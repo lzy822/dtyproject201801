@@ -71,10 +71,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
         try {
-            //InputStream inputStream = getAssets().open(SAMPLE_FILE1);
             InputStream inputStream = getAssets().open(SAMPLE_FILE);
-            //File file = new File(SAMPLE_FILE);
-            //FileInputStream inputStream = new FileInputStream(file);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             StringBuffer sb = new StringBuffer("");
