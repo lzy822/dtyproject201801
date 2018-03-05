@@ -1,15 +1,21 @@
 package com.geopdfviewer.android;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
@@ -38,7 +44,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public int num_line = 0;
     String pdfFileName;
     public boolean isESRI = false;
-
+    String info;
+    PDFView pdfView;
     @Override
     public void loadComplete(int nbPages) {
 
@@ -57,8 +64,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public void WKTFormat() {
 
     }
-    public String ReadPDF(){
-        PDFView pdfView = (PDFView) findViewById(R.id.pdfView);
+    public void ReadPDF(){
+        pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfFileName = SAMPLE_FILE;
         pdfView.fromAsset(SAMPLE_FILE)
                 .defaultPage(pageNumber)
@@ -88,7 +95,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
                 {
                     isESRI = true;
-                    Toast.makeText(this, "l11111", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, "l11111", Toast.LENGTH_LONG).show();
                 }
                 //content = line;
                 num_line += 1;
@@ -100,7 +107,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 save(content);
             }
             //Toast.makeText(this, content, Toast.LENGTH_LONG).show();
-            setTitle(pdfFileName);
+            setTitle(subassetstring(pdfFileName));
 
 
             /*String path = "/geo_information.txt";
@@ -119,51 +126,76 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         catch (IOException e) {
             Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
         }
-        return Integer.toString(num_line);
+
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
-
-        final TextView textView = (TextView) findViewById(R.id.textView);
-        Button button = (Button) findViewById(R.id.readButton);
-        button.setOnClickListener(new View.OnClickListener() {
+        pdfView = (PDFView) findViewById(R.id.pdfView);
+        final TextView textView = (TextView) findViewById(R.id.textview);
+        //final FloatingActionsMenu menu = (FloatingActionsMenu) findViewById(R.id.fam);
+        com.getbase.floatingactionbutton.FloatingActionButton button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.measure);
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String str = load();
-                textView.setText(str);
+                textView.setText("开始测量!");
+                Log.e(TAG, "onClick: " );
             }
         });
-        textView.setText(ReadPDF());
+        com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.north);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView.setText("指北针!");
+                pdfView.resetZoom();
+            }
+        });
+        com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView.setText("zoom!");
+                pdfView.resetZoomWithAnimation();
+            }
+        });
+
+
+
+        ReadPDF();
 
 
         }
-        public void save(String str){
-            FileOutputStream out = null;
-            BufferedWriter writer = null;
-            try {
-                out = openFileOutput("data", Context.MODE_PRIVATE);
-                writer = new BufferedWriter(new OutputStreamWriter(out));
-                writer.write(str);
+
+    public void save(String str){
+        info = str;
+        String fname = "data_" + subassetstring(pdfFileName);
+        FileOutputStream out = null;
+        BufferedWriter writer = null;
+        try {
+            out = openFileOutput(fname, Context.MODE_PRIVATE);
+            writer = new BufferedWriter(new OutputStreamWriter(out));
+            writer.write(str);
             } catch (IOException e) {
-                e.printStackTrace();
+            e.printStackTrace();
             } finally {
-                try {
-                    if (writer != null) {
-                        writer.close();
+            try {
+                if (writer != null) {
+                    writer.close();
                     }} catch (IOException ee) {
-                        ee.printStackTrace();
+                ee.printStackTrace();
                     }
 
             }
         }
-        public String load() {
+    public String load(String name) {
+        String fname = "data_" + name;
             FileInputStream in = null;
             BufferedReader reader = null;
             StringBuilder content = new StringBuilder();
             try {
-                in = openFileInput("data");
+                in = openFileInput(fname);
                 reader = new BufferedReader(new InputStreamReader(in));
                 String line = "";
                 while ((line = reader.readLine()) != null) {
@@ -182,6 +214,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
             return content.toString();
         }
+    public String subassetstring(String str){
+        str = str.substring(4, str.indexOf("."));
+        return str;
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.maintoolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.back:
+                this.finish();
+                break;
+            case R.id.info:
+                //String data = "data_" + subassetstring(pdfFileName);
+                String data = info;
+                Intent intent = new Intent(MainInterface.this, info_page.class);
+                intent.putExtra("extra_data", data);
+                startActivity(intent);
+
+
+                break;
+            default:
+        }
+        return true;
+    }
+}
+
 
 

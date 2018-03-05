@@ -1,33 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <FrameLayout
-        android:layout_gravity="center_horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/readButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:text="Load"/>
-        <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="Come on!"/>
-    </FrameLayout>
+<TextView
+    android:id="@+id/textview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="top"/>
 
 
 
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdfView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"/>
 
 
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/fam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp">
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/measure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_straighten"
+            />
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/north"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_keyboard_arrow_up"/>
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/restorezoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_autorenew"/>
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

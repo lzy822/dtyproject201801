@@ -11,14 +11,18 @@
         <activity
             android:name=".MainInterface"
             android:label="@string/app_showname">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
-        <activity android:name=".select_page" />
-        <activity android:name=".info_page"></activity>
+        <activity android:name=".select_page"
+            android:launchMode="singleTask"
+            android:label="文件选择页面">
+            <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
+        <activity android:name=".info_page"
+            android:label="地理信息显示页面"></activity>
     </application>
 
 </manifest>
