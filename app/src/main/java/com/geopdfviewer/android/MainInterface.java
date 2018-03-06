@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.provider.OpenableColumns;
@@ -35,6 +38,8 @@ import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.model.PagePart;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
+import com.shockwave.pdfium.PdfDocument;
+import com.shockwave.pdfium.PdfiumCore;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -107,9 +112,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
                 {
                     isESRI = true;
-                    //Toast.makeText(this, "l11111", Toast.LENGTH_LONG).show();
                 }
-                //content = line;
                 num_line += 1;
             }
             if (isESRI == true) {
@@ -118,19 +121,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } else {
                 save(content);
             }
-            //Toast.makeText(this, content, Toast.LENGTH_LONG).show();
             setTitle(subassetstring(pdfFileName));
-
-
-            /*String path = "/geo_information.txt";
-            File file = new File(path);
-            FileWriter writer = new FileWriter(file);
-            BufferedWriter bw = new BufferedWriter(writer);
-            bw.write(sb.toString());
-            bw.close();
-            writer.close();*/
-
-
 
             Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
             inputStream.close();
@@ -140,6 +131,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
 
     }
+
     public String getFileName(Uri uri) {
         String result = null;
         if (uri.getScheme().equals("content")) {
@@ -159,6 +151,43 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         return result;
     }
+    public void getGeoInfo(String uri) {
+        try {
+            InputStream inputStream = openFileInput(uri);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            StringBuffer sb = new StringBuffer("");
+            String line;
+
+            while((line = bufferedReader.readLine()) != null) {
+                //Toast.makeText(this, "正在获取内容!", Toast.LENGTH_LONG).show();
+                sb.append(line + "/n");
+                if(line.contains("PROJCS")) {
+
+                    content = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
+
+                }
+                if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
+                {
+                    isESRI = true;
+                }
+                num_line += 1;
+            }
+            if (isESRI == true) {
+                content = "ESRI::" + content;
+                save(content);
+            } else {
+                save(content);
+            }
+            setTitle(subassetstring(pdfFileName));
+
+            Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
+            inputStream.close();
+        }
+        catch (IOException e) {
+            Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
+        }
+    }
     private void displayFromUri(Uri uri) {
         pdfFileName = getFileName(uri);
 
@@ -174,6 +203,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onPageError(this)
                 .load();
 
+        getGeoInfo(uri.toString());
         Log.w(TAG, uri.toString() );
         Log.w(TAG, pdfFileName );
         setTitle(pdfFileName);
@@ -183,41 +213,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
         Intent intent = getIntent();
-
         String data = intent.getStringExtra("type");
-
-
-
         linearLayout = (LinearLayout) findViewById(R.id.search);
         ImageView imageView = (ImageView) findViewById(R.id.img);
-        /*if(data == "asset") {
-            ReadPDF();
-        } else {
-            Uri uri1 = intent.getData();
-            //Toast.makeText(this, "!!!", Toast.LENGTH_LONG).show();
-            Log.w(TAG, uri1.toString() );
-            displayFromUri(uri1);
-        }*/
         Log.w(TAG, data );
         if (data.equalsIgnoreCase("uri") ){
             Uri uri1 = Uri.parse(intent.getStringExtra("data_uri"));
-            //Log.w(TAG, uri1.toString() );
             displayFromUri(uri1);
-            //Toast.makeText(this, "!!!", Toast.LENGTH_LONG).show();
-
-            //m_uri = uri1;
-
         }else if (data.equalsIgnoreCase("asset")){
             Log.w(TAG, "come on" );
             ReadPDF();
 
         }
-        //ReadPDF();
-        /*imageView.setImageDrawable(pdfView.getBackground());
-        imageView.setVisibility(View.VISIBLE);
-        pdfView.setVisibility(View.GONE);*/
-
-
         Button bt1 = (Button) findViewById(R.id.send);
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,6 +237,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 linearLayout.setVisibility(View.GONE);
             }
         });

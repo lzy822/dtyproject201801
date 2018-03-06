@@ -76,7 +76,7 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
         return true;
     }
 
-public void readPDF(){
+    public void readPDF(){
     pdfView = (PDFView) findViewById(R.id.pdfView);
     pdfFileName = SAMPLE_FILE;
     pdfView.fromAsset(SAMPLE_FILE)
