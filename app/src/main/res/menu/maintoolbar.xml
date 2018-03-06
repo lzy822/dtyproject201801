@@ -7,6 +7,11 @@
         android:title="back"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/query"
+        android:icon="@drawable/ic_search"
+        android:title="query"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/info"
         android:icon="@drawable/ic_info_black"
         android:title="info"

@@ -1,6 +1,8 @@
 package com.geopdfviewer.android;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -8,20 +10,57 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.github.barteksc.pdfviewer.PDFView;
+import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
+import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
+import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
+import com.github.barteksc.pdfviewer.model.PagePart;
+import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
+import com.github.barteksc.pdfviewer.util.FitPolicy;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class info_page extends AppCompatActivity {
+public class info_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
+        OnPageErrorListener {
     private static final String TAG = "info_page";
+    public static final String SAMPLE_FILE = "pdf/sample1.pdf";
+    Integer pageNumber = 0;
+    public String content;
+    public int num_line = 0;
+    String pdfFileName;
+    public boolean isESRI = false;
+    String info;
+    PDFView pdfView;
+    LinearLayout linearLayout;
+    @Override
+    public void loadComplete(int nbPages) {
 
+    }
+
+    @Override
+    public void onPageChanged(int page, int pageCount) {
+
+    }
+
+    @Override
+    public void onPageError(int page, Throwable t) {
+
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.info).setVisible(false);
+        menu.findItem(R.id.query).setVisible(false);
         return true;
 
     }
@@ -37,16 +76,75 @@ public class info_page extends AppCompatActivity {
         return true;
     }
 
+public void readPDF(){
+    pdfView = (PDFView) findViewById(R.id.pdfView);
+    pdfFileName = SAMPLE_FILE;
+    pdfView.fromAsset(SAMPLE_FILE)
+            .defaultPage(pageNumber)
+            .onPageChange(this)
+            .enableAnnotationRendering(true)
+            .onLoad(this)
+            .scrollHandle(new DefaultScrollHandle(this))
+            .spacing(10) // in dp
+            .onPageError(this)
+            .pageFitPolicy(FitPolicy.BOTH)
+            .load();
 
+    //PagePart pagePart = new PagePart(pdfView.getCurrentPage(), bitmap, )
+    //pdfView.onBitmapRendered(pdfView.getCurrentPage());
+    try {
+        InputStream inputStream = getAssets().open(SAMPLE_FILE);
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        StringBuffer sb = new StringBuffer("");
+        String line;
+
+        while((line = bufferedReader.readLine()) != null) {
+            //Toast.makeText(this, "正在获取内容!", Toast.LENGTH_LONG).show();
+            sb.append(line + "/n");
+            if(line.contains("PROJCS")) {
+
+                content = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
+
+            }
+            if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
+            {
+                isESRI = true;
+                //Toast.makeText(this, "l11111", Toast.LENGTH_LONG).show();
+            }
+            //content = line;
+            num_line += 1;
+        }
+        if (isESRI == true) {
+            content = "ESRI::" + content;
+        } else {
+        }
+
+
+
+        Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
+        inputStream.close();
+    }
+    catch (IOException e) {
+        Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
+    }
+}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_page);
+        readPDF();
+        pdfView = (PDFView) findViewById(R.id.pdfView);
         TextView textView = (TextView) findViewById(R.id.infotext);
         Intent intent = getIntent();
         String data = intent.getStringExtra("extra_data");
+
         textView.setText(data);
+        ImageView imageView = (ImageView) findViewById(R.id.img1);
+        //Bitmap bitmap = BitmapFactory.decodeFile(intent.getData().toString());
+        //imageView.setImageBitmap(pdfView.getDrawingCache());
+        //imageView.setImageBitmap(bitmap);
         //textView.setText(load(data));
 
     }

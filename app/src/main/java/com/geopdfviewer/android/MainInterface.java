@@ -1,17 +1,29 @@
 package com.geopdfviewer.android;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.net.Uri;
+import android.nfc.Tag;
+import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +32,7 @@ import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
+import com.github.barteksc.pdfviewer.model.PagePart;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 
@@ -38,7 +51,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         OnPageErrorListener {
     private static final String TAG = "MainInterface";
     public static final String SAMPLE_FILE = "pdf/sample1.pdf";
-    public static final String SAMPLE_FILE1 = "txt/geo_information.txt";
     Integer pageNumber = 0;
     public String content;
     public int num_line = 0;
@@ -46,19 +58,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public boolean isESRI = false;
     String info;
     PDFView pdfView;
+    LinearLayout linearLayout;
+    Uri m_uri;
+
     @Override
     public void loadComplete(int nbPages) {
 
     }
 
-    @Override
-    public void onPageChanged(int page, int pageCount) {
 
-    }
 
     @Override
     public void onPageError(int page, Throwable t) {
-
+        Log.e(TAG, "Cannot load page " + page);
     }
 
     public void WKTFormat() {
@@ -128,13 +140,103 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
 
     }
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getLastPathSegment();
+        }
+        return result;
+    }
+    private void displayFromUri(Uri uri) {
+        pdfFileName = getFileName(uri);
 
+        pdfView = (PDFView) findViewById(R.id.pdfView);
+
+        pdfView.fromUri(uri)
+                .defaultPage(pageNumber)
+                .onPageChange(this)
+                .enableAnnotationRendering(true)
+                .onLoad(this)
+                .scrollHandle(new DefaultScrollHandle(this))
+                .spacing(10) // in dp
+                .onPageError(this)
+                .load();
+
+        Log.w(TAG, uri.toString() );
+        Log.w(TAG, pdfFileName );
+        setTitle(pdfFileName);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
-        pdfView = (PDFView) findViewById(R.id.pdfView);
-        final TextView textView = (TextView) findViewById(R.id.textview);
+        Intent intent = getIntent();
+
+        String data = intent.getStringExtra("type");
+
+
+
+        linearLayout = (LinearLayout) findViewById(R.id.search);
+        ImageView imageView = (ImageView) findViewById(R.id.img);
+        /*if(data == "asset") {
+            ReadPDF();
+        } else {
+            Uri uri1 = intent.getData();
+            //Toast.makeText(this, "!!!", Toast.LENGTH_LONG).show();
+            Log.w(TAG, uri1.toString() );
+            displayFromUri(uri1);
+        }*/
+        Log.w(TAG, data );
+        if (data.equalsIgnoreCase("uri") ){
+            Uri uri1 = Uri.parse(intent.getStringExtra("data_uri"));
+            //Log.w(TAG, uri1.toString() );
+            displayFromUri(uri1);
+            //Toast.makeText(this, "!!!", Toast.LENGTH_LONG).show();
+
+            //m_uri = uri1;
+
+        }else if (data.equalsIgnoreCase("asset")){
+            Log.w(TAG, "come on" );
+            ReadPDF();
+
+        }
+        //ReadPDF();
+        /*imageView.setImageDrawable(pdfView.getBackground());
+        imageView.setVisibility(View.VISIBLE);
+        pdfView.setVisibility(View.GONE);*/
+
+
+        Button bt1 = (Button) findViewById(R.id.send);
+        bt1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                linearLayout.setVisibility(View.GONE);
+            }
+        });
+        Button bt2 = (Button) findViewById(R.id.cancel);
+        bt2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                linearLayout.setVisibility(View.GONE);
+            }
+        });
+
+
+
+        final TextView textView = (TextView) findViewById(R.id.txt);
         //final FloatingActionsMenu menu = (FloatingActionsMenu) findViewById(R.id.fam);
         com.getbase.floatingactionbutton.FloatingActionButton button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.measure);
         button1.setOnClickListener(new View.OnClickListener() {
@@ -149,7 +251,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 textView.setText("指北针!");
-                pdfView.resetZoom();
+                //pdfView.resetZoom();
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
@@ -163,10 +265,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
 
-        ReadPDF();
+
 
 
         }
+    @Override
+    public void onPageChanged(int page, int pageCount) {
+        pageNumber = page;
+        setTitle(String.format("%s %s / %s", pdfFileName, page + 1, pageCount));
+    }
 
     public void save(String str){
         info = str;
@@ -225,6 +332,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -235,11 +344,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //String data = "data_" + subassetstring(pdfFileName);
                 String data = info;
                 Intent intent = new Intent(MainInterface.this, info_page.class);
+                //intent.putExtra("uri", m_uri);
                 intent.putExtra("extra_data", data);
                 startActivity(intent);
-
-
                 break;
+            case R.id.query:
+                linearLayout = (LinearLayout) findViewById(R.id.search);
+                linearLayout.setVisibility(View.VISIBLE);
             default:
         }
         return true;
