@@ -7,46 +7,74 @@ import android.net.Uri;
  */
 
 public class Map_test {
-    private String name;
-    private String WKT;
-    private Uri uri;
-    public Map_test(String name, String WKT, Uri uri) {
-        this.name = name;
-        this.WKT = WKT;
-        this.uri = uri;
+    private String m_name;
+    private int m_num;
+    private String m_GPTS;
+    private String m_BBox;
+    private String m_WKT;
+    private Uri m_uri;
+
+    public Map_test(int num, String name, String WKT, Uri uri, String GPTS, String BBox) {
+        m_BBox = BBox;
+        m_num = num;
+        m_name = name;
+        m_WKT = WKT;
+        m_uri = uri;
+        m_GPTS = GPTS;
     }
     public Map_test(String name) {
-        this.name = name;
-        //this.WKT = WKT;
-        //this.uri = uri;
+        m_name = name;
     }
     public Map_test(String name, Uri uri) {
-        this.name = name;
-        //this.WKT = WKT;
-        this.uri = uri;
+        m_name = name;
+        m_uri = uri;
     }
 
-    public String getName() {
-        return name;
+    public String getM_name() {
+        return m_name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setM_name(String m_name) {
+        this.m_name = m_name;
     }
 
-    public String getWKT() {
-        return WKT;
+    public int getM_num() {
+        return m_num;
     }
 
-    public void setWKT(String WKT) {
-        this.WKT = WKT;
+    public void setM_num(int m_num) {
+        this.m_num = m_num;
     }
 
-    public Uri getUri() {
-        return uri;
+    public String getM_GPTS() {
+        return m_GPTS;
     }
 
-    public void setUri(Uri uri) {
-        this.uri = uri;
+    public void setM_GPTS(String m_GPTS) {
+        this.m_GPTS = m_GPTS;
+    }
+
+    public String getM_BBox() {
+        return m_BBox;
+    }
+
+    public void setM_BBox(String m_BBox) {
+        this.m_BBox = m_BBox;
+    }
+
+    public String getM_WKT() {
+        return m_WKT;
+    }
+
+    public void setM_WKT(String m_WKT) {
+        this.m_WKT = m_WKT;
+    }
+
+    public Uri getM_uri() {
+        return m_uri;
+    }
+
+    public void setM_uri(Uri m_uri) {
+        this.m_uri = m_uri;
     }
 }

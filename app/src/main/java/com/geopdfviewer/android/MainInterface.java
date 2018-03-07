@@ -55,7 +55,8 @@ import java.io.OutputStreamWriter;
 public class MainInterface extends AppCompatActivity  implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
     private static final String TAG = "MainInterface";
-    public static final String SAMPLE_FILE = "pdf/sample1.pdf";
+    //public static final String SAMPLE_FILE = "pdf/sample1.pdf";
+    public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
     Integer pageNumber = 0;
     public String content;
     public int num_line = 0;
@@ -100,6 +101,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             StringBuffer sb = new StringBuffer("");
             String line;
+            String m_BBox = "", m_GPTS = "";
 
             while((line = bufferedReader.readLine()) != null) {
                 //Toast.makeText(this, "正在获取内容!", Toast.LENGTH_LONG).show();
@@ -113,8 +115,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 {
                     isESRI = true;
                 }
+                if (line.contains("/BBox")){
+                    //m_BBox = line.substring(line.indexOf("BBox"), line.indexOf("/Type"));
+                    //m_BBox = line;
+                    //Log.w(TAG, "the Type loc = " + Integer.toString(line.indexOf("Type")) );
+                    //Log.w(TAG, "the BBox loc = " + Integer.toString(line.indexOf("BBox")) );
+                    Log.w(TAG, "the line loc = " + Integer.toString(num_line) );
+                    m_BBox = line.substring(line.indexOf("BBox") + 5);
+                    m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
+                    //m_BBox = line.substring(line.indexOf("BBox") + 5, line.indexOf("]", line.indexOf("BBox")) - line.indexOf("BBox") - 5);
+                    m_BBox = m_BBox.trim();
+                }
+                if (line.contains("GPTS")){
+                    //m_GPTS = line.substring(line.indexOf("GPTS") + 5, line.indexOf("/LPTS") - 1);
+                    m_GPTS = line.substring(line.indexOf("GPTS") + 5);
+                    m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
+                    //m_GPTS = line.substring(line.indexOf("GPTS") + 5, line.indexOf("]"));
+                    //m_GPTS = line.substring(line.indexOf("GPTS") + 5, line.indexOf("]", line.indexOf("GPTS")) - line.indexOf("GPTS") - 5);
+                    m_GPTS = m_GPTS.trim();
+                }
                 num_line += 1;
             }
+            Log.w(TAG, "GPTS:" + m_GPTS );
+            Log.w(TAG, "BBox:" + m_BBox );
             if (isESRI == true) {
                 content = "ESRI::" + content;
                 save(content);
@@ -203,7 +226,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onPageError(this)
                 .load();
 
-        getGeoInfo(uri.toString());
+        //getGeoInfo(uri.toString());
         Log.w(TAG, uri.toString() );
         Log.w(TAG, pdfFileName );
         setTitle(pdfFileName);
