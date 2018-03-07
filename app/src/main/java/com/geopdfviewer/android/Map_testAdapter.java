@@ -52,7 +52,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                 int position = holder.getAdapterPosition();
                 Map_test map = mMapList.get(position);
                 Intent intent = new Intent(mContext, select_page.class);
-                intent.putExtra(select_page.FRUIT_NAME, map.getName());
+                intent.putExtra(select_page.FRUIT_NAME, map.getM_name());
                 //intent.putExtra(select_page.FRUIT_IMAGE_ID, map.getImageId());
                 mContext.startActivity(intent);
             }
@@ -63,7 +63,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map_test map = mMapList.get(position);
-        holder.MapName.setText(map.getName());
+        holder.MapName.setText(map.getM_name());
         //holder.MapImage.fromUri(map.getImageId());
         //Glide.with(mContext).load(fruit.getImageId()).into(holder.fruitImage);
     }

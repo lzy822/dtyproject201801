@@ -18,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 import android.support.annotation.NonNull;
 
@@ -42,6 +43,9 @@ import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.ViewById;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +56,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private static final String TAG = "select_page";
     private final static int REQUEST_CODE = 42;
     public static final int PERMISSION_CODE = 42042;
+    private final String DEF_DIR = "/storage/emulated/0/tencent/TIMfile_recv/";
 
     public static final String SAMPLE_FILE = "sample1.pdf";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
@@ -113,10 +118,27 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         //intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.setType("application/pdf");
+        //intent.setType("application/pdf");
+        //File file = new File("/external_files/tencent/TIMfile_recv/test10.1.pdf");
+        //File parentFile = new File(file.getParent());
 
-        //intent.setDataAndType(Uri.parse("content://com.android.fileexplorer.myprovider/external_files/tencent/"), "application/pdf");
+        //String stttq = "/external_files/tencent/TIMfile_recv/test10.1.pdf";
 
+        //File file = new File(DEF_DIR + "test10.1.pdf");
+        //File file = new File(stttq);
+        //Log.w(TAG, file.getParent() );
+
+        /*try {
+            FileInputStream fileInputStream = openFileInput("content://com.android.fileexplorer.myprovider/external_files/tencent/TIMfile_recv/test10.1.pdf");
+        }catch (FileNotFoundException e) {
+            Log.w(TAG, "launchPicker: " );
+        }*/
+
+
+
+
+        intent.setDataAndType(Uri.parse(DEF_DIR), "application/pdf");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(intent, REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
@@ -161,6 +183,26 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             map_testList.add(map_tests[i]);
         }
     }
+    public void initMapI() {
+        SharedPreferences pref = getSharedPreferences("data_num", MODE_PRIVATE);
+        num_pdf = pref.getInt("num", 0);
+        Toast.makeText(this, Integer.toString(num_pdf), Toast.LENGTH_LONG).show();
+        for (int j = 1; j <= num_pdf; j++) {
+            SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
+            String str = "n_" + j + "_";
+            String name = pref1.getString(str + "name", "");
+            Map_test mapTest = new Map_test(name);
+            map_tests[j - 1] = mapTest;
+            map_testList.add(map_tests[j - 1]);
+        }
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,2);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new Map_testAdapter(map_testList);
+        recyclerView.setAdapter(adapter);
+
+
+    }
     public void save(String name, String uri, String WKT){
         num_pdf ++;
         SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
@@ -196,27 +238,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         editor1.putString(str + "uri", uri.toString());
         editor1.apply();
     }
-
-    public void initMapI() {
-        SharedPreferences pref = getSharedPreferences("data_num", MODE_PRIVATE);
-        num_pdf = pref.getInt("num", 0);
-        Toast.makeText(this, Integer.toString(num_pdf), Toast.LENGTH_LONG).show();
-        for (int j = 1; j <= num_pdf; j++) {
-            SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
-            String str = "n_" + j + "_";
-            String name = pref1.getString(str + "name", "");
-            Map_test mapTest = new Map_test(name);
-            map_tests[j - 1] = mapTest;
-            map_testList.add(map_tests[j - 1]);
-        }
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        GridLayoutManager layoutManager = new GridLayoutManager(this,2);
-        recyclerView.setLayoutManager(layoutManager);
-        adapter = new Map_testAdapter(map_testList);
-        recyclerView.setAdapter(adapter);
-
-
+    public void btn_cleardata(){
+        SharedPreferences.Editor pref = getSharedPreferences("data_num", MODE_PRIVATE).edit();
+        pref.clear().commit();
+        SharedPreferences.Editor pref1 = getSharedPreferences("data", MODE_PRIVATE).edit();
+        pref1.clear().commit();
+        Toast.makeText(this, "清除操作完成", Toast.LENGTH_LONG).show();
     }
+
     public void setNum_pdf(){
         SharedPreferences pref = getSharedPreferences("data_num", MODE_PRIVATE);
         num_pdf = pref.getInt("num", 0);
@@ -248,6 +277,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (resultCode == RESULT_OK) {
             uri = data.getData();
             //sendUri(uri);
+            Log.w(TAG, uri.getPath() );
             String name = getFileName(uri);
             save2(name, uri);
             initMap(name);
@@ -282,7 +312,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_select_page);
+        setContentView(R.layout.activity_select_test_page);
+        Button btn_clear = (Button) findViewById(R.id.btn_clear);
+        btn_clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btn_cleardata();
+            }
+        });
         com.getbase.floatingactionbutton.FloatingActionButton bt1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab01);
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -304,12 +341,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         setNum_pdf();
 
         if (num_pdf == 0) {
-            save1("occupation");
-            initMap2("occupation");
-            Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
+            initDemo();
         }
 
         initMapI();
+    }
+    public void initDemo(){
+        save1("demo");
+        //initMap2("occupation");
+        Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
     }
 
 }

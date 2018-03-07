@@ -8,10 +8,13 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.nfc.Tag;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -32,9 +35,11 @@ import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.github.barteksc.pdfviewer.PDFView;
+import com.github.barteksc.pdfviewer.listener.OnDrawListener;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
+import com.github.barteksc.pdfviewer.listener.OnRenderListener;
 import com.github.barteksc.pdfviewer.model.PagePart;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
@@ -74,6 +79,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
 
+
+
     @Override
     public void onPageError(int page, Throwable t) {
         Log.e(TAG, "Cannot load page " + page);
@@ -90,12 +97,36 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onPageChange(this)
                 .enableAnnotationRendering(true)
                 .onLoad(this)
+                .onDraw(new OnDrawListener() {
+                    @Override
+                    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+
+                    }
+                })
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // in dp
                 .onPageError(this)
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
+        PdfiumCore pdfiumCore = new PdfiumCore(this);
+        int pageNum = 1;
+        //Log.w(TAG, "ReadPDF: " );
+        File m_pdf_file = new File("/storage/emulated/0/tencent/TIMfile_recv/test10.1.pdf");
         try {
+            /*Log.w(TAG, this.getFilesDir().getPath() );
+            PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
+            pdfiumCore.openPage(pdf, pageNum);
+            int width = pdfiumCore.getPageWidth(pdf, pageNum);
+            int height = pdfiumCore.getPageHeight(pdf, pageNum);
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, width, height);
+            pdfiumCore.closeDocument(pdf);
+            Log.w(TAG, Environment.getExternalStorageState());*/
+            File of = new File("/storage/emulated/0/tencent/TIMfile_recv", "test.jpg");
+            FileOutputStream outputStream = new FileOutputStream(of);
+            Log.e(TAG, "ReadPDF: " );
+            /*bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
+            outputStream.close();*/
             InputStream inputStream = getAssets().open(SAMPLE_FILE);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -175,7 +206,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return result;
     }
     public void getGeoInfo(String uri) {
+        //Uri m_uri = Uri.parse(uri);
         try {
+            FileInputStream fileInputStream = openFileInput(uri);
             InputStream inputStream = openFileInput(uri);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -221,6 +254,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onPageChange(this)
                 .enableAnnotationRendering(true)
                 .onLoad(this)
+                .onDraw(new OnDrawListener() {
+                    @Override
+                    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+
+                    }
+                })
+                .onRender(new OnRenderListener() {
+                    @Override
+                    public void onInitiallyRendered(int nbPages) {
+
+                    }
+                })
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // in dp
                 .onPageError(this)
@@ -274,7 +319,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 textView.setText("开始测量!");
-                Log.e(TAG, "onClick: " );
+                //Log.e(TAG, "onClick: " );
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.north);
