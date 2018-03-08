@@ -355,6 +355,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             str = str.substring(str.indexOf("/") + 1);
 
         }
+        str = str.substring(0, str.length() - 4);
+        //locError(str);
         return str;
         //locError(str);
 
