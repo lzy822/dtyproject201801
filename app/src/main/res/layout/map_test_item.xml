@@ -10,11 +10,15 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/img_test"
+            android:layout_width="40dp"
+            android:layout_height="80dp" />
         <TextView
             android:id="@+id/map_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center"
             android:layout_margin="5dp"
             android:textSize="16sp"/>
     </LinearLayout>

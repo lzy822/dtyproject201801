@@ -142,9 +142,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             outputStream.flush();
             outputStream.close();
 
-            imageView = (ImageView) findViewById(R.id.img);
+            /*imageView = (ImageView) findViewById(R.id.img);
             imageView.setVisibility(View.VISIBLE);
-            imageView.setImageBitmap(bitmap);
+            imageView.setImageBitmap(bitmap);*/
 
             InputStream inputStream = getAssets().open(SAMPLE_FILE);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

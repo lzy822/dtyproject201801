@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.barteksc.pdfviewer.PDFView;
@@ -24,13 +25,13 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
-        //PDFView MapImage;
+        ImageView MapImage;
         TextView MapName;
 
         public ViewHolder(View view) {
             super(view);
             cardView = (CardView) view;
-            //MapImage = (PDFView) view.findViewById(R.id.map_item);
+            MapImage = (ImageView) view.findViewById(R.id.img_test);
             MapName = (TextView) view.findViewById(R.id.map_name);
 
         }
@@ -64,6 +65,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map_test map = mMapList.get(position);
         holder.MapName.setText(map.getM_name());
+        holder.MapImage.setImageResource(R.drawable.ic_android_black);
         //holder.MapImage.fromUri(map.getImageId());
         //Glide.with(mContext).load(fruit.getImageId()).into(holder.fruitImage);
     }
