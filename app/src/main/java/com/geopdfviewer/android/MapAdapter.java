@@ -25,13 +25,13 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
-        PDFView MapImage;
+        ImageView MapImage;
         TextView MapName;
 
         public ViewHolder(View view) {
             super(view);
             cardView = (CardView) view;
-            MapImage = (PDFView) view.findViewById(R.id.map_item);
+            MapImage = (ImageView) view.findViewById(R.id.map_item);
             MapName = (TextView) view.findViewById(R.id.map_name);
 
         }
@@ -65,7 +65,7 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map map = mFruitList.get(position);
         holder.MapName.setText(map.getName());
-    holder.MapImage.fromUri(map.getImageId());
+    //holder.MapImage.fromUri(map.getImageId());
         //Glide.with(mContext).load(fruit.getImageId()).into(holder.fruitImage);
     }
 

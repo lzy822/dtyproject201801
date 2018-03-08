@@ -60,6 +60,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     public static final String SAMPLE_FILE = "sample1.pdf";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
+    public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     private Map_test[] map_tests = new Map_test[10];
     private List<Map_test> map_testList = new ArrayList<>();
     private Map_testAdapter adapter;
@@ -100,11 +101,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     void pickFile() {
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 READ_EXTERNAL_STORAGE);
+        int permissionCheck1 = ContextCompat.checkSelfPermission(this,
+                WRITE_EXTERNAL_STORAGE);
 
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED || permissionCheck1 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                     this,
-                    new String[]{READ_EXTERNAL_STORAGE},
+                    new String[]{
+                            READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
                     PERMISSION_CODE
             );
 
@@ -116,27 +120,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     void launchPicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        //intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        //intent.setType("application/pdf");
-        //File file = new File("/external_files/tencent/TIMfile_recv/test10.1.pdf");
-        //File parentFile = new File(file.getParent());
-
-        //String stttq = "/external_files/tencent/TIMfile_recv/test10.1.pdf";
-
-        //File file = new File(DEF_DIR + "test10.1.pdf");
-        //File file = new File(stttq);
-        //Log.w(TAG, file.getParent() );
-
-        /*try {
-            FileInputStream fileInputStream = openFileInput("content://com.android.fileexplorer.myprovider/external_files/tencent/TIMfile_recv/test10.1.pdf");
-        }catch (FileNotFoundException e) {
-            Log.w(TAG, "launchPicker: " );
-        }*/
-
-
-
-
         intent.setDataAndType(Uri.parse(DEF_DIR), "application/pdf");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {

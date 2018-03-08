@@ -10,7 +10,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <com.github.barteksc.pdfviewer.PDFView
+        <ImageView
             android:id="@+id/map_item"
             android:layout_width="match_parent"
             android:layout_height="100dp"

@@ -71,6 +71,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     PDFView pdfView;
     LinearLayout linearLayout;
     Uri m_uri;
+    ImageView imageView;
 
     @Override
     public void loadComplete(int nbPages) {
@@ -109,24 +110,42 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
         PdfiumCore pdfiumCore = new PdfiumCore(this);
-        int pageNum = 1;
+        int pageNum = 0;
         //Log.w(TAG, "ReadPDF: " );
-        File m_pdf_file = new File("/storage/emulated/0/tencent/TIMfile_recv/test10.1.pdf");
+        File m_pdf_file = new File("/storage/emulated/0/tencent/TIMfile_recv/sample_big.pdf");
+        Log.w(TAG, Boolean.toString(m_pdf_file.canRead()) );
         try {
-            /*Log.w(TAG, this.getFilesDir().getPath() );
+            //Log.w(TAG, this.getFilesDir().getPath() );
             PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
+            Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
+
             pdfiumCore.openPage(pdf, pageNum);
             int width = pdfiumCore.getPageWidth(pdf, pageNum);
             int height = pdfiumCore.getPageHeight(pdf, pageNum);
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, width, height);
+            //Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            Bitmap bitmap = Bitmap.createBitmap(200, 300, Bitmap.Config.RGB_565);
+            pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 200, 300);
+
             pdfiumCore.closeDocument(pdf);
-            Log.w(TAG, Environment.getExternalStorageState());*/
-            File of = new File("/storage/emulated/0/tencent/TIMfile_recv", "test.jpg");
+            Log.w(TAG, Environment.getExternalStorageState());
+            //Log.e(TAG, Environment.getExternalStorageDirectory().getAbsolutePath() );
+            String m_path = "/storage/emulated/0";
+            String tim_path = "/storage/emulated/0/tencent/TIMfile_recv";
+            Log.w(TAG, Boolean.toString(new File(Environment.getExternalStorageDirectory() + "/PdfReader").mkdirs()) );
+            File of = new File(Environment.getExternalStorageDirectory() + "/PdfReader", "test.jpg");
+            //of.createNewFile();
+            //File of = new File("/storage/emulated/0/tencent/TIMfile_recv", "test10.1.pdf");
+            //Log.e(TAG, Boolean.toString(of.createNewFile()) );
             FileOutputStream outputStream = new FileOutputStream(of);
-            Log.e(TAG, "ReadPDF: " );
-            /*bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
-            outputStream.close();*/
+            //Log.e(TAG, Boolean.toString(of.exists()) );
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            imageView = (ImageView) findViewById(R.id.img);
+            imageView.setVisibility(View.VISIBLE);
+            imageView.setImageBitmap(bitmap);
+
             InputStream inputStream = getAssets().open(SAMPLE_FILE);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -181,6 +200,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             inputStream.close();
         }
         catch (IOException e) {
+            Log.w(TAG, e.getMessage() );
             Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
         }
 
