@@ -13,15 +13,26 @@ public class Map_test {
     private String m_BBox;
     private String m_WKT;
     private Uri m_uri;
+    private String m_imguri;
 
-    public Map_test(int num, String name, String WKT, Uri uri, String GPTS, String BBox) {
+    public Map_test(int num, String name, String WKT, Uri uri, String GPTS, String BBox, String imguri) {
         m_BBox = BBox;
         m_num = num;
         m_name = name;
         m_WKT = WKT;
         m_uri = uri;
         m_GPTS = GPTS;
+        m_imguri = imguri;
     }
+
+    public String getM_imguri() {
+        return m_imguri;
+    }
+
+    public void setM_imguri(String m_imguri) {
+        this.m_imguri = m_imguri;
+    }
+
     public Map_test(String name) {
         m_name = name;
     }

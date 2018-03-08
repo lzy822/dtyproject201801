@@ -9,6 +9,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="clear"/>
+    <ImageView
+        android:id="@+id/img_show"
+        android:layout_width="300dp"
+        android:layout_height="200dp"
+        android:visibility="gone"/>
 
 
     <android.support.design.widget.CoordinatorLayout

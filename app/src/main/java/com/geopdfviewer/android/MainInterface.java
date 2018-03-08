@@ -78,10 +78,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
-
-
-
-
     @Override
     public void onPageError(int page, Throwable t) {
         Log.e(TAG, "Cannot load page " + page);
@@ -90,6 +86,46 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public void WKTFormat() {
 
     }
+
+    public String createThumbnails(String fileName){
+        String outPath = "";
+        PdfiumCore pdfiumCore = new PdfiumCore(this);
+        int pageNum = 0;
+        File m_pdf_file = new File(fileName);
+        //File m_pdf_file = new File("/storage/emulated/0/tencent/TIMfile_recv/sample_big.pdf");
+        Log.w(TAG, Boolean.toString(m_pdf_file.canRead()) );
+        try {
+            PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
+            Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
+
+            pdfiumCore.openPage(pdf, pageNum);
+            int width = pdfiumCore.getPageWidth(pdf, pageNum);
+            int height = pdfiumCore.getPageHeight(pdf, pageNum);
+            Bitmap bitmap = Bitmap.createBitmap(200, 300, Bitmap.Config.RGB_565);
+            pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 200, 300);
+
+            pdfiumCore.closeDocument(pdf);
+            Log.w(TAG, Boolean.toString(new File(Environment.getExternalStorageDirectory() + "/PdfReader").mkdirs()) );
+            File of = new File(Environment.getExternalStorageDirectory() + "/PdfReader", fileName + ".jpg");
+            FileOutputStream outputStream = new FileOutputStream(of);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            /*imageView = (ImageView) findViewById(R.id.img);
+            imageView.setVisibility(View.VISIBLE);
+            imageView.setImageBitmap(bitmap);*/
+
+
+
+        }
+        catch (IOException e) {
+            Log.w(TAG, e.getMessage() );
+            Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
+        }
+        return outPath;
+    }
+
     public void ReadPDF(){
         pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfFileName = SAMPLE_FILE;
@@ -109,100 +145,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onPageError(this)
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
-        PdfiumCore pdfiumCore = new PdfiumCore(this);
-        int pageNum = 0;
-        //Log.w(TAG, "ReadPDF: " );
-        File m_pdf_file = new File("/storage/emulated/0/tencent/TIMfile_recv/sample_big.pdf");
-        Log.w(TAG, Boolean.toString(m_pdf_file.canRead()) );
-        try {
-            //Log.w(TAG, this.getFilesDir().getPath() );
-            PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
-            Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
 
-            pdfiumCore.openPage(pdf, pageNum);
-            int width = pdfiumCore.getPageWidth(pdf, pageNum);
-            int height = pdfiumCore.getPageHeight(pdf, pageNum);
-            //Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            Bitmap bitmap = Bitmap.createBitmap(200, 300, Bitmap.Config.RGB_565);
-            pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 200, 300);
 
-            pdfiumCore.closeDocument(pdf);
-            Log.w(TAG, Environment.getExternalStorageState());
-            //Log.e(TAG, Environment.getExternalStorageDirectory().getAbsolutePath() );
-            String m_path = "/storage/emulated/0";
-            String tim_path = "/storage/emulated/0/tencent/TIMfile_recv";
-            Log.w(TAG, Boolean.toString(new File(Environment.getExternalStorageDirectory() + "/PdfReader").mkdirs()) );
-            File of = new File(Environment.getExternalStorageDirectory() + "/PdfReader", "test.jpg");
-            //of.createNewFile();
-            //File of = new File("/storage/emulated/0/tencent/TIMfile_recv", "test10.1.pdf");
-            //Log.e(TAG, Boolean.toString(of.createNewFile()) );
-            FileOutputStream outputStream = new FileOutputStream(of);
-            //Log.e(TAG, Boolean.toString(of.exists()) );
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-            outputStream.flush();
-            outputStream.close();
-
-            /*imageView = (ImageView) findViewById(R.id.img);
-            imageView.setVisibility(View.VISIBLE);
-            imageView.setImageBitmap(bitmap);*/
-
-            InputStream inputStream = getAssets().open(SAMPLE_FILE);
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuffer sb = new StringBuffer("");
-            String line;
-            String m_BBox = "", m_GPTS = "";
-
-            while((line = bufferedReader.readLine()) != null) {
-                //Toast.makeText(this, "正在获取内容!", Toast.LENGTH_LONG).show();
-                sb.append(line + "/n");
-                if(line.contains("PROJCS")) {
-
-                    content = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
-
-                }
-                if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
-                {
-                    isESRI = true;
-                }
-                if (line.contains("/BBox")){
-                    //m_BBox = line.substring(line.indexOf("BBox"), line.indexOf("/Type"));
-                    //m_BBox = line;
-                    //Log.w(TAG, "the Type loc = " + Integer.toString(line.indexOf("Type")) );
-                    //Log.w(TAG, "the BBox loc = " + Integer.toString(line.indexOf("BBox")) );
-                    Log.w(TAG, "the line loc = " + Integer.toString(num_line) );
-                    m_BBox = line.substring(line.indexOf("BBox") + 5);
-                    m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
-                    //m_BBox = line.substring(line.indexOf("BBox") + 5, line.indexOf("]", line.indexOf("BBox")) - line.indexOf("BBox") - 5);
-                    m_BBox = m_BBox.trim();
-                }
-                if (line.contains("GPTS")){
-                    //m_GPTS = line.substring(line.indexOf("GPTS") + 5, line.indexOf("/LPTS") - 1);
-                    m_GPTS = line.substring(line.indexOf("GPTS") + 5);
-                    m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
-                    //m_GPTS = line.substring(line.indexOf("GPTS") + 5, line.indexOf("]"));
-                    //m_GPTS = line.substring(line.indexOf("GPTS") + 5, line.indexOf("]", line.indexOf("GPTS")) - line.indexOf("GPTS") - 5);
-                    m_GPTS = m_GPTS.trim();
-                }
-                num_line += 1;
-            }
-            Log.w(TAG, "GPTS:" + m_GPTS );
-            Log.w(TAG, "BBox:" + m_BBox );
-            if (isESRI == true) {
-                content = "ESRI::" + content;
-                save(content);
-            } else {
-                save(content);
-            }
-            setTitle(subassetstring(pdfFileName));
-
-            Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
-            inputStream.close();
-        }
-        catch (IOException e) {
-            Log.w(TAG, e.getMessage() );
-            Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
-        }
 
     }
 
@@ -225,6 +169,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         return result;
     }
+
     public void getGeoInfo(String uri) {
         //Uri m_uri = Uri.parse(uri);
         try {
@@ -255,7 +200,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } else {
                 save(content);
             }
-            setTitle(subassetstring(pdfFileName));
+            setTitle(findTitle(pdfFileName));
 
             Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
             inputStream.close();
@@ -264,6 +209,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
         }
     }
+
     private void displayFromUri(Uri uri) {
         pdfFileName = getFileName(uri);
 
@@ -296,6 +242,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Log.w(TAG, pdfFileName );
         setTitle(pdfFileName);
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -365,6 +312,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
         }
+
     @Override
     public void onPageChanged(int page, int pageCount) {
         pageNumber = page;
@@ -373,7 +321,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     public void save(String str){
         info = str;
-        String fname = "data_" + subassetstring(pdfFileName);
+        String fname = "data_" + findTitle(pdfFileName);
         FileOutputStream out = null;
         BufferedWriter writer = null;
         try {
@@ -392,6 +340,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
             }
         }
+
     public String load(String name) {
         String fname = "data_" + name;
             FileInputStream in = null;
@@ -417,7 +366,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
             return content.toString();
         }
-    public String subassetstring(String str){
+
+    public String findTitle(String str){
         str = str.substring(4, str.indexOf("."));
         return str;
     }
@@ -427,8 +377,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         return true;
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
