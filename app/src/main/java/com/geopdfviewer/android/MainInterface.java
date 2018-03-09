@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.nfc.Tag;
@@ -26,6 +27,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +43,7 @@ import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.listener.OnRenderListener;
+import com.github.barteksc.pdfviewer.listener.OnTapListener;
 import com.github.barteksc.pdfviewer.model.PagePart;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
@@ -76,9 +79,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public final static String uri = "";
     public final static String GPTS = "";
     public final static String BBox = "";*/
+    TextView textView;
 
-
-    public   String name = "";
     public   String WKT = "";
     public   String uri = "";
     public   String GPTS = "";
@@ -147,7 +149,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public void getInfo(int num) {
         SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
         String str = "n_" + num + "_";
-        name = pref1.getString(str + "name", "");
+        pdfFileName = pref1.getString(str + "name", "");
         WKT = pref1.getString(str + "WKT", "");
         uri = pref1.getString(str + "uri", "");
         GPTS = pref1.getString(str + "GPTS", "");
@@ -186,6 +188,44 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //Log.w(TAG, pdfFileName );
         setTitle(pdfFileName);
     }
+    Float x, y;
+    private void displayFromFile(String filePath) {
+        setTitle(pdfFileName);
+
+        pdfView = (PDFView) findViewById(R.id.pdfView);
+
+        File file = new File(filePath);
+        pdfView.fromFile(file)
+                .defaultPage(pageNumber)
+                .onPageChange(this)
+                .enableAnnotationRendering(true)
+                .onLoad(this)
+                .onDraw(new OnDrawListener() {
+                    @Override
+                    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+                        canvas.drawLine(0, 0, 100, 100, new Paint(1));
+                    }
+                })
+                .onRender(new OnRenderListener() {
+                    @Override
+                    public void onInitiallyRendered(int nbPages) {
+
+                    }
+                })
+                .onTap(new OnTapListener() {
+                    @Override
+                    public boolean onTap(MotionEvent e) {
+                        textView = (TextView) findViewById(R.id.txt);
+                        textView.setText(Float.toString(e.getX()) + "&" + Float.toString(e.getY()) + "&" + Float.toString(pdfView.getCurrentXOffset()));
+
+                        return true;
+                    }
+                })
+                .scrollHandle(new DefaultScrollHandle(this))
+                .spacing(10) // in dp
+                .onPageError(this)
+                .load();
+    }
 
     public void getInfo(){
 
@@ -220,7 +260,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //setTitle(name);
         //locError(uri);
         linearLayout = (LinearLayout) findViewById(R.id.search);
-        displayFromUri(Uri.parse(uri));
+        //displayFromUri(Uri.parse(uri));
+        displayFromFile(uri);
+        ;
         Button bt1 = (Button) findViewById(R.id.send);
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -240,13 +282,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
 
-        final TextView textView = (TextView) findViewById(R.id.txt);
+
         //final FloatingActionsMenu menu = (FloatingActionsMenu) findViewById(R.id.fam);
         com.getbase.floatingactionbutton.FloatingActionButton button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.measure);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textView.setText("开始测量!");
+                //textView.setText("开始测量!");
                 //Log.e(TAG, "onClick: " );
             }
         });
@@ -254,7 +296,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textView.setText("指北针!");
+                //textView.setText("指北针!");
                 //pdfView.resetZoom();
             }
         });
@@ -262,7 +304,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textView.setText("zoom!");
+                //textView.setText("zoom!");
                 pdfView.resetZoomWithAnimation();
             }
         });
@@ -271,8 +313,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     @Override
     public void onPageChanged(int page, int pageCount) {
-        pageNumber = page;
-        setTitle(String.format("%s %s / %s", pdfFileName, page + 1, pageCount));
+        //pageNumber = page;
+        //setTitle(String.format("%s %s / %s", pdfFileName, page + 1, pageCount));
     }
 
     public void save(String str){

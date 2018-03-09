@@ -26,7 +26,10 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
     private List<Map_test> mMapList;
 
+    private OnRecyclerItemLongListener mOnItemLong = null;
+
     static class ViewHolder extends RecyclerView.ViewHolder {
+        //private OnRecyclerItemLongListener mOnItemLong = null;
         CardView cardView;
         ImageView MapImage;
         TextView MapName;
@@ -36,6 +39,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             cardView = (CardView) view;
             MapImage = (ImageView) view.findViewById(R.id.img_test);
             MapName = (TextView) view.findViewById(R.id.map_name);
+            //view.setOnLongClickListener(this);
 
         }
     }
@@ -45,6 +49,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
         if(mContext == null) {
             mContext = parent.getContext();
         }
@@ -57,14 +62,23 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                 Map_test map = mMapList.get(position);
                 Intent intent = new Intent(mContext, MainInterface.class);
                 intent.putExtra("num", map.getM_num());
-                //intent.putExtra(select_page.FRUIT_NAME, map.getM_name());
-                //intent.putExtra(select_page.FRUIT_IMAGE_ID, map.getImageId());
-                /*intent.putExtra(MainInterface.name, map.getM_name());
-                intent.putExtra(MainInterface.BBox, map.getM_BBox());
-                intent.putExtra(MainInterface.WKT, map.getM_WKT());
-                intent.putExtra(MainInterface.uri, map.getM_uri());
-                intent.putExtra(MainInterface.GPTS, map.getM_GPTS());*/
                 mContext.startActivity(intent);
+            }
+        });
+        holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                /*if (mOnItemLong != null){
+                mOnItemLong.onItemLongClick(v, holder.getAdapterPosition());}*/
+                int position = holder.getAdapterPosition();
+                Map_test map = mMapList.get(position);
+                Intent intent = new Intent(mContext, select_page.class);
+                intent.putExtra(select_page.LOC_DELETE_ITEM, map.getM_num());
+                Toast.makeText(mContext, "暂时没有更新删除功能", Toast.LENGTH_LONG).show();
+                //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
+                //mContext.setTheme(R.style.DarkTheme);
+                mContext.startActivity(intent);
+                return true;
             }
         });
         return holder;
@@ -87,5 +101,12 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     @Override
     public int getItemCount() {
         return mMapList.size();
+    }
+
+    public interface OnRecyclerItemLongListener{
+        void onItemLongClick(View view,int position);
+    }
+    public void setOnItemLongClickListener(OnRecyclerItemLongListener listener){
+        this.mOnItemLong =  listener;
     }
 }

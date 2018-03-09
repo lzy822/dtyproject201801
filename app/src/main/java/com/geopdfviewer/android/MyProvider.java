@@ -38,6 +38,9 @@ public class MyProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         // TODO: Implement this to handle query requests from clients.
+        //Cursor cursor = null;
+        //cursor =
+        //uri.getPath();
         throw new UnsupportedOperationException("Not yet implemented");
     }
 

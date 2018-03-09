@@ -75,6 +75,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
+    public static final String LOC_DELETE_ITEM = "map_num";
     private Map_test[] map_tests = new Map_test[15];
     private List<Map_test> map_testList = new ArrayList<>();
     private Map_testAdapter adapter;
@@ -285,12 +286,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     public void Btn_clearData(){
 
-        SharedPreferences.Editor pref = getSharedPreferences("data_num", MODE_PRIVATE).edit();
+        /*SharedPreferences.Editor pref = getSharedPreferences("data_num", MODE_PRIVATE).edit();
         pref.clear().commit();
         SharedPreferences.Editor pref1 = getSharedPreferences("data", MODE_PRIVATE).edit();
         pref1.clear().commit();
         Toast.makeText(this, "清除操作完成", Toast.LENGTH_LONG).show();
-        refreshRecycler();
+        initPage();
+        refreshRecycler();*/
+        Intent intent = getIntent();
+        int loc_delete = intent.getIntExtra(LOC_DELETE_ITEM, 0);
+        locError(Integer.toString(loc_delete));
     }
 
     public void setNum_pdf(){
@@ -353,7 +358,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
-            locError(uri.getAuthority());
+            //locError(data.getData().getHost());
+            /*locError(uri.toString());
+            String m_filePath = uri.toString().substring("content://com.android.fileexplorer.myprovider/".length());
+            m_filePath = "content://com.geopdfviewer.android.provider/" + m_filePath;
+            getGeoInfo(getRealPath(uri.toString()), URI_TYPE, m_filePath, findNameFromUri(uri));*/
             getGeoInfo(getRealPath(uri.toString()), URI_TYPE, uri.toString(), findNameFromUri(uri));
             refreshRecycler();
         }
@@ -384,6 +393,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        adapter = new Map_testAdapter(map_testList);
+        adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
+            @Override
+            public void onItemLongClick(View view, int position) {
+            }
+        });
+
         //Clear按钮事件编辑
         Button btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_clear.setOnClickListener(new View.OnClickListener() {
@@ -523,7 +539,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
             Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
             in.close();
-            saveGeoInfo(m_name, m_uri, m_WKT, m_BBox, m_GPTS, bmPath);
+            saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath);
         } catch (IOException e) {
             Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }
