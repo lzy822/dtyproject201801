@@ -12,10 +12,10 @@ public class Map_test {
     private String m_GPTS;
     private String m_BBox;
     private String m_WKT;
-    private Uri m_uri;
+    private String m_uri;
     private String m_imguri;
 
-    public Map_test(int num, String name, String WKT, Uri uri, String GPTS, String BBox, String imguri) {
+    public Map_test(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri) {
         m_BBox = BBox;
         m_num = num;
         m_name = name;
@@ -36,7 +36,7 @@ public class Map_test {
     public Map_test(String name) {
         m_name = name;
     }
-    public Map_test(String name, Uri uri) {
+    public Map_test(String name, String uri) {
         m_name = name;
         m_uri = uri;
     }
@@ -81,11 +81,11 @@ public class Map_test {
         this.m_WKT = m_WKT;
     }
 
-    public Uri getM_uri() {
+    public String getM_uri() {
         return m_uri;
     }
 
-    public void setM_uri(Uri m_uri) {
+    public void setM_uri(String m_uri) {
         this.m_uri = m_uri;
     }
 }

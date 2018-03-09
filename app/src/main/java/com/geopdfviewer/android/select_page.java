@@ -64,8 +64,7 @@ import java.util.regex.Pattern;
 
 public class select_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
-    public static final String FRUIT_NAME = "fruit_name";
-    public static final String FRUIT_IMAGE_ID = "fruit_image_id";
+
     private static final String TAG = "select_page";
     private final static int REQUEST_CODE = 42;
     public static final int PERMISSION_CODE = 42042;
@@ -76,9 +75,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
-    private Map_test[] map_tests = new Map_test[10];
+    private Map_test[] map_tests = new Map_test[15];
     private List<Map_test> map_testList = new ArrayList<>();
     private Map_testAdapter adapter;
+    private RecyclerView recyclerView;
+    private GridLayoutManager layoutManager;
     @Override
     public void loadComplete(int nbPages) {
 
@@ -157,81 +158,66 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
 
-    public void initMap(String name) {
-        Map_test mapTest = new Map_test(name);
 
-        Log.w(TAG, Integer.toString(num_pdf) );
-        Log.w(TAG, Integer.toString(map_tests.length) );
-        //Log.w(TAG, map_tests[0].getName() );
+    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri) {
+        Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri);
         map_tests[num_pdf - 1] = mapTest;
-        Log.w(TAG, Integer.toString(map_tests.length) );
         map_testList.clear();
         for (int i = 0; i < num_pdf; i++) {
             map_testList.add(map_tests[i]);
         }
     }
 
-    public void initMap2(String name) {
-        Map_test mapTest = new Map_test(name);
 
-        Log.w(TAG, Integer.toString(num_pdf) );
-        Log.w(TAG, Integer.toString(map_tests.length) );
-        //Log.w(TAG, map_tests[0].getName() );
-        map_tests[num_pdf - 1] = mapTest;
-        Log.w(TAG, Integer.toString(map_tests.length) );
+
+    public void initMap() {
         map_testList.clear();
-        for (int i = 0; i < num_pdf; i++) {
-            map_testList.add(map_tests[i]);
-        }
-    }
-
-    public void initMapI() {
-        SharedPreferences pref = getSharedPreferences("data_num", MODE_PRIVATE);
-        num_pdf = pref.getInt("num", 0);
-        Toast.makeText(this, Integer.toString(num_pdf), Toast.LENGTH_LONG).show();
         for (int j = 1; j <= num_pdf; j++) {
+            locError(Integer.toString(j));
             SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
             String str = "n_" + j + "_";
+            int num = pref1.getInt(str + "num", 0);
             String name = pref1.getString(str + "name", "");
-            Map_test mapTest = new Map_test(name);
+            String WKT = pref1.getString(str + "WKT", "");
+            String uri = pref1.getString(str + "uri", "");
+            String GPTS = pref1.getString(str + "GPTS", "");
+            String BBox = pref1.getString(str + "BBox", "");
+            String imguri = pref1.getString(str + "img_path", "");
+            Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri);
             map_tests[j - 1] = mapTest;
             map_testList.add(map_tests[j - 1]);
         }
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        GridLayoutManager layoutManager = new GridLayoutManager(this,2);
+        refreshRecycler();
+
+
+    }
+
+    public void refreshRecycler(){
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new Map_testAdapter(map_testList);
         recyclerView.setAdapter(adapter);
-
-
     }
 
-    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS){
+    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path){
         num_pdf ++;
         SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
         editor.putInt("num", num_pdf);
         editor.apply();
         SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
         String str = "n_" + Integer.toString(num_pdf) + "_";
-        editor.putString(str + "name", name);
-        editor.putString(str + "uri", uri);
-        editor.putString(str + "WKT", WKT);
-        editor.putString(str + "BBox", BBox);
-        editor.putString(str + "GPTS", GPTS);
-        editor.apply();
-    }
-
-    public void save1(String name){
-        num_pdf ++;
-        SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
-        Toast.makeText(this, Integer.toString(num_pdf), Toast.LENGTH_LONG).show();
-        editor.putInt("num", num_pdf);
-        editor.apply();
-        SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
-        String str = "n_" + Integer.toString(num_pdf) + "_";
+        editor1.putInt(str + "num", num_pdf);
         editor1.putString(str + "name", name);
+        editor1.putString(str + "uri", uri);
+        editor1.putString(str + "WKT", WKT);
+        editor1.putString(str + "BBox", BBox);
+        editor1.putString(str + "GPTS", GPTS);
+        editor1.putString(str + "img_path", img_path);
         editor1.apply();
+        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path);
     }
+
 
     public String createThumbnails(String fileName, String filePath, int Type){
 
@@ -279,10 +265,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             outputStream.flush();
             outputStream.close();
 
-            ImageView imageView = (ImageView) findViewById(R.id.img_show);
+            /*ImageView imageView = (ImageView) findViewById(R.id.img_show);
             imageView.setVisibility(View.VISIBLE);
             Log.e(TAG, outPath );
-            imageView.setImageURI(Uri.parse(outPath));
+            imageView.setImageURI(Uri.parse(outPath));*/
             //imageView.setImageBitmap(bitmap);
 
 
@@ -296,18 +282,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return outPath;
     }
 
-    public void save2(String name, Uri uri){
-        num_pdf ++;
-        SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
-        Toast.makeText(this, Integer.toString(num_pdf), Toast.LENGTH_LONG).show();
-        editor.putInt("num", num_pdf);
-        editor.apply();
-        SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
-        String str = "n_" + Integer.toString(num_pdf) + "_";
-        editor1.putString(str + "name", name);
-        editor1.putString(str + "uri", uri.toString());
-        editor1.apply();
-    }
 
     public void Btn_clearData(){
 
@@ -316,6 +290,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         SharedPreferences.Editor pref1 = getSharedPreferences("data", MODE_PRIVATE).edit();
         pref1.clear().commit();
         Toast.makeText(this, "清除操作完成", Toast.LENGTH_LONG).show();
+        refreshRecycler();
     }
 
     public void setNum_pdf(){
@@ -378,26 +353,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
-            //findNameFromUri(uri);
+            locError(uri.getAuthority());
             getGeoInfo(getRealPath(uri.toString()), URI_TYPE, uri.toString(), findNameFromUri(uri));
-            Log.w(TAG, getRealPath(uri.toString()) );
-            Log.w(TAG, uri.toString() );
-            //Log.w(TAG, uri.getPath() );
-            String name = getFileName(uri);
-            save2(name, uri);
-            initMap(name);
-            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-            GridLayoutManager layoutManager = new GridLayoutManager(this,2);
-            recyclerView.setLayoutManager(layoutManager);
-            Log.e(TAG, Integer.toString(map_testList.size()));
-            adapter = new Map_testAdapter(map_testList);
-            recyclerView.setAdapter(adapter);
-            //setTitle(Integer.toString(num_pdf));
-            //Log.w(TAG, uri.toString() );
-            /*Intent intent = new Intent(select_page.this, MainInterface.class);
-            intent.putExtra("type", "uri");
-            intent.putExtra("data_uri", uri.toString());
-            startActivity(intent);*/
+            refreshRecycler();
         }
     }
 
@@ -444,6 +402,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 intent.putExtra("type", "asset");
                 startActivity(intent);*/
                 getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
+
             }
         });
         //第二个子floating按钮事件编辑
@@ -465,27 +424,29 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (num_pdf == 0) {
             initDemo();
         }
+        Log.w(TAG, Integer.toString(num_pdf) );
         //初始化
-        initMapI();
+        initMap();
     }
 
     public void initDemo(){
-        save1("demo");
+        //save1("demo");
+        saveGeoInfo("demo", "", "", "", "", "");
         //initMap2("occupation");
         Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
     }
 
-    public void ReadPDFromAssets(){
 
-    }
 
     public String findNamefromSample(String str){
         str = str.substring(4, str.indexOf("."));
         return str;
     }
+
     public void locError(){
         Log.w(TAG, "可以成功运行到这里" );
     }
+
     public void locError(String str){
         Log.e(TAG, str );
     }
@@ -562,6 +523,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
             Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
             in.close();
+            saveGeoInfo(m_name, m_uri, m_WKT, m_BBox, m_GPTS, bmPath);
         } catch (IOException e) {
             Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }

@@ -3,6 +3,7 @@ package com.geopdfviewer.android;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
@@ -70,8 +71,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     String info;
     PDFView pdfView;
     LinearLayout linearLayout;
-    Uri m_uri;
-    ImageView imageView;
+    /*public final static String name = "";
+    public final static String WKT = "";
+    public final static String uri = "";
+    public final static String GPTS = "";
+    public final static String BBox = "";*/
+
+
+    public   String name = "";
+    public   String WKT = "";
+    public   String uri = "";
+    public   String GPTS = "";
+    public   String BBox = "";
 
     @Override
     public void loadComplete(int nbPages) {
@@ -87,44 +98,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
-    public String createThumbnails(String fileName){
-        String outPath = "";
-        PdfiumCore pdfiumCore = new PdfiumCore(this);
-        int pageNum = 0;
-        File m_pdf_file = new File(fileName);
-        //File m_pdf_file = new File("/storage/emulated/0/tencent/TIMfile_recv/sample_big.pdf");
-        Log.w(TAG, Boolean.toString(m_pdf_file.canRead()) );
-        try {
-            PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
-            Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
 
-            pdfiumCore.openPage(pdf, pageNum);
-            int width = pdfiumCore.getPageWidth(pdf, pageNum);
-            int height = pdfiumCore.getPageHeight(pdf, pageNum);
-            Bitmap bitmap = Bitmap.createBitmap(200, 300, Bitmap.Config.RGB_565);
-            pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 200, 300);
-
-            pdfiumCore.closeDocument(pdf);
-            Log.w(TAG, Boolean.toString(new File(Environment.getExternalStorageDirectory() + "/PdfReader").mkdirs()) );
-            File of = new File(Environment.getExternalStorageDirectory() + "/PdfReader", fileName + ".jpg");
-            FileOutputStream outputStream = new FileOutputStream(of);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-            outputStream.flush();
-            outputStream.close();
-
-            /*imageView = (ImageView) findViewById(R.id.img);
-            imageView.setVisibility(View.VISIBLE);
-            imageView.setImageBitmap(bitmap);*/
-
-
-
-        }
-        catch (IOException e) {
-            Log.w(TAG, e.getMessage() );
-            Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
-        }
-        return outPath;
-    }
 
     public void ReadPDF(){
         pdfView = (PDFView) findViewById(R.id.pdfView);
@@ -170,48 +144,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return result;
     }
 
-    public void getGeoInfo(String uri) {
-        //Uri m_uri = Uri.parse(uri);
-        try {
-            FileInputStream fileInputStream = openFileInput(uri);
-            InputStream inputStream = openFileInput(uri);
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuffer sb = new StringBuffer("");
-            String line;
-
-            while((line = bufferedReader.readLine()) != null) {
-                //Toast.makeText(this, "正在获取内容!", Toast.LENGTH_LONG).show();
-                sb.append(line + "/n");
-                if(line.contains("PROJCS")) {
-
-                    content = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
-
-                }
-                if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
-                {
-                    isESRI = true;
-                }
-                num_line += 1;
-            }
-            if (isESRI == true) {
-                content = "ESRI::" + content;
-                save(content);
-            } else {
-                save(content);
-            }
-            setTitle(findTitle(pdfFileName));
-
-            Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
-            inputStream.close();
-        }
-        catch (IOException e) {
-            Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
-        }
+    public void getInfo(int num) {
+        SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
+        String str = "n_" + num + "_";
+        name = pref1.getString(str + "name", "");
+        WKT = pref1.getString(str + "WKT", "");
+        uri = pref1.getString(str + "uri", "");
+        GPTS = pref1.getString(str + "GPTS", "");
+        BBox = pref1.getString(str + "BBox", "");
     }
 
     private void displayFromUri(Uri uri) {
         pdfFileName = getFileName(uri);
+        Log.w(TAG, uri.toString() );
 
         pdfView = (PDFView) findViewById(R.id.pdfView);
 
@@ -237,29 +182,45 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onPageError(this)
                 .load();
 
-        //getGeoInfo(uri.toString());
-        Log.w(TAG, uri.toString() );
-        Log.w(TAG, pdfFileName );
+        //Log.w(TAG, uri.toString() );
+        //Log.w(TAG, pdfFileName );
         setTitle(pdfFileName);
     }
 
+    public void getInfo(){
+
+    }
+
+    public void locError(String str){
+        Log.e(TAG, str );
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
-        Intent intent = getIntent();
-        String data = intent.getStringExtra("type");
-        linearLayout = (LinearLayout) findViewById(R.id.search);
-        ImageView imageView = (ImageView) findViewById(R.id.img);
-        Log.w(TAG, data );
-        if (data.equalsIgnoreCase("uri") ){
-            Uri uri1 = Uri.parse(intent.getStringExtra("data_uri"));
-            displayFromUri(uri1);
-        }else if (data.equalsIgnoreCase("asset")){
-            Log.w(TAG, "come on" );
-            ReadPDF();
 
-        }
+
+
+
+        Intent intent = getIntent();
+        int m_num = intent.getIntExtra("num", 0);
+        getInfo(m_num);
+        /*String m_name = intent.getStringExtra(name);
+
+        String m_WKT = intent.getStringExtra(WKT);
+        String m_uri = intent.getStringExtra(uri);
+        String m_GPTS = intent.getStringExtra(GPTS);
+        String m_BBox = intent.getStringExtra(BBox);
+        locError(m_name);
+        locError(m_WKT);
+        locError(m_uri);
+        locError(m_GPTS);
+        locError(m_BBox);*/
+        //int num = intent.getIntExtra("num", 0);
+        //setTitle(name);
+        //locError(uri);
+        linearLayout = (LinearLayout) findViewById(R.id.search);
+        displayFromUri(Uri.parse(uri));
         Button bt1 = (Button) findViewById(R.id.send);
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -305,11 +266,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 pdfView.resetZoomWithAnimation();
             }
         });
-
-
-
-
-
 
         }
 
@@ -385,11 +341,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 this.finish();
                 break;
             case R.id.info:
-                //String data = "data_" + subassetstring(pdfFileName);
-                String data = info;
                 Intent intent = new Intent(MainInterface.this, info_page.class);
-                //intent.putExtra("uri", m_uri);
-                intent.putExtra("extra_data", data);
+                intent.putExtra("extra_data", WKT);
                 startActivity(intent);
                 break;
             case R.id.query:

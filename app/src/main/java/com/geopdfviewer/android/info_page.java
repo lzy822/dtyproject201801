@@ -38,10 +38,6 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
     public String content;
     public int num_line = 0;
     String pdfFileName;
-    public boolean isESRI = false;
-    String info;
-    PDFView pdfView;
-    LinearLayout linearLayout;
     @Override
     public void loadComplete(int nbPages) {
 
@@ -76,76 +72,17 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
         return true;
     }
 
-    public void readPDF(){
-    pdfView = (PDFView) findViewById(R.id.pdfView);
-    pdfFileName = SAMPLE_FILE;
-    pdfView.fromAsset(SAMPLE_FILE)
-            .defaultPage(pageNumber)
-            .onPageChange(this)
-            .enableAnnotationRendering(true)
-            .onLoad(this)
-            .scrollHandle(new DefaultScrollHandle(this))
-            .spacing(10) // in dp
-            .onPageError(this)
-            .pageFitPolicy(FitPolicy.BOTH)
-            .load();
-
-    //PagePart pagePart = new PagePart(pdfView.getCurrentPage(), bitmap, )
-    //pdfView.onBitmapRendered(pdfView.getCurrentPage());
-    try {
-        InputStream inputStream = getAssets().open(SAMPLE_FILE);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        StringBuffer sb = new StringBuffer("");
-        String line;
-
-        while((line = bufferedReader.readLine()) != null) {
-            //Toast.makeText(this, "正在获取内容!", Toast.LENGTH_LONG).show();
-            sb.append(line + "/n");
-            if(line.contains("PROJCS")) {
-
-                content = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
-
-            }
-            if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
-            {
-                isESRI = true;
-                //Toast.makeText(this, "l11111", Toast.LENGTH_LONG).show();
-            }
-            //content = line;
-            num_line += 1;
-        }
-        if (isESRI == true) {
-            content = "ESRI::" + content;
-        } else {
-        }
-
-
-
-        Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
-        inputStream.close();
-    }
-    catch (IOException e) {
-        Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
-    }
-}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_page);
-        readPDF();
-        pdfView = (PDFView) findViewById(R.id.pdfView);
         TextView textView = (TextView) findViewById(R.id.infotext);
         Intent intent = getIntent();
         String data = intent.getStringExtra("extra_data");
 
         textView.setText(data);
-        ImageView imageView = (ImageView) findViewById(R.id.img1);
-        //Bitmap bitmap = BitmapFactory.decodeFile(intent.getData().toString());
-        //imageView.setImageBitmap(pdfView.getDrawingCache());
-        //imageView.setImageBitmap(bitmap);
-        //textView.setText(load(data));
+        //ImageView imageView = (ImageView) findViewById(R.id.img1);
 
     }
     public String load(String str) {

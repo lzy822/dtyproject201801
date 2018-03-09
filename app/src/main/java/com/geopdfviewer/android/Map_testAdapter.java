@@ -2,6 +2,7 @@ package com.geopdfviewer.android;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.barteksc.pdfviewer.PDFView;
 
@@ -53,9 +55,15 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 Map_test map = mMapList.get(position);
-                Intent intent = new Intent(mContext, select_page.class);
-                intent.putExtra(select_page.FRUIT_NAME, map.getM_name());
+                Intent intent = new Intent(mContext, MainInterface.class);
+                intent.putExtra("num", map.getM_num());
+                //intent.putExtra(select_page.FRUIT_NAME, map.getM_name());
                 //intent.putExtra(select_page.FRUIT_IMAGE_ID, map.getImageId());
+                /*intent.putExtra(MainInterface.name, map.getM_name());
+                intent.putExtra(MainInterface.BBox, map.getM_BBox());
+                intent.putExtra(MainInterface.WKT, map.getM_WKT());
+                intent.putExtra(MainInterface.uri, map.getM_uri());
+                intent.putExtra(MainInterface.GPTS, map.getM_GPTS());*/
                 mContext.startActivity(intent);
             }
         });
@@ -66,7 +74,11 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map_test map = mMapList.get(position);
         holder.MapName.setText(map.getM_name());
-        holder.MapImage.setImageResource(R.drawable.ic_android_black);
+        if (map.getM_imguri() != ""){
+            holder.MapImage.setImageURI(Uri.parse(map.getM_imguri()));
+        }else holder.MapImage.setImageResource(R.drawable.ic_android_black);
+
+
         //holder.MapImage.fromUri(map.getImageId());
         //Glide.with(mContext).load(fruit.getImageId()).into(holder.fruitImage);
     }

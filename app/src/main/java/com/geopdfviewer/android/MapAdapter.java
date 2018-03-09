@@ -53,8 +53,8 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
                 int position = holder.getAdapterPosition();
                 Map map = mFruitList.get(position);
                 Intent intent = new Intent(mContext, select_page.class);
-                intent.putExtra(select_page.FRUIT_NAME, map.getName());
-                intent.putExtra(select_page.FRUIT_IMAGE_ID, map.getImageId());
+                //intent.putExtra(select_page.FRUIT_NAME, map.getName());
+                //intent.putExtra(select_page.FRUIT_IMAGE_ID, map.getImageId());
                 mContext.startActivity(intent);
             }
         });
