@@ -250,8 +250,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
 
             pdfiumCore.openPage(pdf, pageNum);
-            int width = pdfiumCore.getPageWidth(pdf, pageNum);
-            int height = pdfiumCore.getPageHeight(pdf, pageNum);
+            //int width = ;
+            locError(Integer.toString(pdfiumCore.getPageWidth(pdf, pageNum)));
+            locError(Integer.toString(pdfiumCore.getPageHeight(pdf, pageNum)));
+            //int height = pdfiumCore.getPageHeight(pdf, pageNum);
             Bitmap bitmap = Bitmap.createBitmap(120, 180, Bitmap.Config.RGB_565);
             pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 120, 180);
             pdfiumCore.closeDocument(pdf);
@@ -286,16 +288,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     public void Btn_clearData(){
 
-        /*SharedPreferences.Editor pref = getSharedPreferences("data_num", MODE_PRIVATE).edit();
+        SharedPreferences.Editor pref = getSharedPreferences("data_num", MODE_PRIVATE).edit();
         pref.clear().commit();
         SharedPreferences.Editor pref1 = getSharedPreferences("data", MODE_PRIVATE).edit();
         pref1.clear().commit();
         Toast.makeText(this, "清除操作完成", Toast.LENGTH_LONG).show();
         initPage();
-        refreshRecycler();*/
-        Intent intent = getIntent();
+        refreshRecycler();
+        /*Intent intent = getIntent();
         int loc_delete = intent.getIntExtra(LOC_DELETE_ITEM, 0);
-        locError(Integer.toString(loc_delete));
+        locError(Integer.toString(loc_delete));*/
     }
 
     public void setNum_pdf(){
@@ -364,6 +366,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             m_filePath = "content://com.geopdfviewer.android.provider/" + m_filePath;
             getGeoInfo(getRealPath(uri.toString()), URI_TYPE, m_filePath, findNameFromUri(uri));*/
             getGeoInfo(getRealPath(uri.toString()), URI_TYPE, uri.toString(), findNameFromUri(uri));
+            locError(getRealPath(uri.toString()));
+            locError(uri.toString());
+            locError(findNameFromUri(uri));
             refreshRecycler();
         }
     }
@@ -417,7 +422,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 //intent.putExtra("data_uri", "asset");
                 intent.putExtra("type", "asset");
                 startActivity(intent);*/
-                getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
+
 
             }
         });
@@ -447,7 +452,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     public void initDemo(){
         //save1("demo");
-        saveGeoInfo("demo", "", "", "", "", "");
+        //saveGeoInfo("demo", "", "", "", "", "");
+        getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
         //initMap2("occupation");
         Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
     }
@@ -507,7 +513,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 {
                     isESRI = true;
                 }
-                if (line.contains("/BBox")){
+                if (line.contains("/BBox") && line.contains("Viewport")){
                     //Log.w(TAG, "the line loc = " + Integer.toString(num_line) );
                     m_BBox = line.substring(line.indexOf("BBox") + 5);
                     m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
@@ -539,7 +545,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
             Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
             in.close();
-            saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath);
+            //locError("看这里"+m_name);
+            if (filePath != "") {
+                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath);
+            } else saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath);
         } catch (IOException e) {
             Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }
