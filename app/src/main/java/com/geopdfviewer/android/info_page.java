@@ -33,7 +33,6 @@ import java.io.InputStreamReader;
 public class info_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
     private static final String TAG = "info_page";
-    public static final String SAMPLE_FILE = "pdf/sample1.pdf";
     Integer pageNumber = 0;
     public String content;
     public int num_line = 0;
@@ -81,6 +80,7 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
         Intent intent = getIntent();
         String data = intent.getStringExtra("extra_data");
 
+        Log.w(TAG, data );
         textView.setText(data);
         //ImageView imageView = (ImageView) findViewById(R.id.img1);
 

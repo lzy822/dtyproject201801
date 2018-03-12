@@ -520,6 +520,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     m_BBox = m_BBox.trim();
                 }
                 if (line.contains("GPTS")){
+                    locError(line);
                     m_GPTS = line.substring(line.indexOf("GPTS") + 5);
                     m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
                     m_GPTS = m_GPTS.trim();

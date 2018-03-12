@@ -14,6 +14,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.pdf.PdfRenderer;
 import android.location.Address;
 import android.location.Geocoder;
@@ -75,10 +76,10 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class MainInterface extends AppCompatActivity  implements OnPageChangeListener, OnLoadCompleteListener,
-        OnPageErrorListener {
+        OnPageErrorListener, OnDrawListener {
     private static final String TAG = "MainInterface";
-    //public static final String SAMPLE_FILE = "pdf/sample1.pdf";
     public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
+    public static int FILE_TYPE = 0;
     Integer pageNumber = 0;
     public String content;
     public int num_line = 0;
@@ -104,7 +105,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
     //坐标信息
-    Double m_lat,m_long;
+    double m_lat,m_long;
     //获取pdf的坐标信息
     double min_lat, max_lat, min_long, max_long;
     //坐标精度
@@ -176,15 +177,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
             //DecimalFormat df = new DecimalFormat("0.00000");
             //setLocationInfo(df.format(location.getLatitude()), df.format(location.getLongitude()));
-            setLocationInfo(location.getLatitude(), location.getLongitude());
+            //setLocationInfo(location.getLatitude(), location.getLongitude());
 
+
+            m_lat = location.getLatitude();
+            m_long = location.getLongitude();
+            //m_lat = 25.029896449028467;
+            //m_long = 102.7012173402311;
             /*pdfView = (PDFView) findViewById(R.id.pdfView);
             Rect rect = new Rect(200, 300, 400, 100);
             Canvas canvas = new Canvas(rect);
             pdfView.draw();*/
             //locError("看这里!!!");
             //Log.w(TAG, location.toString() );
-
+            locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
 
         } else {
 
@@ -198,11 +204,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             //format.
         }
         DecimalFormat df = new DecimalFormat(format);
-        //Log.w(TAG, format );
+        Log.w(TAG, format );
+        locError(Double.toString(lat));
         m_lat = Double.valueOf(df.format(lat));
         m_long = Double.valueOf(df.format(longt));
         textView = (TextView) findViewById(R.id.txt) ;
         textView.setText( df.format(lat)+ "$$" + df.format(longt));
+    }
+
+    @Override
+    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+        //Log.w(TAG, Float.toString(pdfView.getZoom()) );
+        //pdfView.moveRelativeTo(500, 300);
+        canvas.drawLine(0, pageHeight, pageWidth, 0,  new Paint(1));
+        //canvas.drawLine(30, 1177, 826, 35,  new Paint(1));
+        //canvas.drawLine((float) bottom_x, (float)bottom_y, (float)top_x, (float)top_y, new Paint(1));
+
+        //locError(Double.toString(bottom_x));
     }
 
     @Override
@@ -280,11 +298,25 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getBBox();
 
     }
-
+private double w, h, w_min;
     private void getGPTS() {
         String[] GPTString = GPTS.split(" ");
 
         String m_definition = GPTString[0].substring(GPTString[0].indexOf(".") + 1);
+        //locError(Double.toString());
+        //Double.valueOf(GPTString[3]) - Double.valueOf(GPTString[5])
+        locError("see here");
+        //locError(Double.toString());
+        //Double.valueOf(GPTString[7]) - Double.valueOf(GPTString[1])
+        w = ((Double.valueOf(GPTString[3]) - Double.valueOf(GPTString[5])) + (Double.valueOf(GPTString[7]) - Double.valueOf(GPTString[1]))) / 2;
+        h = ((Double.valueOf(GPTString[4]) - Double.valueOf(GPTString[2])) + (Double.valueOf(GPTString[0]) - Double.valueOf(GPTString[6]))) / 2;
+        w_min = ((Double.valueOf(GPTString[1])) + (Double.valueOf(GPTString[5]))) / 2;
+        //locError(Double.toString());
+        //Double.valueOf(GPTString[4]) - Double.valueOf(GPTString[2])
+        locError("see here");
+        //locError(Double.toString());
+        //Double.valueOf(GPTString[0]) - Double.valueOf(GPTString[6])
+
         definition = m_definition.length();
         min_lat = Double.valueOf(GPTString[0]);
         max_lat = Double.valueOf(GPTString[0]);
@@ -298,11 +330,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (Double.valueOf(GPTString[i]) > max_long) max_long = Double.valueOf(GPTString[i]);
             else if (Double.valueOf(GPTString[i]) < min_long) min_long = Double.valueOf(GPTString[i]);
         }
-        Log.w(TAG, "min_lat : " + Double.toString(min_lat) );
+        /*Log.w(TAG, "min_lat : " + Double.toString(min_lat) );
         Log.w(TAG, "max_lat : " + Double.toString(max_lat) );
         Log.w(TAG, "min_long : " + Double.toString(min_long) );
         Log.w(TAG, "max_long : " + Double.toString(max_long) );
-        Log.w(TAG, "pdf精度为: " + Integer.toString(definition) );
+        Log.w(TAG, "pdf精度为: " + Integer.toString(definition) );*/
+
         getLocation();
         //Log.w(TAG, m_definition );
     }
@@ -347,7 +380,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private void displayFromFile(String filePath) {
         setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
-        File file = new File(filePath);
+        final File file = new File(filePath);
         pdfView.fromFile(file)
                 .enableSwipe(false)
                 .enableDoubletap(false)
@@ -357,7 +390,43 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onDraw(new OnDrawListener() {
                     @Override
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-                        canvas.drawLine(0, 0, 100, 100, new Paint(1));
+                        Paint paint = new Paint();
+                        paint.setColor(Color.RED);
+                        paint.setStrokeWidth((float)3.0);
+                        paint.setStyle(Paint.Style.FILL);
+                        Paint paint1 = new Paint();
+                        paint1.setColor(Color.GREEN);
+                        paint1.setStrokeWidth((float)3.0);
+                        paint1.setStyle(Paint.Style.FILL);
+                        float xss = (float) m_lat;
+                        float yss = (float) m_long;
+                        //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long));
+                        //locError(Float.toString(xss) + "&&" + Float.toString(yss));
+                        double y_ratio = ((m_lat - min_lat) / (max_lat - min_lat));
+                        //double x_ratio = ((m_long - min_long) / (max_long - min_long));
+                        double x_ratio = ((m_long - w_min) / w);
+                        //double x_ratio = ((m_long - 102.61422) / 0.194225);
+                        //double y_ratio = ((m_lat - 24.90466) / 0.25781);
+                        locError(Double.toString(m_long));
+                        locError(Double.toString(w_min));
+                        double yy_ratio = ((max_lat - min_lat) / pageHeight);
+                        double xx_ratio = ((max_long - min_long) / pageWidth);
+                        if (xx_ratio > yy_ratio) {
+                            yy_ratio = xx_ratio;
+                        } else xx_ratio = yy_ratio;
+                        //locError(Double.toString(xx_ratio) + "see here");
+
+                        float xx = (float) ( x_ratio * pageWidth);
+                        float yy = (float) ( (1 - y_ratio) * pageHeight);
+                        /*if (x_ratio > y_ratio) {
+                            y_ratio = x_ratio;
+                        } else x_ratio = y_ratio;*/
+                        locError(Double.toString(x_ratio) + "&&" + Double.toString(y_ratio));
+                        locError(Float.toString(xx) + "&&" + Float.toString(yy));
+                        //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long));
+
+                        canvas.drawCircle(xx, yy, 20, paint);
+                        //canvas.drawCircle(yy, xx, 20, paint1);
                     }
                 })
                 .onRender(new OnRenderListener() {
@@ -447,7 +516,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //getLocation();
         //
 
-        //
+        //申请动态权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
         }
@@ -456,26 +525,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Intent intent = getIntent();
         int m_num = intent.getIntExtra("num", 0);
         getInfo(m_num);
-        /*String m_name = intent.getStringExtra(name);
-
-        String m_WKT = intent.getStringExtra(WKT);
-        String m_uri = intent.getStringExtra(uri);
-        String m_GPTS = intent.getStringExtra(GPTS);
-        String m_BBox = intent.getStringExtra(BBox);
-        locError(m_name);
-        locError(m_WKT);
-        locError(m_uri);
-        locError(m_GPTS);
-        locError(m_BBox);*/
-        //int num = intent.getIntExtra("num", 0);
-        //setTitle(name);
-        //locError(uri);
         linearLayout = (LinearLayout) findViewById(R.id.search);
-        //displayFromUri(Uri.parse(uri));
-        //locError(uri);
         if (uri != "") {
+            FILE_TYPE = 1;
             displayFromFile(uri);
         } else {
+            FILE_TYPE = 2;
             displayFromAsset("Demo");
         }
         ;
@@ -495,39 +550,45 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 linearLayout.setVisibility(View.GONE);
             }
         });
-
-
-
-
-        //final FloatingActionsMenu menu = (FloatingActionsMenu) findViewById(R.id.fam);
         com.getbase.floatingactionbutton.FloatingActionButton button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.measure);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //textView.setText("开始测量!");
-                //Log.e(TAG, "onClick: " );
+                //浮动按钮1 具体功能如下:
+                reDrawCache();
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.north);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //textView.setText("指北针!");
-                //pdfView.resetZoom();
+                //浮动按钮2 具体功能如下:
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //textView.setText("zoom!");
+                //浮动按钮3 具体功能如下:
                 pdfView.resetZoomWithAnimation();
             }
         });
 
 
         }
+
+    private void reDrawCache() {
+        if (FILE_TYPE == 0) {
+            Toast.makeText(this, "PDF文件读取出现问题", Toast.LENGTH_LONG).show();
+        } else if (FILE_TYPE == 1) {
+            displayFromFile(uri);
+            Toast.makeText(this, "这是硬盘上的文件", Toast.LENGTH_LONG).show();
+        } else if (FILE_TYPE == 2) {
+            displayFromAsset("Demo");
+            Toast.makeText(this, "这是Demo", Toast.LENGTH_LONG).show();
+        }
+
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -575,54 +636,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //setTitle(String.format("%s %s / %s", pdfFileName, page + 1, pageCount));
     }
 
-    public void save(String str){
-        info = str;
-        String fname = "data_" + findTitle(pdfFileName);
-        FileOutputStream out = null;
-        BufferedWriter writer = null;
-        try {
-            out = openFileOutput(fname, Context.MODE_PRIVATE);
-            writer = new BufferedWriter(new OutputStreamWriter(out));
-            writer.write(str);
-            } catch (IOException e) {
-            e.printStackTrace();
-            } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                    }} catch (IOException ee) {
-                ee.printStackTrace();
-                    }
-
-            }
-        }
-
-    public String load(String name) {
-        String fname = "data_" + name;
-            FileInputStream in = null;
-            BufferedReader reader = null;
-            StringBuilder content = new StringBuilder();
-            try {
-                in = openFileInput(fname);
-                reader = new BufferedReader(new InputStreamReader(in));
-                String line = "";
-                while ((line = reader.readLine()) != null) {
-                    content.append(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return content.toString();
-        }
-
     public String findTitle(String str){
         str = str.substring(4, str.indexOf("."));
         return str;
@@ -631,6 +644,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
+        menu.findItem(R.id.query).setVisible(false);
         return true;
     }
 
