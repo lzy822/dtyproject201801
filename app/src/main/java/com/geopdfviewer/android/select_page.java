@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -57,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -168,6 +171,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             map_testList.add(map_tests[i]);
         }
     }
+
     public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox) {
         Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox);
         map_tests[num_pdf - 1] = mapTest;
@@ -500,6 +504,114 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.e(TAG, str );
     }
 
+    private boolean isDrift(String LPTS){
+        boolean isDrift = false;
+        String[] LPTSStrings = LPTS.split(" ");
+        //locError(Integer.toString(LPTSStrings.length));
+        for (int i = 0; i < LPTSStrings.length; i++){
+            //locError(LPTSStrings[i]);
+            if (Float.valueOf(LPTSStrings[i]) != 0 && Float.valueOf(LPTSStrings[i]) != 1){
+                isDrift = true;
+                break;
+            }
+        }
+        return isDrift;
+    }
+
+    private String getGPTS(String GPTS, String LPTS){
+        boolean isDrift = isDrift(LPTS);
+        if (isDrift == true) {
+            float lat_axis, long_axis;
+            float lat_axis1, long_axis1;
+            DecimalFormat df = new DecimalFormat("0.0");
+            String[] GPTSStrings = GPTS.split(" ");
+            String[] LPTSStrings = LPTS.split(" ");
+            //将String 数组转换为 Float 数组
+            float[] GPTSs = new float[GPTSStrings.length];
+            float[] LPTSs = new float[LPTSStrings.length];
+            for (int i = 0; i < LPTSStrings.length; i++) {
+                LPTSs[i] = Float.valueOf(LPTSStrings[i]);
+            }
+            for (int i = 0; i < GPTSStrings.length; i++) {
+                GPTSs[i] = Float.valueOf(GPTSStrings[i]);
+            }
+            //
+            //构建两个矩形
+            //构建经纬度矩形
+            PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+            lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+            long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+            for (int i = 0; i < GPTSs.length; i = i + 2){
+                if (GPTSs[i] < lat_axis) {
+                    if (GPTSs[i + 1] < long_axis){
+                        pt_lb.x = GPTSs[i];
+                        pt_lb.y = GPTSs[i + 1];
+                    } else {
+                        pt_rb.x = GPTSs[i];
+                        pt_rb.y = GPTSs[i + 1];
+                    }
+                } else {
+                    if (GPTSs[i + 1] < long_axis){
+                        pt_lt.x = GPTSs[i];
+                        pt_lt.y = GPTSs[i + 1];
+                    } else {
+                        pt_rt.x = GPTSs[i];
+                        pt_rt.y = GPTSs[i + 1];
+                    }
+                }
+            }
+            GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+            locError(GPTS);
+            //
+            //构建LPTS 矩形
+            //预处理LPTS
+            for (int i = 0; i < LPTSs.length; i++){
+                LPTSs[i] = Float.valueOf(df.format(LPTSs[i]));
+            }
+            //
+            PointF pt_lb1 = new PointF(), pt_rb1 = new PointF(), pt_lt1 = new PointF(), pt_rt1 = new PointF();
+            lat_axis1 = (LPTSs[0] + LPTSs[2] + LPTSs[4] + LPTSs[6]) / 4;
+            long_axis1 = (LPTSs[1] + LPTSs[3] + LPTSs[5] + LPTSs[7]) / 4;
+            for (int i = 0; i < LPTSs.length; i = i + 2){
+                if (LPTSs[i] < lat_axis1) {
+                    if (LPTSs[i + 1] < long_axis1){
+                        pt_lb1.x = LPTSs[i];
+                        pt_lb1.y = LPTSs[i + 1];
+                    } else {
+                        pt_rb1.x = LPTSs[i];
+                        pt_rb1.y = LPTSs[i + 1];
+                    }
+                } else {
+                    if (LPTSs[i + 1] < long_axis1){
+                        pt_lt1.x = LPTSs[i];
+                        pt_lt1.y = LPTSs[i + 1];
+                    } else {
+                        pt_rt1.x = LPTSs[i];
+                        pt_rt1.y = LPTSs[i + 1];
+                    }
+                }
+            }
+            GPTS = Float.toString(pt_lb1.x) + " " + Float.toString(pt_lb1.y) + " " + Float.toString(pt_lt1.x) + " " + Float.toString(pt_lt1.y) + " " + Float.toString(pt_rt1.x) + " " + Float.toString(pt_rt1.y) + " " + Float.toString(pt_rb1.x) + " " + Float.toString(pt_rb1.y);
+            locError(GPTS);
+            float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
+            float delta_width = pt_rb1.y - pt_lb1.y, delta_height = pt_lt1.x - pt_lb1.x;
+            pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt_lb1.x - 0));
+            pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt_lb1.y - 0));
+            pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt_lt1.x - 1));
+            pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt_lt1.y - 0));
+            pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt_rb1.x - 0));
+            pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt_rb1.y - 1));
+            pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt_rt1.x - 1));
+            pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt_rt1.y - 1));
+            GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+            locError(GPTS);
+            //
+            //
+        }
+        locError(Boolean.toString(isDrift));
+        return GPTS;
+    }
+
     public void getGeoInfo(String filePath, int Type, String uri, String name) {
         locError(name);
         String m_name = name;
@@ -527,7 +639,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             //StringBuffer sb = new StringBuffer("");
             String line;
-            String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "";
+            String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "", m_LPTS = "";
             //locError();
             int m_num_GPTS = 0;
             while((line = bufferedReader.readLine()) != null) {
@@ -549,10 +661,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     locError(m_BBox);
                 }
                 if (line.contains("GPTS")){
-                    m_num_GPTS++;
+                    //m_num_GPTS++;
                     m_GPTS = line.substring(line.indexOf("GPTS") + 5);
                     m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
                     m_GPTS = m_GPTS.trim();
+                    m_LPTS = line.substring(line.indexOf("LPTS") + 5);
+                    m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
+                    m_LPTS = m_LPTS.trim();
+                    m_GPTS = getGPTS(m_GPTS, m_LPTS);
                     //locError(m_GPTS);
                     Log.w(TAG, m_GPTS );
                     locError(line);
@@ -569,12 +685,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
                 num_line += 1;
             }
-            if (m_CropBox == ""){
+            if (m_CropBox.isEmpty()){
                 m_CropBox = m_MediaBox;
             }
             locError(Integer.toString(m_num_GPTS));
-            Log.w(TAG, "GPTS:" + m_GPTS );
-            Log.w(TAG, "BBox:" + m_BBox );
+            //Log.w(TAG, "GPTS:" + m_GPTS );
+            //Log.w(TAG, "BBox:" + m_BBox );
             if (isESRI == true) {
                 m_WKT = "ESRI::" + m_WKT;
                 //save(content);

@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.pdf.PdfRenderer;
@@ -106,6 +107,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private   String CropBox = "";
 
 
+
+
     //坐标信息
     double m_lat,m_long;
     //获取pdf 的坐标信息
@@ -113,13 +116,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //坐标精度
     int definition;
     //获取pdf BBOX 信息
-    double b_bottom_x, b_bottom_y, b_top_x, b_top_y;
+    float b_bottom_x, b_bottom_y, b_top_x, b_top_y;
     //获取pdf MediaBOX 信息
-    double m_bottom_x, m_bottom_y, m_top_x, m_top_y;
+    float m_bottom_x, m_bottom_y, m_top_x, m_top_y;
     //获取pdf CropBOX 信息
-    double c_bottom_x, c_bottom_y, c_top_x, c_top_y;
+    float c_bottom_x, c_bottom_y, c_top_x, c_top_y;
     //记录pdf 页面的长宽拉伸比例
     private float ratio_height = 1, ratio_width = 1;
+    private float current_pagewidth = 0, current_pageheight = 0;
+    private boolean isGetStretchRatio = false;
 
     Location location;
 
@@ -302,23 +307,54 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         CropBox = pref1.getString(str + "CropBox", "");
         Log.w(TAG, "BBox : " + BBox );
         Log.w(TAG, "GPTS : " + GPTS );
+        Log.w(TAG, "MediaBox : " + MediaBox );
+        Log.w(TAG, "CropBox : " + CropBox );
         //GPTSList = new double[8];
         getGPTS();
         getBBox();
+        getCropBox();
+        getMediaBox();
 
     }
 private double w, h, w_min;
     private void getGPTS() {
         String[] GPTString = GPTS.split(" ");
+        float[] GPTSs = new float[GPTString.length];
+        for (int i = 0; i < GPTString.length; i++) {
+            GPTSs[i] = Float.valueOf(GPTString[i]);
+        }
+        float lat_axis, long_axis;
+        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+        for (int i = 0; i < GPTSs.length; i = i + 2){
+            if (GPTSs[i] < lat_axis) {
+                if (GPTSs[i + 1] < long_axis){
+                    pt_lb.x = GPTSs[i];
+                    pt_lb.y = GPTSs[i + 1];
+                } else {
+                    pt_rb.x = GPTSs[i];
+                    pt_rb.y = GPTSs[i + 1];
+                }
+            } else {
+                if (GPTSs[i + 1] < long_axis){
+                    pt_lt.x = GPTSs[i];
+                    pt_lt.y = GPTSs[i + 1];
+                } else {
+                    pt_rt.x = GPTSs[i];
+                    pt_rt.y = GPTSs[i + 1];
+                }
+            }
+        }
 
-        String m_definition = GPTString[0].substring(GPTString[0].indexOf(".") + 1);
+        //String m_definition = GPTString[0].substring(GPTString[0].indexOf(".") + 1);
         //locError(Double.toString());
         //Double.valueOf(GPTString[3]) - Double.valueOf(GPTString[5])
         locError("see here");
         //locError(Double.toString());
         //Double.valueOf(GPTString[7]) - Double.valueOf(GPTString[1])
-        w = ((Double.valueOf(GPTString[3]) - Double.valueOf(GPTString[5])) + (Double.valueOf(GPTString[7]) - Double.valueOf(GPTString[1]))) / 2;
-        h = ((Double.valueOf(GPTString[4]) - Double.valueOf(GPTString[2])) + (Double.valueOf(GPTString[0]) - Double.valueOf(GPTString[6]))) / 2;
+        w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+        h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
         w_min = ((Double.valueOf(GPTString[1])) + (Double.valueOf(GPTString[5]))) / 2;
         //locError(Double.toString());
         //Double.valueOf(GPTString[4]) - Double.valueOf(GPTString[2])
@@ -326,19 +362,12 @@ private double w, h, w_min;
         //locError(Double.toString());
         //Double.valueOf(GPTString[0]) - Double.valueOf(GPTString[6])
 
-        definition = m_definition.length();
-        min_lat = Double.valueOf(GPTString[0]);
-        max_lat = Double.valueOf(GPTString[0]);
-        min_long = Double.valueOf(GPTString[1]);
-        max_long = Double.valueOf(GPTString[1]);
-        for (int i = 0; i < GPTString.length; i = i + 2){
-            if (Double.valueOf(GPTString[i]) > max_lat) max_lat = Double.valueOf(GPTString[i]);
-            else if (Double.valueOf(GPTString[i]) < min_lat) min_lat = Double.valueOf(GPTString[i]);
-        }
-        for (int i = 1; i < GPTString.length; i = i + 2){
-            if (Double.valueOf(GPTString[i]) > max_long) max_long = Double.valueOf(GPTString[i]);
-            else if (Double.valueOf(GPTString[i]) < min_long) min_long = Double.valueOf(GPTString[i]);
-        }
+        //definition = m_definition.length();
+        min_lat = pt_lb.x;
+        max_lat = pt_lt.x;
+        min_long = pt_lb.y;
+        max_long = pt_rb.y;
+
         /*Log.w(TAG, "min_lat : " + Double.toString(min_lat) );
         Log.w(TAG, "max_lat : " + Double.toString(max_lat) );
         Log.w(TAG, "min_long : " + Double.toString(min_long) );
@@ -351,28 +380,30 @@ private double w, h, w_min;
 
     private void getBBox() {
         String[] BBoxString = BBox.split(" ");
-        b_bottom_x = Double.valueOf(BBoxString[0]);
-        b_bottom_y = Double.valueOf(BBoxString[1]);
-        b_top_x = Double.valueOf(BBoxString[2]);
-        b_top_y = Double.valueOf(BBoxString[3]);
+        b_bottom_x = Float.valueOf(BBoxString[0]);
+        b_bottom_y = Float.valueOf(BBoxString[1]);
+        b_top_x = Float.valueOf(BBoxString[2]);
+        b_top_y = Float.valueOf(BBoxString[3]);
 
     }
 
     private void getMediaBox() {
         String[] MediaBoxString = MediaBox.split(" ");
-        m_bottom_x = Double.valueOf(MediaBoxString[0]);
-        m_bottom_y = Double.valueOf(MediaBoxString[1]);
-        m_top_x = Double.valueOf(MediaBoxString[2]);
-        m_top_y = Double.valueOf(MediaBoxString[3]);
+        m_bottom_x = Float.valueOf(MediaBoxString[0]);
+        m_bottom_y = Float.valueOf(MediaBoxString[1]);
+        m_top_x = Float.valueOf(MediaBoxString[2]);
+        m_top_y = Float.valueOf(MediaBoxString[3]);
+        locError(Integer.toString(MediaBoxString.length));
 
     }
 
     private void getCropBox() {
         String[] CropBoxString = CropBox.split(" ");
-        c_bottom_x = Double.valueOf(CropBoxString[0]);
-        c_bottom_y = Double.valueOf(CropBoxString[1]);
-        c_top_x = Double.valueOf(CropBoxString[2]);
-        c_top_y = Double.valueOf(CropBoxString[3]);
+        c_bottom_x = Float.valueOf(CropBoxString[0]);
+        c_bottom_y = Float.valueOf(CropBoxString[1]);
+        c_top_x = Float.valueOf(CropBoxString[2]);
+        c_top_y = Float.valueOf(CropBoxString[3]);
+        locError(Integer.toString(CropBoxString.length));
 
     }
 
@@ -380,6 +411,7 @@ private double w, h, w_min;
         pdfFileName = assetFileName;
 
         pdfView = (PDFView) findViewById(R.id.pdfView);
+        pdfView.setBackgroundColor(Color.BLACK);
         pdfView.fromAsset(SAMPLE_FILE)
                 .defaultPage(pageNumber)
                 .enableAnnotationRendering(true)
@@ -396,59 +428,88 @@ private double w, h, w_min;
                 .onDraw(new OnDrawListener() {
                     @Override
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+                        Paint paint = new Paint();
+                        paint.setColor(Color.GREEN);
+                        paint.setStrokeWidth((float)3.0);
+                        paint.setStyle(Paint.Style.FILL);
+                        if (isGetStretchRatio == false){
+                        getStretchRatio(pageWidth, pageHeight);
 
+
+                            //
+
+                            //
+                            }
+                        canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
                     }
                 })
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
-        getStretchRatio(pdfView);
         setTitle(pdfFileName);
     }
     Float x, y;
 
-    private void getStretchRatio(PDFView pdfView){
-        ratio_height = (float) (m_top_y - m_bottom_y) / pdfView.getPageSize(pageNumber).getHeight();
-        ratio_width = (float) (m_top_x - m_bottom_x) / pdfView.getPageSize(pageNumber).getWidth();
+    private void getStretchRatio(float pagewidth, float pageheight){
+        isGetStretchRatio = true;
+        //pdfView = (PDFView) findViewById(R.id.pdfView);
+        locError(Float.toString(pagewidth));
+        locError(Float.toString(pageheight));
+        current_pageheight = pageheight;
+        current_pagewidth = pagewidth;
+        //locError(pdfView.getDocumentMeta().getProducer());
+        //locError(pdfView.getPageSize(0).toString());
+        ratio_height =  (float)(pageheight / (m_top_y - m_bottom_y));
+        ratio_width = (float)(pagewidth / (m_top_x - m_bottom_x));
         locError(Float.toString(ratio_height) + "&&" + Float.toString(ratio_width));
+    }
+    private void getLocation(float x, float y){
+
     }
 
     private void displayFromFile(String filePath) {
         setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
+        pdfView.setBackgroundColor(Color.GREEN);
         final File file = new File(filePath);
         pdfView.fromFile(file)
                 .enableSwipe(false)
-                .enableDoubletap(false)
                 .defaultPage(pageNumber)
                 .enableAnnotationRendering(false)
                 .onLoad(this)
                 .onDraw(new OnDrawListener() {
                     @Override
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+
+                        if (isGetStretchRatio == false){
+                            getStretchRatio(pageWidth, pageHeight);
+
+
+                        }
+
+                        getStretchRatio(pageWidth, pageHeight);
                         Paint paint = new Paint();
                         paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
+
+                        canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
+                        canvas.drawLine(b_bottom_x * ratio_width, b_top_y * ratio_height, b_top_x * ratio_width, b_bottom_y * ratio_height, paint);
                         Paint paint1 = new Paint();
                         paint1.setColor(Color.GREEN);
                         paint1.setStrokeWidth((float)3.0);
                         paint1.setStyle(Paint.Style.FILL);
-                        float xss = (float) m_lat;
-                        float yss = (float) m_long;
-                        //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long));
-                        //locError(Float.toString(xss) + "&&" + Float.toString(yss));
+                        //canvas.drawLine(0, 0, pdfView.getWidth(), pdfView.getHeight(), paint1);
+                        canvas.drawLine(0, 0, pageWidth, pageHeight, paint);
+                        //
+                        //canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
+                        //
+
                         double y_ratio = ((m_lat - min_lat) / (max_lat - min_lat));
-                        //double x_ratio = ((m_long - min_long) / (max_long - min_long));
-                        double x_ratio = ((m_long - w_min) / w);
+                        double x_ratio = ((m_long - min_long) / w);
                         //double x_ratio = ((m_long - 102.61422) / 0.194225);
                         //double y_ratio = ((m_lat - 24.90466) / 0.25781);
-                        locError(Double.toString(m_long));
-                        locError(Double.toString(w_min));
-                        double yy_ratio = ((max_lat - min_lat) / pageHeight);
-                        double xx_ratio = ((max_long - min_long) / pageWidth);
-                        if (xx_ratio > yy_ratio) {
-                            yy_ratio = xx_ratio;
-                        } else xx_ratio = yy_ratio;
+                        //locError(Double.toString(m_long));
+                        //locError(Double.toString(w_min));
                         //locError(Double.toString(xx_ratio) + "see here");
 
                         float xx = (float) ( x_ratio * pageWidth);
@@ -456,7 +517,7 @@ private double w, h, w_min;
                         /*if (x_ratio > y_ratio) {
                             y_ratio = x_ratio;
                         } else x_ratio = y_ratio;*/
-                        locError(Double.toString(x_ratio) + "&&" + Double.toString(y_ratio));
+                        //locError(Double.toString(x_ratio) + "&&" + Double.toString(y_ratio));
                         locError(Float.toString(xx) + "&&" + Float.toString(yy));
                         //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long));
 
@@ -474,18 +535,24 @@ private double w, h, w_min;
                     @Override
                     public boolean onTap(MotionEvent e) {
                         textView = (TextView) findViewById(R.id.txt);
-                        textView.setText(Float.toString(e.getX()) + "&" + Float.toString(e.getY()) + "&" + Float.toString(pdfView.getCurrentXOffset()) );
+                        //textView.setText(Float.toString(e.getX()) + "&" + Float.toString(e.getY()) + "&" + Float.toString(pdfView.getCurrentXOffset()) + "&" + Float.toString(pdfView.getZoom()) );
 
-                        Log.w(TAG, pdfView.getPageSize(0).toString() );
-                        locError(Float.toString(pdfView.getMaxZoom()));
-                        locError(Float.toString(pdfView.getZoom()));
+                        float xxxx, yyyy;
+                        xxxx = (e.getX() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentXOffset());
+                        yyyy = (e.getY() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentYOffset());
+                        textView.setText(Float.toString(xxxx) + "&" + Float.toString(yyyy) + "&" + Float.toString(current_pagewidth) + "&" + Float.toString(current_pageheight));
+                        locError(Float.toString(((e.getX() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentXOffset())) / pdfView.getZoom()) + "$$$" + Float.toString(((e.getY() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentYOffset())) / pdfView.getZoom()));
+
+
+                        //locError(Float.toString(pdfView.getMaxZoom()));
+                        //locError(Float.toString(pdfView.getZoom()));
                         //pdfView = (PDFView) findViewById(R.id.pdfView);
-                        locError(Integer.toString(pdfView.getLeft()));
-                        locError(Integer.toString(pdfView.getRight()));
-                        locError(Integer.toString(pdfView.getTop()));
-                        locError(Integer.toString(pdfView.getBottom()));
-                        locError(Integer.toString(pdfView.getHeight()));
-                        locError(Integer.toString(pdfView.getMeasuredHeight()));
+                        //locError(Integer.toString(pdfView.getLeft()));
+                        //locError(Integer.toString(pdfView.getRight()));
+                        //locError(Integer.toString(pdfView.getTop()));
+                        //locError(Integer.toString(pdfView.getBottom()));
+                        //locError(Integer.toString(pdfView.getHeight()));
+                        //locError(Integer.toString(pdfView.getMeasuredHeight()));
                         return true;
                     }
                 })
@@ -493,8 +560,6 @@ private double w, h, w_min;
                 .spacing(10) // in dp
                 .onPageError(this)
                 .load();
-        getStretchRatio(pdfView);
-
     }
 
     public void getInfo(){
@@ -511,7 +576,7 @@ private double w, h, w_min;
     }
 
     public void locError(String str){
-        Log.e(TAG, str );
+        Log.e(TAG, "debug: " + str );
     }
 
     private void getLocation() {
@@ -552,6 +617,7 @@ private double w, h, w_min;
         //getLocation();
         //
 
+
         //申请动态权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
@@ -569,6 +635,7 @@ private double w, h, w_min;
             FILE_TYPE = 2;
             displayFromAsset("Demo");
         }
+        //locError("!!");
         ;
         Button bt1 = (Button) findViewById(R.id.send);
         bt1.setOnClickListener(new View.OnClickListener() {
