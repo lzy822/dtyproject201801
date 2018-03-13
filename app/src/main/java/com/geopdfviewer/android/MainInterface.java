@@ -98,20 +98,28 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
 
-    public   String WKT = "";
-    public   String uri = "";
-    public   String GPTS = "";
-    public   String BBox = "";
+    private   String WKT = "";
+    private   String uri = "";
+    private   String GPTS = "";
+    private   String BBox = "";
+    private   String MediaBox = "";
+    private   String CropBox = "";
 
 
     //坐标信息
     double m_lat,m_long;
-    //获取pdf的坐标信息
+    //获取pdf 的坐标信息
     double min_lat, max_lat, min_long, max_long;
     //坐标精度
     int definition;
-    //获取pdf BBOX信息
-    double bottom_x, bottom_y, top_x, top_y;
+    //获取pdf BBOX 信息
+    double b_bottom_x, b_bottom_y, b_top_x, b_top_y;
+    //获取pdf MediaBOX 信息
+    double m_bottom_x, m_bottom_y, m_top_x, m_top_y;
+    //获取pdf CropBOX 信息
+    double c_bottom_x, c_bottom_y, c_top_x, c_top_y;
+    //记录pdf 页面的长宽拉伸比例
+    private float ratio_height = 1, ratio_width = 1;
 
     Location location;
 
@@ -218,9 +226,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //pdfView.moveRelativeTo(500, 300);
         canvas.drawLine(0, pageHeight, pageWidth, 0,  new Paint(1));
         //canvas.drawLine(30, 1177, 826, 35,  new Paint(1));
-        //canvas.drawLine((float) bottom_x, (float)bottom_y, (float)top_x, (float)top_y, new Paint(1));
 
-        //locError(Double.toString(bottom_x));
+        locError(Float.toString(pageWidth) + "%%" + Float.toString(pageHeight));
     }
 
     @Override
@@ -291,6 +298,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         uri = pref1.getString(str + "uri", "");
         GPTS = pref1.getString(str + "GPTS", "");
         BBox = pref1.getString(str + "BBox", "");
+        MediaBox = pref1.getString(str + "MediaBox", "");
+        CropBox = pref1.getString(str + "CropBox", "");
         Log.w(TAG, "BBox : " + BBox );
         Log.w(TAG, "GPTS : " + GPTS );
         //GPTSList = new double[8];
@@ -342,10 +351,28 @@ private double w, h, w_min;
 
     private void getBBox() {
         String[] BBoxString = BBox.split(" ");
-        bottom_x = Double.valueOf(BBoxString[0]);
-        bottom_y = Double.valueOf(BBoxString[1]);
-        top_x = Double.valueOf(BBoxString[2]);
-        top_y = Double.valueOf(BBoxString[3]);
+        b_bottom_x = Double.valueOf(BBoxString[0]);
+        b_bottom_y = Double.valueOf(BBoxString[1]);
+        b_top_x = Double.valueOf(BBoxString[2]);
+        b_top_y = Double.valueOf(BBoxString[3]);
+
+    }
+
+    private void getMediaBox() {
+        String[] MediaBoxString = MediaBox.split(" ");
+        m_bottom_x = Double.valueOf(MediaBoxString[0]);
+        m_bottom_y = Double.valueOf(MediaBoxString[1]);
+        m_top_x = Double.valueOf(MediaBoxString[2]);
+        m_top_y = Double.valueOf(MediaBoxString[3]);
+
+    }
+
+    private void getCropBox() {
+        String[] CropBoxString = CropBox.split(" ");
+        c_bottom_x = Double.valueOf(CropBoxString[0]);
+        c_bottom_y = Double.valueOf(CropBoxString[1]);
+        c_top_x = Double.valueOf(CropBoxString[2]);
+        c_top_y = Double.valueOf(CropBoxString[3]);
 
     }
 
@@ -374,9 +401,17 @@ private double w, h, w_min;
                 })
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
+        getStretchRatio(pdfView);
         setTitle(pdfFileName);
     }
     Float x, y;
+
+    private void getStretchRatio(PDFView pdfView){
+        ratio_height = (float) (m_top_y - m_bottom_y) / pdfView.getPageSize(pageNumber).getHeight();
+        ratio_width = (float) (m_top_x - m_bottom_x) / pdfView.getPageSize(pageNumber).getWidth();
+        locError(Float.toString(ratio_height) + "&&" + Float.toString(ratio_width));
+    }
+
     private void displayFromFile(String filePath) {
         setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
@@ -458,6 +493,7 @@ private double w, h, w_min;
                 .spacing(10) // in dp
                 .onPageError(this)
                 .load();
+        getStretchRatio(pdfView);
 
     }
 

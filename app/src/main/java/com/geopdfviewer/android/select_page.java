@@ -168,6 +168,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             map_testList.add(map_tests[i]);
         }
     }
+    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox) {
+        Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox);
+        map_tests[num_pdf - 1] = mapTest;
+        map_testList.clear();
+        for (int i = 0; i < num_pdf; i++) {
+            map_testList.add(map_tests[i]);
+        }
+    }
 
 
 
@@ -184,7 +192,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String GPTS = pref1.getString(str + "GPTS", "");
             String BBox = pref1.getString(str + "BBox", "");
             String imguri = pref1.getString(str + "img_path", "");
-            Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri);
+            String MediaBox = pref1.getString(str + "MediaBox", "");
+            String CropBox = pref1.getString(str + "CropBox", "");
+            Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox);
             map_tests[j - 1] = mapTest;
             map_testList.add(map_tests[j - 1]);
         }
@@ -217,6 +227,26 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         editor1.putString(str + "img_path", img_path);
         editor1.apply();
         initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path);
+    }
+
+    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path, String MediaBox, String CropBox){
+        num_pdf ++;
+        SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
+        editor.putInt("num", num_pdf);
+        editor.apply();
+        SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
+        String str = "n_" + Integer.toString(num_pdf) + "_";
+        editor1.putInt(str + "num", num_pdf);
+        editor1.putString(str + "name", name);
+        editor1.putString(str + "uri", uri);
+        editor1.putString(str + "WKT", WKT);
+        editor1.putString(str + "BBox", BBox);
+        editor1.putString(str + "MediaBox", MediaBox);
+        editor1.putString(str + "CropBox", CropBox);
+        editor1.putString(str + "GPTS", GPTS);
+        editor1.putString(str + "img_path", img_path);
+        editor1.apply();
+        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox);
     }
 
 
@@ -257,10 +287,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             Bitmap bitmap = Bitmap.createBitmap(120, 180, Bitmap.Config.RGB_565);
             pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 120, 180);
             pdfiumCore.closeDocument(pdf);
-            File file1 = new File(Environment.getExternalStorageDirectory() + "/PdfReader");
-            if(!file1.exists() && !file1.isDirectory()){
-                file1.mkdirs();
-            }
+
 
             File of = new File(Environment.getExternalStorageDirectory() + "/PdfReader", fileName + ".jpg");
             FileOutputStream outputStream = new FileOutputStream(of);
@@ -500,8 +527,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             //StringBuffer sb = new StringBuffer("");
             String line;
-            String m_BBox = "", m_GPTS = "";
+            String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "";
             //locError();
+            int m_num_GPTS = 0;
             while((line = bufferedReader.readLine()) != null) {
                 //sb.append(line + "/n");
                 if(line.contains("PROJCS")) {
@@ -518,16 +546,33 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     m_BBox = line.substring(line.indexOf("BBox") + 5);
                     m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
                     m_BBox = m_BBox.trim();
+                    locError(m_BBox);
                 }
                 if (line.contains("GPTS")){
-                    locError(line);
+                    m_num_GPTS++;
                     m_GPTS = line.substring(line.indexOf("GPTS") + 5);
                     m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
                     m_GPTS = m_GPTS.trim();
+                    //locError(m_GPTS);
+                    Log.w(TAG, m_GPTS );
+                    locError(line);
+                }
+                if (line.contains("MediaBox")){
+                    m_MediaBox = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
+                    m_MediaBox = m_MediaBox.trim();
+                    Log.w(TAG, m_MediaBox );
+                }
+                if (line.contains("CropBox")){
+                    m_CropBox = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
+                    m_CropBox = m_CropBox.trim();
+                    Log.w(TAG, m_CropBox );
                 }
                 num_line += 1;
             }
-
+            if (m_CropBox == ""){
+                m_CropBox = m_MediaBox;
+            }
+            locError(Integer.toString(m_num_GPTS));
             Log.w(TAG, "GPTS:" + m_GPTS );
             Log.w(TAG, "BBox:" + m_BBox );
             if (isESRI == true) {
@@ -548,8 +593,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             in.close();
             //locError("看这里"+m_name);
             if (filePath != "") {
-                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath);
-            } else saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath);
+                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox);
+            } else saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox);
         } catch (IOException e) {
             Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }
