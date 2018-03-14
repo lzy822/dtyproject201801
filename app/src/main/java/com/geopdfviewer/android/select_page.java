@@ -519,8 +519,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private String getGPTS(String GPTS, String LPTS){
-        boolean isDrift = isDrift(LPTS);
-        if (isDrift == true) {
+        if (isDrift(LPTS) == true) {
             float lat_axis, long_axis;
             float lat_axis1, long_axis1;
             DecimalFormat df = new DecimalFormat("0.0");
@@ -560,8 +559,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                 }
             }
-            GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            locError(GPTS);
+            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+            //locError(GPTS);
             //
             //构建LPTS 矩形
             //预处理LPTS
@@ -591,8 +590,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                 }
             }
-            GPTS = Float.toString(pt_lb1.x) + " " + Float.toString(pt_lb1.y) + " " + Float.toString(pt_lt1.x) + " " + Float.toString(pt_lt1.y) + " " + Float.toString(pt_rt1.x) + " " + Float.toString(pt_rt1.y) + " " + Float.toString(pt_rb1.x) + " " + Float.toString(pt_rb1.y);
-            locError(GPTS);
+            //GPTS = Float.toString(pt_lb1.x) + " " + Float.toString(pt_lb1.y) + " " + Float.toString(pt_lt1.x) + " " + Float.toString(pt_lt1.y) + " " + Float.toString(pt_rt1.x) + " " + Float.toString(pt_rt1.y) + " " + Float.toString(pt_rb1.x) + " " + Float.toString(pt_rb1.y);
+            //locError(GPTS);
             float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
             float delta_width = pt_rb1.y - pt_lb1.y, delta_height = pt_lt1.x - pt_lb1.x;
             pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt_lb1.x - 0));
@@ -604,11 +603,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt_rt1.x - 1));
             pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt_rt1.y - 1));
             GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            locError(GPTS);
+            //locError(GPTS);
             //
             //
         }
-        locError(Boolean.toString(isDrift));
+        //locError(Boolean.toString(isDrift));
         return GPTS;
     }
 

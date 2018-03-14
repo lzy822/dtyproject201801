@@ -132,6 +132,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     float page_width, page_height;
     //记录 高度方向留白系数, 和宽度方向留白系数
     float k_h, k_w;
+    //记录当前窗口所在区域的位置
+    float cs_top, cs_bottom, cs_left, cs_right;
 
     private float current_pagewidth = 0, current_pageheight = 0;
 
@@ -357,36 +359,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
         }
-
-        //String m_definition = GPTString[0].substring(GPTString[0].indexOf(".") + 1);
-        //locError(Double.toString());
-        //Double.valueOf(GPTString[3]) - Double.valueOf(GPTString[5])
         locError("see here");
-        //locError(Double.toString());
-        //Double.valueOf(GPTString[7]) - Double.valueOf(GPTString[1])
         w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
         h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-        w_min = ((Double.valueOf(GPTString[1])) + (Double.valueOf(GPTString[5]))) / 2;
-        //locError(Double.toString());
-        //Double.valueOf(GPTString[4]) - Double.valueOf(GPTString[2])
         locError("see here");
-        //locError(Double.toString());
-        //Double.valueOf(GPTString[0]) - Double.valueOf(GPTString[6])
-
-        //definition = m_definition.length();
-        min_lat = pt_lb.x;
-        max_lat = pt_lt.x;
-        min_long = pt_lb.y;
-        max_long = pt_rb.y;
-
-        /*Log.w(TAG, "min_lat : " + Double.toString(min_lat) );
-        Log.w(TAG, "max_lat : " + Double.toString(max_lat) );
-        Log.w(TAG, "min_long : " + Double.toString(min_long) );
-        Log.w(TAG, "max_long : " + Double.toString(max_long) );
-        Log.w(TAG, "pdf精度为: " + Integer.toString(definition) );*/
-
+        min_lat = (pt_lb.x + pt_rb.x) / 2;
+        max_lat = (pt_lt.x + pt_rt.x) / 2;
+        min_long = (pt_lt.y + pt_lb.y) / 2;
+        max_long = (pt_rt.y + pt_rb.y) / 2;
+        locError(Double.toString(min_lat));
+        locError(Double.toString(max_lat));
         getLocation();
-        //Log.w(TAG, m_definition );
     }
 
     private void getBBox() {
@@ -458,20 +441,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .load();
         setTitle(pdfFileName);
     }
-    Float x, y;
 
     private void getStretchRatio(float pagewidth, float pageheight){
         isGetStretchRatio = true;
-        //pdfView = (PDFView) findViewById(R.id.pdfView);
-        locError(Float.toString(pagewidth));
-        locError(Float.toString(pageheight));
+        //locError(Float.toString(pagewidth));
+        //locError(Float.toString(pageheight));
         current_pageheight = pageheight;
         current_pagewidth = pagewidth;
-        //locError(pdfView.getDocumentMeta().getProducer());
-        //locError(pdfView.getPageSize(0).toString());
         ratio_height =  (float)(pageheight / (m_top_y - m_bottom_y));
         ratio_width = (float)(pagewidth / (m_top_x - m_bottom_x));
-        locError(Float.toString(ratio_height) + "&&" + Float.toString(ratio_width));
+        //locError(Float.toString(m_top_x) + "&&" + Float.toString(m_top_y));
+        //locError(Float.toString(b_top_x) + "&&" + Float.toString(b_top_y));
+        //locError(Float.toString(b_bottom_x) + "&&" + Float.toString(b_bottom_y));
     }
 
     private void getLocation(float x, float y){
@@ -497,27 +478,27 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_height = pdfView.getHeight();
                             viewer_width = pdfView.getWidth();
                             int viewer_bottom = pdfView.getBottom();
-                            Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
+                            //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
+                        //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
                         Paint paint = new Paint();
                         paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
-                        //canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
+                        canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         //canvas.drawLine(b_bottom_x * ratio_width, b_top_y * ratio_height, b_top_x * ratio_width, b_bottom_y * ratio_height, paint);
                         Paint paint1 = new Paint();
                         paint1.setColor(Color.GREEN);
                         paint1.setStrokeWidth((float)3.0);
                         paint1.setStyle(Paint.Style.FILL);
-                        //canvas.drawLine(0, 0, pageWidth, pageHeight, paint);
-                        double y_ratio = ((m_lat - min_lat) / (max_lat - min_lat));
+                        double y_ratio = ((m_lat - min_lat) / h);
                         double x_ratio = ((m_long - min_long) / w);
                         float xx = (float) ( x_ratio * pageWidth);
                         float yy = (float) ( (1 - y_ratio) * pageHeight);
-                        locError(Float.toString(xx) + "&&" + Float.toString(yy));
                         canvas.drawCircle(xx, yy, 20, paint);
+                        getCurrentScreenLoc();
                     }
                 })
                 .onRender(new OnRenderListener() {
@@ -530,7 +511,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     @Override
                     public boolean onTap(MotionEvent e) {
                         getScreenLocation(e.getRawX(), e.getRawY());
-                        locError("XOffset : " + Float.toString(pdfView.getCurrentXOffset()));
                         return true;
                     }
                 })
@@ -550,27 +530,55 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         if (viewer_width > page_width){
             k_w = (viewer_width - page_width) / 2;
         } else k_w = 0;
-        locError(Float.toString(k_w) + "see" + Float.toString(width));
+        //locError(Float.toString(k_w) + "see" + Float.toString(k_h));
+    }
+
+    private void getCurrentScreenLoc(){
+        DecimalFormat df = new DecimalFormat("0.0000");
+        //精确定位算法
+        float xxxx, yyyy;
+        if (pdfView.getCurrentYOffset() > 0 || pdfView.getCurrentXOffset() > 0) {
+            if (pdfView.getCurrentYOffset() > 0 && pdfView.getCurrentXOffset() > 0){
+                cs_top = (float)max_lat;
+                cs_bottom = (float)min_lat;
+                cs_left = (float)min_long;
+                cs_right = (float)max_long;
+            }else if (pdfView.getCurrentYOffset() > 0 && pdfView.getCurrentXOffset() <= 0){
+                cs_top = (float)max_lat;
+                cs_bottom = (float)min_lat;
+                cs_left = (float)(( Math.abs(pdfView.getCurrentXOffset()) / current_pagewidth) * w + min_long);
+                cs_right = (float)(( viewer_width - pdfView.getCurrentXOffset()) / current_pagewidth * w + min_long);
+            }else {
+                cs_top = (float)(max_lat - Math.abs(pdfView.getCurrentYOffset()) / current_pageheight * h);
+                cs_bottom = (float)(max_lat - (viewer_height - pdfView.getCurrentYOffset()) / current_pageheight * h);
+                cs_left = (float)min_long;
+                cs_right = (float)max_long;
+            }
+        } else {
+            cs_top = (float)(max_lat - Math.abs(pdfView.getCurrentYOffset()) / current_pageheight * h);
+            cs_bottom = (float)(max_lat - (viewer_height - pdfView.getCurrentYOffset()) / current_pageheight * h);
+            cs_left = (float)(( Math.abs(pdfView.getCurrentXOffset()) / current_pagewidth) * w + min_long);
+            cs_right = (float)(( viewer_width - pdfView.getCurrentXOffset()) / current_pagewidth * w + min_long);
+        }
+        locError(Float.toString(cs_top) + "%" + Float.toString(cs_bottom) + "%" + Float.toString(cs_left) + "%" + Float.toString(cs_right));
+        //cs_top = pdfView.getCurrentYOffset()
     }
 
     private void getScreenLocation(float x, float y){
         textView = (TextView) findViewById(R.id.txt);
-        //textView.setText(Float.toString(e.getX()) + "&" + Float.toString(e.getY()) + "&" + Float.toString(pdfView.getCurrentXOffset()) + "&" + Float.toString(pdfView.getZoom()) );
-
+        DecimalFormat df = new DecimalFormat("0.0000");
         //精确定位算法
         float xxxx, yyyy;
         if (page_height < viewer_height || page_width < viewer_width) {
             xxxx = ((x - (screen_width - viewer_width + k_w)));
             yyyy = ((y - (screen_height - viewer_height + k_h)));
             if (y >= (screen_height - viewer_height + k_h) && y <= (screen_height - viewer_height + k_h + page_height) && x >= (screen_width - viewer_width + k_w) && x <= (screen_width - viewer_width + k_w + page_width)) {
-
-
-                textView.setText(Float.toString(xxxx) + "&" + Float.toString(yyyy));
+                textView.setText(df.format(max_lat - (yyyy) / current_pageheight * ( max_lat - min_lat)) + "; " + df.format(( xxxx) / current_pagewidth * ( max_long - min_long) + min_long));
             } else textView.setText("点击位置在区域之外");
         } else {
             xxxx = x - (screen_width - viewer_width);
             yyyy = y - (screen_height - viewer_height);
-            textView.setText(Float.toString(xxxx) + "&" + Float.toString(yyyy));
+            textView.setText(df.format(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat)) + "; " + df.format(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long));
         }
 
 
