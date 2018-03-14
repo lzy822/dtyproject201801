@@ -35,12 +35,15 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -123,7 +126,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     float c_bottom_x, c_bottom_y, c_top_x, c_top_y;
     //记录pdf 页面的长宽拉伸比例
     private float ratio_height = 1, ratio_width = 1;
+    //记录屏幕高度, 宽度, viewer控件高度, 宽度
+    float screen_width, screen_height, viewer_height, viewer_width;
+    //记录pdf文档高度, 宽度
+    float page_width, page_height;
+    //记录 高度方向留白系数, 和宽度方向留白系数
+    float k_h, k_w;
+
     private float current_pagewidth = 0, current_pageheight = 0;
+
     private boolean isGetStretchRatio = false;
 
     Location location;
@@ -249,8 +260,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
-
-
     public void ReadPDF(){
         pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfFileName = SAMPLE_FILE;
@@ -316,7 +325,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getMediaBox();
 
     }
-private double w, h, w_min;
+
+    private double w, h, w_min;
+
     private void getGPTS() {
         String[] GPTString = GPTS.split(" ");
         float[] GPTSs = new float[GPTString.length];
@@ -462,6 +473,7 @@ private double w, h, w_min;
         ratio_width = (float)(pagewidth / (m_top_x - m_bottom_x));
         locError(Float.toString(ratio_height) + "&&" + Float.toString(ratio_width));
     }
+
     private void getLocation(float x, float y){
 
     }
@@ -479,50 +491,33 @@ private double w, h, w_min;
                 .onDraw(new OnDrawListener() {
                     @Override
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-
                         if (isGetStretchRatio == false){
                             getStretchRatio(pageWidth, pageHeight);
-
-
+                            int viewer_top = pdfView.getTop();
+                            viewer_height = pdfView.getHeight();
+                            viewer_width = pdfView.getWidth();
+                            int viewer_bottom = pdfView.getBottom();
+                            Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
-
+                        getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
                         Paint paint = new Paint();
                         paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
-
-                        canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
-                        canvas.drawLine(b_bottom_x * ratio_width, b_top_y * ratio_height, b_top_x * ratio_width, b_bottom_y * ratio_height, paint);
+                        //canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
+                        //canvas.drawLine(b_bottom_x * ratio_width, b_top_y * ratio_height, b_top_x * ratio_width, b_bottom_y * ratio_height, paint);
                         Paint paint1 = new Paint();
                         paint1.setColor(Color.GREEN);
                         paint1.setStrokeWidth((float)3.0);
                         paint1.setStyle(Paint.Style.FILL);
-                        //canvas.drawLine(0, 0, pdfView.getWidth(), pdfView.getHeight(), paint1);
-                        canvas.drawLine(0, 0, pageWidth, pageHeight, paint);
-                        //
-                        //canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
-                        //
-
+                        //canvas.drawLine(0, 0, pageWidth, pageHeight, paint);
                         double y_ratio = ((m_lat - min_lat) / (max_lat - min_lat));
                         double x_ratio = ((m_long - min_long) / w);
-                        //double x_ratio = ((m_long - 102.61422) / 0.194225);
-                        //double y_ratio = ((m_lat - 24.90466) / 0.25781);
-                        //locError(Double.toString(m_long));
-                        //locError(Double.toString(w_min));
-                        //locError(Double.toString(xx_ratio) + "see here");
-
                         float xx = (float) ( x_ratio * pageWidth);
                         float yy = (float) ( (1 - y_ratio) * pageHeight);
-                        /*if (x_ratio > y_ratio) {
-                            y_ratio = x_ratio;
-                        } else x_ratio = y_ratio;*/
-                        //locError(Double.toString(x_ratio) + "&&" + Double.toString(y_ratio));
                         locError(Float.toString(xx) + "&&" + Float.toString(yy));
-                        //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long));
-
                         canvas.drawCircle(xx, yy, 20, paint);
-                        //canvas.drawCircle(yy, xx, 20, paint1);
                     }
                 })
                 .onRender(new OnRenderListener() {
@@ -534,25 +529,8 @@ private double w, h, w_min;
                 .onTap(new OnTapListener() {
                     @Override
                     public boolean onTap(MotionEvent e) {
-                        textView = (TextView) findViewById(R.id.txt);
-                        //textView.setText(Float.toString(e.getX()) + "&" + Float.toString(e.getY()) + "&" + Float.toString(pdfView.getCurrentXOffset()) + "&" + Float.toString(pdfView.getZoom()) );
-
-                        float xxxx, yyyy;
-                        xxxx = (e.getX() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentXOffset());
-                        yyyy = (e.getY() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentYOffset());
-                        textView.setText(Float.toString(xxxx) + "&" + Float.toString(yyyy) + "&" + Float.toString(current_pagewidth) + "&" + Float.toString(current_pageheight));
-                        locError(Float.toString(((e.getX() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentXOffset())) / pdfView.getZoom()) + "$$$" + Float.toString(((e.getY() * pdfView.getZoom()) + Math.abs(pdfView.getCurrentYOffset())) / pdfView.getZoom()));
-
-
-                        //locError(Float.toString(pdfView.getMaxZoom()));
-                        //locError(Float.toString(pdfView.getZoom()));
-                        //pdfView = (PDFView) findViewById(R.id.pdfView);
-                        //locError(Integer.toString(pdfView.getLeft()));
-                        //locError(Integer.toString(pdfView.getRight()));
-                        //locError(Integer.toString(pdfView.getTop()));
-                        //locError(Integer.toString(pdfView.getBottom()));
-                        //locError(Integer.toString(pdfView.getHeight()));
-                        //locError(Integer.toString(pdfView.getMeasuredHeight()));
+                        getScreenLocation(e.getRawX(), e.getRawY());
+                        locError("XOffset : " + Float.toString(pdfView.getCurrentXOffset()));
                         return true;
                     }
                 })
@@ -560,6 +538,43 @@ private double w, h, w_min;
                 .spacing(10) // in dp
                 .onPageError(this)
                 .load();
+    }
+
+    private void getK(float width, float height){
+        //精确定位算法
+        page_height = height;
+        page_width = width;
+        if (viewer_height > page_height){
+            k_h = (viewer_height - page_height) / 2;
+        } else k_h = 0;
+        if (viewer_width > page_width){
+            k_w = (viewer_width - page_width) / 2;
+        } else k_w = 0;
+        locError(Float.toString(k_w) + "see" + Float.toString(width));
+    }
+
+    private void getScreenLocation(float x, float y){
+        textView = (TextView) findViewById(R.id.txt);
+        //textView.setText(Float.toString(e.getX()) + "&" + Float.toString(e.getY()) + "&" + Float.toString(pdfView.getCurrentXOffset()) + "&" + Float.toString(pdfView.getZoom()) );
+
+        //精确定位算法
+        float xxxx, yyyy;
+        if (page_height < viewer_height || page_width < viewer_width) {
+            xxxx = ((x - (screen_width - viewer_width + k_w)));
+            yyyy = ((y - (screen_height - viewer_height + k_h)));
+            if (y >= (screen_height - viewer_height + k_h) && y <= (screen_height - viewer_height + k_h + page_height) && x >= (screen_width - viewer_width + k_w) && x <= (screen_width - viewer_width + k_w + page_width)) {
+
+
+                textView.setText(Float.toString(xxxx) + "&" + Float.toString(yyyy));
+            } else textView.setText("点击位置在区域之外");
+        } else {
+            xxxx = x - (screen_width - viewer_width);
+            yyyy = y - (screen_height - viewer_height);
+            textView.setText(Float.toString(xxxx) + "&" + Float.toString(yyyy));
+        }
+
+
+        //
     }
 
     public void getInfo(){
@@ -614,16 +629,10 @@ private double w, h, w_min;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
-        //getLocation();
-        //
-
-
         //申请动态权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
         }
-        //
-
         Intent intent = getIntent();
         int m_num = intent.getIntExtra("num", 0);
         getInfo(m_num);
@@ -635,8 +644,6 @@ private double w, h, w_min;
             FILE_TYPE = 2;
             displayFromAsset("Demo");
         }
-        //locError("!!");
-        ;
         Button bt1 = (Button) findViewById(R.id.send);
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -728,9 +735,8 @@ private double w, h, w_min;
     protected void onResume() {
         super.onResume();
         String currentProvider = LocationManager.NETWORK_PROVIDER;
-
+        getScreen();
         Log.d(TAG, currentProvider);
-        //Location lastKnownLocation =
     }
 
     @Override
@@ -742,6 +748,20 @@ private double w, h, w_min;
     public String findTitle(String str){
         str = str.substring(4, str.indexOf("."));
         return str;
+    }
+
+    private void getScreen(){
+        WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics dm = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(dm);
+        screen_width = dm.widthPixels;
+        screen_height = dm.heightPixels;
+        float density = dm.density;
+        int screenWidth = (int) (screen_width / density);
+        int screenHeight = (int) (screen_height / density);
+        pdfView = (PDFView) findViewById(R.id.pdfView);
+
+        Log.d(TAG, Float.toString(screen_width) + "^" + Float.toString(screen_height) + "^" + Float.toString(screenWidth) + "^" + Float.toString(screenHeight));
     }
 
     @Override
