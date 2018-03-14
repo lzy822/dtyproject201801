@@ -181,8 +181,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-
-
     public void initMap() {
         map_testList.clear();
         for (int j = 1; j <= num_pdf; j++) {
@@ -362,16 +360,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         int num;
         num = appearNumber(uri.toString(), "/");
         String str = uri.toString();
-        //Log.w(TAG, uri.toString() );
-        //Log.w(TAG, Integer.toString(num) );
         for (int i = 1; i <= num; i++){
             str = str.substring(str.indexOf("/") + 1);
 
         }
         str = str.substring(0, str.length() - 4);
-        //locError(str);
         return str;
-        //locError(str);
 
     }
 
@@ -384,8 +378,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
         return count;
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -411,9 +403,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         filePath = Dir + filePath.substring(str.length());
         return filePath;
     }
-
-
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
@@ -489,8 +478,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
     }
 
-
-
     public String findNamefromSample(String str){
         str = str.substring(4, str.indexOf("."));
         return str;
@@ -516,6 +503,82 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
         }
         return isDrift;
+    }
+
+    private String rubberCoordination(String MediaBox, String BBox, String GPTS){
+        locError(MediaBox + "&" + BBox + "&" + GPTS);
+        String[] MediaBoxString = MediaBox.split(" ");
+        String[] BBoxString = BBox.split(" ");
+        String[] GPTSString = GPTS.split(" ");
+        //将String 数组转换为 Float 数组
+        float[] MediaBoxs = new float[MediaBoxString.length];
+        float[] BBoxs = new float[BBoxString.length];
+        float[] GPTSs = new float[GPTSString.length];
+        for (int i = 0; i < MediaBoxString.length; i++) {
+            MediaBoxs[i] = Float.valueOf(MediaBoxString[i]);
+        }
+        for (int i = 0; i < BBoxString.length; i++) {
+            BBoxs[i] = Float.valueOf(BBoxString[i]);
+        }
+        for (int i = 0; i < GPTSString.length; i++) {
+            GPTSs[i] = Float.valueOf(GPTSString[i]);
+        }
+        //PointF pt1_lb = new PointF(BBoxs[0], BBoxs[3]), pt1_lt = new PointF(BBoxs[0], BBoxs[1]), pt1_rt = new PointF(BBoxs[2], BBoxs[1]), pt1_rb = new PointF(BBoxs[2], BBoxs[3]);
+        PointF pt1_lb = new PointF(), pt1_lt = new PointF(), pt1_rt = new PointF(), pt1_rb = new PointF();
+        PointF pt_lb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF(), pt_rb = new PointF();
+        pt1_lb.x = BBoxs[0] / MediaBoxs[2];
+        pt1_lb.y = BBoxs[3] / MediaBoxs[3];
+        pt1_lt.x = BBoxs[0] / MediaBoxs[2];
+        pt1_lt.y = BBoxs[1] / MediaBoxs[3];
+        pt1_rt.x = BBoxs[2] / MediaBoxs[2];
+        pt1_rt.y = BBoxs[1] / MediaBoxs[3];
+        pt1_rb.x = BBoxs[2] / MediaBoxs[2];
+        pt1_rb.y = BBoxs[3] / MediaBoxs[3];
+        GPTS = Float.toString(pt1_lb.x) + " " + Float.toString(pt1_lb.y) + " " + Float.toString(pt1_lt.x) + " " + Float.toString(pt1_lt.y) + " " + Float.toString(pt1_rt.x) + " " + Float.toString(pt1_rt.y) + " " + Float.toString(pt1_rb.x) + " " + Float.toString(pt1_rb.y);
+        locError(GPTS);
+        float lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+        float long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+        for (int i = 0; i < GPTSs.length; i = i + 2){
+            if (GPTSs[i] < lat_axis) {
+                if (GPTSs[i + 1] < long_axis){
+                    pt_lb.x = GPTSs[i];
+                    pt_lb.y = GPTSs[i + 1];
+                } else {
+                    pt_rb.x = GPTSs[i];
+                    pt_rb.y = GPTSs[i + 1];
+                }
+            } else {
+                if (GPTSs[i + 1] < long_axis){
+                    pt_lt.x = GPTSs[i];
+                    pt_lt.y = GPTSs[i + 1];
+                } else {
+                    pt_rt.x = GPTSs[i];
+                    pt_rt.y = GPTSs[i + 1];
+                }
+            }
+        }
+        GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+        locError(GPTS);
+        //
+        float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
+        float delta_width = pt1_rb.y - pt1_lb.y, delta_height = pt1_lt.x - pt1_lb.x;
+        pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt1_lb.x - 0));
+        pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt1_lb.y - 0));
+        pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt1_lt.x - 1));
+        pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt1_lt.y - 0));
+        pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt1_rb.x - 0));
+        pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt1_rb.y - 1));
+        pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt1_rt.x - 1));
+        pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.y - 1));
+        //
+        //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+        //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+        //locError(GPTS);
+
+        GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+        locError(GPTS);
+        return GPTS;
+
     }
 
     private String getGPTS(String GPTS, String LPTS){
@@ -612,14 +675,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public void getGeoInfo(String filePath, int Type, String uri, String name) {
-        locError(name);
+        //locError(name);
         String m_name = name;
         String m_uri = uri;
         String bmPath = "";
-
-
-
-        //locError();
         File file = new File(filePath);
         InputStream in = null;
         String m_WKT = "";
@@ -636,10 +695,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            //StringBuffer sb = new StringBuffer("");
             String line;
             String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "", m_LPTS = "";
-            //locError();
             int m_num_GPTS = 0;
             while((line = bufferedReader.readLine()) != null) {
                 //sb.append(line + "/n");
@@ -657,7 +714,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     m_BBox = line.substring(line.indexOf("BBox") + 5);
                     m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
                     m_BBox = m_BBox.trim();
-                    locError(m_BBox);
+                    locError("BBox : " + m_BBox);
                 }
                 if (line.contains("GPTS")){
                     //m_num_GPTS++;
@@ -667,20 +724,21 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     m_LPTS = line.substring(line.indexOf("LPTS") + 5);
                     m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
                     m_LPTS = m_LPTS.trim();
+                    //坐标飘移纠偏
                     m_GPTS = getGPTS(m_GPTS, m_LPTS);
                     //locError(m_GPTS);
                     Log.w(TAG, m_GPTS );
-                    locError(line);
+                    //locError(line);
                 }
                 if (line.contains("MediaBox")){
                     m_MediaBox = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
                     m_MediaBox = m_MediaBox.trim();
-                    Log.w(TAG, m_MediaBox );
+                    Log.w(TAG, "MediaBox : " + m_MediaBox );
                 }
                 if (line.contains("CropBox")){
                     m_CropBox = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
                     m_CropBox = m_CropBox.trim();
-                    Log.w(TAG, m_CropBox );
+                    //Log.w(TAG, m_CropBox );
                 }
                 num_line += 1;
             }
@@ -708,8 +766,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             in.close();
             //locError("看这里"+m_name);
             if (filePath != "") {
+                //locError(m_MediaBox + "&" + m_BBox + "&" + m_GPTS);
+                m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
                 saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox);
-            } else saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox);
+            } else {
+                m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
+                saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox);
+            }
         } catch (IOException e) {
             Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }
