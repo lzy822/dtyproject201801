@@ -3,6 +3,8 @@
     <dbname value="POIStore" ></dbname>
     <version value="1" ></version>
     <list>
-
+        <mapping class="com.geopdfviewer.android.Trail"></mapping>
+        <mapping class="com.geopdfviewer.android.POI"></mapping>
+        <mapping class="com.geopdfviewer.android.PhotoLoc"></mapping>
     </list>
 </litepal>
