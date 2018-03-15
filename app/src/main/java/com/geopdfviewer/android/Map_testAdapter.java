@@ -2,6 +2,7 @@ package com.geopdfviewer.android;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -66,7 +67,6 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                 mContext.startActivity(intent);
             }
         });
-
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -75,6 +75,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                     Map_test map = mMapList.get(position);
                     mOnItemLong.onItemLongClick(v, map.getM_num());
                     Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
+                    holder.cardView.setCardBackgroundColor(Color.GRAY);
                }
                 //Toast.makeText(mContext, "see here", Toast.LENGTH_LONG).show();
                 /*

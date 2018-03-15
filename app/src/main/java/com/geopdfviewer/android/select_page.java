@@ -22,6 +22,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -84,6 +85,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private Map_testAdapter adapter;
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
+    private boolean isLongClicked = false;
     @Override
     public void loadComplete(int nbPages) {
 
@@ -99,26 +101,60 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     }
 
-    @ViewById
-    PDFView pdfView;
-
     //记录总的pdf条目数
     int num_pdf = 0;
+
+    private int selectedNum = 0;
 
     @NonConfigurationInstance
     Uri uri;
 
-    @NonConfigurationInstance
-    Integer pageNumber = 0;
-
-    String pdfFileName;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //getMenuInflater().inflate(R.menu.options, menu);
+        getMenuInflater().inflate(R.menu.deletetoolbar, menu);
         return true;
-
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        switch(item.getItemId())
+        {
+            case  R.id.delete:
+                if (selectedNum != 0){
+                deleteData(selectedNum);
+                selectedNum = 0;
+                }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
+                break;
+            case  R.id.mmcancel:
+                if (selectedNum != 0){
+                    refreshRecycler();
+                    selectedNum = 0;
+                }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
+                break;
+            case  R.id.showinfo:
+                if (selectedNum != 0){
+                    showInfo(selectedNum);
+                    selectedNum = 0;
+                }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
+                break;
+        }
+        return true;
+    }
+
+    private void showInfo(int num){
+        refreshRecycler();
+        Intent intent = new Intent(select_page.this, info_page.class);
+        intent.putExtra("extra_data", getWKT(num));
+        startActivity(intent);
+    }
+
+    private String getWKT(int num) {
+        SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
+        String str = "n_" + num + "_";
+        return pref1.getString(str + "WKT", "");
+    }
 
     void pickFile() {
         int permissionCheck = ContextCompat.checkSelfPermission(this,
@@ -152,17 +188,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-
-    public void sendUri(Uri uri) {
-    Log.w(TAG, uri.toString() );
-    Intent intent = new Intent(select_page.this, MainInterface.class);
-    intent.putExtra("type", "uri");
-    intent.putExtra("data_uri", uri.toString());
-    startActivity(intent);
-    }
-
-
-
     public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri) {
         Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri);
         map_tests[num_pdf - 1] = mapTest;
@@ -184,7 +209,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     public void initMap() {
         map_testList.clear();
         for (int j = 1; j <= num_pdf; j++) {
-            locError(Integer.toString(j));
+            //locError(Integer.toString(j));
             SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
             String str = "n_" + j + "_";
             int num = pref1.getInt(str + "num", 0);
@@ -215,6 +240,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             public void onItemLongClick(View view, int position) {
                 locError(Integer.toString(position));
                 locError("see here");
+                selectedNum = position;
                 //deleteData(position);
             }
         });
@@ -267,7 +293,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 map_tests[j - 2] = mapTest;
                 map_testList.add(map_tests[j - 2]);
             }
-            }else deleted = true;
+            }else {
+                SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
+                String str = "n_" + j + "_";
+                String imguri = pref1.getString(str + "img_path", "");
+                deletemFile(imguri);
+                deleted = true;
+            }
         }
         num_pdf = num_pdf - 1;
         SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
@@ -293,6 +325,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     }
 
+    public void deletemFile(String filePath){
+        File file = new File(filePath);
+        if (file.exists() && file.isFile()){
+            if (file.delete()){
+                Toast.makeText(this, "删除文件成功", Toast.LENGTH_SHORT).show();
+            }else Toast.makeText(this, "删除文件失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path, String MediaBox, String CropBox){
         num_pdf ++;
         SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
@@ -314,16 +355,17 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public String createThumbnails(String fileName, String filePath, int Type){
-
+        File file = new File(Environment.getExternalStorageDirectory() + "/PdfReader");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        fileName = fileName + Long.toString(System.currentTimeMillis());
         String outPath = Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".jpg";
         PdfiumCore pdfiumCore = new PdfiumCore(this);
         int pageNum = 0;
         File m_pdf_file;
         OutputStream outputStream1 = null;
         InputStream ip = null;
-
-        //File m_pdf_file = new File("/storage/emulated/0/tencent/TIMfile_recv/sample_big.pdf");
-        //Log.w(TAG, Boolean.toString(m_pdf_file.canRead()) );
         try {
             if(Type == SAMPLE_TYPE) {
                 ip = getAssets().open(SAMPLE_FILE);
@@ -341,37 +383,23 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             //PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(getAssets().open(SAMPLE_FILE), ParcelFileDescriptor.MODE_READ_WRITE));
             PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
             Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
-
             pdfiumCore.openPage(pdf, pageNum);
-            //int width = ;
-            locError(Integer.toString(pdfiumCore.getPageWidth(pdf, pageNum)));
-            locError(Integer.toString(pdfiumCore.getPageHeight(pdf, pageNum)));
-            //int height = pdfiumCore.getPageHeight(pdf, pageNum);
             Bitmap bitmap = Bitmap.createBitmap(120, 180, Bitmap.Config.RGB_565);
             pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 120, 180);
             pdfiumCore.closeDocument(pdf);
-
-
             File of = new File(Environment.getExternalStorageDirectory() + "/PdfReader", fileName + ".jpg");
             FileOutputStream outputStream = new FileOutputStream(of);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream);
             outputStream.flush();
             outputStream.close();
-
-            /*ImageView imageView = (ImageView) findViewById(R.id.img_show);
-            imageView.setVisibility(View.VISIBLE);
-            Log.e(TAG, outPath );
-            imageView.setImageURI(Uri.parse(outPath));*/
-            //imageView.setImageBitmap(bitmap);
-
-
-
         }
         catch (IOException e) {
             Log.w(TAG, e.getMessage() );
             Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
         }
-        Log.e(TAG, outPath );
+        if (Type == SAMPLE_TYPE){
+            deletemFile(Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".pdf");
+        }
         return outPath;
     }
 
@@ -477,6 +505,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        //locError();
         //Clear按钮事件编辑
         Button btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_clear.setOnClickListener(new View.OnClickListener() {
@@ -519,10 +548,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public void initDemo(){
-        //save1("demo");
-        //saveGeoInfo("demo", "", "", "", "", "");
         getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
-        //initMap2("occupation");
         Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
     }
 

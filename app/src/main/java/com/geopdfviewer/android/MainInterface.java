@@ -201,21 +201,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            //DecimalFormat df = new DecimalFormat("0.00000");
-            //setLocationInfo(df.format(location.getLatitude()), df.format(location.getLongitude()));
-            //setLocationInfo(location.getLatitude(), location.getLongitude());
-
-
             m_lat = location.getLatitude();
             m_long = location.getLongitude();
-            //m_lat = 25.029896449028467;
-            //m_long = 102.7012173402311;
-            /*pdfView = (PDFView) findViewById(R.id.pdfView);
-            Rect rect = new Rect(200, 300, 400, 100);
-            Canvas canvas = new Canvas(rect);
-            pdfView.draw();*/
-            //locError("看这里!!!");
-            //Log.w(TAG, location.toString() );
+            //setHereLocation();
             locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
 
         } else {
@@ -430,17 +418,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
+                        current_pageheight = pageHeight;
+                        current_pagewidth = pageWidth;
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
                         Paint paint = new Paint();
                         paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
-                        canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
+                        //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         double y_ratio = ((m_lat - min_lat) / h);
                         double x_ratio = ((m_long - min_long) / w);
                         float xx = (float) ( x_ratio * pageWidth);
                         float yy = (float) ( (1 - y_ratio) * pageHeight);
+                        setHereLocation();
                         canvas.drawCircle(xx, yy, 20, paint);
                         getCurrentScreenLoc();
                     }
@@ -462,9 +453,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Float.toString(b_top_x) + "&&" + Float.toString(b_top_y));
         //locError(Float.toString(b_bottom_x) + "&&" + Float.toString(b_bottom_y));
     }
-
-    private void getLocation(float x, float y){
-
+    float s_x , s_y;
+    private void setHereLocation(){
+        double y_ratio = ((m_lat - min_lat) / h);
+        double x_ratio = ((m_long - min_long) / w);
+        float xx = (float) ( x_ratio * current_pagewidth);
+        float yy = (float) ( (1 - y_ratio) * current_pageheight);
+        s_x = xx;
+        s_y = yy;
     }
 
     private void displayFromFile(String filePath) {
@@ -486,6 +482,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_width = pdfView.getWidth();
                             //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
+                        current_pageheight = pageHeight;
+                        current_pagewidth = pageWidth;
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
@@ -493,12 +491,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
-                        canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
+                        //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         double y_ratio = ((m_lat - min_lat) / h);
                         double x_ratio = ((m_long - min_long) / w);
                         float xx = (float) ( x_ratio * pageWidth);
                         float yy = (float) ( (1 - y_ratio) * pageHeight);
+                        setHereLocation();
                         canvas.drawCircle(xx, yy, 20, paint);
+                        locError(Float.toString(xx) + "%" + Float.toString(yy));
                         getCurrentScreenLoc();
                     }
                 })
@@ -677,11 +677,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 reDrawCache();
             }
         });
-        com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.north);
+        final com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //浮动按钮2 具体功能如下:
+                //locError(Float.toString(s_x) + "%" + Float.toString(s_y));
+                pdfView.moveRelativeTo(s_x, s_y);
+                //button2.setIcon(R.drawable.ic_my_location);
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);

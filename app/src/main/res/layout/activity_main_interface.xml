@@ -61,12 +61,12 @@
             android:src="@drawable/ic_straighten"
             />
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/north"
+            android:id="@+id/lochere"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:tooltipText="指北针"
-            fab:fab_title="指北针"
-            android:src="@drawable/ic_navigation"/>
+            android:tooltipText="定位"
+            fab:fab_title="定位"
+            android:src="@drawable/ic_location_searching"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/restorezoom"
             android:layout_width="wrap_content"
