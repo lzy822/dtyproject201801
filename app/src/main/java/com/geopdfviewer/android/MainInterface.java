@@ -416,25 +416,33 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onTap(new OnTapListener() {
                     @Override
                     public boolean onTap(MotionEvent e) {
-                        return false;
+                        getScreenLocation(e.getRawX(), e.getRawY());
+                        return true;
                     }
                 })
                 .onDraw(new OnDrawListener() {
                     @Override
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+                        if (isGetStretchRatio == false){
+                            getStretchRatio(pageWidth, pageHeight);
+                            viewer_height = pdfView.getHeight();
+                            viewer_width = pdfView.getWidth();
+                            //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
+                        }
+                        //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
+                        getK(pageWidth, pageHeight);
+                        getStretchRatio(pageWidth, pageHeight);
                         Paint paint = new Paint();
-                        paint.setColor(Color.GREEN);
+                        paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
-                        if (isGetStretchRatio == false){
-                        getStretchRatio(pageWidth, pageHeight);
-
-
-                            //
-
-                            //
-                            }
-                        canvas.drawLine(b_bottom_x * ratio_width, b_bottom_y * ratio_height, b_top_x * ratio_width, b_top_y * ratio_height, paint);
+                        canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
+                        double y_ratio = ((m_lat - min_lat) / h);
+                        double x_ratio = ((m_long - min_long) / w);
+                        float xx = (float) ( x_ratio * pageWidth);
+                        float yy = (float) ( (1 - y_ratio) * pageHeight);
+                        canvas.drawCircle(xx, yy, 20, paint);
+                        getCurrentScreenLoc();
                     }
                 })
                 .pageFitPolicy(FitPolicy.BOTH)
@@ -474,10 +482,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
                         if (isGetStretchRatio == false){
                             getStretchRatio(pageWidth, pageHeight);
-                            int viewer_top = pdfView.getTop();
                             viewer_height = pdfView.getHeight();
                             viewer_width = pdfView.getWidth();
-                            int viewer_bottom = pdfView.getBottom();
                             //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
@@ -488,11 +494,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
                         canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
-                        //canvas.drawLine(b_bottom_x * ratio_width, b_top_y * ratio_height, b_top_x * ratio_width, b_bottom_y * ratio_height, paint);
-                        Paint paint1 = new Paint();
-                        paint1.setColor(Color.GREEN);
-                        paint1.setStrokeWidth((float)3.0);
-                        paint1.setStyle(Paint.Style.FILL);
                         double y_ratio = ((m_lat - min_lat) / h);
                         double x_ratio = ((m_long - min_long) / w);
                         float xx = (float) ( x_ratio * pageWidth);

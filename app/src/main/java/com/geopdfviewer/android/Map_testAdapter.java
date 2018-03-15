@@ -26,7 +26,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
     private List<Map_test> mMapList;
 
-    private OnRecyclerItemLongListener mOnItemLong = null;
+    private OnRecyclerItemLongListener mOnItemLong;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         //private OnRecyclerItemLongListener mOnItemLong = null;
@@ -39,7 +39,8 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             cardView = (CardView) view;
             MapImage = (ImageView) view.findViewById(R.id.img_test);
             MapName = (TextView) view.findViewById(R.id.map_name);
-            //view.setOnLongClickListener(this);
+
+
 
         }
     }
@@ -65,19 +66,25 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                 mContext.startActivity(intent);
             }
         });
+
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                /*if (mOnItemLong != null){
-                mOnItemLong.onItemLongClick(v, holder.getAdapterPosition());}*/
-                int position = holder.getAdapterPosition();
-                Map_test map = mMapList.get(position);
+                //if (mOnItemLong != null){
+                    int position = holder.getAdapterPosition();
+                    Map_test map = mMapList.get(position);
+                    mOnItemLong.onItemLongClick(v, map.getM_num());
+                    Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
+               // }
+                Toast.makeText(mContext, "see here", Toast.LENGTH_LONG).show();
+                /*
                 Intent intent = new Intent(mContext, select_page.class);
                 intent.putExtra(select_page.LOC_DELETE_ITEM, map.getM_num());
-                Toast.makeText(mContext, "暂时没有更新删除功能", Toast.LENGTH_LONG).show();
+                selectedNum = map.getM_num();
+                //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
                 //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
                 //mContext.setTheme(R.style.DarkTheme);
-                mContext.startActivity(intent);
+                mContext.startActivity(intent);*/
                 return true;
             }
         });
@@ -102,6 +109,8 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     public int getItemCount() {
         return mMapList.size();
     }
+
+
 
     public interface OnRecyclerItemLongListener{
         void onItemLongClick(View view,int position);

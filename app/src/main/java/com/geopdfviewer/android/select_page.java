@@ -210,6 +210,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new Map_testAdapter(map_testList);
+        //adapter.getItemSelected();
         recyclerView.setAdapter(adapter);
     }
 
@@ -250,7 +251,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         editor1.apply();
         initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox);
     }
-
 
     public String createThumbnails(String fileName, String filePath, int Type){
 
@@ -314,16 +314,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return outPath;
     }
 
-
     public void Btn_clearData(){
 
+        /*
         SharedPreferences.Editor pref = getSharedPreferences("data_num", MODE_PRIVATE).edit();
         pref.clear().commit();
         SharedPreferences.Editor pref1 = getSharedPreferences("data", MODE_PRIVATE).edit();
         pref1.clear().commit();
         Toast.makeText(this, "清除操作完成", Toast.LENGTH_LONG).show();
         initPage();
-        refreshRecycler();
+        refreshRecycler();*/
         /*Intent intent = getIntent();
         int loc_delete = intent.getIntExtra(LOC_DELETE_ITEM, 0);
         locError(Integer.toString(loc_delete));*/
@@ -422,6 +422,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, int position) {
+                locError(Integer.toString(position));
+                locError("see here");
             }
         });
 
@@ -527,7 +529,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
 
         if (Math.floor(MediaBoxs[2]) != Math.floor(BBoxs[2]) && Math.floor(MediaBoxs[3]) != Math.floor(BBoxs[3])) {
-            //PointF pt1_lb = new PointF(BBoxs[0], BBoxs[3]), pt1_lt = new PointF(BBoxs[0], BBoxs[1]), pt1_rt = new PointF(BBoxs[2], BBoxs[1]), pt1_rb = new PointF(BBoxs[2], BBoxs[3]);
             PointF pt1_lb = new PointF(), pt1_lt = new PointF(), pt1_rt = new PointF(), pt1_rb = new PointF();
             PointF pt_lb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF(), pt_rb = new PointF();
             pt1_lb.x = BBoxs[0] / MediaBoxs[2];
@@ -538,8 +539,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             pt1_rt.y = BBoxs[1] / MediaBoxs[3];
             pt1_rb.x = BBoxs[2] / MediaBoxs[2];
             pt1_rb.y = BBoxs[3] / MediaBoxs[3];
-            //GPTS = Float.toString(pt1_lb.x) + " " + Float.toString(pt1_lb.y) + " " + Float.toString(pt1_lt.x) + " " + Float.toString(pt1_lt.y) + " " + Float.toString(pt1_rt.x) + " " + Float.toString(pt1_rt.y) + " " + Float.toString(pt1_rb.x) + " " + Float.toString(pt1_rb.y);
-            //locError(GPTS);
             float lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
             float long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
             for (int i = 0; i < GPTSs.length; i = i + 2) {
@@ -561,27 +560,19 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                 }
             }
-            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            //locError(GPTS);
-            //
+            GPTS = Float.toString(pt1_lb.x) + " " + Float.toString(pt1_lb.y) + " " + Float.toString(pt1_lt.x) + " " + Float.toString(pt1_lt.y) + " " + Float.toString(pt1_rt.x) + " " + Float.toString(pt1_rt.y) + " " + Float.toString(pt1_rb.x) + " " + Float.toString(pt1_rb.y);
+            locError(GPTS);
             float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
             float delta_width = pt1_rb.x - pt1_lb.x, delta_height = pt1_lt.y - pt1_lb.y;
-            //locError(Float.toString(delta_height)+ "&" + Float.toString(delta_width));
-            pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt1_lb.x - 0));
-            pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt1_lb.y - 0));
-            pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt1_lt.x - 1));
-            pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt1_lt.y - 0));
-            pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt1_rb.x - 0));
-            pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt1_rb.y - 1));
-            pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt1_rt.x - 1));
-            pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.y - 1));
-            //
-            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            //locError(GPTS);
-
+            pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt1_lb.y - 0));
+            pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt1_lb.x - 0));
+            pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt1_lt.y - 1));
+            pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt1_lt.x - 0));
+            pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt1_rb.y - 0));
+            pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt1_rb.x - 1));
+            pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt1_rt.y - 1));
+            pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.x - 1));
             GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            //locError(GPTS);
         }
             return GPTS;
 
@@ -659,8 +650,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                 }
             }
-            //GPTS = Float.toString(pt_lb1.x) + " " + Float.toString(pt_lb1.y) + " " + Float.toString(pt_lt1.x) + " " + Float.toString(pt_lt1.y) + " " + Float.toString(pt_rt1.x) + " " + Float.toString(pt_rt1.y) + " " + Float.toString(pt_rb1.x) + " " + Float.toString(pt_rb1.y);
-            //locError(GPTS);
+            GPTS = Float.toString(pt_lb1.x) + " " + Float.toString(pt_lb1.y) + " " + Float.toString(pt_lt1.x) + " " + Float.toString(pt_lt1.y) + " " + Float.toString(pt_rt1.x) + " " + Float.toString(pt_rt1.y) + " " + Float.toString(pt_rb1.x) + " " + Float.toString(pt_rb1.y);
+            locError(GPTS);
             float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
             float delta_width = pt_rb1.y - pt_lb1.y, delta_height = pt_lt1.x - pt_lb1.x;
             pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt_lb1.x - 0));
