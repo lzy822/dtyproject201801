@@ -13,9 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.barteksc.pdfviewer.PDFView;
 
 import java.util.List;
+
 
 /**
  * Created by 54286 on 2018/3/6.
@@ -70,13 +70,13 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                //if (mOnItemLong != null){
+                if (mOnItemLong != null){
                     int position = holder.getAdapterPosition();
                     Map_test map = mMapList.get(position);
                     mOnItemLong.onItemLongClick(v, map.getM_num());
                     Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
-               // }
-                Toast.makeText(mContext, "see here", Toast.LENGTH_LONG).show();
+               }
+                //Toast.makeText(mContext, "see here", Toast.LENGTH_LONG).show();
                 /*
                 Intent intent = new Intent(mContext, select_page.class);
                 intent.putExtra(select_page.LOC_DELETE_ITEM, map.getM_num());
@@ -116,6 +116,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         void onItemLongClick(View view,int position);
     }
     public void setOnItemLongClickListener(OnRecyclerItemLongListener listener){
+        //Log.w(TAG, "setOnItemLongClickListener: " );
         this.mOnItemLong =  listener;
     }
 }
