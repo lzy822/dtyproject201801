@@ -516,68 +516,74 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         float[] GPTSs = new float[GPTSString.length];
         for (int i = 0; i < MediaBoxString.length; i++) {
             MediaBoxs[i] = Float.valueOf(MediaBoxString[i]);
+            //locError("MediaBoxs : " + MediaBoxs[i]);
         }
         for (int i = 0; i < BBoxString.length; i++) {
             BBoxs[i] = Float.valueOf(BBoxString[i]);
+            //locError("BBoxs : " + Float.toString(BBoxs[i]));
         }
         for (int i = 0; i < GPTSString.length; i++) {
             GPTSs[i] = Float.valueOf(GPTSString[i]);
         }
-        //PointF pt1_lb = new PointF(BBoxs[0], BBoxs[3]), pt1_lt = new PointF(BBoxs[0], BBoxs[1]), pt1_rt = new PointF(BBoxs[2], BBoxs[1]), pt1_rb = new PointF(BBoxs[2], BBoxs[3]);
-        PointF pt1_lb = new PointF(), pt1_lt = new PointF(), pt1_rt = new PointF(), pt1_rb = new PointF();
-        PointF pt_lb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF(), pt_rb = new PointF();
-        pt1_lb.x = BBoxs[0] / MediaBoxs[2];
-        pt1_lb.y = BBoxs[3] / MediaBoxs[3];
-        pt1_lt.x = BBoxs[0] / MediaBoxs[2];
-        pt1_lt.y = BBoxs[1] / MediaBoxs[3];
-        pt1_rt.x = BBoxs[2] / MediaBoxs[2];
-        pt1_rt.y = BBoxs[1] / MediaBoxs[3];
-        pt1_rb.x = BBoxs[2] / MediaBoxs[2];
-        pt1_rb.y = BBoxs[3] / MediaBoxs[3];
-        GPTS = Float.toString(pt1_lb.x) + " " + Float.toString(pt1_lb.y) + " " + Float.toString(pt1_lt.x) + " " + Float.toString(pt1_lt.y) + " " + Float.toString(pt1_rt.x) + " " + Float.toString(pt1_rt.y) + " " + Float.toString(pt1_rb.x) + " " + Float.toString(pt1_rb.y);
-        locError(GPTS);
-        float lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-        float long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-        for (int i = 0; i < GPTSs.length; i = i + 2){
-            if (GPTSs[i] < lat_axis) {
-                if (GPTSs[i + 1] < long_axis){
-                    pt_lb.x = GPTSs[i];
-                    pt_lb.y = GPTSs[i + 1];
+
+        if (Math.floor(MediaBoxs[2]) != Math.floor(BBoxs[2]) && Math.floor(MediaBoxs[3]) != Math.floor(BBoxs[3])) {
+            //PointF pt1_lb = new PointF(BBoxs[0], BBoxs[3]), pt1_lt = new PointF(BBoxs[0], BBoxs[1]), pt1_rt = new PointF(BBoxs[2], BBoxs[1]), pt1_rb = new PointF(BBoxs[2], BBoxs[3]);
+            PointF pt1_lb = new PointF(), pt1_lt = new PointF(), pt1_rt = new PointF(), pt1_rb = new PointF();
+            PointF pt_lb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF(), pt_rb = new PointF();
+            pt1_lb.x = BBoxs[0] / MediaBoxs[2];
+            pt1_lb.y = BBoxs[3] / MediaBoxs[3];
+            pt1_lt.x = BBoxs[0] / MediaBoxs[2];
+            pt1_lt.y = BBoxs[1] / MediaBoxs[3];
+            pt1_rt.x = BBoxs[2] / MediaBoxs[2];
+            pt1_rt.y = BBoxs[1] / MediaBoxs[3];
+            pt1_rb.x = BBoxs[2] / MediaBoxs[2];
+            pt1_rb.y = BBoxs[3] / MediaBoxs[3];
+            //GPTS = Float.toString(pt1_lb.x) + " " + Float.toString(pt1_lb.y) + " " + Float.toString(pt1_lt.x) + " " + Float.toString(pt1_lt.y) + " " + Float.toString(pt1_rt.x) + " " + Float.toString(pt1_rt.y) + " " + Float.toString(pt1_rb.x) + " " + Float.toString(pt1_rb.y);
+            //locError(GPTS);
+            float lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+            float long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+            for (int i = 0; i < GPTSs.length; i = i + 2) {
+                if (GPTSs[i] < lat_axis) {
+                    if (GPTSs[i + 1] < long_axis) {
+                        pt_lb.x = GPTSs[i];
+                        pt_lb.y = GPTSs[i + 1];
+                    } else {
+                        pt_rb.x = GPTSs[i];
+                        pt_rb.y = GPTSs[i + 1];
+                    }
                 } else {
-                    pt_rb.x = GPTSs[i];
-                    pt_rb.y = GPTSs[i + 1];
-                }
-            } else {
-                if (GPTSs[i + 1] < long_axis){
-                    pt_lt.x = GPTSs[i];
-                    pt_lt.y = GPTSs[i + 1];
-                } else {
-                    pt_rt.x = GPTSs[i];
-                    pt_rt.y = GPTSs[i + 1];
+                    if (GPTSs[i + 1] < long_axis) {
+                        pt_lt.x = GPTSs[i];
+                        pt_lt.y = GPTSs[i + 1];
+                    } else {
+                        pt_rt.x = GPTSs[i];
+                        pt_rt.y = GPTSs[i + 1];
+                    }
                 }
             }
-        }
-        GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-        locError(GPTS);
-        //
-        float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
-        float delta_width = pt1_rb.y - pt1_lb.y, delta_height = pt1_lt.x - pt1_lb.x;
-        pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt1_lb.x - 0));
-        pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt1_lb.y - 0));
-        pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt1_lt.x - 1));
-        pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt1_lt.y - 0));
-        pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt1_rb.x - 0));
-        pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt1_rb.y - 1));
-        pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt1_rt.x - 1));
-        pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.y - 1));
-        //
-        //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-        //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-        //locError(GPTS);
+            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+            //locError(GPTS);
+            //
+            float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
+            float delta_width = pt1_rb.x - pt1_lb.x, delta_height = pt1_lt.y - pt1_lb.y;
+            //locError(Float.toString(delta_height)+ "&" + Float.toString(delta_width));
+            pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt1_lb.x - 0));
+            pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt1_lb.y - 0));
+            pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt1_lt.x - 1));
+            pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt1_lt.y - 0));
+            pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt1_rb.x - 0));
+            pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt1_rb.y - 1));
+            pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt1_rt.x - 1));
+            pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.y - 1));
+            //
+            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+            //locError(GPTS);
 
-        GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-        locError(GPTS);
-        return GPTS;
+            GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+            //locError(GPTS);
+        }
+            return GPTS;
 
     }
 
