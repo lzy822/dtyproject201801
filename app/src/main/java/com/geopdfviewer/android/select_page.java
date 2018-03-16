@@ -50,6 +50,8 @@ import org.androidannotations.annotations.OnActivityResult;
 import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.ViewById;
+import org.litepal.LitePal;
+import org.litepal.crud.DataSupport;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -206,6 +208,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
+    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic) {
+        Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic);
+        map_tests[num_pdf - 1] = mapTest;
+        map_testList.clear();
+        for (int i = 0; i < num_pdf; i++) {
+            map_testList.add(map_tests[i]);
+        }
+    }
+
     public void initMap() {
         map_testList.clear();
         for (int j = 1; j <= num_pdf; j++) {
@@ -283,13 +294,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String imguri = pref1.getString(str + "img_path", "");
             String MediaBox = pref1.getString(str + "MediaBox", "");
             String CropBox = pref1.getString(str + "CropBox", "");
-
+            String ic = pref1.getString(str + "ic", "");
             if (!deleted){
-                Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox);
+                Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic);
                 map_tests[j - 1] = mapTest;
                 map_testList.add(map_tests[j - 1]);
             }else {
-                Map_test mapTest = new Map_test(num - 1, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox);
+                Map_test mapTest = new Map_test(num - 1, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic);
                 map_tests[j - 2] = mapTest;
                 map_testList.add(map_tests[j - 2]);
             }
@@ -297,6 +308,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
                 String str = "n_" + j + "_";
                 String imguri = pref1.getString(str + "img_path", "");
+                String the_ic = pref1.getString(str + "ic", "");
+                deleteMDatabase(the_ic);
                 deletemFile(imguri);
                 deleted = true;
             }
@@ -318,11 +331,17 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             editor1.putString(str + "CropBox", map_tests[j - 1].getM_CropBox());
             editor1.putString(str + "GPTS", map_tests[j - 1].getM_GPTS());
             editor1.putString(str + "img_path", map_tests[j - 1].getM_imguri());
+            editor1.putString(str + "ic", map_tests[j - 1].getM_ic());
             editor1.apply();
         }
         initMap();
 
 
+    }
+
+    public void deleteMDatabase(String m_ic){
+        DataSupport.deleteAll(POI.class, "ic = ?", m_ic);
+        DataSupport.deleteAll(Trail.class, "ic = ?", m_ic);
     }
 
     public void deletemFile(String filePath){
@@ -352,6 +371,27 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         editor1.putString(str + "img_path", img_path);
         editor1.apply();
         initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox);
+    }
+
+    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path, String MediaBox, String CropBox, String ic){
+        num_pdf ++;
+        SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
+        editor.putInt("num", num_pdf);
+        editor.apply();
+        SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
+        String str = "n_" + Integer.toString(num_pdf) + "_";
+        editor1.putInt(str + "num", num_pdf);
+        editor1.putString(str + "name", name);
+        editor1.putString(str + "uri", uri);
+        editor1.putString(str + "WKT", WKT);
+        editor1.putString(str + "BBox", BBox);
+        editor1.putString(str + "MediaBox", MediaBox);
+        editor1.putString(str + "CropBox", CropBox);
+        editor1.putString(str + "GPTS", GPTS);
+        editor1.putString(str + "img_path", img_path);
+        editor1.putString(str + "ic", ic);
+        editor1.apply();
+        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox, ic);
     }
 
     public String createThumbnails(String fileName, String filePath, int Type){
@@ -449,7 +489,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         String str = uri.toString();
         for (int i = 1; i <= num; i++){
             str = str.substring(str.indexOf("/") + 1);
-
         }
         str = str.substring(0, str.length() - 4);
         return str;
@@ -479,6 +518,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             locError(getRealPath(uri.toString()));
             locError(uri.toString());
             locError(findNameFromUri(uri));
+            LitePal.getDatabase();
             refreshRecycler();
         }
     }
@@ -837,10 +877,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             if (filePath != "") {
                 //locError(m_MediaBox + "&" + m_BBox + "&" + m_GPTS);
                 m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
-                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox);
+                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name + Long.toString(System.currentTimeMillis()));
             } else {
                 m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
-                saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox);
+                saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name + Long.toString(System.currentTimeMillis()));
             }
         } catch (IOException e) {
             Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();

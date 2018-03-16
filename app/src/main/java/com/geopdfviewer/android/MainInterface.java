@@ -64,6 +64,8 @@ import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
+import org.litepal.crud.DataSupport;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -77,12 +79,17 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainInterface extends AppCompatActivity  implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener, OnDrawListener {
     private static final String TAG = "MainInterface";
     public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
-    public static int FILE_TYPE = 0;
+    public static final int NONE_FILE_TYPE = 0;
+    public static final int FILE_FILE_TYPE = 1;
+    public static final int ASSET_FILE_TYPE = 2;
+    public static int FILE_TYPE = NONE_FILE_TYPE;
     Integer pageNumber = 0;
     public String content;
     public int num_line = 0;
@@ -145,16 +152,33 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private LocationManager locationManager;
 
-    private boolean isLocateEnd = false;
+    //是否结束绘制
+    private boolean isLocateEnd = true;
 
+    //是否绘制POI 以及 trail
+    private boolean showAll = false;
+
+    //记录当前绘图类型
+    private int isDrawType = NONE_DRAW_TYPE;
+    public static final int POI_DRAW_TYPE = 2;
+    public static final int TRAIL_DRAW_TYPE = 1;
+    public static final int NONE_DRAW_TYPE = 0;
+
+    //当前记录的坐标点个数
     private int isLocate = 0;
+
+    //上一个记录下来的坐标点坐标
+    private float last_x, last_y;
+
+    //记录当前GeoPDF识别码
+    private String ic;
 
     private void recordTrail(Location location){
         isLocate++;
         if (location != null) {
             if (isLocateEnd || isLocate == 1){
-                m_cTrail = Double.toString(m_lat) + " " + Double.toString(m_long);
-                isLocateEnd = true;
+                m_cTrail = m_cTrail + Double.toString(m_lat) + " " + Double.toString(m_long);
+                //isLocateEnd = true;
             }else m_cTrail = m_cTrail + " " + Double.toString(m_lat) + " " + Double.toString(m_long) + " " + Double.toString(m_lat) + " " + Double.toString(m_long);
             //setHereLocation();
             //locError(Double.toString(m_lat) + "," + Double.toString(m_long) + "Come here");
@@ -164,13 +188,50 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
+    public static int appearNumber(String srcText, String findText) {
+        int count = 0;
+        Pattern p = Pattern.compile(findText);
+        Matcher m = p.matcher(srcText);
+        while (m.find()) {
+            count++;
+        }
+        return count;
+    }
+
+    private void recordTrail(float x, float y){
+        isLocate++;
+        last_x = x;
+        last_y = y;
+        locError(Integer.toString(isLocate));
+        //if (location != null) {
+            if (isLocateEnd || isLocate == 1){
+                if (!m_cTrail.isEmpty()){
+                    if (isLocate > 2) {
+                        int num = appearNumber(m_cTrail, " ");
+                        String str = m_cTrail;
+                        for (int i = 0; i <= num - 2; i++) {
+                            str = str.substring(str.indexOf(" ") + 1);
+                        }
+                        m_cTrail = m_cTrail.substring(0, m_cTrail.length() - str.length());
+                    } else m_cTrail = m_cTrail + " " + Float.toString(x) + " " + Float.toString(y);
+                }else m_cTrail = m_cTrail + Float.toString(x) + " " + Float.toString(y);
+            }else m_cTrail = m_cTrail + " " + Float.toString(x) + " " + Float.toString(y) + " " + Float.toString(x) + " " + Float.toString(y);
+            //setHereLocation();
+            //locError(Integer.toString(m_lat) + "," + Double.toString(m_long) + "Come here");
+
+        //} else {
+
+        //}
+    }
+
     protected final LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             //Log.d(TAG, "Location changed to: " + getLocationInfo(location));
             updateView(location);
-            if (isLocateEnd) {
-                recordTrail(location);
+            if (!isLocateEnd) {
+                recordTrail((float)location.getLatitude(), (float)location.getLongitude());
+                locError(m_cTrail);
             }
         }
 
@@ -299,10 +360,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         BBox = pref1.getString(str + "BBox", "");
         MediaBox = pref1.getString(str + "MediaBox", "");
         CropBox = pref1.getString(str + "CropBox", "");
+        ic = pref1.getString(str + "ic", "");
         Log.w(TAG, "BBox : " + BBox );
         Log.w(TAG, "GPTS : " + GPTS );
         Log.w(TAG, "MediaBox : " + MediaBox );
         Log.w(TAG, "CropBox : " + CropBox );
+        Log.w(TAG, "ic : " + ic );
         //GPTSList = new double[8];
         getGPTS();
         getBBox();
@@ -402,7 +465,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     @Override
                     public boolean onTap(MotionEvent e) {
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
-                        getGeoLocFromPixL(pt);
+
+                        PointF pt1;
+                        pt1 = getGeoLocFromPixL(pt);
+                        if (isDrawType == TRAIL_DRAW_TYPE){
+                            //PointF pt1 = new PointF(, );
+                            if (!isLocateEnd) {
+                                recordTrail(pt1.x, pt1.y);
+                                locError(m_cTrail);
+                            }
+                        }
+                        if (isDrawType == POI_DRAW_TYPE){
+                            POI poi = new POI();
+                            poi.setIc(ic);
+                            poi.setX(pt1.x);
+                            poi.setY(pt1.y);
+                            poi.save();
+                            locError(pt1.toString());
+                        }
                         return true;
                     }
                 })
@@ -430,7 +510,33 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
                             canvas.drawCircle(pt.x, pt.y, 20, paint);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
+                        if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
+                            List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                            for (Trail trail : trails){
+                                String str1 = trail.getPath();
+                                String[] TrailString = str1.split(" ");
+                                float[] Trails = new float[TrailString.length];
+                                for (int i = 0; i < TrailString.length; i++){
+                                    Trails[i] = Float.valueOf(TrailString[i]);
+                                }
+                                for (int j = 0; j < Trails.length - 2; j = j + 2){
+                                    PointF pt11, pt12;
+                                    pt11 = getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]));
+                                    pt12 = getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]));
+                                    canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint);
+                                }
+                            }
+                        }
+                        if(isDrawType == POI_DRAW_TYPE || showAll){
+                            List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            if (pois.size() > 0){
+                                for (POI poi : pois){
+                                    PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                                    canvas.drawCircle(pt2.x, pt2.y, 50, paint);
+                                }}
+                        }
                         getCurrentScreenLoc();
+
                     }
                 })
                 .pageFitPolicy(FitPolicy.BOTH)
@@ -501,18 +607,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
                         canvas.drawCircle(pt.x, pt.y, 20, paint);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
-                        if (isLocateEnd){
-                            String[] TrailString = m_cTrail.split(" ");
-                            float[] Trails = new float[TrailString.length];
-                            for (int i = 0; i < TrailString.length; i++){
-                                Trails[i] = Float.valueOf(TrailString[i]);
+                        if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
+                            List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                            for (Trail trail : trails){
+                                String str1 = trail.getPath();
+                                String[] TrailString = str1.split(" ");
+                                float[] Trails = new float[TrailString.length];
+                                for (int i = 0; i < TrailString.length; i++){
+                                    Trails[i] = Float.valueOf(TrailString[i]);
+                                }
+                                for (int j = 0; j < Trails.length - 2; j = j + 2){
+                                    PointF pt11, pt12;
+                                    pt11 = getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]));
+                                    pt12 = getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]));
+                                    canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint);
+                                }
                             }
-                            for (int j = 0; j < Trails.length - 2; j = j + 2){
-                                PointF pt11, pt12;
-                                pt11 = getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]));
-                                pt12 = getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 4]));
-                                canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint);
-                            }
+                        }
+                        if(isDrawType == POI_DRAW_TYPE || showAll){
+                            List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            if (pois.size() > 0){
+                            for (POI poi : pois){
+                                PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                                canvas.drawCircle(pt2.x, pt2.y, 50, paint);
+                            }}
                         }
                         /*float[] pts = new float[8];
                         pts[0] = 100;
@@ -539,7 +657,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     @Override
                     public boolean onTap(MotionEvent e) {
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
-                        getGeoLocFromPixL(pt);
+
+                        PointF pt1;
+                        pt1 = getGeoLocFromPixL(pt);
+                        /*if (isDrawType == TRAIL_DRAW_TYPE){
+                        //PointF pt1 = new PointF(, );
+                        if (!isLocateEnd) {
+                            recordTrail(pt1.x, pt1.y);
+                            locError(m_cTrail);
+                        }
+                        }*/
+                        if (isDrawType == POI_DRAW_TYPE){
+                            POI poi = new POI();
+                            poi.setIc(ic);
+                            poi.setX(pt1.x);
+                            poi.setY(pt1.y);
+                            poi.save();
+                            locError(pt1.toString());
+                        }
                         return true;
                     }
                 })
@@ -593,7 +728,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //cs_top = pdfView.getCurrentYOffset()
     }
 
-    private void getGeoLocFromPixL(PointF pt){
+    private PointF getGeoLocFromPixL(PointF pt){
         textView = (TextView) findViewById(R.id.txt);
         DecimalFormat df = new DecimalFormat("0.0000");
         //精确定位算法
@@ -613,8 +748,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
             textView.setText(df.format(pt.x) + "; " + df.format(pt.y));
         }
-
-
+        return pt;
         //
     }
 
@@ -672,12 +806,52 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getInfo(m_num);
         linearLayout = (LinearLayout) findViewById(R.id.search);
         if (uri != "") {
-            FILE_TYPE = 1;
+            FILE_TYPE = FILE_FILE_TYPE;
             displayFromFile(uri);
         } else {
-            FILE_TYPE = 2;
+            FILE_TYPE = ASSET_FILE_TYPE;
             displayFromAsset("Demo");
         }
+        Button btt1 = (Button) findViewById(R.id.start);
+        btt1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isDrawType = TRAIL_DRAW_TYPE;
+                m_cTrail = "";
+                isLocateEnd = false;
+                isLocate = 0;
+                initTrail();
+                //linearLayout.setVisibility(View.GONE);
+            }
+        });
+        Button btt2 = (Button) findViewById(R.id.go);
+        btt2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                isDrawType = POI_DRAW_TYPE;
+                //linearLayout.setVisibility(View.GONE);
+            }
+        });
+        Button btt3 = (Button) findViewById(R.id.stop);
+        btt3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //m_cTrail = "";
+                if (!isLocateEnd){
+                    isLocateEnd = true;
+                    recordTrail(last_x, last_y);
+                    locError(m_cTrail);
+                    Trail trail = new Trail();
+                    List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                    trail.setIc(ic);
+                    trail.setName("路径" + Integer.toString(trails.size() + 1));
+                    trail.setPath(m_cTrail);
+                    trail.save();
+                }else locError("你没有打开位置记录功能");
+                //linearLayout.setVisibility(View.GONE);
+            }
+        });
         Button bt1 = (Button) findViewById(R.id.send);
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -699,7 +873,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //浮动按钮1 具体功能如下:
-                reDrawCache();
+                //reDrawCache();
+                //DataSupport.deleteAll(Trail.class);
+                List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                locError(Integer.toString(pois.size() + trails.size()));
             }
         });
         final com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
@@ -710,6 +888,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //locError(Float.toString(s_x) + "%" + Float.toString(s_y));
                 //pdfView.moveRelativeTo(s_x, s_y);
                 //button2.setIcon(R.drawable.ic_my_location);
+                showAll = true;
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
@@ -725,12 +904,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
 
     private void reDrawCache() {
-        if (FILE_TYPE == 0) {
+        if (FILE_TYPE == NONE_FILE_TYPE) {
             Toast.makeText(this, "PDF文件读取出现问题", Toast.LENGTH_LONG).show();
-        } else if (FILE_TYPE == 1) {
+        } else if (FILE_TYPE == FILE_FILE_TYPE) {
             displayFromFile(uri);
             Toast.makeText(this, "这是硬盘上的文件", Toast.LENGTH_LONG).show();
-        } else if (FILE_TYPE == 2) {
+        } else if (FILE_TYPE == ASSET_FILE_TYPE) {
             displayFromAsset("Demo");
             Toast.makeText(this, "这是Demo", Toast.LENGTH_LONG).show();
         }
@@ -842,14 +1021,25 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 startActivity(intent);
                 break;
             case R.id.trail:
+                isDrawType = TRAIL_DRAW_TYPE;
+                m_cTrail = "";
+                isLocateEnd = false;
+                isLocate = 0;
                 initTrail();
                 break;
             case R.id.trailend:
                 //initTrail();
-                m_cTrail = "";
                 if (!isLocateEnd){
                     isLocateEnd = true;
-                }else Toast.makeText(this, "你没有打开位置记录功能", Toast.LENGTH_LONG).show();
+                    recordTrail(last_x, last_y);
+                    locError(m_cTrail);
+                    Trail trail = new Trail();
+                    List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                    trail.setIc(ic);
+                    trail.setName("路径" + Integer.toString(trails.size() + 1));
+                    trail.setPath(m_cTrail);
+                    trail.save();
+                }else locError("你没有打开位置记录功能");
 
                 break;
             case R.id.query:

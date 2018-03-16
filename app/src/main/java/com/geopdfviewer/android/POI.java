@@ -8,6 +8,7 @@ import org.litepal.crud.DataSupport;
 
 public class POI  extends DataSupport {
     private int id;
+    private String ic;
     private String name;
     private String path;
     private float path_x;
@@ -16,6 +17,13 @@ public class POI  extends DataSupport {
     private float y;
     private int time;
 
+    public String getIc() {
+        return ic;
+    }
+
+    public void setIc(String ic) {
+        this.ic = ic;
+    }
 
     public float getPath_x() {
         return path_x;

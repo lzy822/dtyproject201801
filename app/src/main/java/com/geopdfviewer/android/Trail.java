@@ -10,8 +10,26 @@ import java.util.List;
 
 public class Trail extends DataSupport{
     private int id;
+    private String ic;
     private String name;
     private String path;
+    private int time;
+
+    public String getIc() {
+        return ic;
+    }
+
+    public void setIc(String ic) {
+        this.ic = ic;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
 
     public int getId() {
         return id;

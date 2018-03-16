@@ -16,6 +16,15 @@ public class Map_test {
     private String m_imguri;
     private String m_MediaBox;
     private String m_CropBox;
+    private String m_ic;
+
+    public String getM_ic() {
+        return m_ic;
+    }
+
+    public void setM_ic(String m_ic) {
+        this.m_ic = m_ic;
+    }
 
     public Map_test(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri) {
         m_BBox = BBox;
@@ -36,6 +45,19 @@ public class Map_test {
         m_imguri = imguri;
         m_MediaBox = MediaBox;
         m_CropBox = CropBox;
+    }
+
+    public Map_test(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic) {
+        m_BBox = BBox;
+        m_num = num;
+        m_name = name;
+        m_WKT = WKT;
+        m_uri = uri;
+        m_GPTS = GPTS;
+        m_imguri = imguri;
+        m_MediaBox = MediaBox;
+        m_CropBox = CropBox;
+        m_ic = ic;
     }
 
     public String getM_MediaBox() {
