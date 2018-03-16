@@ -1,12 +1,14 @@
 package com.geopdfviewer.android;
 
+import org.litepal.crud.DataSupport;
+
 import java.util.List;
 
 /**
  * Created by 54286 on 2018/3/15.
  */
 
-public class Trail {
+public class Trail extends DataSupport{
     private int id;
     private String name;
     private String path;

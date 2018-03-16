@@ -24,7 +24,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
@@ -137,17 +136,42 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private float current_pagewidth = 0, current_pageheight = 0;
 
+    //记录当前轨迹
+    private String m_cTrail = "";
+
     private boolean isGetStretchRatio = false;
 
     Location location;
 
     private LocationManager locationManager;
 
+    private boolean isLocateEnd = false;
+
+    private int isLocate = 0;
+
+    private void recordTrail(Location location){
+        isLocate++;
+        if (location != null) {
+            if (isLocateEnd || isLocate == 1){
+                m_cTrail = Double.toString(m_lat) + " " + Double.toString(m_long);
+                isLocateEnd = true;
+            }else m_cTrail = m_cTrail + " " + Double.toString(m_lat) + " " + Double.toString(m_long) + " " + Double.toString(m_lat) + " " + Double.toString(m_long);
+            //setHereLocation();
+            //locError(Double.toString(m_lat) + "," + Double.toString(m_long) + "Come here");
+
+        } else {
+
+        }
+    }
+
     protected final LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             //Log.d(TAG, "Location changed to: " + getLocationInfo(location));
             updateView(location);
+            if (isLocateEnd) {
+                recordTrail(location);
+            }
         }
 
         @Override
@@ -185,7 +209,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     };
 
     private void updateView(Location location) {
-
         Geocoder gc = new Geocoder(this);
         List<Address> addresses = null;
         String msg = "";
@@ -244,34 +267,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     @Override
     public void onPageError(int page, Throwable t) {
         Log.e(TAG, "Cannot load page " + page);
-    }
-
-    public void WKTFormat() {
-
-    }
-
-    public void ReadPDF(){
-        pdfView = (PDFView) findViewById(R.id.pdfView);
-        pdfFileName = SAMPLE_FILE;
-        pdfView.fromAsset(SAMPLE_FILE)
-                .defaultPage(pageNumber)
-                .onPageChange(this)
-                .enableAnnotationRendering(true)
-                .onLoad(this)
-                .onDraw(new OnDrawListener() {
-                    @Override
-                    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-
-                    }
-                })
-                .scrollHandle(new DefaultScrollHandle(this))
-                .spacing(10) // in dp
-                .onPageError(this)
-                .pageFitPolicy(FitPolicy.BOTH)
-                .load();
-
-
-
     }
 
     public String getFileName(Uri uri) {
@@ -357,7 +352,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         max_long = (pt_rt.y + pt_rb.y) / 2;
         locError(Double.toString(min_lat));
         locError(Double.toString(max_lat));
-        getLocation();
+        if (isGPSEnabled()) {
+            getLocation();
+        }else locError("请打开GPS功能");
     }
 
     private void getBBox() {
@@ -404,7 +401,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onTap(new OnTapListener() {
                     @Override
                     public boolean onTap(MotionEvent e) {
-                        getScreenLocation(e.getRawX(), e.getRawY());
+                        PointF pt = new PointF(e.getRawX(), e.getRawY());
+                        getGeoLocFromPixL(pt);
                         return true;
                     }
                 })
@@ -427,12 +425,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
-                        double y_ratio = ((m_lat - min_lat) / h);
-                        double x_ratio = ((m_long - min_long) / w);
-                        float xx = (float) ( x_ratio * pageWidth);
-                        float yy = (float) ( (1 - y_ratio) * pageHeight);
-                        setHereLocation();
-                        canvas.drawCircle(xx, yy, 20, paint);
+                        if (isGPSEnabled()){
+                            PointF pt = new PointF((float)m_lat, (float)m_long);
+                            pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
+                            canvas.drawCircle(pt.x, pt.y, 20, paint);
+                        }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         getCurrentScreenLoc();
                     }
                 })
@@ -453,14 +450,21 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Float.toString(b_top_x) + "&&" + Float.toString(b_top_y));
         //locError(Float.toString(b_bottom_x) + "&&" + Float.toString(b_bottom_y));
     }
-    float s_x , s_y;
-    private void setHereLocation(){
-        double y_ratio = ((m_lat - min_lat) / h);
-        double x_ratio = ((m_long - min_long) / w);
-        float xx = (float) ( x_ratio * current_pagewidth);
-        float yy = (float) ( (1 - y_ratio) * current_pageheight);
-        s_x = xx;
-        s_y = yy;
+
+    private PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight){
+        double y_ratio = ((pt.x - min_lat) / h);
+        double x_ratio = ((pt.y - min_long) / w);
+        pt.x = (float) ( x_ratio * pageWidth);
+        pt.y = (float) ( (1 - y_ratio) * pageHeight);
+        return pt;
+    }
+
+    private PointF getPixLocFromGeoL(PointF pt){
+        double y_ratio = ((pt.x - min_lat) / h);
+        double x_ratio = ((pt.y - min_long) / w);
+        pt.x = (float) ( x_ratio * current_pagewidth);
+        pt.y = (float) ( (1 - y_ratio) * current_pageheight);
+        return pt;
     }
 
     private void displayFromFile(String filePath) {
@@ -492,13 +496,36 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
-                        double y_ratio = ((m_lat - min_lat) / h);
-                        double x_ratio = ((m_long - min_long) / w);
-                        float xx = (float) ( x_ratio * pageWidth);
-                        float yy = (float) ( (1 - y_ratio) * pageHeight);
-                        setHereLocation();
-                        canvas.drawCircle(xx, yy, 20, paint);
-                        locError(Float.toString(xx) + "%" + Float.toString(yy));
+                        if (isGPSEnabled()){
+                        PointF pt = new PointF((float)m_lat, (float)m_long);
+                        pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
+                        canvas.drawCircle(pt.x, pt.y, 20, paint);
+                        }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
+                        if (isLocateEnd){
+                            String[] TrailString = m_cTrail.split(" ");
+                            float[] Trails = new float[TrailString.length];
+                            for (int i = 0; i < TrailString.length; i++){
+                                Trails[i] = Float.valueOf(TrailString[i]);
+                            }
+                            for (int j = 0; j < Trails.length - 2; j = j + 2){
+                                PointF pt11, pt12;
+                                pt11 = getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]));
+                                pt12 = getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 4]));
+                                canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint);
+                            }
+                        }
+                        /*float[] pts = new float[8];
+                        pts[0] = 100;
+                        pts[1] = 100;
+                        pts[2] = 100;
+                        pts[3] = 200;
+                        pts[4] = 400;
+                        pts[5] = 300;
+                        pts[6] = 800;
+                        pts[7] = 200;
+                        canvas.drawLines(pts, paint);*/
+
+                        //locError(Float.toString(xx) + "%" + Float.toString(yy));
                         getCurrentScreenLoc();
                     }
                 })
@@ -511,7 +538,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onTap(new OnTapListener() {
                     @Override
                     public boolean onTap(MotionEvent e) {
-                        getScreenLocation(e.getRawX(), e.getRawY());
+                        PointF pt = new PointF(e.getRawX(), e.getRawY());
+                        getGeoLocFromPixL(pt);
                         return true;
                     }
                 })
@@ -565,29 +593,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //cs_top = pdfView.getCurrentYOffset()
     }
 
-    private void getScreenLocation(float x, float y){
+    private void getGeoLocFromPixL(PointF pt){
         textView = (TextView) findViewById(R.id.txt);
         DecimalFormat df = new DecimalFormat("0.0000");
         //精确定位算法
         float xxxx, yyyy;
         if (page_height < viewer_height || page_width < viewer_width) {
-            xxxx = ((x - (screen_width - viewer_width + k_w)));
-            yyyy = ((y - (screen_height - viewer_height + k_h)));
-            if (y >= (screen_height - viewer_height + k_h) && y <= (screen_height - viewer_height + k_h + page_height) && x >= (screen_width - viewer_width + k_w) && x <= (screen_width - viewer_width + k_w + page_width)) {
-                textView.setText(df.format(max_lat - (yyyy) / current_pageheight * ( max_lat - min_lat)) + "; " + df.format(( xxxx) / current_pagewidth * ( max_long - min_long) + min_long));
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + page_height) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + page_width)) {
+                pt.x = (float)(max_lat - (yyyy) / current_pageheight * ( max_lat - min_lat));
+                pt.y = (float)(( xxxx) / current_pagewidth * ( max_long - min_long) + min_long);
+                textView.setText(df.format(pt.x) + "; " + df.format(pt.y));
             } else textView.setText("点击位置在区域之外");
         } else {
-            xxxx = x - (screen_width - viewer_width);
-            yyyy = y - (screen_height - viewer_height);
-            textView.setText(df.format(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat)) + "; " + df.format(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long));
+            xxxx = pt.x - (screen_width - viewer_width);
+            yyyy = pt.y - (screen_height - viewer_height);
+            pt.x = (float)(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat));
+            pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
+            textView.setText(df.format(pt.x) + "; " + df.format(pt.y));
         }
 
 
         //
-    }
-
-    public void getInfo(){
-
     }
 
     @Override
@@ -606,9 +634,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private void getLocation() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-
-
-//
         if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
             Toast.makeText(this, "请打开网络或GPS定位功能!", Toast.LENGTH_SHORT).show();
@@ -627,8 +652,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             Log.d(TAG, "onCreate.location = " + location);
             updateView(location);
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 8000, 5, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 8000, 5, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 5, locationListener);
         }catch (SecurityException  e){
             e.printStackTrace();
         }
@@ -683,7 +708,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 //浮动按钮2 具体功能如下:
                 //locError(Float.toString(s_x) + "%" + Float.toString(s_y));
-                pdfView.moveRelativeTo(s_x, s_y);
+                //pdfView.moveRelativeTo(s_x, s_y);
                 //button2.setIcon(R.drawable.ic_my_location);
             }
         });
@@ -734,13 +759,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        pdfView = (PDFView) findViewById(R.id.pdfView);
-        locError(Integer.toString(pdfView.getLeft()));
-        locError(Integer.toString(pdfView.getRight()));
-        locError(Integer.toString(pdfView.getTop()));
-        locError(Integer.toString(pdfView.getBottom()));
-        locError(Integer.toString(pdfView.getHeight()));
-        locError(Integer.toString(pdfView.getMeasuredHeight()));
+        //pdfView = (PDFView) findViewById(R.id.pdfView);
+        //locError(Integer.toString(pdfView.getLeft()));
+        //locError(Integer.toString(pdfView.getRight()));
+        //locError(Integer.toString(pdfView.getTop()));
+        //locError(Integer.toString(pdfView.getBottom()));
+        //locError(Integer.toString(pdfView.getHeight()));
+        //locError(Integer.toString(pdfView.getMeasuredHeight()));
     }
 
     @Override
@@ -780,7 +805,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.query).setVisible(false);
+        menu.findItem(R.id.trail).setVisible(true);
+        menu.findItem(R.id.trailend).setVisible(true);
         return true;
+    }
+
+    private void initTrail(){
+        if (isGPSEnabled()){
+            locError("开始绘制轨迹");
+        }else locError("请打开GPS功能");
+    }
+
+    private boolean isGPSEnabled(){
+        textView = (TextView) findViewById(R.id.txt);
+        //得到系统的位置服务，判断GPS是否激活
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean ok = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if(ok){
+            textView.setText("GPS已经开启");
+            return true;
+        }else{
+            textView.setText("GPS没有开启");
+            return false;
+        }
     }
 
     @Override
@@ -793,6 +840,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 Intent intent = new Intent(MainInterface.this, info_page.class);
                 intent.putExtra("extra_data", WKT);
                 startActivity(intent);
+                break;
+            case R.id.trail:
+                initTrail();
+                break;
+            case R.id.trailend:
+                //initTrail();
+                m_cTrail = "";
+                if (!isLocateEnd){
+                    isLocateEnd = true;
+                }else Toast.makeText(this, "你没有打开位置记录功能", Toast.LENGTH_LONG).show();
+
                 break;
             case R.id.query:
                 linearLayout = (LinearLayout) findViewById(R.id.search);

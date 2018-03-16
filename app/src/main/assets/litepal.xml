@@ -5,6 +5,5 @@
     <list>
         <mapping class="com.geopdfviewer.android.Trail"></mapping>
         <mapping class="com.geopdfviewer.android.POI"></mapping>
-        <mapping class="com.geopdfviewer.android.PhotoLoc"></mapping>
     </list>
 </litepal>

@@ -11,6 +11,17 @@
         android:icon="@drawable/ic_search"
         android:title="query"
         app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/trail"
+        android:icon="@drawable/ic_subway"
+        android:title="Trail"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/trailend"
+        android:icon="@drawable/ic_subway"
+        android:title="endTrail"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/info"
         android:icon="@drawable/ic_info_black"

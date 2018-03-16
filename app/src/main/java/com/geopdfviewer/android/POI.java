@@ -1,14 +1,53 @@
 package com.geopdfviewer.android;
 
+import org.litepal.crud.DataSupport;
+
 /**
  * Created by 54286 on 2018/3/15.
  */
 
-public class POI {
+public class POI  extends DataSupport {
     private int id;
     private String name;
+    private String path;
+    private float path_x;
+    private float path_y;
     private float x;
     private float y;
+    private int time;
+
+
+    public float getPath_x() {
+        return path_x;
+    }
+
+    public void setPath_x(float path_x) {
+        this.path_x = path_x;
+    }
+
+    public float getPath_y() {
+        return path_y;
+    }
+
+    public void setPath_y(float path_y) {
+        this.path_y = path_y;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
 
     public int getId() {
         return id;
