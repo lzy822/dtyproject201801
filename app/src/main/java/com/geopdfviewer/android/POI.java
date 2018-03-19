@@ -10,12 +10,21 @@ public class POI  extends DataSupport {
     private int id;
     private String ic;
     private String name;
-    private String path;
-    private float path_x;
-    private float path_y;
+    private String POIC;
+    private int photonum;
+    private String description;
+    private int tapenum;
     private float x;
     private float y;
-    private long time;
+    private String time;
+
+    public String getPOIC() {
+        return POIC;
+    }
+
+    public void setPOIC(String POIC) {
+        this.POIC = POIC;
+    }
 
     public String getIc() {
         return ic;
@@ -25,35 +34,35 @@ public class POI  extends DataSupport {
         this.ic = ic;
     }
 
-    public float getPath_x() {
-        return path_x;
+    public int getPhotonum() {
+        return photonum;
     }
 
-    public void setPath_x(float path_x) {
-        this.path_x = path_x;
+    public void setPhotonum(int photonum) {
+        this.photonum = photonum;
     }
 
-    public float getPath_y() {
-        return path_y;
+    public String getDescription() {
+        return description;
     }
 
-    public void setPath_y(float path_y) {
-        this.path_y = path_y;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getPath() {
-        return path;
+    public int getTapenum() {
+        return tapenum;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setTapenum(int tapenum) {
+        this.tapenum = tapenum;
     }
 
-    public long getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(String time) {
         this.time = time;
     }
 

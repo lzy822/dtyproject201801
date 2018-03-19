@@ -27,5 +27,10 @@
         android:icon="@drawable/ic_info_black"
         android:title="info"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/deletePOI"
+        android:icon="@drawable/ic_info_black"
+        android:title="deletePOI"
+        app:showAsAction="never"/>
 
 </menu>
