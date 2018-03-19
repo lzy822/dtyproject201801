@@ -23,9 +23,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -64,6 +66,7 @@ import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
+import org.litepal.LitePal;
 import org.litepal.crud.DataSupport;
 
 import java.io.BufferedReader;
@@ -78,6 +81,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,6 +90,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         OnPageErrorListener, OnDrawListener {
     private static final String TAG = "MainInterface";
     public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
+    private final static int REQUEST_CODE = 42;
+    public static final int PERMISSION_CODE = 42042;
+    private final String DEF_DIR =  Environment.getExternalStorageDirectory().toString() + "/DCIM/Camera/";
+    public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
+    public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     public static final int NONE_FILE_TYPE = 0;
     public static final int FILE_FILE_TYPE = 1;
     public static final int ASSET_FILE_TYPE = 2;
@@ -557,6 +566,83 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Float.toString(b_bottom_x) + "&&" + Float.toString(b_bottom_y));
     }
 
+    void pickFile() {
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                READ_EXTERNAL_STORAGE);
+        int permissionCheck1 = ContextCompat.checkSelfPermission(this,
+                WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED || permissionCheck1 != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{
+                            READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_CODE
+            );
+
+            return;
+        }
+
+        launchPicker();
+    }
+
+    void launchPicker() {
+        //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        //intent.setData(Uri.parse(DEF_DIR));
+        //intent.addCategory(Intent.CATEGORY_OPENABLE);
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        try {
+            startActivityForResult(intent, REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            //alert user that file manager not working
+            Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            Uri uri = data.getData();
+            //locError(uri.getPath());
+            float[] latandlong = new float[2];
+            try{
+                ExifInterface exifInterface = new ExifInterface(getRealPath(uri.getPath()));
+                exifInterface.getLatLong(latandlong);
+                locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                POI poi = new POI();
+                poi.setIc(ic);
+                poi.setPath_x(latandlong[0]);
+                poi.setPath_y(latandlong[1]);
+                poi.setPath(getRealPath(uri.getPath()));
+                poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
+                poi.setX(latandlong[0]);
+                poi.setY(latandlong[1]);
+                poi.setTime(System.currentTimeMillis());
+                poi.save();
+                showAll = true;
+                pdfView.resetZoomWithAnimation();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    //获取File可使用路径
+    public String getRealPath(String filePath) {
+        if (!filePath.contains("raw")) {
+            String str = "/external_files";
+            String Dir = Environment.getExternalStorageDirectory().toString();
+            filePath = Dir + filePath.substring(str.length());
+        }else {
+            filePath = filePath.substring(5);
+            //locError("here");
+            //locError(filePath);
+        }
+        return filePath;
+    }
+
     private PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight){
         double y_ratio = ((pt.x - min_lat) / h);
         double x_ratio = ((pt.y - min_long) / w);
@@ -601,6 +687,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
+                        Paint paint1 = new Paint();
+                        paint1.setColor(Color.GREEN);
+                        paint1.setStrokeWidth((float)2.0);
+                        paint1.setStyle(Paint.Style.FILL);
+                        Paint paint2 = new Paint();
+                        paint2.setColor(Color.BLACK);
+                        paint2.setStrokeWidth((float)2.0);
+                        paint2.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                         PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -629,7 +723,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             if (pois.size() > 0){
                             for (POI poi : pois){
                                 PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
-                                canvas.drawCircle(pt2.x, pt2.y, 50, paint);
+                                canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                                //locError(Boolean.toString(poi.getPath().isEmpty()));
+                                //locError(Integer.toString(poi.getPath().length()));
+                                //locError(poi.getPath());
+                                if (poi.getPath() == null){
+                                canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                                }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
                             }}
                         }
                         /*float[] pts = new float[8];
@@ -875,9 +975,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //浮动按钮1 具体功能如下:
                 //reDrawCache();
                 //DataSupport.deleteAll(Trail.class);
-                List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                /*List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                 List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
-                locError(Integer.toString(pois.size() + trails.size()));
+                locError(Integer.toString(pois.size() + trails.size()));*/
+                pickFile();
             }
         });
         final com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
@@ -889,6 +990,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //pdfView.moveRelativeTo(s_x, s_y);
                 //button2.setIcon(R.drawable.ic_my_location);
                 showAll = true;
+                //pdfView.zoomTo((float) 2.0);
+                pdfView.resetZoomWithAnimation();
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);

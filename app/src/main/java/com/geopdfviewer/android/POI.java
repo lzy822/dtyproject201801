@@ -15,7 +15,7 @@ public class POI  extends DataSupport {
     private float path_y;
     private float x;
     private float y;
-    private int time;
+    private long time;
 
     public String getIc() {
         return ic;
@@ -49,11 +49,11 @@ public class POI  extends DataSupport {
         this.path = path;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(long time) {
         this.time = time;
     }
 

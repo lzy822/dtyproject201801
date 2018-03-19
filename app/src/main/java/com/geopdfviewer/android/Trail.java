@@ -13,7 +13,7 @@ public class Trail extends DataSupport{
     private String ic;
     private String name;
     private String path;
-    private int time;
+    private long time;
 
     public String getIc() {
         return ic;
@@ -23,11 +23,11 @@ public class Trail extends DataSupport{
         this.ic = ic;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(long time) {
         this.time = time;
     }
 
