@@ -52,16 +52,16 @@ public class mPOIobjAdapter extends RecyclerView.Adapter<mPOIobjAdapter.ViewHold
         if(mContext == null) {
             mContext = parent.getContext();
         }
-        View view = LayoutInflater.from(mContext).inflate(R.layout.map_test_item, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.pois_item, parent, false);
         final mPOIobjAdapter.ViewHolder holder = new mPOIobjAdapter.ViewHolder(view);
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 mPOIobj poi = mPOIList.get(position);
-                /*Intent intent = new Intent(mContext, MainInterface.class);
-                intent.putExtra("num", map.getM_num());
-                mContext.startActivity(intent);*/
+                Intent intent = new Intent(mContext, singlepoi.class);
+                intent.putExtra("POIC", poi.getM_POIC());
+                mContext.startActivity(intent);
             }
         });
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -70,19 +70,9 @@ public class mPOIobjAdapter extends RecyclerView.Adapter<mPOIobjAdapter.ViewHold
                 if (mOnItemLong != null){
                     int position = holder.getAdapterPosition();
                     mPOIobj poi = mPOIList.get(position);
-                    /*mOnItemLong.onItemLongClick(v, map.getM_num());
-                    Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();*/
+                    mOnItemLong.onItemLongClick(v, poi.getM_POIC());
                     holder.cardView.setCardBackgroundColor(Color.GRAY);
                 }
-                //Toast.makeText(mContext, "see here", Toast.LENGTH_LONG).show();
-                /*
-                Intent intent = new Intent(mContext, select_page.class);
-                intent.putExtra(select_page.LOC_DELETE_ITEM, map.getM_num());
-                selectedNum = map.getM_num();
-                //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
-                //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
-                //mContext.setTheme(R.style.DarkTheme);
-                mContext.startActivity(intent);*/
                 return true;
             }
         });
@@ -92,15 +82,22 @@ public class mPOIobjAdapter extends RecyclerView.Adapter<mPOIobjAdapter.ViewHold
     @Override
     public void onBindViewHolder(mPOIobjAdapter.ViewHolder holder, int position) {
         mPOIobj poi = mPOIList.get(position);
-        holder.POIName.setText(poi.getM_name());
-
-        /*if (map.getM_imguri() != ""){
-            holder.MapImage.setImageURI(Uri.parse(map.getM_imguri()));
-        }else holder.MapImage.setImageResource(R.drawable.ic_android_black);*/
-
-
-        //holder.MapImage.fromUri(map.getImageId());
-        //Glide.with(mContext).load(fruit.getImageId()).into(holder.fruitImage);
+        if (poi.getM_tapenum() == 0 && poi.getM_photonum() == 0){
+            holder.POIImage.setImageResource(R.drawable.ic_pin_red1);
+        }
+        if (poi.getM_tapenum() == 0 && poi.getM_photonum() != 0){
+            holder.POIImage.setImageResource(R.drawable.ic_pin_green1);
+        }
+        if (poi.getM_tapenum() != 0 && poi.getM_photonum() == 0){
+            holder.POIImage.setImageResource(R.drawable.ic_pin_blue1);
+        }
+        if (poi.getM_tapenum() != 0 && poi.getM_photonum() != 0){
+            holder.POIImage.setImageResource(R.drawable.ic_pin_yellow1);
+        }
+        String data;
+        data = "POI名称: " + poi.getM_name() + "\n" + "描述: " + poi.getM_description() + "\n" + "时间: " + poi.getM_time() + "\n" + "有" +
+                poi.getM_tapenum() + "个录音, 有" + poi.getM_photonum() + "个图片";
+        holder.POIName.setText(data);
     }
 
 
@@ -112,7 +109,7 @@ public class mPOIobjAdapter extends RecyclerView.Adapter<mPOIobjAdapter.ViewHold
 
 
     public interface OnRecyclerItemLongListener{
-        void onItemLongClick(View view,int position);
+        void onItemLongClick(View view,String POIC);
     }
     public void setOnItemLongClickListener(mPOIobjAdapter.OnRecyclerItemLongListener listener){
         //Log.w(TAG, "setOnItemLongClickListener: " );

@@ -497,7 +497,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.save();
                             locError(pt1.toString());
                         }
-                        if (isQuery == true){
+                        if (isQuery && isDrawType == NONE_DRAW_TYPE){
                             List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             locError(Integer.toString(pois.size()));
                             int n = 0;
@@ -559,6 +559,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint3.setColor(Color.BLUE);
                         paint3.setStrokeWidth((float)2.0);
                         paint3.setStyle(Paint.Style.FILL);
+                        Paint paint4 = new Paint();
+                        paint4.setColor(Color.YELLOW);
+                        paint4.setStrokeWidth((float)2.0);
+                        paint4.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -595,7 +599,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
                                         } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
-                                    }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                                    }else {
+                                        if (poi.getTapenum() == 0){
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                                        }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                    }
                                 }}
                         }
                         getCurrentScreenLoc();
@@ -801,6 +809,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint3.setColor(Color.BLUE);
                         paint3.setStrokeWidth((float)2.0);
                         paint3.setStyle(Paint.Style.FILL);
+                        Paint paint4 = new Paint();
+                        paint4.setColor(Color.YELLOW);
+                        paint4.setStrokeWidth((float)2.0);
+                        paint4.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                         PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -837,7 +849,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     if (poi.getTapenum() == 0){
                                 canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
                                     } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
-                                }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                                }else {
+                                    if (poi.getTapenum() == 0){
+                                    canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                                    }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                }
                             }}
                         }
                         /*float[] pts = new float[8];
@@ -882,7 +898,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.save();
                             locError(pt1.toString());
                         }
-                        if (isQuery == true){
+                        if (isQuery && isDrawType == NONE_DRAW_TYPE){
                             List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             locError(Integer.toString(pois.size()));
                             int n = 0;
@@ -890,9 +906,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             if (pois.size() > 0){
                                 POI poii = pois.get(0);
                                 float delta = Math.abs( poii.getX() - pt1.x) + Math.abs( poii.getY() - pt1.y);
-                                //locError(Float.toString(delta));
                                 for (POI poi : pois){
-                                    if (Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < delta && Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < 0.01){
+                                    if (Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < delta && Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < 0.001){
                                         //locError(Float.toString(Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y)));
                                         num = n;
                                         //break;
@@ -902,7 +917,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 locError("num : " + Integer.toString(num));
                                 if (delta < 0.01 || num != 0){
-                                    locError("photonum : " + Integer.toString(pois.get(num).getPhotonum()));
+                                    //locError("photonum : " + Integer.toString(pois.get(num).getPhotonum()));
                                     Intent intent = new Intent(MainInterface.this, singlepoi.class);
                                     intent.putExtra("POIC", pois.get(num).getPOIC());
                                     startActivity(intent);
@@ -1053,6 +1068,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 isDrawType = TRAIL_DRAW_TYPE;
+                isQuery = false;
                 m_cTrail = "";
                 isLocateEnd = false;
                 isLocate = 0;
@@ -1065,7 +1081,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
 
-                isDrawType = POI_DRAW_TYPE;
+                if (isDrawType == POI_DRAW_TYPE){
+                    isDrawType = NONE_DRAW_TYPE;
+                }else {
+                    isDrawType = POI_DRAW_TYPE;
+                    isQuery = false;
+                }
+
                 //linearLayout.setVisibility(View.GONE);
             }
         });
@@ -1094,6 +1116,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 if (!isQuery){
                     isQuery = true;
+                    isDrawType = NONE_DRAW_TYPE;
                 }else isQuery = false;
             }
         });
@@ -1118,11 +1141,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //浮动按钮1 具体功能如下:
-                //reDrawCache();
-                //DataSupport.deleteAll(Trail.class);
-                /*List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
-                List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
-                locError(Integer.toString(pois.size() + trails.size()));*/
                 pickFile();
             }
         });
@@ -1131,11 +1149,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //浮动按钮2 具体功能如下:
-                //locError(Float.toString(s_x) + "%" + Float.toString(s_y));
-                //pdfView.moveRelativeTo(s_x, s_y);
-                //button2.setIcon(R.drawable.ic_my_location);
                 showAll = true;
-                //pdfView.zoomTo((float) 2.0);
                 pdfView.resetZoomWithAnimation();
             }
         });
@@ -1243,6 +1257,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         menu.findItem(R.id.trail).setVisible(true);
         menu.findItem(R.id.trailend).setVisible(true);
         menu.findItem(R.id.deletePOI).setVisible(true);
+        menu.findItem(R.id.queryPOI).setVisible(true);
         return true;
     }
 
@@ -1305,6 +1320,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             case R.id.deletePOI:
                 DataSupport.deleteAll(POI.class, "ic = ?", ic);
                 pdfView.resetZoomWithAnimation();
+                break;
+            case R.id.queryPOI:
+                Intent intent2 = new Intent(MainInterface.this, pois.class);
+                intent2.putExtra("ic", ic);
+                startActivity(intent2);
                 break;
             default:
         }

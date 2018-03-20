@@ -33,9 +33,14 @@
         <activity
             android:name=".info_page"
             android:label="地理信息显示页面" />
-
-        <activity android:name=".singlepoi" />
-        <activity android:name=".pois"></activity>
+        <activity
+            android:name=".singlepoi"
+            android:label="单个POI点信息" />
+        <activity
+            android:name=".pois"
+            android:label="所有POI信息" />
+        <activity android:name=".photoshow" />
+        <activity android:name=".tapeshow"></activity>
     </application>
 
 </manifest>

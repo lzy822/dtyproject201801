@@ -7,7 +7,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,12 +32,20 @@ public class singlepoi extends AppCompatActivity {
         setContentView(R.layout.activity_singlepoi);
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
+    }
+
+    private void refresh(){
         List<POI> pois = DataSupport.where("POIC = ?", POIC).find(POI.class);
         POI poi = pois.get(0);
         name = poi.getName();
-        Log.w(TAG, POIC );
-        Log.w(TAG, name );
-        Log.w(TAG, POIC.substring(3) );
         editText_name = (EditText) findViewById(R.id.edit_name);
         editText_name.setText(name);
         editText_des = (EditText) findViewById(R.id.edit_des);
@@ -51,11 +61,33 @@ public class singlepoi extends AppCompatActivity {
         textView_tapenum.setText(Integer.toString(poi.getTapenum()));
         TextView textView_loc = (TextView) findViewById(R.id.txt_locshow);
         textView_loc.setText(Float.toString(poi.getX()) + ", " + Float.toString(poi.getY()));
+        ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
+        addphoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //打开图片列表
+                Intent intent1 = new Intent(singlepoi.this, photoshow.class);
+                intent1.putExtra("POIC", POIC);
+                startActivity(intent1);
+            }
+        });
+        ImageButton addtape = (ImageButton)findViewById(R.id.addTape_singlepoi);
+        addtape.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //打开录音列表
+                Intent intent2 = new Intent(singlepoi.this, tapeshow.class);
+                intent2.putExtra("POIC", POIC);
+                startActivity(intent2);
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.poiinfotoolbar, menu);
+        menu.findItem(R.id.back_pois).setVisible(false);
+        menu.findItem(R.id.add_pois).setVisible(false);
         return true;
     }
 
@@ -72,8 +104,6 @@ public class singlepoi extends AppCompatActivity {
                 this.finish();
                 break;
             case R.id.deletepoi:
-                editText_des = (EditText) findViewById(R.id.edit_des);
-                editText_name = (EditText) findViewById(R.id.edit_name);
                 DataSupport.deleteAll(POI.class, "POIC = ?", POIC);
                 DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC);
                 DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC);

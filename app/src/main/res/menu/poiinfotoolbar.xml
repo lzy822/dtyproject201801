@@ -11,4 +11,14 @@
         android:icon="@drawable/ic_delete"
         android:title="deletePOI"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/back_pois"
+        android:icon="@drawable/ic_arrow_back"
+        android:title="返回"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/add_pois"
+        android:icon="@drawable/ic_add"
+        android:title="返回"
+        app:showAsAction="always"/>
 </menu>

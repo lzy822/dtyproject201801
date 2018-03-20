@@ -32,5 +32,10 @@
         android:icon="@drawable/ic_info_black"
         android:title="deletePOI"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/queryPOI"
+        android:icon="@drawable/ic_info_black"
+        android:title="查看所有POI点信息"
+        app:showAsAction="never"/>
 
 </menu>
