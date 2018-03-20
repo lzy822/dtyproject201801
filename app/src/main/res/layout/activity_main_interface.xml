@@ -84,12 +84,20 @@
         fab:fab_labelsPosition="left"
         >
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/measure"
+            android:id="@+id/addTape"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_title="测量"
-            android:tooltipText="测量"
-            android:src="@drawable/ic_straighten"
+            fab:fab_title="添加录音"
+            android:tooltipText="添加录音"
+            android:src="@drawable/ic_sound"
+            />
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addPhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_title="添加照片"
+            android:tooltipText="添加照片"
+            android:src="@drawable/ic_add_a_photo"
             />
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/lochere"

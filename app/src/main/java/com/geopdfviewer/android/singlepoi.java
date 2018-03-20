@@ -42,7 +42,7 @@ public class singlepoi extends AppCompatActivity {
         if (poi.getDescription() != null) {
             editText_des.setText(poi.getDescription());
         }else editText_des.setText("");
-        TextView textView_time = (TextView) findViewById(R.id.txt_time);
+        TextView textView_time = (TextView) findViewById(R.id.txt_timeshow);
         textView_time.setText(poi.getTime());
         Log.w(TAG, Integer.toString(poi.getTapenum()));
         TextView textView_photonum = (TextView) findViewById(R.id.txt_photonumshow);
@@ -69,6 +69,14 @@ public class singlepoi extends AppCompatActivity {
                 poi.setName(editText_name.getText().toString());
                 poi.setDescription(editText_des.getText().toString());
                 poi.updateAll("POIC = ?", POIC);
+                this.finish();
+                break;
+            case R.id.deletepoi:
+                editText_des = (EditText) findViewById(R.id.edit_des);
+                editText_name = (EditText) findViewById(R.id.edit_name);
+                DataSupport.deleteAll(POI.class, "POIC = ?", POIC);
+                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC);
+                DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC);
                 this.finish();
                 break;
             default:

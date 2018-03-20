@@ -5,6 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.geopdfviewer.android.pois">
-
+<android.support.v7.widget.RecyclerView
+    android:id="@+id/recycler_view_poi"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
 
 </LinearLayout>

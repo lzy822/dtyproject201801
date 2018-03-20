@@ -9,9 +9,11 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -330,6 +332,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public void deleteMDatabase(String m_ic){
+        List<POI> pois = DataSupport.where("ic = ?", m_ic).find(POI.class);
+        for ( POI poi : pois){
+            String poic = poi.getPOIC();
+            DataSupport.deleteAll(MTAPE.class, "POIC = ?", poic);
+            DataSupport.deleteAll(MPHOTO.class, "POIC = ?", poic);
+        }
         DataSupport.deleteAll(POI.class, "ic = ?", m_ic);
         DataSupport.deleteAll(Trail.class, "ic = ?", m_ic);
     }
@@ -535,6 +543,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        /*Uri uri = Uri.parse("/storage/emulated/0/MIUI/sound_recorder/3月20日 上午10点36分.mp3");
+        MediaPlayer mediaPlayer = MediaPlayer.create(this, uri);
+        mediaPlayer.start();*/
         //locError();
         //Clear按钮事件编辑
         Button btn_clear = (Button) findViewById(R.id.btn_clear);

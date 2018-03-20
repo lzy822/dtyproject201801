@@ -24,6 +24,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -91,7 +92,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         OnPageErrorListener, OnDrawListener {
     private static final String TAG = "MainInterface";
     public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
-    private final static int REQUEST_CODE = 42;
+    private final static int REQUEST_CODE_PHOTO = 42;
+    private final static int REQUEST_CODE_TAPE = 43;
     public static final int PERMISSION_CODE = 42042;
     private final String DEF_DIR =  Environment.getExternalStorageDirectory().toString() + "/DCIM/Camera/";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
@@ -478,23 +480,51 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     @Override
                     public boolean onTap(MotionEvent e) {
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
-
                         PointF pt1;
                         pt1 = getGeoLocFromPixL(pt);
-                        if (isDrawType == TRAIL_DRAW_TYPE){
-                            //PointF pt1 = new PointF(, );
-                            if (!isLocateEnd) {
-                                recordTrail(pt1.x, pt1.y);
-                                locError(m_cTrail);
-                            }
-                        }
-                        if (isDrawType == POI_DRAW_TYPE){
+                        if (isDrawType == POI_DRAW_TYPE && isQuery == false){
+                            List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
                             POI poi = new POI();
+                            poi.setName("POI" + String.valueOf(POIs.size() + 1));
                             poi.setIc(ic);
                             poi.setX(pt1.x);
                             poi.setY(pt1.y);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                            Date date = new Date(System.currentTimeMillis());
+                            poi.setTime(simpleDateFormat.format(date));
+                            poi.setPhotonum(0);
+                            poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
+                        }
+                        if (isQuery == true){
+                            List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            locError(Integer.toString(pois.size()));
+                            int n = 0;
+                            int num = 0;
+                            if (pois.size() > 0){
+                                POI poii = pois.get(0);
+                                float delta = Math.abs( poii.getX() - pt1.x) + Math.abs( poii.getY() - pt1.y);
+                                //locError(Float.toString(delta));
+                                for (POI poi : pois){
+                                    if (Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < delta && Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < 0.01){
+                                        //locError(Float.toString(Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y)));
+                                        num = n;
+                                        //break;
+                                    }
+                                    locError("n : " + Integer.toString(n));
+                                    n++;
+                                }
+                                locError("num : " + Integer.toString(num));
+                                if (delta < 0.01 || num != 0){
+                                    locError("photonum : " + Integer.toString(pois.get(num).getPhotonum()));
+                                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                    intent.putExtra("POIC", pois.get(num).getPOIC());
+                                    startActivity(intent);
+                                    //locError(Integer.toString(pois.get(num).getPhotonum()));
+                                }else locError("没有正常查询");
+                            }
+
                         }
                         return true;
                     }
@@ -517,6 +547,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint.setColor(Color.RED);
                         paint.setStrokeWidth((float)3.0);
                         paint.setStyle(Paint.Style.FILL);
+                        Paint paint1 = new Paint();
+                        paint1.setColor(Color.GREEN);
+                        paint1.setStrokeWidth((float)2.0);
+                        paint1.setStyle(Paint.Style.FILL);
+                        Paint paint2 = new Paint();
+                        paint2.setColor(Color.BLACK);
+                        paint2.setStrokeWidth((float)2.0);
+                        paint2.setStyle(Paint.Style.FILL);
+                        Paint paint3 = new Paint();
+                        paint3.setColor(Color.BLUE);
+                        paint3.setStrokeWidth((float)2.0);
+                        paint3.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -545,7 +587,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             if (pois.size() > 0){
                                 for (POI poi : pois){
                                     PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
-                                    canvas.drawCircle(pt2.x, pt2.y, 50, paint);
+                                    canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                                    //locError(Boolean.toString(poi.getPath().isEmpty()));
+                                    //locError(Integer.toString(poi.getPath().length()));
+                                    //locError(poi.getPath());
+                                    if (poi.getPhotonum() == 0){
+                                        if (poi.getTapenum() == 0){
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
+                                    }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
                                 }}
                         }
                         getCurrentScreenLoc();
@@ -596,7 +646,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //intent.addCategory(Intent.CATEGORY_OPENABLE);
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         try {
-            startActivityForResult(intent, REQUEST_CODE);
+            startActivityForResult(intent, REQUEST_CODE_PHOTO);
         } catch (ActivityNotFoundException e) {
             //alert user that file manager not working
             Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
@@ -605,7 +655,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
             //locError(uri.getPath());
             float[] latandlong = new float[2];
@@ -638,6 +688,46 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 e.printStackTrace();
             }
 
+        }
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
+            Uri uri = data.getData();
+            long time = System.currentTimeMillis();
+            String POIC = "POI" + String.valueOf(time);
+            List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+            POI poi = new POI();
+            poi.setIc(ic);
+            poi.setPOIC(POIC);
+            poi.setTapenum(1);
+            poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
+            poi.setX((float) m_lat);
+            poi.setY((float)m_long);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            Date date = new Date(System.currentTimeMillis());
+            poi.setTime(simpleDateFormat.format(date));
+            poi.save();
+            MTAPE mtape = new MTAPE();
+            mtape.setPath(getRealPathFromUri(this, uri));
+            mtape.setPdfic(ic);
+            mtape.setPOIC(POIC);
+            mtape.setTime(simpleDateFormat.format(date));
+            mtape.save();
+            showAll = true;
+            pdfView.resetZoomWithAnimation();
+        }
+    }
+
+    public static String getRealPathFromUri(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Audio.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 
@@ -707,6 +797,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint2.setColor(Color.BLACK);
                         paint2.setStrokeWidth((float)2.0);
                         paint2.setStyle(Paint.Style.FILL);
+                        Paint paint3 = new Paint();
+                        paint3.setColor(Color.BLUE);
+                        paint3.setStrokeWidth((float)2.0);
+                        paint3.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                         PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -740,7 +834,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //locError(Integer.toString(poi.getPath().length()));
                                 //locError(poi.getPath());
                                 if (poi.getPhotonum() == 0){
+                                    if (poi.getTapenum() == 0){
                                 canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                                    } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
                                 }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
                             }}
                         }
@@ -799,7 +895,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     if (Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < delta && Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < 0.01){
                                         //locError(Float.toString(Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y)));
                                         num = n;
-                                        break;
+                                        //break;
                                     }
                                     locError("n : " + Integer.toString(n));
                                     n++;
@@ -1017,7 +1113,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 linearLayout.setVisibility(View.GONE);
             }
         });
-        com.getbase.floatingactionbutton.FloatingActionButton button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.measure);
+        com.getbase.floatingactionbutton.FloatingActionButton button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addPhoto);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1049,6 +1145,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 //浮动按钮3 具体功能如下:
                 pdfView.resetZoomWithAnimation();
+            }
+        });
+        com.getbase.floatingactionbutton.FloatingActionButton button4 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addTape);
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //浮动按钮4 具体功能如下:
+                Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                startActivityForResult(intent, REQUEST_CODE_TAPE);
             }
         });
 
@@ -1104,7 +1209,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         super.onResume();
         String currentProvider = LocationManager.NETWORK_PROVIDER;
         getScreen();
-        Log.d(TAG, currentProvider);
     }
 
     @Override
