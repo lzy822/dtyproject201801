@@ -74,6 +74,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -187,6 +188,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录是否开始查询操作
     private boolean isQuery = false;
+
+    //记录当前设置点位数
+    private int poinum_messure = 0;
+
+    //记录是否开始测量
+    private  boolean isMessure = false;
+
+    //记录测量点位的坐标
+    private PointF poi111, poi222;
 
     private void recordTrail(Location location){
         isLocate++;
@@ -607,6 +617,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }}
                         }
                         getCurrentScreenLoc();
+                        if (isMessure == true){
+                            locError("here we go");
+                        // 保存绘图为本地图片
+                        canvas.save(Canvas.ALL_SAVE_FLAG);
+                        canvas.restore();
+                        Bitmap mBitmap= Bitmap.createBitmap((int) pageWidth, (int)pageHeight, Bitmap.Config.RGB_565 );
+                        File file = new File(Environment.getExternalStorageDirectory().getPath()
+                                 + "/share_pic.png");// 保存到sdcard根目录下，文件名为share_pic.png
+                        Log.i("CXC", Environment.getExternalStorageDirectory().getPath());
+                        FileOutputStream fos = null;
+                        try {
+                            fos = new FileOutputStream(file);
+                            mBitmap.compress(Bitmap.CompressFormat.PNG, 50, fos);
+
+                        } catch (FileNotFoundException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        try {
+                            fos.close();
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }}
 
                     }
                 })
@@ -836,6 +870,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                             }
                         }
+                        if (isMessure == true && poinum_messure == 2){
+                            //canvas.drawLine();
+                        }
                         if(isDrawType == POI_DRAW_TYPE || showAll){
                             List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             if (pois.size() > 0){
@@ -897,6 +934,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
+                        }
+                        if (isMessure == true){
+                            poinum_messure++;
+                            if (poinum_messure == 1){
+                                poi111 = pt1;
+                            }
+                            if (poinum_messure == 2){
+                                poi222 = pt1;
+                                locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                Toast.makeText(MainInterface.this, "距离为" + Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)) + "米", Toast.LENGTH_LONG).show();
+                            }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
                             List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
@@ -1158,7 +1206,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //浮动按钮3 具体功能如下:
-                pdfView.resetZoomWithAnimation();
+                //pdfView.resetZoomWithAnimation();
+                isQuery = false;
+                isDrawType = NONE_DRAW_TYPE;
+                isLocate = 0;
+                isLocateEnd = true;
+                showAll = false;
+                isMessure = true;
+                poinum_messure = 0;
+                //pdfView.get
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button4 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addTape);
@@ -1173,6 +1229,36 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
         }
+
+    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
+
+        double Lat1 = rad(latitude1); // 纬度
+
+        double Lat2 = rad(latitude2);
+
+        double a = Lat1 - Lat2;//两点纬度之差
+
+        double b = rad(longitude1) - rad(longitude2); //经度之差
+
+        double s = 2 * Math.asin(Math
+
+                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
+
+        s = s * 6378137.0;//弧长乘地球半径（半径为米）
+
+        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
+
+        return s;
+
+    }
+
+
+
+    private static double rad(double d) {
+
+        return d * Math.PI / 180.00; //角度转换成弧度
+
+    }
 
     private void reDrawCache() {
         if (FILE_TYPE == NONE_FILE_TYPE) {
