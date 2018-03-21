@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +41,9 @@ public class singlepoi extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_singlepoi);
+        //声明ToolBar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
 
@@ -170,6 +174,7 @@ public class singlepoi extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.poiinfotoolbar, menu);
         menu.findItem(R.id.back_pois).setVisible(false);
+        menu.findItem(R.id.restore_pois).setVisible(false);
         menu.findItem(R.id.add_pois).setVisible(false);
         return true;
     }

@@ -30,6 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -122,6 +123,32 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //记录当前pdf地图中心的经纬度值
     float m_center_x, m_center_y;
 
+    //记录是否长按
+    private int isLongClick = 1;
+
+    //声明Toolbar
+    Toolbar toolbar;
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        //toolbar = (Toolbar) findViewById(R.id.toolbar);
+        switch (isLongClick){
+            case 1:
+                toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                menu.findItem(R.id.delete).setVisible(false);
+                menu.findItem(R.id.mmcancel).setVisible(false);
+                menu.findItem(R.id.showinfo).setVisible(false);
+                break;
+            case 0:
+                toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
+                menu.findItem(R.id.delete).setVisible(true);
+                menu.findItem(R.id.mmcancel).setVisible(true);
+                menu.findItem(R.id.showinfo).setVisible(true);
+                break;
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //getMenuInflater().inflate(R.menu.options, menu);
@@ -136,20 +163,27 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         {
             case  R.id.delete:
                 if (selectedNum != 0){
-                deleteData(selectedNum);
-                selectedNum = 0;
+                    deleteData(selectedNum);
+                    selectedNum = 0;
+                    isLongClick = 1;
+                    invalidateOptionsMenu();
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
             case  R.id.mmcancel:
                 if (selectedNum != 0){
+                    isLongClick = 1;
                     refreshRecycler();
                     selectedNum = 0;
+                    isLongClick = 1;
+                    invalidateOptionsMenu();
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
             case  R.id.showinfo:
                 if (selectedNum != 0){
                     showInfo(selectedNum);
                     selectedNum = 0;
+                    isLongClick = 1;
+                    invalidateOptionsMenu();
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
         }
@@ -228,7 +262,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
     public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic, String center_latlong) {
-        Map_test mapTest = new Map_test(name, num, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
+        Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
         map_tests[num_pdf - 1] = mapTest;
         map_testList.clear();
         for (int i = 0; i < num_pdf; i++) {
@@ -253,7 +287,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String CropBox = pref1.getString(str + "CropBox", "");
             String center_latlong = pref1.getString(str + "center_latlong", "");
             String ic = pref1.getString(str + "ic", "");
-            Map_test mapTest = new Map_test(name, num, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
+            Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
             map_tests[j - 1] = mapTest;
             map_testList.add(map_tests[j - 1]);
         }
@@ -274,6 +308,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 locError(Integer.toString(position));
                 locError("see here");
                 selectedNum = position;
+                isLongClick = 0;
+                invalidateOptionsMenu();
                 //deleteData(position);
             }
         });
@@ -697,6 +733,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+
+
         //申请动态权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
@@ -708,13 +746,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         mediaPlayer.start();*/
         //locError();
         //Clear按钮事件编辑
-        Button btn_clear = (Button) findViewById(R.id.btn_clear);
+        /*Button btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Btn_clearData();
             }
-        });
+        });*/
         //第一个子floating按钮事件编辑
         com.getbase.floatingactionbutton.FloatingActionButton bt1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab01);
         bt1.setOnClickListener(new View.OnClickListener() {
@@ -735,6 +773,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         });
         //初始化界面一
         initPage();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //声明ToolBar
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
     public void initPage(){
@@ -845,7 +891,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt1_rb.x - 1));
             pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt1_rt.y - 1));
             pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.x - 1));
+            m_center_x = ( pt_lb.x + pt_lt.x + pt_rb.x + pt_rt.x) / 4;
+            m_center_y = ( pt_lb.y + pt_lt.y + pt_rb.y + pt_rt.y) / 4;
+            locError("GETGPTS: " + Double.toString(m_center_x));
             GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
+        }else {
+            m_center_x = ( GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+            m_center_y = ( GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+            locError("GETGPTS: " + Double.toString(m_center_x));
         }
             return GPTS;
 
@@ -924,7 +977,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             }
             GPTS = Float.toString(pt_lb1.x) + " " + Float.toString(pt_lb1.y) + " " + Float.toString(pt_lt1.x) + " " + Float.toString(pt_lt1.y) + " " + Float.toString(pt_rt1.x) + " " + Float.toString(pt_rt1.y) + " " + Float.toString(pt_rb1.x) + " " + Float.toString(pt_rb1.y);
-            locError(GPTS);
+            locError("GETGPTS: " + GPTS);
             float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
             float delta_width = pt_rb1.y - pt_lb1.y, delta_height = pt_lt1.x - pt_lb1.x;
             pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt_lb1.x - 0));
@@ -935,9 +988,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt_rb1.y - 1));
             pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt_rt1.x - 1));
             pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt_rt1.y - 1));
-            m_center_x = ( pt_lb.x + pt_lt.x + pt_rb.x + pt_rt.x) / 4;
-            m_center_y = ( pt_lb.y + pt_lt.y + pt_rb.y + pt_rt.y) / 4;
-            locError(Double.toString(m_center_x));
             GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
             //locError(GPTS);
             //

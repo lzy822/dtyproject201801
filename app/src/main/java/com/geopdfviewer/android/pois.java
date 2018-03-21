@@ -1,10 +1,12 @@
 package com.geopdfviewer.android;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +25,8 @@ public class pois extends AppCompatActivity {
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
     private String selectedPOIC;
+    private int isLongClick = 1;
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,9 @@ public class pois extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //声明ToolBar
+        toolbar = (Toolbar) findViewById(R.id.toolbar2);
+        setSupportActionBar(toolbar);
         refreshCard();
     }
 
@@ -54,6 +61,8 @@ public class pois extends AppCompatActivity {
             @Override
             public void onItemLongClick(View view, String POIC) {
                 selectedPOIC = POIC;
+                isLongClick = 0;
+                invalidateOptionsMenu();
             }
         });
         recyclerView.setAdapter(adapter);
@@ -68,12 +77,37 @@ public class pois extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        //toolbar = (Toolbar) findViewById(R.id.toolbar);
+        switch (isLongClick){
+            case 1:
+                toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                menu.findItem(R.id.restore_pois).setVisible(false);
+                menu.findItem(R.id.deletepoi).setVisible(false);
+                break;
+            case 0:
+                toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
+                menu.findItem(R.id.back_pois).setVisible(false);
+                menu.findItem(R.id.deletepoi).setVisible(true);
+                menu.findItem(R.id.restore_pois).setVisible(true);
+                break;
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.back_pois:
                 this.finish();
                 break;
+            case R.id.restore_pois:
+                isLongClick = 1;
+                refreshCard();
+                invalidateOptionsMenu();
+                break;
             case R.id.deletepoi:
+                isLongClick = 1;
                 DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
                 DataSupport.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
                 DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);

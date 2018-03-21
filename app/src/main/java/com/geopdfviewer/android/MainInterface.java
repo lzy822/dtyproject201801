@@ -52,6 +52,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.github.barteksc.pdfviewer.PDFView;
@@ -1153,6 +1154,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar1);
+        setSupportActionBar(toolbar);
         //申请动态权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
@@ -1292,6 +1295,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         super.onResume();
         String currentProvider = LocationManager.NETWORK_PROVIDER;
         getScreen();
+        isQuery = false;
     }
 
     @Override
@@ -1357,10 +1361,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         boolean ok = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if(ok){
             //textView.setText("GPS已经开启");
-            Toast.makeText(this, "GPS已经开启", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "GPS已经开启", Toast.LENGTH_LONG).show();
             return true;
         }else{
-            Toast.makeText(this, "GPS没有开启, 请打开GPS功能", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "GPS没有开启, 请打开GPS功能", Toast.LENGTH_SHORT).show();
             //textView.setText("GPS没有开启");
             return false;
         }

@@ -17,6 +17,11 @@
         android:title="返回"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/restore_pois"
+        android:icon="@drawable/ic_arrow_back"
+        android:title="恢复"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/add_pois"
         android:icon="@drawable/ic_add"
         android:title="返回"

@@ -7,6 +7,7 @@ import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +38,7 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
     public String content;
     public int num_line = 0;
     String pdfFileName;
+
     @Override
     public void loadComplete(int nbPages) {
 
@@ -51,11 +53,16 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
     public void onPageError(int page, Throwable t) {
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.info).setVisible(false);
         menu.findItem(R.id.query).setVisible(false);
+        menu.findItem(R.id.trail).setVisible(false);
+        menu.findItem(R.id.trailend).setVisible(false);
+        menu.findItem(R.id.deletePOI).setVisible(false);
+        menu.findItem(R.id.queryPOI).setVisible(false);
         return true;
 
     }
@@ -76,6 +83,9 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_page);
+        //声明ToolBar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar3);
+        setSupportActionBar(toolbar);
         TextView textView = (TextView) findViewById(R.id.infotext);
         Intent intent = getIntent();
         String data = intent.getStringExtra("extra_data");
@@ -85,6 +95,7 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
         //ImageView imageView = (ImageView) findViewById(R.id.img1);
 
     }
+
     public String load(String str) {
         FileInputStream in = null;
         BufferedReader reader = null;
