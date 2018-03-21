@@ -1,5 +1,6 @@
 package com.geopdfviewer.android;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,12 +10,19 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -80,7 +88,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private Map_testAdapter adapter;
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
-    private boolean isLongClicked = false;
+
+    //记录当前坐标信息
+    double m_lat, m_long;
+    String m_latlong_description;
+
+    Location location;
+
+    private LocationManager locationManager;
+
     @Override
     public void loadComplete(int nbPages) {
 
@@ -102,6 +118,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private int selectedNum = 0;
 
     Uri uri;
+
+    //记录当前pdf地图中心的经纬度值
+    float m_center_x, m_center_y;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -208,6 +227,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             map_testList.add(map_tests[i]);
         }
     }
+    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic, String center_latlong) {
+        Map_test mapTest = new Map_test(name, num, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
+        map_tests[num_pdf - 1] = mapTest;
+        map_testList.clear();
+        for (int i = 0; i < num_pdf; i++) {
+            map_testList.add(map_tests[i]);
+        }
+    }
 
     public void initMap() {
         map_testList.clear();
@@ -224,7 +251,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String imguri = pref1.getString(str + "img_path", "");
             String MediaBox = pref1.getString(str + "MediaBox", "");
             String CropBox = pref1.getString(str + "CropBox", "");
-            Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox);
+            String center_latlong = pref1.getString(str + "center_latlong", "");
+            String ic = pref1.getString(str + "ic", "");
+            Map_test mapTest = new Map_test(name, num, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
             map_tests[j - 1] = mapTest;
             map_testList.add(map_tests[j - 1]);
         }
@@ -233,6 +262,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     }
 
+    //重新刷新Recycler
     public void refreshRecycler(){
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         layoutManager = new GridLayoutManager(this,2);
@@ -249,6 +279,136 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         });
         //adapter.getItemSelected();
         recyclerView.setAdapter(adapter);
+    }
+
+    //获取当前坐标位置
+    private void getLocation() {
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
+            Toast.makeText(this, "请打开网络或GPS定位功能!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(intent, 0);
+            return;
+        }
+
+        try {
+
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(location == null){
+                Log.d(TAG, "onCreate.location = null");
+                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            Log.d(TAG, "onCreate.location = " + location);
+            updateView(location);
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 5, locationListener);
+        }catch (SecurityException  e){
+            e.printStackTrace();
+        }
+    }
+
+    //坐标监听器
+    protected final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            //Log.d(TAG, "Location changed to: " + getLocationInfo(location));
+            updateView(location);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.d(TAG, "onStatusChanged() called with " + "provider = [" + provider + "], status = [" + status + "], extras = [" + extras + "]");
+            switch (status) {
+                case LocationProvider.AVAILABLE:
+                    Log.i(TAG, "AVAILABLE");
+                    break;
+                case LocationProvider.OUT_OF_SERVICE:
+                    Log.i(TAG, "OUT_OF_SERVICE");
+                    break;
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                    Log.i(TAG, "TEMPORARILY_UNAVAILABLE");
+                    break;
+            }
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d(TAG, "onProviderEnabled() called with " + "provider = [" + provider + "]");
+            try {
+                Location location = locationManager.getLastKnownLocation(provider);
+                Log.d(TAG, "onProviderDisabled.location = " + location);
+                updateView(location);
+            }catch (SecurityException e){
+
+            }
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d(TAG, "onProviderDisabled() called with " + "provider = [" + provider + "]");
+        }
+    };
+
+    //更新坐标信息
+    private void updateView(Location location) {
+        Geocoder gc = new Geocoder(this);
+        List<Address> addresses = null;
+        String msg = "";
+        Log.d(TAG, "updateView.location = " + location);
+        if (location != null) {
+            try {
+                addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                m_latlong_description = addresses.get(0).getAddressLine(0);
+                Toast.makeText(this, "你当前在: " + m_latlong_description, Toast.LENGTH_LONG).show();
+                Log.d(TAG, "updateView.addresses = " + addresses);
+                if (addresses.size() > 0) {
+                    msg += addresses.get(0).getAdminArea().substring(0,2);
+                    msg += " " + addresses.get(0).getLocality().substring(0,2);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            m_lat = location.getLatitude();
+            m_long = location.getLongitude();
+            //setHereLocation();
+            //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
+
+        } else {
+
+        }
+    }
+
+    //距离量测(输入参数为 两点的经纬度)
+    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
+
+        double Lat1 = rad(latitude1); // 纬度
+
+        double Lat2 = rad(latitude2);
+
+        double a = Lat1 - Lat2;//两点纬度之差
+
+        double b = rad(longitude1) - rad(longitude2); //经度之差
+
+        double s = 2 * Math.asin(Math
+
+                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
+
+        s = s * 6378137.0;//弧长乘地球半径（半径为米）
+
+        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
+
+        return s;
+
+    }
+
+    //将角度转化为弧度
+    private static double rad(double d) {
+
+        return d * Math.PI / 180.00; //角度转换成弧度
+
     }
 
     public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path){
@@ -287,12 +447,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String MediaBox = pref1.getString(str + "MediaBox", "");
             String CropBox = pref1.getString(str + "CropBox", "");
             String ic = pref1.getString(str + "ic", "");
+            String center_latlong = pref1.getString(str + "center_latlong", "");
             if (!deleted){
-                Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic);
+                Map_test mapTest = new Map_test(name, num, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
                 map_tests[j - 1] = mapTest;
                 map_testList.add(map_tests[j - 1]);
             }else {
-                Map_test mapTest = new Map_test(num - 1, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic);
+                Map_test mapTest = new Map_test(name, num - 1, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
                 map_tests[j - 2] = mapTest;
                 map_testList.add(map_tests[j - 2]);
             }
@@ -324,6 +485,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             editor1.putString(str + "GPTS", map_tests[j - 1].getM_GPTS());
             editor1.putString(str + "img_path", map_tests[j - 1].getM_imguri());
             editor1.putString(str + "ic", map_tests[j - 1].getM_ic());
+            editor1.putString(str + "center_latlong", map_tests[j - 1].getM_center_latlong());
             editor1.apply();
         }
         initMap();
@@ -388,8 +550,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         editor1.putString(str + "GPTS", GPTS);
         editor1.putString(str + "img_path", img_path);
         editor1.putString(str + "ic", ic);
+        String center_latlong = Double.toString(m_center_x) + "," + Double.toString(m_center_y);
+        editor1.putString(str + "center_latlong", center_latlong);
         editor1.apply();
-        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox, ic);
+        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox, ic, center_latlong);
     }
 
     public String createThumbnails(String fileName, String filePath, int Type){
@@ -538,11 +702,31 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 launchPicker();
             }
         }
+        switch (requestCode) {
+            case 66:
+                if (grantResults.length > 0) {
+                    for (int result : grantResults) {
+                        if (result != PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
+                            finish();
+                            return;
+                        }
+                    }
+
+                }
+                break;
+            default:
+        }
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        //申请动态权限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
+        }
+        getLocation();
         /*Uri uri = Uri.parse("/storage/emulated/0/MIUI/sound_recorder/3月20日 上午10点36分.mp3");
         MediaPlayer mediaPlayer = MediaPlayer.create(this, uri);
         mediaPlayer.start();*/
@@ -775,6 +959,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt_rb1.y - 1));
             pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt_rt1.x - 1));
             pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt_rt1.y - 1));
+            m_center_x = ( pt_lb.x + pt_lt.x + pt_rb.x + pt_rt.x) / 4;
+            m_center_y = ( pt_lb.y + pt_lt.y + pt_rb.y + pt_rt.y) / 4;
             GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
             //locError(GPTS);
             //
@@ -888,6 +1074,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
 
     }
+
 
 
 }

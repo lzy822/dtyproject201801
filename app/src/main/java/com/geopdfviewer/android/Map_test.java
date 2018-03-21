@@ -17,6 +17,29 @@ public class Map_test {
     private String m_MediaBox;
     private String m_CropBox;
     private String m_ic;
+    private String m_center_latlong;
+
+    public Map_test(String m_name, int m_num, String m_GPTS, String m_BBox, String m_WKT, String m_uri, String m_imguri, String m_MediaBox, String m_CropBox, String m_ic, String m_center_latlong) {
+        this.m_name = m_name;
+        this.m_num = m_num;
+        this.m_GPTS = m_GPTS;
+        this.m_BBox = m_BBox;
+        this.m_WKT = m_WKT;
+        this.m_uri = m_uri;
+        this.m_imguri = m_imguri;
+        this.m_MediaBox = m_MediaBox;
+        this.m_CropBox = m_CropBox;
+        this.m_ic = m_ic;
+        this.m_center_latlong = m_center_latlong;
+    }
+
+    public String getM_center_latlong() {
+        return m_center_latlong;
+    }
+
+    public void setM_center_latlong(String m_center_latlong) {
+        this.m_center_latlong = m_center_latlong;
+    }
 
     public String getM_ic() {
         return m_ic;

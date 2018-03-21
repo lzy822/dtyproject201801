@@ -96,7 +96,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private final static int REQUEST_CODE_PHOTO = 42;
     private final static int REQUEST_CODE_TAPE = 43;
     public static final int PERMISSION_CODE = 42042;
-    private final String DEF_DIR =  Environment.getExternalStorageDirectory().toString() + "/DCIM/Camera/";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     public static final int NONE_FILE_TYPE = 0;
@@ -105,17 +104,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public static int FILE_TYPE = NONE_FILE_TYPE;
     Integer pageNumber = 0;
     public String content;
-    public int num_line = 0;
     String pdfFileName;
-    public boolean isESRI = false;
-    String info;
     PDFView pdfView;
     LinearLayout linearLayout;
-    /*public final static String name = "";
-    public final static String WKT = "";
-    public final static String uri = "";
-    public final static String GPTS = "";
-    public final static String BBox = "";*/
     TextView textView;
 
 
@@ -127,9 +118,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private   String BBox = "";
     private   String MediaBox = "";
     private   String CropBox = "";
-
-
-
 
     //坐标信息
     double m_lat,m_long;
@@ -223,6 +211,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return count;
     }
 
+    //记录轨迹
     private void recordTrail(float x, float y){
         isLocate++;
         last_x = x;
@@ -247,77 +236,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //} else {
 
         //}
-    }
-
-    protected final LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            //Log.d(TAG, "Location changed to: " + getLocationInfo(location));
-            updateView(location);
-            if (!isLocateEnd) {
-                recordTrail((float)location.getLatitude(), (float)location.getLongitude());
-                locError(m_cTrail);
-            }
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.d(TAG, "onStatusChanged() called with " + "provider = [" + provider + "], status = [" + status + "], extras = [" + extras + "]");
-            switch (status) {
-                case LocationProvider.AVAILABLE:
-                    Log.i(TAG, "AVAILABLE");
-                    break;
-                case LocationProvider.OUT_OF_SERVICE:
-                    Log.i(TAG, "OUT_OF_SERVICE");
-                    break;
-                case LocationProvider.TEMPORARILY_UNAVAILABLE:
-                    Log.i(TAG, "TEMPORARILY_UNAVAILABLE");
-                    break;
-            }
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            Log.d(TAG, "onProviderEnabled() called with " + "provider = [" + provider + "]");
-            try {
-                Location location = locationManager.getLastKnownLocation(provider);
-                Log.d(TAG, "onProviderDisabled.location = " + location);
-                updateView(location);
-            }catch (SecurityException e){
-
-            }
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            Log.d(TAG, "onProviderDisabled() called with " + "provider = [" + provider + "]");
-        }
-    };
-
-    private void updateView(Location location) {
-        Geocoder gc = new Geocoder(this);
-        List<Address> addresses = null;
-        String msg = "";
-        Log.d(TAG, "updateView.location = " + location);
-        if (location != null) {
-            try {
-                addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                Log.d(TAG, "updateView.addresses = " + addresses);
-                if (addresses.size() > 0) {
-                    msg += addresses.get(0).getAdminArea().substring(0,2);
-                    msg += " " + addresses.get(0).getLocality().substring(0,2);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            m_lat = location.getLatitude();
-            m_long = location.getLongitude();
-            //setHereLocation();
-            locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
-
-        } else {
-
-        }
     }
 
     private void setLocationInfo(double lat, double longt){
@@ -375,6 +293,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return result;
     }
 
+
+    //获取地理信息
     public void getInfo(int num) {
         SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
         String str = "n_" + num + "_";
@@ -474,6 +394,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
+    //显示GeoPDF
     private void displayFromAsset(String assetFileName) {
         pdfFileName = assetFileName;
 
@@ -506,6 +427,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
+                        }
+                        if (isMessure == true){
+                            poinum_messure++;
+                            if (poinum_messure == 1){
+                                poi111 = pt1;
+                            }
+                            if (poinum_messure == 2){
+                                poi222 = pt1;
+                                locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                Toast.makeText(MainInterface.this, "距离为" + Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)) + "米", Toast.LENGTH_LONG).show();
+                            }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
                             List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
@@ -617,190 +549,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }}
                         }
                         getCurrentScreenLoc();
-                        if (isMessure == true){
-                            locError("here we go");
-                        // 保存绘图为本地图片
-                        canvas.save(Canvas.ALL_SAVE_FLAG);
-                        canvas.restore();
-                        Bitmap mBitmap= Bitmap.createBitmap((int) pageWidth, (int)pageHeight, Bitmap.Config.RGB_565 );
-                        File file = new File(Environment.getExternalStorageDirectory().getPath()
-                                 + "/share_pic.png");// 保存到sdcard根目录下，文件名为share_pic.png
-                        Log.i("CXC", Environment.getExternalStorageDirectory().getPath());
-                        FileOutputStream fos = null;
-                        try {
-                            fos = new FileOutputStream(file);
-                            mBitmap.compress(Bitmap.CompressFormat.PNG, 50, fos);
 
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                        try {
-                            fos.close();
-                        } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }}
 
                     }
                 })
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
         setTitle(pdfFileName);
-    }
-
-    private void getStretchRatio(float pagewidth, float pageheight){
-        isGetStretchRatio = true;
-        //locError(Float.toString(pagewidth));
-        //locError(Float.toString(pageheight));
-        current_pageheight = pageheight;
-        current_pagewidth = pagewidth;
-        ratio_height =  (float)(pageheight / (m_top_y - m_bottom_y));
-        ratio_width = (float)(pagewidth / (m_top_x - m_bottom_x));
-        //locError(Float.toString(m_top_x) + "&&" + Float.toString(m_top_y));
-        //locError(Float.toString(b_top_x) + "&&" + Float.toString(b_top_y));
-        //locError(Float.toString(b_bottom_x) + "&&" + Float.toString(b_bottom_y));
-    }
-
-    void pickFile() {
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                READ_EXTERNAL_STORAGE);
-        int permissionCheck1 = ContextCompat.checkSelfPermission(this,
-                WRITE_EXTERNAL_STORAGE);
-
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED || permissionCheck1 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{
-                            READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
-                    PERMISSION_CODE
-            );
-
-            return;
-        }
-
-        launchPicker();
-    }
-
-    void launchPicker() {
-        //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        //intent.setData(Uri.parse(DEF_DIR));
-        //intent.addCategory(Intent.CATEGORY_OPENABLE);
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        try {
-            startActivityForResult(intent, REQUEST_CODE_PHOTO);
-        } catch (ActivityNotFoundException e) {
-            //alert user that file manager not working
-            Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
-            Uri uri = data.getData();
-            //locError(uri.getPath());
-            float[] latandlong = new float[2];
-            try{
-                ExifInterface exifInterface = new ExifInterface(getRealPath(uri.getPath()));
-                exifInterface.getLatLong(latandlong);
-                locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
-                POI poi = new POI();
-                poi.setIc(ic);
-                long time = System.currentTimeMillis();
-                poi.setPOIC("POI" + String.valueOf(time));
-                poi.setPhotonum(1);
-                poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
-                poi.setX(latandlong[0]);
-                poi.setY(latandlong[1]);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                Date date = new Date(System.currentTimeMillis());
-                poi.setTime(simpleDateFormat.format(date));
-                poi.save();
-                MPHOTO mphoto = new MPHOTO();
-                mphoto.setPdfic(ic);
-                mphoto.setPOIC("POI" + String.valueOf(time));
-                mphoto.setPath(getRealPath(uri.getPath()));
-                mphoto.setTime(simpleDateFormat.format(date));
-                mphoto.save();
-                showAll = true;
-                pdfView.resetZoomWithAnimation();
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-
-        }
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
-            Uri uri = data.getData();
-            long time = System.currentTimeMillis();
-            String POIC = "POI" + String.valueOf(time);
-            List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
-            POI poi = new POI();
-            poi.setIc(ic);
-            poi.setPOIC(POIC);
-            poi.setTapenum(1);
-            poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
-            poi.setX((float) m_lat);
-            poi.setY((float)m_long);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-            Date date = new Date(System.currentTimeMillis());
-            poi.setTime(simpleDateFormat.format(date));
-            poi.save();
-            MTAPE mtape = new MTAPE();
-            mtape.setPath(getRealPathFromUri(this, uri));
-            mtape.setPdfic(ic);
-            mtape.setPOIC(POIC);
-            mtape.setTime(simpleDateFormat.format(date));
-            mtape.save();
-            showAll = true;
-            pdfView.resetZoomWithAnimation();
-        }
-    }
-
-    public static String getRealPathFromUri(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Audio.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    //获取File可使用路径
-    public String getRealPath(String filePath) {
-        if (!filePath.contains("raw")) {
-            String str = "/external_files";
-            String Dir = Environment.getExternalStorageDirectory().toString();
-            filePath = Dir + filePath.substring(str.length());
-        }else {
-            filePath = filePath.substring(5);
-            //locError("here");
-            //locError(filePath);
-        }
-        return filePath;
-    }
-
-    private PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight){
-        double y_ratio = ((pt.x - min_lat) / h);
-        double x_ratio = ((pt.y - min_long) / w);
-        pt.x = (float) ( x_ratio * pageWidth);
-        pt.y = (float) ( (1 - y_ratio) * pageHeight);
-        return pt;
-    }
-
-    private PointF getPixLocFromGeoL(PointF pt){
-        double y_ratio = ((pt.x - min_lat) / h);
-        double x_ratio = ((pt.y - min_long) / w);
-        pt.x = (float) ( x_ratio * current_pagewidth);
-        pt.y = (float) ( (1 - y_ratio) * current_pageheight);
-        return pt;
     }
 
     private void displayFromFile(String filePath) {
@@ -849,9 +604,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint4.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
-                        PointF pt = new PointF((float)m_lat, (float)m_long);
-                        pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
-                        canvas.drawCircle(pt.x, pt.y, 20, paint);
+                            PointF pt = new PointF((float)m_lat, (float)m_long);
+                            pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
+                            canvas.drawCircle(pt.x, pt.y, 20, paint);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
                             List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
@@ -876,22 +631,22 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if(isDrawType == POI_DRAW_TYPE || showAll){
                             List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             if (pois.size() > 0){
-                            for (POI poi : pois){
-                                PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
-                                canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                                //locError(Boolean.toString(poi.getPath().isEmpty()));
-                                //locError(Integer.toString(poi.getPath().length()));
-                                //locError(poi.getPath());
-                                if (poi.getPhotonum() == 0){
-                                    if (poi.getTapenum() == 0){
-                                canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                                    } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
-                                }else {
-                                    if (poi.getTapenum() == 0){
-                                    canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
-                                    }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
-                                }
-                            }}
+                                for (POI poi : pois){
+                                    PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                                    canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                                    //locError(Boolean.toString(poi.getPath().isEmpty()));
+                                    //locError(Integer.toString(poi.getPath().length()));
+                                    //locError(poi.getPath());
+                                    if (poi.getPhotonum() == 0){
+                                        if (poi.getTapenum() == 0){
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
+                                    }else {
+                                        if (poi.getTapenum() == 0){
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                                        }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                    }
+                                }}
                         }
                         /*float[] pts = new float[8];
                         pts[0] = 100;
@@ -983,6 +738,167 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .load();
     }
 
+    //获取当前页面的经纬度拉伸比例
+    private void getStretchRatio(float pagewidth, float pageheight){
+        isGetStretchRatio = true;
+        //locError(Float.toString(pagewidth));
+        //locError(Float.toString(pageheight));
+        current_pageheight = pageheight;
+        current_pagewidth = pagewidth;
+        ratio_height =  (float)(pageheight / (m_top_y - m_bottom_y));
+        ratio_width = (float)(pagewidth / (m_top_x - m_bottom_x));
+        //locError(Float.toString(m_top_x) + "&&" + Float.toString(m_top_y));
+        //locError(Float.toString(b_top_x) + "&&" + Float.toString(b_top_y));
+        //locError(Float.toString(b_bottom_x) + "&&" + Float.toString(b_bottom_y));
+    }
+
+    //获取文件读取权限
+    void pickFile() {
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                READ_EXTERNAL_STORAGE);
+        int permissionCheck1 = ContextCompat.checkSelfPermission(this,
+                WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED || permissionCheck1 != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{
+                            READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_CODE
+            );
+
+            return;
+        }
+
+        launchPicker();
+    }
+
+    //打开图片的文件管理器
+    void launchPicker() {
+        //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        //intent.setData(Uri.parse(DEF_DIR));
+        //intent.addCategory(Intent.CATEGORY_OPENABLE);
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        try {
+            startActivityForResult(intent, REQUEST_CODE_PHOTO);
+        } catch (ActivityNotFoundException e) {
+            //alert user that file manager not working
+            Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //获取文件管理器的返回信息
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
+            Uri uri = data.getData();
+            //locError(uri.getPath());
+            float[] latandlong = new float[2];
+            try{
+                ExifInterface exifInterface = new ExifInterface(getRealPath(uri.getPath()));
+                exifInterface.getLatLong(latandlong);
+                locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                POI poi = new POI();
+                poi.setIc(ic);
+                long time = System.currentTimeMillis();
+                poi.setPOIC("POI" + String.valueOf(time));
+                poi.setPhotonum(1);
+                poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
+                poi.setX(latandlong[0]);
+                poi.setY(latandlong[1]);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                Date date = new Date(System.currentTimeMillis());
+                poi.setTime(simpleDateFormat.format(date));
+                poi.save();
+                MPHOTO mphoto = new MPHOTO();
+                mphoto.setPdfic(ic);
+                mphoto.setPOIC("POI" + String.valueOf(time));
+                mphoto.setPath(getRealPath(uri.getPath()));
+                mphoto.setTime(simpleDateFormat.format(date));
+                mphoto.save();
+                showAll = true;
+                pdfView.resetZoomWithAnimation();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+        }
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
+            Uri uri = data.getData();
+            long time = System.currentTimeMillis();
+            String POIC = "POI" + String.valueOf(time);
+            List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+            POI poi = new POI();
+            poi.setIc(ic);
+            poi.setPOIC(POIC);
+            poi.setTapenum(1);
+            poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
+            poi.setX((float) m_lat);
+            poi.setY((float)m_long);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            Date date = new Date(System.currentTimeMillis());
+            poi.setTime(simpleDateFormat.format(date));
+            poi.save();
+            MTAPE mtape = new MTAPE();
+            mtape.setPath(getRealPathFromUri(this, uri));
+            mtape.setPdfic(ic);
+            mtape.setPOIC(POIC);
+            mtape.setTime(simpleDateFormat.format(date));
+            mtape.save();
+            showAll = true;
+            pdfView.resetZoomWithAnimation();
+        }
+    }
+
+    //获取音频文件路径
+    public static String getRealPathFromUri(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Audio.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    //获取File可使用路径
+    public String getRealPath(String filePath) {
+        if (!filePath.contains("raw")) {
+            String str = "/external_files";
+            String Dir = Environment.getExternalStorageDirectory().toString();
+            filePath = Dir + filePath.substring(str.length());
+        }else {
+            filePath = filePath.substring(5);
+            //locError("here");
+            //locError(filePath);
+        }
+        return filePath;
+    }
+
+    //经纬度到屏幕坐标位置转化
+    private PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight){
+        double y_ratio = ((pt.x - min_lat) / h);
+        double x_ratio = ((pt.y - min_long) / w);
+        pt.x = (float) ( x_ratio * pageWidth);
+        pt.y = (float) ( (1 - y_ratio) * pageHeight);
+        return pt;
+    }
+
+    private PointF getPixLocFromGeoL(PointF pt){
+        double y_ratio = ((pt.x - min_lat) / h);
+        double x_ratio = ((pt.y - min_long) / w);
+        pt.x = (float) ( x_ratio * current_pagewidth);
+        pt.y = (float) ( (1 - y_ratio) * current_pageheight);
+        return pt;
+    }
+
+    //获取pdf阅读器和pdf页面的拉伸比例
     private void getK(float width, float height){
         //精确定位算法
         page_height = height;
@@ -996,10 +912,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Float.toString(k_w) + "see" + Float.toString(k_h));
     }
 
+    //获取当前屏幕所视区域的经纬度范围
     private void getCurrentScreenLoc(){
-        DecimalFormat df = new DecimalFormat("0.0000");
-        //精确定位算法
-        float xxxx, yyyy;
         if (pdfView.getCurrentYOffset() > 0 || pdfView.getCurrentXOffset() > 0) {
             if (pdfView.getCurrentYOffset() > 0 && pdfView.getCurrentXOffset() > 0){
                 cs_top = (float)max_lat;
@@ -1027,6 +941,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //cs_top = pdfView.getCurrentYOffset()
     }
 
+    //屏幕坐标位置到经纬度转化
     private PointF getGeoLocFromPixL(PointF pt){
         textView = (TextView) findViewById(R.id.txt);
         DecimalFormat df = new DecimalFormat("0.0000");
@@ -1051,19 +966,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //
     }
 
-    @Override
-    protected void onDestroy() {
-        try{
-            locationManager.removeUpdates(locationListener);
-        }catch (SecurityException e){
-        }
-        super.onDestroy();
-    }
-
     public void locError(String str){
         Log.e(TAG, "debug: " + str );
     }
 
+    //获取当前坐标位置
     private void getLocation() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -1090,6 +997,156 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }catch (SecurityException  e){
             e.printStackTrace();
         }
+    }
+
+    //坐标监听器
+    protected final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            //Log.d(TAG, "Location changed to: " + getLocationInfo(location));
+            updateView(location);
+            if (!isLocateEnd) {
+                recordTrail((float)location.getLatitude(), (float)location.getLongitude());
+                locError(m_cTrail);
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.d(TAG, "onStatusChanged() called with " + "provider = [" + provider + "], status = [" + status + "], extras = [" + extras + "]");
+            switch (status) {
+                case LocationProvider.AVAILABLE:
+                    Log.i(TAG, "AVAILABLE");
+                    break;
+                case LocationProvider.OUT_OF_SERVICE:
+                    Log.i(TAG, "OUT_OF_SERVICE");
+                    break;
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                    Log.i(TAG, "TEMPORARILY_UNAVAILABLE");
+                    break;
+            }
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d(TAG, "onProviderEnabled() called with " + "provider = [" + provider + "]");
+            try {
+                Location location = locationManager.getLastKnownLocation(provider);
+                Log.d(TAG, "onProviderDisabled.location = " + location);
+                updateView(location);
+            }catch (SecurityException e){
+
+            }
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d(TAG, "onProviderDisabled() called with " + "provider = [" + provider + "]");
+        }
+    };
+
+    //更新坐标信息
+    private void updateView(Location location) {
+        Geocoder gc = new Geocoder(this);
+        List<Address> addresses = null;
+        String msg = "";
+        Log.d(TAG, "updateView.location = " + location);
+        if (location != null) {
+            try {
+                addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                Toast.makeText(this, "你当前在: " + addresses.get(0).getAddressLine(0), Toast.LENGTH_LONG).show();
+                Log.d(TAG, "updateView.addresses = " + addresses);
+                if (addresses.size() > 0) {
+                    msg += addresses.get(0).getAdminArea().substring(0,2);
+                    msg += " " + addresses.get(0).getLocality().substring(0,2);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            m_lat = location.getLatitude();
+            m_long = location.getLongitude();
+            //setHereLocation();
+            locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
+
+        } else {
+
+        }
+    }
+
+    //距离量测(输入参数为 两点的经纬度)
+    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
+
+        double Lat1 = rad(latitude1); // 纬度
+
+        double Lat2 = rad(latitude2);
+
+        double a = Lat1 - Lat2;//两点纬度之差
+
+        double b = rad(longitude1) - rad(longitude2); //经度之差
+
+        double s = 2 * Math.asin(Math
+
+                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
+
+        s = s * 6378137.0;//弧长乘地球半径（半径为米）
+
+        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
+
+        return s;
+
+    }
+
+    //将角度转化为弧度
+    private static double rad(double d) {
+
+        return d * Math.PI / 180.00; //角度转换成弧度
+
+    }
+
+    private void reDrawCache() {
+        if (FILE_TYPE == NONE_FILE_TYPE) {
+            Toast.makeText(this, "PDF文件读取出现问题", Toast.LENGTH_LONG).show();
+        } else if (FILE_TYPE == FILE_FILE_TYPE) {
+            displayFromFile(uri);
+            Toast.makeText(this, "这是硬盘上的文件", Toast.LENGTH_LONG).show();
+        } else if (FILE_TYPE == ASSET_FILE_TYPE) {
+            displayFromAsset("Demo");
+            Toast.makeText(this, "这是Demo", Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    //获取许可权限的返回值
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 66:
+                if (grantResults.length > 0) {
+                    for (int result : grantResults) {
+                        if (result != PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
+                            finish();
+                            return;
+                        }
+                    }
+
+                }
+                break;
+            default:
+        }
+    }
+
+    //
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        //pdfView = (PDFView) findViewById(R.id.pdfView);
+        //locError(Integer.toString(pdfView.getLeft()));
+        //locError(Integer.toString(pdfView.getRight()));
+        //locError(Integer.toString(pdfView.getTop()));
+        //locError(Integer.toString(pdfView.getBottom()));
+        //locError(Integer.toString(pdfView.getHeight()));
+        //locError(Integer.toString(pdfView.getMeasuredHeight()));
     }
 
     @Override
@@ -1228,80 +1285,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         });
 
 
-        }
-
-    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
-
-        double Lat1 = rad(latitude1); // 纬度
-
-        double Lat2 = rad(latitude2);
-
-        double a = Lat1 - Lat2;//两点纬度之差
-
-        double b = rad(longitude1) - rad(longitude2); //经度之差
-
-        double s = 2 * Math.asin(Math
-
-                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
-
-        s = s * 6378137.0;//弧长乘地球半径（半径为米）
-
-        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
-
-        return s;
-
-    }
-
-
-
-    private static double rad(double d) {
-
-        return d * Math.PI / 180.00; //角度转换成弧度
-
-    }
-
-    private void reDrawCache() {
-        if (FILE_TYPE == NONE_FILE_TYPE) {
-            Toast.makeText(this, "PDF文件读取出现问题", Toast.LENGTH_LONG).show();
-        } else if (FILE_TYPE == FILE_FILE_TYPE) {
-            displayFromFile(uri);
-            Toast.makeText(this, "这是硬盘上的文件", Toast.LENGTH_LONG).show();
-        } else if (FILE_TYPE == ASSET_FILE_TYPE) {
-            displayFromAsset("Demo");
-            Toast.makeText(this, "这是Demo", Toast.LENGTH_LONG).show();
-        }
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 66:
-                if (grantResults.length > 0) {
-                    for (int result : grantResults) {
-                        if (result != PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
-                            finish();
-                            return;
-                        }
-                    }
-
-                }
-                break;
-            default:
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        //pdfView = (PDFView) findViewById(R.id.pdfView);
-        //locError(Integer.toString(pdfView.getLeft()));
-        //locError(Integer.toString(pdfView.getRight()));
-        //locError(Integer.toString(pdfView.getTop()));
-        //locError(Integer.toString(pdfView.getBottom()));
-        //locError(Integer.toString(pdfView.getHeight()));
-        //locError(Integer.toString(pdfView.getMeasuredHeight()));
     }
 
     @Override
@@ -1311,6 +1294,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getScreen();
     }
 
+    @Override
+    protected void onDestroy() {
+        try{
+            locationManager.removeUpdates(locationListener);
+        }catch (SecurityException e){
+        }
+        super.onDestroy();
+    }
+
+    //PDF页面变化监控
     @Override
     public void onPageChanged(int page, int pageCount) {
         //pageNumber = page;
@@ -1322,6 +1315,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return str;
     }
 
+    //获取当前屏幕的参数
     private void getScreen(){
         WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
@@ -1336,6 +1330,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Log.d(TAG, Float.toString(screen_width) + "^" + Float.toString(screen_height) + "^" + Float.toString(screenWidth) + "^" + Float.toString(screenHeight));
     }
 
+    //加载当前菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
@@ -1347,26 +1342,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return true;
     }
 
+    //开始记录轨迹
     private void initTrail(){
         if (isGPSEnabled()){
             locError("开始绘制轨迹");
         }else locError("请打开GPS功能");
     }
 
+    //判断GPS功能是否处于开启状态
     private boolean isGPSEnabled(){
         textView = (TextView) findViewById(R.id.txt);
         //得到系统的位置服务，判断GPS是否激活
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         boolean ok = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if(ok){
-            textView.setText("GPS已经开启");
+            //textView.setText("GPS已经开启");
+            Toast.makeText(this, "GPS已经开启", Toast.LENGTH_LONG).show();
             return true;
         }else{
-            textView.setText("GPS没有开启");
+            Toast.makeText(this, "GPS没有开启, 请打开GPS功能", Toast.LENGTH_LONG).show();
+            //textView.setText("GPS没有开启");
             return false;
         }
     }
 
+    //菜单栏按钮监控
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
