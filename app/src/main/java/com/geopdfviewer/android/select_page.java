@@ -265,7 +265,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //重新刷新Recycler
     public void refreshRecycler(){
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        layoutManager = new GridLayoutManager(this,2);
+        layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new Map_testAdapter(map_testList);
         adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
@@ -373,42 +373,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
             m_lat = location.getLatitude();
             m_long = location.getLongitude();
+            SharedPreferences.Editor editor = getSharedPreferences("latlong", MODE_PRIVATE).edit();
+            editor.clear().commit();
+            editor.putString("mlatlong", Double.toString(m_lat) + "," + Double.toString(m_long));
+            editor.apply();
             //setHereLocation();
             //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
 
         } else {
 
         }
-    }
-
-    //距离量测(输入参数为 两点的经纬度)
-    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
-
-        double Lat1 = rad(latitude1); // 纬度
-
-        double Lat2 = rad(latitude2);
-
-        double a = Lat1 - Lat2;//两点纬度之差
-
-        double b = rad(longitude1) - rad(longitude2); //经度之差
-
-        double s = 2 * Math.asin(Math
-
-                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
-
-        s = s * 6378137.0;//弧长乘地球半径（半径为米）
-
-        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
-
-        return s;
-
-    }
-
-    //将角度转化为弧度
-    private static double rad(double d) {
-
-        return d * Math.PI / 180.00; //角度转换成弧度
-
     }
 
     public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path){
@@ -551,6 +525,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         editor1.putString(str + "img_path", img_path);
         editor1.putString(str + "ic", ic);
         String center_latlong = Double.toString(m_center_x) + "," + Double.toString(m_center_y);
+        locError(center_latlong);
         editor1.putString(str + "center_latlong", center_latlong);
         editor1.apply();
         initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox, ic, center_latlong);
@@ -727,6 +702,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
         }
         getLocation();
+
         /*Uri uri = Uri.parse("/storage/emulated/0/MIUI/sound_recorder/3月20日 上午10点36分.mp3");
         MediaPlayer mediaPlayer = MediaPlayer.create(this, uri);
         mediaPlayer.start();*/
@@ -961,6 +937,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt_rt1.y - 1));
             m_center_x = ( pt_lb.x + pt_lt.x + pt_rb.x + pt_rt.x) / 4;
             m_center_y = ( pt_lb.y + pt_lt.y + pt_rb.y + pt_rt.y) / 4;
+            locError(Double.toString(m_center_x));
             GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
             //locError(GPTS);
             //
