@@ -171,7 +171,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 break;
             case  R.id.mmcancel:
                 if (selectedNum != 0){
-                    isLongClick = 1;
+                    //isLongClick = 1;
                     refreshRecycler();
                     selectedNum = 0;
                     isLongClick = 1;
@@ -220,7 +220,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             return;
         }
 
-        launchPicker();
+        //launchPicker();
     }
 
     void launchPicker() {
@@ -235,32 +235,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri) {
-        Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri);
-        map_tests[num_pdf - 1] = mapTest;
-        map_testList.clear();
-        for (int i = 0; i < num_pdf; i++) {
-            map_testList.add(map_tests[i]);
-        }
-    }
 
-    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox) {
-        Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox);
-        map_tests[num_pdf - 1] = mapTest;
-        map_testList.clear();
-        for (int i = 0; i < num_pdf; i++) {
-            map_testList.add(map_tests[i]);
-        }
-    }
-
-    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic) {
-        Map_test mapTest = new Map_test(num, name, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic);
-        map_tests[num_pdf - 1] = mapTest;
-        map_testList.clear();
-        for (int i = 0; i < num_pdf; i++) {
-            map_testList.add(map_tests[i]);
-        }
-    }
     public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic, String center_latlong) {
         Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
         map_tests[num_pdf - 1] = mapTest;
@@ -296,6 +271,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     }
 
+    //记录上一个所按的按钮
+    private int selectedpos;
     //重新刷新Recycler
     public void refreshRecycler(){
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -304,11 +281,18 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         adapter = new Map_testAdapter(map_testList);
         adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
             @Override
-            public void onItemLongClick(View view, int position) {
-                locError(Integer.toString(position));
-                locError("see here");
-                selectedNum = position;
-                isLongClick = 0;
+            public void onItemLongClick(View view, int map_num, int position) {
+                locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
+                selectedNum = map_num;
+                if (isLongClick != 0){
+                    isLongClick = 0;
+                    selectedpos = position;
+                }else {
+                    adapter.notifyItemChanged(selectedpos);
+                    selectedpos = position;
+                }
+
+
                 invalidateOptionsMenu();
                 //deleteData(position);
             }
@@ -421,24 +405,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path){
-        num_pdf ++;
-        SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
-        editor.putInt("num", num_pdf);
-        editor.apply();
-        SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
-        String str = "n_" + Integer.toString(num_pdf) + "_";
-        editor1.putInt(str + "num", num_pdf);
-        editor1.putString(str + "name", name);
-        editor1.putString(str + "uri", uri);
-        editor1.putString(str + "WKT", WKT);
-        editor1.putString(str + "BBox", BBox);
-        editor1.putString(str + "GPTS", GPTS);
-        editor1.putString(str + "img_path", img_path);
-        editor1.apply();
-        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path);
-    }
-
     public void deleteData(int selectedNum){
         map_testList.clear();
         boolean deleted = false;
@@ -459,11 +425,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String ic = pref1.getString(str + "ic", "");
             String center_latlong = pref1.getString(str + "center_latlong", "");
             if (!deleted){
-                Map_test mapTest = new Map_test(name, num, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
+                Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
                 map_tests[j - 1] = mapTest;
                 map_testList.add(map_tests[j - 1]);
             }else {
-                Map_test mapTest = new Map_test(name, num - 1, WKT, uri, GPTS, BBox, imguri, MediaBox, CropBox, ic, center_latlong);
+                Map_test mapTest = new Map_test(name, num - 1, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
                 map_tests[j - 2] = mapTest;
                 map_testList.add(map_tests[j - 2]);
             }
@@ -518,29 +484,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         File file = new File(filePath);
         if (file.exists() && file.isFile()){
             if (file.delete()){
-                Toast.makeText(this, "删除文件成功", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "删除文件成功", Toast.LENGTH_SHORT).show();
             }else Toast.makeText(this, "删除文件失败", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path, String MediaBox, String CropBox){
-        num_pdf ++;
-        SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
-        editor.putInt("num", num_pdf);
-        editor.apply();
-        SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
-        String str = "n_" + Integer.toString(num_pdf) + "_";
-        editor1.putInt(str + "num", num_pdf);
-        editor1.putString(str + "name", name);
-        editor1.putString(str + "uri", uri);
-        editor1.putString(str + "WKT", WKT);
-        editor1.putString(str + "BBox", BBox);
-        editor1.putString(str + "MediaBox", MediaBox);
-        editor1.putString(str + "CropBox", CropBox);
-        editor1.putString(str + "GPTS", GPTS);
-        editor1.putString(str + "img_path", img_path);
-        editor1.apply();
-        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox);
     }
 
     public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path, String MediaBox, String CropBox, String ic){
@@ -710,7 +656,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (requestCode == PERMISSION_CODE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                launchPicker();
+                //launchPicker();
+            }else {
+                Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
+                finish();
             }
         }
         switch (requestCode) {
@@ -734,13 +683,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
 
+        pickFile();
 
         //申请动态权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
         }
         getLocation();
-
         /*Uri uri = Uri.parse("/storage/emulated/0/MIUI/sound_recorder/3月20日 上午10点36分.mp3");
         MediaPlayer mediaPlayer = MediaPlayer.create(this, uri);
         mediaPlayer.start();*/
@@ -768,7 +717,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void onClick(View v) {
 
-                pickFile();
+                launchPicker();
             }
         });
         //初始化界面一
@@ -781,6 +730,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        isLongClick = 1;
+        selectedNum = 0;
+        refreshRecycler();
     }
 
     public void initPage(){
@@ -789,7 +741,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (num_pdf == 0) {
             initDemo();
         }
-        Log.w(TAG, Integer.toString(num_pdf) );
+        //Log.w(TAG, Integer.toString(num_pdf) );
         //初始化
         initMap();
     }

@@ -80,19 +80,10 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                 if (mOnItemLong != null){
                     int position = holder.getAdapterPosition();
                     Map_test map = mMapList.get(position);
-                    mOnItemLong.onItemLongClick(v, map.getM_num());
-                    Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
+                    mOnItemLong.onItemLongClick(v, map.getM_num(), position);
+                    //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
                     holder.cardView.setCardBackgroundColor(Color.GRAY);
                }
-                //Toast.makeText(mContext, "see here", Toast.LENGTH_LONG).show();
-                /*
-                Intent intent = new Intent(mContext, select_page.class);
-                intent.putExtra(select_page.LOC_DELETE_ITEM, map.getM_num());
-                selectedNum = map.getM_num();
-                //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
-                //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
-                //mContext.setTheme(R.style.DarkTheme);
-                mContext.startActivity(intent);*/
                 return true;
             }
         });
@@ -100,19 +91,31 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     }
 
     @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        //notifyItemChanged(position);
+        if (payloads.isEmpty()){
+            onBindViewHolder(holder, position);
+        }else {
+            notifyItemChanged(position);
+            //Toast.makeText(mContext, Integer.toString(position), Toast.LENGTH_SHORT).show();
+            Log.w(TAG, "find here" + payloads.toString() );
+        }
+    }
+
+    @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map_test map = mMapList.get(position);
-        DecimalFormat df = new DecimalFormat("0.00");
+        DecimalFormat df = new DecimalFormat("0.0");
         SharedPreferences pref1 = mContext.getSharedPreferences("latlong", MODE_PRIVATE);
         String mlatlong = pref1.getString("mlatlong", "");
         String[] latandlong;
         latandlong = mlatlong.split(",");
         double m_lat = Double.valueOf(latandlong[0]);
         double m_long = Double.valueOf(latandlong[1]);
-        String[] latandlong1;
-        latandlong1 = map.getM_center_latlong().split(",");
-        double the_lat = Double.valueOf(latandlong1[0]);
-        double the_long = Double.valueOf(latandlong1[1]);
+        //String[] latandlong1;
+        //latandlong1 = map.getM_center_latlong().split(",");
+        //double the_lat = Double.valueOf(latandlong1[0]);
+        //double the_long = Double.valueOf(latandlong1[1]);
         double distance = getDistancebtptandmap(map.getM_GPTS(), m_lat, m_long) / 1000;
         if (distance != 0) {
             holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
@@ -120,6 +123,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         /*holder.MapName.setText(map.getM_name() + "\n" + "距中心: " + df.format(algorithm(m_long, m_lat, the_long, the_lat) / 1000) + "公里"
                 + "\n" + "在地图上 ");*/
         if (map.getM_imguri() != ""){
+            //Toast.makeText(mContext, map.getM_imguri(), Toast.LENGTH_SHORT).show();
             holder.MapImage.setImageURI(Uri.parse(map.getM_imguri()));
         }else holder.MapImage.setImageResource(R.drawable.ic_android_black);
 
@@ -127,7 +131,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
     private Double getDistancebtptandmap(String GPTS, double lat, double longi){
         double distance = 0;
-        Log.w(TAG, "catch you" + GPTS);
+        //Log.w(TAG, "catch you" + GPTS);
         String[] GPTString = GPTS.split(" ");
         float[] GPTSs = new float[GPTString.length];
         for (int i = 0; i < GPTString.length; i++) {
@@ -191,7 +195,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
 
     public interface OnRecyclerItemLongListener{
-        void onItemLongClick(View view,int position);
+        void onItemLongClick(View view,int map_num, int position);
     }
     public void setOnItemLongClickListener(OnRecyclerItemLongListener listener){
         //Log.w(TAG, "setOnItemLongClickListener: " );
