@@ -50,6 +50,7 @@ public class tapeshow extends AppCompatActivity {
         adapter.setOnItemLongClickListener(new mTapeobjAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, String path) {
+                setTitle("正在进行长按操作");
                 deletePath = path;
                 isLongClick = 0;
                 invalidateOptionsMenu();
@@ -112,12 +113,14 @@ public class tapeshow extends AppCompatActivity {
             case R.id.restore_pois:
                 isLongClick = 1;
                 refreshCard();
+                setTitle("录音列表");
                 invalidateOptionsMenu();
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;
                 invalidateOptionsMenu();
                 DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
+                setTitle("录音列表");
                 refreshCard();
                 break;
             case R.id.add_pois:

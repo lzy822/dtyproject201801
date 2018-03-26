@@ -110,6 +110,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     float k_h, k_w;
     //记录当前窗口所在区域的位置
     float cs_top, cs_bottom, cs_left, cs_right;
+    float cpix_top, cpix_bottom, cpix_left, cpix_right;
 
     private float current_pagewidth = 0, current_pageheight = 0;
 
@@ -157,6 +158,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //按键声明
     ImageButton bbt1, bbt2, bbt3, bbt4, bbt5;
+
+    //记录当前缩放比例
+    private float c_zoom;
 
     private void recordTrail(Location location){
         isLocate++;
@@ -535,7 +539,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private void displayFromFile(String filePath) {
         setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
-        pdfView.setBackgroundColor(Color.GREEN);
+        pdfView.setBackgroundColor(Color.BLACK);
         final File file = new File(filePath);
         pdfView.fromFile(file)
                 .enableSwipe(false)
@@ -551,6 +555,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_width = pdfView.getWidth();
                             //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
+                        c_zoom = pdfView.getZoom();
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
@@ -663,6 +668,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
+                            PointF pp = getPixLocFromGeoL(pt1);
+                            pdfView.zoomWithAnimation(pp.x, pp.y, 8);
                         }
                         if (isMessure == true){
                             poinum_messure++;
@@ -774,27 +781,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 ExifInterface exifInterface = new ExifInterface(getRealPath(uri.getPath()));
                 exifInterface.getLatLong(latandlong);
                 locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
-                POI poi = new POI();
-                poi.setIc(ic);
-                long time = System.currentTimeMillis();
-                poi.setPOIC("POI" + String.valueOf(time));
-                poi.setPhotonum(1);
-                poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
-                poi.setX(latandlong[0]);
-                poi.setY(latandlong[1]);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                Date date = new Date(System.currentTimeMillis());
-                poi.setTime(simpleDateFormat.format(date));
-                poi.save();
-                MPHOTO mphoto = new MPHOTO();
-                mphoto.setPdfic(ic);
-                mphoto.setPOIC("POI" + String.valueOf(time));
-                mphoto.setPath(getRealPath(uri.getPath()));
-                mphoto.setTime(simpleDateFormat.format(date));
-                mphoto.save();
-                showAll = true;
-                pdfView.resetZoomWithAnimation();
+                if (latandlong[0] >= min_lat && latandlong[0] <= max_lat && latandlong[1] >= min_long && latandlong[1] <= max_long){
+                    List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                    POI poi = new POI();
+                    poi.setIc(ic);
+                    long time = System.currentTimeMillis();
+                    poi.setPOIC("POI" + String.valueOf(time));
+                    poi.setPhotonum(1);
+                    poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
+                    poi.setX(latandlong[0]);
+                    poi.setY(latandlong[1]);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                    Date date = new Date(System.currentTimeMillis());
+                    poi.setTime(simpleDateFormat.format(date));
+                    poi.save();
+                    MPHOTO mphoto = new MPHOTO();
+                    mphoto.setPdfic(ic);
+                    mphoto.setPOIC("POI" + String.valueOf(time));
+                    mphoto.setPath(getRealPath(uri.getPath()));
+                    mphoto.setTime(simpleDateFormat.format(date));
+                    mphoto.save();
+                    showAll = true;
+                    pdfView.resetZoomWithAnimation();
+                }else Toast.makeText(MainInterface.this, "该照片不在此地图中", Toast.LENGTH_SHORT).show();
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -888,7 +897,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Float.toString(k_w) + "see" + Float.toString(k_h));
     }
 
-    //获取当前屏幕所视区域的经纬度范围
+    //获取当前屏幕所视区域的经纬度与像素范围
     private void getCurrentScreenLoc(){
         if (pdfView.getCurrentYOffset() > 0 || pdfView.getCurrentXOffset() > 0) {
             if (pdfView.getCurrentYOffset() > 0 && pdfView.getCurrentXOffset() > 0){
@@ -913,7 +922,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             cs_left = (float)(( Math.abs(pdfView.getCurrentXOffset()) / current_pagewidth) * w + min_long);
             cs_right = (float)(( viewer_width - pdfView.getCurrentXOffset()) / current_pagewidth * w + min_long);
         }
-        locError(Float.toString(cs_top) + "%" + Float.toString(cs_bottom) + "%" + Float.toString(cs_left) + "%" + Float.toString(cs_right));
+        //locError(Float.toString(cs_top) + "%" + Float.toString(cs_bottom) + "%" + Float.toString(cs_left) + "%" + Float.toString(cs_right));
         //cs_top = pdfView.getCurrentYOffset()
     }
 
@@ -1121,72 +1130,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             FILE_TYPE = ASSET_FILE_TYPE;
             displayFromAsset("Demo");
         }
-        /*Button btt1 = (Button) findViewById(R.id.start);
-        btt1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setTitle("正在记录轨迹");
-                isDrawType = TRAIL_DRAW_TYPE;
-                isQuery = false;
-                m_cTrail = "";
-                isLocateEnd = false;
-                isLocate = 0;
-                initTrail();
-                //linearLayout.setVisibility(View.GONE);
-            }
-        });
-        Button btt2 = (Button) findViewById(R.id.go);
-        btt2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAll = true;
-                pdfView.resetZoomWithAnimation();
-                if (isDrawType == POI_DRAW_TYPE){
-                    isDrawType = NONE_DRAW_TYPE;
-                    setTitle(pdfFileName);
-                }else {
-                    isDrawType = POI_DRAW_TYPE;
-                    isQuery = false;
-                    setTitle("正在插放兴趣点");
-                }
-
-                //linearLayout.setVisibility(View.GONE);
-            }
-        });
-        Button btt3 = (Button) findViewById(R.id.stop);
-        btt3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //m_cTrail = "";
-                setTitle(pdfFileName);
-                if (!isLocateEnd){
-                    isLocateEnd = true;
-                    recordTrail(last_x, last_y);
-                    locError(m_cTrail);
-                    Trail trail = new Trail();
-                    List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
-                    trail.setIc(ic);
-                    trail.setName("路径" + Integer.toString(trails.size() + 1));
-                    trail.setPath(m_cTrail);
-                    trail.save();
-                }else locError("你没有打开位置记录功能");
-                //linearLayout.setVisibility(View.GONE);
-            }
-        });
-        Button btt4 = (Button) findViewById(R.id.querytip);
-        btt4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isQuery){
-                    setTitle("正在查询");
-                    isQuery = true;
-                    isDrawType = NONE_DRAW_TYPE;
-                }else {
-                    isQuery = false;
-                    setTitle(pdfFileName);
-                }
-            }
-        });*/
         bbt1 = (ImageButton) findViewById(R.id.trail);
         bbt2 = (ImageButton) findViewById(R.id.starttrail);
         bbt3 = (ImageButton) findViewById(R.id.endtrail);
@@ -1195,6 +1138,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bbt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setTitle("准备记录轨迹");
+                PointF mmm = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);
                 bbt2.setVisibility(View.VISIBLE);
                 bbt3.setVisibility(View.VISIBLE);
                 bbt1.setVisibility(View.INVISIBLE);
@@ -1232,6 +1178,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 bbt2.setVisibility(View.INVISIBLE);
                 bbt3.setVisibility(View.INVISIBLE);
                 bbt1.setVisibility(View.VISIBLE);
+                pdfView.resetZoomWithAnimation();
             }
         });
         bbt4.setOnClickListener(new View.OnClickListener() {
@@ -1242,6 +1189,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (isDrawType == POI_DRAW_TYPE){
                     isDrawType = NONE_DRAW_TYPE;
                     setTitle(pdfFileName);
+                    pdfView.zoomWithAnimation(1);
                 }else {
                     isDrawType = POI_DRAW_TYPE;
                     isQuery = false;
@@ -1373,7 +1321,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         int screenHeight = (int) (screen_height / density);
         pdfView = (PDFView) findViewById(R.id.pdfView);
 
-        Log.d(TAG, Float.toString(screen_width) + "^" + Float.toString(screen_height) + "^" + Float.toString(screenWidth) + "^" + Float.toString(screenHeight));
+        //Log.d(TAG, Float.toString(screen_width) + "^" + Float.toString(screen_height) + "^" + Float.toString(screenWidth) + "^" + Float.toString(screenHeight));
     }
 
     //加载当前菜单

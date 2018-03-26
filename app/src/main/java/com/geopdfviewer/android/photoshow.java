@@ -55,6 +55,7 @@ public class photoshow extends AppCompatActivity {
         adapter.setOnItemLongClickListener(new mPhotobjAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, String path) {
+                setTitle("正在进行长按操作");
                 deletePath = path;
                 isLongClick = 0;
                 invalidateOptionsMenu();
@@ -116,11 +117,13 @@ public class photoshow extends AppCompatActivity {
                 break;
             case R.id.restore_pois:
                 isLongClick = 1;
+                setTitle("录音列表");
                 refreshCard();
                 invalidateOptionsMenu();
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;
+                setTitle("录音列表");
                 invalidateOptionsMenu();
                 DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
                 refreshCard();

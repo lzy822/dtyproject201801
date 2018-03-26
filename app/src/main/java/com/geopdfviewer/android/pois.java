@@ -61,6 +61,7 @@ public class pois extends AppCompatActivity {
         adapter.setOnItemLongClickListener(new mPOIobjAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, String POIC) {
+                setTitle("正在进行长按操作");
                 selectedPOIC = POIC;
                 isLongClick = 0;
                 invalidateOptionsMenu();
@@ -104,11 +105,13 @@ public class pois extends AppCompatActivity {
                 break;
             case R.id.restore_pois:
                 isLongClick = 1;
+                setTitle("兴趣点列表");
                 refreshCard();
                 invalidateOptionsMenu();
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;
+                setTitle("兴趣点列表");
                 DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
                 DataSupport.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
                 DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);
