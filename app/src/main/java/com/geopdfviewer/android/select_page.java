@@ -129,6 +129,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //声明Toolbar
     Toolbar toolbar;
 
+    com.getbase.floatingactionbutton.FloatingActionButton bt2;
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         //toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -156,6 +158,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return true;
     }
 
+    private void resetView(){
+        setTitle("地图列表");
+        selectedNum = 0;
+        isLongClick = 1;
+        invalidateOptionsMenu();
+        bt2.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
@@ -164,26 +174,20 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             case  R.id.delete:
                 if (selectedNum != 0){
                     deleteData(selectedNum);
-                    selectedNum = 0;
-                    isLongClick = 1;
-                    invalidateOptionsMenu();
+                    resetView();
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
             case  R.id.mmcancel:
                 if (selectedNum != 0){
                     //isLongClick = 1;
                     refreshRecycler();
-                    selectedNum = 0;
-                    isLongClick = 1;
-                    invalidateOptionsMenu();
+                    resetView();
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
             case  R.id.showinfo:
                 if (selectedNum != 0){
                     showInfo(selectedNum);
-                    selectedNum = 0;
-                    isLongClick = 1;
-                    invalidateOptionsMenu();
+                    resetView();
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
         }
@@ -235,6 +239,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
+    private void requestAuthority(){
+        List<String> permissionList = new ArrayList<>();
+        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.RECORD_AUDIO);
+        }
+        if (!permissionList.isEmpty()){
+            String[] permissions = permissionList.toArray(new String[permissionList.size()]);
+            ActivityCompat.requestPermissions(select_page.this, permissions, 118);
+        }else {
+            getLocation();
+            initPage();
+        }
+    }
 
     public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic, String center_latlong) {
         Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
@@ -282,6 +305,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, int map_num, int position) {
+                setTitle("正在进行长按操作");
+                bt2.setVisibility(View.INVISIBLE);
                 locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
                 selectedNum = map_num;
                 if (isLongClick != 0){
@@ -526,7 +551,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         OutputStream outputStream1 = null;
         InputStream ip = null;
         try {
-            if(Type == SAMPLE_TYPE) {
+            /*if(Type == SAMPLE_TYPE) {
                 ip = getAssets().open(SAMPLE_FILE);
                 outputStream1 = new FileOutputStream(m_pdf_file = new File(Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".pdf"));
                 int read = 0;
@@ -536,9 +561,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
                 ip.close();
                 outputStream1.close();
-            }else {
+            }else {*/
                 m_pdf_file = new File(filePath);
-            }
+            //}
             //PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(getAssets().open(SAMPLE_FILE), ParcelFileDescriptor.MODE_READ_WRITE));
             PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
             Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
@@ -551,13 +576,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream);
             outputStream.flush();
             outputStream.close();
+            if (Type == SAMPLE_TYPE){
+                deletemFile(Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".pdf");
+            }
         }
         catch (IOException e) {
             Log.w(TAG, e.getMessage() );
             Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
-        }
-        if (Type == SAMPLE_TYPE){
-            deletemFile(Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".pdf");
         }
         return outPath;
     }
@@ -653,7 +678,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_CODE) {
+        /*if (requestCode == PERMISSION_CODE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //launchPicker();
@@ -661,15 +686,30 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
                 finish();
             }
-        }
+        }*/
         switch (requestCode) {
-            case 66:
+            /*case 66:
                 if (grantResults.length > 0) {
                     for (int result : grantResults) {
                         if (result != PackageManager.PERMISSION_GRANTED) {
                             Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
                             finish();
                             return;
+                        }
+                    }
+
+                }
+                break;*/
+            case 118:
+                if (grantResults.length > 0) {
+                    for (int result : grantResults) {
+                        if (result != PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
+                            finish();
+                            return;
+                        }else {
+                            getLocation();
+                            initPage();
                         }
                     }
 
@@ -683,13 +723,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
 
-        pickFile();
-
+        //pickFile();
+        setTitle("地图列表");
         //申请动态权限
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        requestAuthority();
+
+        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
-        }
-        getLocation();
+        }*/
+        //getLocation();
         /*Uri uri = Uri.parse("/storage/emulated/0/MIUI/sound_recorder/3月20日 上午10点36分.mp3");
         MediaPlayer mediaPlayer = MediaPlayer.create(this, uri);
         mediaPlayer.start();*/
@@ -702,26 +744,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 Btn_clearData();
             }
         });*/
-        //第一个子floating按钮事件编辑
-        com.getbase.floatingactionbutton.FloatingActionButton bt1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab01);
-        bt1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-            }
-        });
-        //第二个子floating按钮事件编辑
-        com.getbase.floatingactionbutton.FloatingActionButton bt2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab02);
+        //子floating按钮事件编辑
+        bt2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab02);
         bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 launchPicker();
             }
         });
         //初始化界面一
-        initPage();
+        //initPage();
     }
 
     @Override
@@ -730,9 +762,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (num_pdf != 0){
         isLongClick = 1;
         selectedNum = 0;
         refreshRecycler();
+        }
     }
 
     public void initPage(){
@@ -962,7 +996,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         try {
             if (Type == SAMPLE_TYPE){
                 in = getAssets().open(SAMPLE_FILE);
-                bmPath = createThumbnails(name, filePath, SAMPLE_TYPE);
+                //bmPath = createThumbnails(name, filePath, SAMPLE_TYPE);
+                //locError(getAssets().open("image/cangyuan.jpg").toString());
+                //bmPath = getAssets().open("image/cangyuan.jpg").toString();
             }
             else {
                 in = new FileInputStream(file);

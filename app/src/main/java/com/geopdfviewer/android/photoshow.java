@@ -90,6 +90,7 @@ public class photoshow extends AppCompatActivity {
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar4);
         setSupportActionBar(toolbar);
+        setTitle("相片列表");
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
     }

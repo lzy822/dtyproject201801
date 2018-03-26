@@ -65,6 +65,7 @@ public class tapeshow extends AppCompatActivity {
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar5);
         setSupportActionBar(toolbar);
+        setTitle("录音列表");
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
     }

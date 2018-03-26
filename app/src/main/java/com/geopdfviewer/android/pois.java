@@ -32,6 +32,7 @@ public class pois extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pois);
+        setTitle("兴趣点列表");
         Intent intent = getIntent();
         ic = intent.getStringExtra("ic");
         //refreshCard();

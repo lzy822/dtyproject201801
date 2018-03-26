@@ -21,21 +21,12 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-        <com.getbase.floatingactionbutton.FloatingActionsMenu
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end">
-            <com.getbase.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab01"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_add" />
             <com.getbase.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab02"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_playlist_add"/>
-        </com.getbase.floatingactionbutton.FloatingActionsMenu>
+                android:src="@drawable/ic_playlist_add"
+                android:layout_gravity="bottom|end"/>
 
     </android.support.design.widget.CoordinatorLayout>
 </LinearLayout>

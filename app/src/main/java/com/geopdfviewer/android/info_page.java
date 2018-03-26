@@ -58,10 +58,6 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.info).setVisible(false);
-        menu.findItem(R.id.query).setVisible(false);
-        menu.findItem(R.id.trail).setVisible(false);
-        menu.findItem(R.id.trailend).setVisible(false);
-        menu.findItem(R.id.deletePOI).setVisible(false);
         menu.findItem(R.id.queryPOI).setVisible(false);
         return true;
 

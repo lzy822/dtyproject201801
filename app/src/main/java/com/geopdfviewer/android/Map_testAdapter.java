@@ -3,6 +3,8 @@ package com.geopdfviewer.android;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.net.Uri;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -125,7 +128,15 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         if (map.getM_imguri() != ""){
             //Toast.makeText(mContext, map.getM_imguri(), Toast.LENGTH_SHORT).show();
             holder.MapImage.setImageURI(Uri.parse(map.getM_imguri()));
-        }else holder.MapImage.setImageResource(R.drawable.ic_android_black);
+        }else {
+            //holder.MapImage.setImageResource(R.drawable.ic_android_black);
+            try {
+                Bitmap bmp = BitmapFactory.decodeStream(mContext.getAssets().open("image/cangyuan.jpg"));
+                holder.MapImage.setImageBitmap(bmp);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -183,9 +194,6 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         }
         return distance;
     }
-
-
-
 
     @Override
     public int getItemCount() {

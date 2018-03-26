@@ -11,31 +11,15 @@
         android:icon="@drawable/ic_search"
         android:title="query"
         app:showAsAction="always"/>
-
-    <item
-        android:id="@+id/trail"
-        android:icon="@drawable/ic_subway"
-        android:title="Trail"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/trailend"
-        android:icon="@drawable/ic_subway"
-        android:title="endTrail"
-        app:showAsAction="never"/>
     <item
         android:id="@+id/info"
         android:icon="@drawable/ic_info_black"
         android:title="info"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/deletePOI"
-        android:icon="@drawable/ic_info_black"
-        android:title="deletePOI"
-        app:showAsAction="never"/>
-    <item
         android:id="@+id/queryPOI"
         android:icon="@drawable/ic_info_black"
-        android:title="查看所有POI点信息"
+        android:title="查看所有兴趣点信息"
         app:showAsAction="never"/>
 
 </menu>

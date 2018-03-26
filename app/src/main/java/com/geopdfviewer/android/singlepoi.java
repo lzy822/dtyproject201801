@@ -44,6 +44,7 @@ public class singlepoi extends AppCompatActivity {
         //声明ToolBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle("兴趣点信息");
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
 

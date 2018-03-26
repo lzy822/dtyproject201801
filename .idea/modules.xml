@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MyGeoPDF.iml" filepath="$PROJECT_DIR$/MyGeoPDF.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Code\MyGeoPDF\app\app.iml" filepath="C:\Code\MyGeoPDF\app\app.iml" />
-      <module fileurl="file://C:\Code\MyGeoPDF\geopdfviewer.iml" filepath="C:\Code\MyGeoPDF\geopdfviewer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/geopdfviewer.iml" filepath="$PROJECT_DIR$/geopdfviewer.iml" />
     </modules>
   </component>
 </project>
