@@ -64,6 +64,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -629,12 +631,21 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     public String findNameFromUri(Uri uri){
         int num;
+        String str = "";
         num = appearNumber(uri.toString(), "/");
-        String str = uri.toString();
-        for (int i = 1; i <= num; i++){
-            str = str.substring(str.indexOf("/") + 1);
+        try {
+            String configPath = uri.toString();
+            configPath = URLDecoder.decode(configPath, "utf-8");
+            locError(configPath);
+            str = configPath;
+            for (int i = 1; i <= num; i++){
+                str = str.substring(str.indexOf("/") + 1);
+            }
+            str = str.substring(0, str.length() - 4);
+
+        }catch (UnsupportedEncodingException e){
+            e.printStackTrace();
         }
-        str = str.substring(0, str.length() - 4);
         return str;
 
     }
@@ -653,12 +664,21 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
+            try {
+                String configPath = uri.toString();
+                configPath = URLDecoder.decode(configPath, "utf-8");
+                locError(configPath);
+                getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
+            }catch (UnsupportedEncodingException e){
+                e.printStackTrace();
+            }
+
             //locError(data.getData().getHost());
             /*locError(uri.toString());
             String m_filePath = uri.toString().substring("content://com.android.fileexplorer.myprovider/".length());
             m_filePath = "content://com.geopdfviewer.android.provider/" + m_filePath;
             getGeoInfo(getRealPath(uri.toString()), URI_TYPE, m_filePath, findNameFromUri(uri));*/
-            getGeoInfo(getRealPath(uri.toString()), URI_TYPE, uri.toString(), findNameFromUri(uri));
+            //getGeoInfo(getRealPath(uri.toString()), URI_TYPE, uri.toString(), findNameFromUri(uri));
             locError(getRealPath(uri.toString()));
             locError(uri.toString());
             locError(findNameFromUri(uri));
@@ -813,6 +833,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private String rubberCoordination(String MediaBox, String BBox, String GPTS){
+        locError("GPTS: " + GPTS);
         locError(MediaBox + "&" + BBox + "&" + GPTS);
         String[] MediaBoxString = MediaBox.split(" ");
         String[] BBoxString = BBox.split(" ");
@@ -892,6 +913,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private String getGPTS(String GPTS, String LPTS){
         if (isDrift(LPTS) == true) {
+            locError("看这里: " + GPTS + "LPTS " + LPTS);
             float lat_axis, long_axis;
             float lat_axis1, long_axis1;
             DecimalFormat df = new DecimalFormat("0.0");
@@ -1038,7 +1060,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     //坐标飘移纠偏
                     m_GPTS = getGPTS(m_GPTS, m_LPTS);
                     //locError(m_GPTS);
-                    Log.w(TAG, m_GPTS );
+                    Log.w(TAG, "hold on" + m_GPTS );
                     //locError(line);
                 }
                 if (line.contains("MediaBox")){
@@ -1076,6 +1098,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
             in.close();
             //locError("看这里"+m_name);
+            //locError("WKT: " + m_WKT);
             if (filePath != "") {
                 //locError(m_MediaBox + "&" + m_BBox + "&" + m_GPTS);
                 m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
