@@ -553,20 +553,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         OutputStream outputStream1 = null;
         InputStream ip = null;
         try {
-            /*if(Type == SAMPLE_TYPE) {
-                ip = getAssets().open(SAMPLE_FILE);
-                outputStream1 = new FileOutputStream(m_pdf_file = new File(Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".pdf"));
-                int read = 0;
-                byte[] bytes = new byte[1024];
-                while ((read = ip.read(bytes)) != -1) {
-                    outputStream1.write(bytes, 0, read);
-                }
-                ip.close();
-                outputStream1.close();
-            }else {*/
-                m_pdf_file = new File(filePath);
-            //}
-            //PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(getAssets().open(SAMPLE_FILE), ParcelFileDescriptor.MODE_READ_WRITE));
+            m_pdf_file = new File(filePath);
             PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
             Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
             pdfiumCore.openPage(pdf, pageNum);
@@ -819,6 +806,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private boolean isDrift(String LPTS){
+        locError("Drift : " + LPTS);
         boolean isDrift = false;
         String[] LPTSStrings = LPTS.split(" ");
         //locError(Integer.toString(LPTSStrings.length));
@@ -850,6 +838,19 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             BBoxs[i] = Float.valueOf(BBoxString[i]);
             //locError("BBoxs : " + Float.toString(BBoxs[i]));
         }
+        //优化BBOX拉伸算法
+        float del;
+        /*if (BBoxs[0] > BBoxs[2]){
+            del = BBoxs[0];
+            BBoxs[0] = BBoxs[2];
+            BBoxs[2] = del;
+        }*/
+        if (BBoxs[1] < BBoxs[3]){
+            del = BBoxs[1];
+            BBoxs[1] = BBoxs[3];
+            BBoxs[3] = del;
+        }
+        //
         for (int i = 0; i < GPTSString.length; i++) {
             GPTSs[i] = Float.valueOf(GPTSString[i]);
         }
@@ -900,20 +901,22 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.x - 1));
             m_center_x = ( pt_lb.x + pt_lt.x + pt_rb.x + pt_rt.x) / 4;
             m_center_y = ( pt_lb.y + pt_lt.y + pt_rb.y + pt_rt.y) / 4;
-            locError("GETGPTS: " + Double.toString(m_center_x));
+            //locError("GETGPTS: " + Double.toString(m_center_x));
             GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
         }else {
             m_center_x = ( GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
             m_center_y = ( GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-            locError("GETGPTS: " + Double.toString(m_center_x));
+            //locError("GETGPTS: " + Double.toString(m_center_x));
         }
+        locError("GPTS : test" + GPTS);
             return GPTS;
 
     }
 
     private String getGPTS(String GPTS, String LPTS){
+        //locError("看这里: " + " & LPTS " + LPTS);
         if (isDrift(LPTS) == true) {
-            locError("看这里: " + GPTS + "LPTS " + LPTS);
+            //locError("看这里: " + GPTS + " & LPTS " + LPTS);
             float lat_axis, long_axis;
             float lat_axis1, long_axis1;
             DecimalFormat df = new DecimalFormat("0.0");
@@ -932,6 +935,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             //构建两个矩形
             //构建经纬度矩形
             PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+            //PointF pt_lb1 = new PointF(), pt_rb1 = new PointF(), pt_lt1 = new PointF(), pt_rt1 = new PointF();
             lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
             long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
             for (int i = 0; i < GPTSs.length; i = i + 2){
@@ -1042,28 +1046,30 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 {
                     isESRI = true;
                 }
-                if (line.contains("/BBox") && line.contains("Viewport")){
+                if (line.contains("/BBox") & line.contains("Viewport")){
                     //Log.w(TAG, "the line loc = " + Integer.toString(num_line) );
                     m_BBox = line.substring(line.indexOf("BBox") + 5);
                     m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
                     m_BBox = m_BBox.trim();
                     locError("BBox : " + m_BBox);
                 }
-                if (line.contains("GPTS")){
-                    //m_num_GPTS++;
-                    m_GPTS = line.substring(line.indexOf("GPTS") + 5);
-                    m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
-                    m_GPTS = m_GPTS.trim();
+                if (line.contains("GPTS") & line.contains("LPTS")){
                     m_LPTS = line.substring(line.indexOf("LPTS") + 5);
                     m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
                     m_LPTS = m_LPTS.trim();
-                    //坐标飘移纠偏
-                    m_GPTS = getGPTS(m_GPTS, m_LPTS);
+                    if (m_LPTS.length() > 0){
+                        m_GPTS = line.substring(line.indexOf("GPTS") + 5);
+                        m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
+                        m_GPTS = m_GPTS.trim();
+                        //坐标飘移纠偏
+                        m_GPTS = getGPTS(m_GPTS, m_LPTS);
+                    }
                     //locError(m_GPTS);
                     Log.w(TAG, "hold on" + m_GPTS );
-                    //locError(line);
+
                 }
                 if (line.contains("MediaBox")){
+                    line = line.substring(line.indexOf("MediaBox"));
                     m_MediaBox = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
                     m_MediaBox = m_MediaBox.trim();
                     Log.w(TAG, "MediaBox : " + m_MediaBox );
