@@ -162,6 +162,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //记录当前缩放比例
     private float c_zoom;
 
+    //记录当前图号
+    private int num_map;
+
     private void recordTrail(Location location){
         isLocate++;
         if (location != null) {
@@ -272,6 +275,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //获取地理信息
     public void getInfo(int num) {
+        num_map = num;
         SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
         String str = "n_" + num + "_";
         pdfFileName = pref1.getString(str + "name", "");
@@ -537,6 +541,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void displayFromFile(String filePath) {
+        locError("filePath: " + filePath);
         setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfView.setBackgroundColor(Color.BLACK);
@@ -555,6 +560,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_width = pdfView.getWidth();
                             //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
+                        if (isQuery & num_map == 4 & c_zoom > 5 & ( ( cs_bottom > 24.6 & cs_top < 25.3) & ( cs_left > 102.48 & cs_right < 102.97))){
+                            getInfo(3);
+                            displayFromFile(uri);
+                            getScreen();
+                            setTitle(pdfFileName);
+                            isQuery = false;
+                        }
+                        if (isQuery & num_map == 3 & c_zoom < 1.2 & ( ( cs_bottom < 24.92 & cs_top > 25.157) & ( cs_left < 102.63 & cs_right > 102.75))){
+                            locError("bottom: 我的天哪");
+                            getInfo(4);
+                            displayFromFile(uri);
+                            getScreen();
+                            setTitle(pdfFileName);
+                            isQuery = false;
+                        }
+
+                        locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
                         c_zoom = pdfView.getZoom();
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;

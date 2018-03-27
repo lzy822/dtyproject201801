@@ -1063,7 +1063,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     locError("BBox : " + m_BBox);
                 }
-                if (line.contains("GPTS") & line.contains("LPTS")){
+                if (line.contains("GPTS") & line.contains("LPTS") & m_num_GPTS == 0){
+                    m_num_GPTS++;
                     m_LPTS = line.substring(line.indexOf("LPTS") + 5);
                     m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
                     m_LPTS = m_LPTS.trim();
