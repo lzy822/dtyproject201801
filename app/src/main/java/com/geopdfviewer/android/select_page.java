@@ -68,9 +68,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class select_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
@@ -1035,6 +1038,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String line;
             String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "", m_LPTS = "";
             int m_num_GPTS = 0;
+            //line = bufferedReader.readLine()
             while((line = bufferedReader.readLine()) != null) {
                 //sb.append(line + "/n");
                 if(line.contains("PROJCS")) {
@@ -1049,8 +1053,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 if (line.contains("/BBox") & line.contains("Viewport")){
                     //Log.w(TAG, "the line loc = " + Integer.toString(num_line) );
                     m_BBox = line.substring(line.indexOf("BBox") + 5);
+                    if(!m_BBox.contains("BBox")){
                     m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
                     m_BBox = m_BBox.trim();
+                    }else {
+                        m_BBox = m_BBox.substring(m_BBox.indexOf("BBox") + 5);
+                        m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
+                        m_BBox = m_BBox.trim();
+                    }
                     locError("BBox : " + m_BBox);
                 }
                 if (line.contains("GPTS") & line.contains("LPTS")){
