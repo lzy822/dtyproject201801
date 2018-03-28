@@ -255,6 +255,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.RECORD_AUDIO);
         }
+        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.CAMERA);
+        }
         if (!permissionList.isEmpty()){
             String[] permissions = permissionList.toArray(new String[permissionList.size()]);
             ActivityCompat.requestPermissions(select_page.this, permissions, 118);

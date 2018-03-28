@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:name="org.litepal.LitePalApplication"
@@ -41,6 +42,15 @@
             android:label="所有POI信息" />
         <activity android:name=".photoshow" />
         <activity android:name=".tapeshow"></activity>
+        <provider
+            android:authorities="com.geopdfviewer.android.fileprovider"
+            android:name="android.support.v4.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
     </application>
 
 </manifest>

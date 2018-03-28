@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -19,16 +21,19 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -37,6 +42,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.github.barteksc.pdfviewer.PDFView;
@@ -50,6 +56,7 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 import org.litepal.crud.DataSupport;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -71,6 +78,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public static final int FILE_FILE_TYPE = 1;
     public static final int ASSET_FILE_TYPE = 2;
     public static int FILE_TYPE = NONE_FILE_TYPE;
+    public static final int TAKE_PHOTO = 119;
     Integer pageNumber = 0;
     public String content;
     String pdfFileName;
@@ -164,6 +172,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录当前图号
     private int num_map;
+
+    //记录拍照后返回的URI
+    private Uri imageUri;
 
     private void recordTrail(Location location){
         isLocate++;
@@ -801,14 +812,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
-            //locError(uri.getPath());
             float[] latandlong = new float[2];
             try{
                 ExifInterface exifInterface = new ExifInterface(getRealPath(uri.getPath()));
                 exifInterface.getLatLong(latandlong);
                 locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                if (latandlong[0] >= min_lat && latandlong[0] <= max_lat && latandlong[1] >= min_long && latandlong[1] <= max_long){
-                    //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
                     List<POI> POIs = DataSupport.findAll(POI.class);
                     POI poi = new POI();
                     poi.setIc(ic);
@@ -830,7 +838,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     mphoto.save();
                     showAll = true;
                     pdfView.resetZoomWithAnimation();
-                }else Toast.makeText(MainInterface.this, "该照片不在此地图中", Toast.LENGTH_SHORT).show();
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -854,7 +861,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             poi.setTime(simpleDateFormat.format(date));
             poi.save();
             MTAPE mtape = new MTAPE();
-            mtape.setPath(getRealPathFromUri(this, uri));
+            mtape.setPath(getRealPathFromUriForAudio(this, uri));
             mtape.setPdfic(ic);
             mtape.setPOIC(POIC);
             mtape.setTime(simpleDateFormat.format(date));
@@ -862,15 +869,122 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             showAll = true;
             pdfView.resetZoomWithAnimation();
         }
+        if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
+            String imageuri = getRealPath(imageUri.getPath());
+            locError("imageUri : " + imageuri.toString());
+            float[] latandlong = new float[2];
+            try{
+                ExifInterface exifInterface = new ExifInterface(imageuri);
+                exifInterface.getLatLong(latandlong);
+                locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                    //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                    List<POI> POIs = DataSupport.findAll(POI.class);
+                    POI poi = new POI();
+                    poi.setIc(ic);
+                    long time = System.currentTimeMillis();
+                    poi.setPOIC("POI" + String.valueOf(time));
+                    poi.setPhotonum(1);
+                    poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
+                    poi.setX(latandlong[0]);
+                    poi.setY(latandlong[1]);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                    Date date = new Date(System.currentTimeMillis());
+                    poi.setTime(simpleDateFormat.format(date));
+                    poi.save();
+                    MPHOTO mphoto = new MPHOTO();
+                    mphoto.setPdfic(ic);
+                    mphoto.setPOIC("POI" + String.valueOf(time));
+                    mphoto.setPath(imageuri);
+                    mphoto.setTime(simpleDateFormat.format(date));
+                    mphoto.save();
+                    showAll = true;
+                    pdfView.resetZoomWithAnimation();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private void showPopueWindow(){
+        View popView = View.inflate(this,R.layout.popupwindow_camera_need,null);
+        Button bt_album = (Button) popView.findViewById(R.id.btn_pop_album);
+        Button bt_camera = (Button) popView.findViewById(R.id.btn_pop_camera);
+        Button bt_cancle = (Button) popView.findViewById(R.id.btn_pop_cancel);
+        //获取屏幕宽高
+        int weight = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels*1/3;
+
+        final PopupWindow popupWindow = new PopupWindow(popView,weight,height);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(true);
+
+        bt_album.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickFile();
+                popupWindow.dismiss();
+
+            }
+        });
+        bt_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePhoto();
+                popupWindow.dismiss();
+
+            }
+        });
+        bt_cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+
+            }
+        });
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 0.5f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.BOTTOM,0,50);
+
     }
 
     //获取音频文件路径
-    public static String getRealPathFromUri(Context context, Uri contentUri) {
+    public static String getRealPathFromUriForAudio(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
             String[] proj = { MediaStore.Audio.Media.DATA };
             cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    //获取照片文件路径
+    public static String getRealPathFromUriForPhoto(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        Log.w(TAG, contentUri.toString() );
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             return cursor.getString(column_index);
         } finally {
@@ -1259,7 +1373,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //浮动按钮1 具体功能如下:
-                pickFile();
+                //pickFile();
+                showPopueWindow();
             }
         });
         final com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
@@ -1269,6 +1384,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //浮动按钮2 具体功能如下:
                 Toast.makeText(MainInterface.this, "定位到当前位置功能尚未添加", Toast.LENGTH_SHORT).show();
                 //DataSupport.deleteAll(POI.class);
+
+                //takePhoto();
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
@@ -1324,6 +1441,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }catch (SecurityException e){
         }
         super.onDestroy();
+    }
+
+    private void takePhoto(){
+        File file = new File(Environment.getExternalStorageDirectory() + "/maphoto");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        long timenow = System.currentTimeMillis();
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/maphoto", Long.toString(timenow) + ".jpg");
+        try {
+            if (outputImage.exists()){
+                outputImage.delete();
+            }
+            outputImage.createNewFile();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        if (Build.VERSION.SDK_INT >= 24){
+        //locError(Environment.getExternalStorageDirectory() + "/maphoto/" + Long.toString(timenow) + ".jpg");
+            imageUri = FileProvider.getUriForFile(MainInterface.this, "com.geopdfviewer.android.fileprovider", outputImage);
+
+        }else imageUri = Uri.fromFile(outputImage);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(intent, TAKE_PHOTO);
     }
 
     //PDF页面变化监控
