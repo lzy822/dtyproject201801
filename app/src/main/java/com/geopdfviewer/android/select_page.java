@@ -500,6 +500,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public void deleteMDatabase(String m_ic){
+        /*
         List<POI> pois = DataSupport.where("ic = ?", m_ic).find(POI.class);
         for ( POI poi : pois){
             String poic = poi.getPOIC();
@@ -507,7 +508,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             DataSupport.deleteAll(MPHOTO.class, "POIC = ?", poic);
         }
         DataSupport.deleteAll(POI.class, "ic = ?", m_ic);
-        DataSupport.deleteAll(Trail.class, "ic = ?", m_ic);
+        DataSupport.deleteAll(Trail.class, "ic = ?", m_ic);*/
     }
 
     public void deletemFile(String filePath){

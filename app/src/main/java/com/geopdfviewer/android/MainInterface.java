@@ -394,7 +394,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         PointF pt1;
                         pt1 = getGeoLocFromPixL(pt);
                         if (isDrawType == POI_DRAW_TYPE && isQuery == false){
-                            List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                            //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                            List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
                             poi.setName("POI" + String.valueOf(POIs.size() + 1));
                             poi.setIc(ic);
@@ -422,7 +423,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
-                            List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             locError(Integer.toString(pois.size()));
                             int n = 0;
                             int num = 0;
@@ -511,7 +513,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                         if(isDrawType == POI_DRAW_TYPE || showAll){
-                            List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
                                 for (POI poi : pois){
                                     PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
@@ -630,7 +633,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             //canvas.drawLine();
                         }
                         if(isDrawType == POI_DRAW_TYPE || showAll){
-                            List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
                                 for (POI poi : pois){
                                     PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
@@ -677,7 +681,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         PointF pt1;
                         pt1 = getGeoLocFromPixL(pt);
                         if (isDrawType == POI_DRAW_TYPE && isQuery == false){
-                            List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                            List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
                             poi.setName("POI" + String.valueOf(POIs.size() + 1));
                             poi.setIc(ic);
@@ -707,7 +711,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
-                            List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             locError(Integer.toString(pois.size()));
                             int n = 0;
                             int num = 0;
@@ -804,7 +808,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 exifInterface.getLatLong(latandlong);
                 locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
                 if (latandlong[0] >= min_lat && latandlong[0] <= max_lat && latandlong[1] >= min_long && latandlong[1] <= max_long){
-                    List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                    //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                    List<POI> POIs = DataSupport.findAll(POI.class);
                     POI poi = new POI();
                     poi.setIc(ic);
                     long time = System.currentTimeMillis();
@@ -835,7 +840,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             Uri uri = data.getData();
             long time = System.currentTimeMillis();
             String POIC = "POI" + String.valueOf(time);
-            List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+            //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+            List<POI> POIs = DataSupport.findAll(POI.class);
             POI poi = new POI();
             poi.setIc(ic);
             poi.setPOIC(POIC);
@@ -1262,6 +1268,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 //浮动按钮2 具体功能如下:
                 Toast.makeText(MainInterface.this, "定位到当前位置功能尚未添加", Toast.LENGTH_SHORT).show();
+                //DataSupport.deleteAll(POI.class);
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
@@ -1397,6 +1404,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             case R.id.queryPOI:
                 Intent intent2 = new Intent(MainInterface.this, pois.class);
                 intent2.putExtra("ic", ic);
+                intent2.putExtra("min_lat", min_lat);
+                intent2.putExtra("max_lat", max_lat);
+                intent2.putExtra("min_long", min_long);
+                intent2.putExtra("max_long", max_long);
                 startActivity(intent2);
                 break;
             default:

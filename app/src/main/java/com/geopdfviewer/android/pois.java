@@ -1,6 +1,9 @@
 package com.geopdfviewer.android;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +30,8 @@ public class pois extends AppCompatActivity {
     private String selectedPOIC;
     private int isLongClick = 1;
     Toolbar toolbar;
+    double min_lat, max_lat, min_long, max_long;
+    private SQLiteOpenHelper dbhelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +40,10 @@ public class pois extends AppCompatActivity {
         setTitle("兴趣点列表");
         Intent intent = getIntent();
         ic = intent.getStringExtra("ic");
+        min_lat = intent.getDoubleExtra("min_lat", 0);
+        max_lat = intent.getDoubleExtra("max_lat", 0);
+        min_long = intent.getDoubleExtra("min_long", 0);
+        max_long = intent.getDoubleExtra("max_long", 0);
         //refreshCard();
     }
 
@@ -49,11 +58,37 @@ public class pois extends AppCompatActivity {
 
     private void refreshCard(){
         mPOIobjList.clear();
-        List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+        //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+        //List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+        //List<POI> pois = DataSupport.where("x >= " + String.valueOf(max_lat)).find(POI.class);
+        //List<POI> pois = DataSupport.where("y <= ?", String.valueOf(max_long)).where("y >= ?", String.valueOf(min_long)).where("x >= ?", String.valueOf(min_lat)).where("x <= ?", String.valueOf(max_lat)).find(POI.class);
+        //List<POI> pois = DataSupport.findAll(POI.class);
+        /*Log.w(TAG, "数量 : " + Integer.toString(pois.size()));
+        Log.w(TAG, " max_lat : " + Double.toString(max_lat) + " min_lat : " + Double.toString(min_lat) + " max_long : " + Double.toString(max_long) + " min_long : " + Double.toString(min_long));
         for (POI poi : pois){
             mPOIobj mPOIobj = new mPOIobj(poi.getPOIC(), poi.getX(), poi.getY(), poi.getTime(), poi.getTapenum(), poi.getPhotonum(), poi.getName(), poi.getDescription());
             mPOIobjList.add(mPOIobj);
+        }*/
+        //SQLiteDatabase database = dbhelper.getReadableDatabase();
+        //Cursor cursor = database.rawQuery("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", new String[] {String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long)});
+        Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+        Log.w(TAG, cursor.getColumnName(0) + cursor.getColumnName(1) + cursor.getColumnName(2) + cursor.getColumnName(3));;
+        if (cursor.moveToFirst()){
+            do {
+                String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                //String POIC = "Xx";
+                String time = cursor.getString(cursor.getColumnIndex("time"));
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                String description = cursor.getString(cursor.getColumnIndex("description"));
+                int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                mPOIobjList.add(mPOIobj);
+            }while (cursor.moveToNext());
         }
+        cursor.close();
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_poi);
         layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);
