@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +56,21 @@ public class tapeshow extends AppCompatActivity {
                 deletePath = path;
                 isLongClick = 0;
                 invalidateOptionsMenu();
+                Log.w(TAG, "onItemLongClick: " + deletePath );
+            }
+        });
+        adapter.setOnItemClickListener(new mTapeobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String path, int position) {
+                mTapeobjAdapter.ViewHolder holder = new mTapeobjAdapter.ViewHolder(view);
+                if (isLongClick == 0){
+                    holder.cardView.setCardBackgroundColor(Color.GRAY);
+                    deletePath = deletePath + "wslzy" + path;
+                }else {
+                    MediaPlayer mediaPlayer = MediaPlayer.create(tapeshow.this, Uri.parse(path));
+                    mediaPlayer.start();
+                }
+                Log.w(TAG, "onItemClick: " + deletePath );
             }
         });
         recyclerView.setAdapter(adapter);
@@ -120,6 +137,7 @@ public class tapeshow extends AppCompatActivity {
                 isLongClick = 1;
                 invalidateOptionsMenu();
                 DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
+                //parseSelectedPath();
                 setTitle("录音列表");
                 refreshCard();
                 break;
@@ -168,4 +186,18 @@ public class tapeshow extends AppCompatActivity {
             }
         }
     }
+
+    private void parseSelectedPath(){
+        if (deletePath.contains("wslzy")){
+            String[] nums = deletePath.split("wslzy");
+            for (int i = 0; i < nums.length; i++){
+                Log.w(TAG, "parseSelectedPath: " + nums[i]);
+                DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", nums[i]);
+            }
+        }else {
+            Log.w(TAG, "parseSelectedPath111: " + deletePath);
+            DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
+        }
+    }
+
 }

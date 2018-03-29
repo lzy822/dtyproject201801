@@ -26,6 +26,8 @@ public class mTapeobjAdapter extends RecyclerView.Adapter<mTapeobjAdapter.ViewHo
 
     private mTapeobjAdapter.OnRecyclerItemLongListener mOnItemLong;
 
+    private mTapeobjAdapter.OnRecyclerItemClickListener mOnItemClick;
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         //private OnRecyclerItemLongListener mOnItemLong = null;
         CardView cardView;
@@ -59,11 +61,9 @@ public class mTapeobjAdapter extends RecyclerView.Adapter<mTapeobjAdapter.ViewHo
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 mTapeobj mtapeobj = mTapeobjList.get(position);
-                MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(mtapeobj.getM_path()));
-                mediaPlayer.start();
-                //Intent intent = new Intent(mContext, singlepoi.class);
-                //intent.putExtra("POIC", poi.getM_POIC());
-                //mContext.startActivity(intent);
+                mOnItemClick.onItemClick(v, mtapeobj.getM_path(), position);
+                /*MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(mtapeobj.getM_path()));
+                mediaPlayer.start();*/
             }
         });
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -106,5 +106,11 @@ public class mTapeobjAdapter extends RecyclerView.Adapter<mTapeobjAdapter.ViewHo
     public void setOnItemLongClickListener(mTapeobjAdapter.OnRecyclerItemLongListener listener){
         //Log.w(TAG, "setOnItemLongClickListener: " );
         this.mOnItemLong =  listener;
+    }
+    public interface OnRecyclerItemClickListener{
+        void onItemClick(View view,String path, int position);
+    }
+    public void setOnItemClickListener(OnRecyclerItemClickListener listener){
+        this.mOnItemClick =  listener;
     }
 }

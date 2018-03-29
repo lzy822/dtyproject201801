@@ -134,6 +134,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //声明Toolbar
     Toolbar toolbar;
 
+    //记录长按的position
+    private String mselectedpos = "";
+
     com.getbase.floatingactionbutton.FloatingActionButton bt2;
 
     @Override
@@ -171,6 +174,17 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         bt2.setVisibility(View.VISIBLE);
     }
 
+    private void parseSelectedpos(){
+        if (mselectedpos.contains(" ")){
+            String[] nums = mselectedpos.split(" ");
+            for (int i = 0; i < nums.length; i++){
+                deleteData(Integer.valueOf(nums[i]));
+            }
+        }else {
+            deleteData(selectedNum);
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
@@ -178,7 +192,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         {
             case  R.id.delete:
                 if (selectedNum != 0){
-                    deleteData(selectedNum);
+                    //deleteData(selectedNum);
+                    parseSelectedpos();
                     resetView();
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
@@ -320,14 +335,28 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 if (isLongClick != 0){
                     isLongClick = 0;
                     selectedpos = position;
+                    mselectedpos = String.valueOf(position);
                 }else {
                     adapter.notifyItemChanged(selectedpos);
                     selectedpos = position;
+                    mselectedpos = String.valueOf(position);
                 }
-
-
                 invalidateOptionsMenu();
-                //deleteData(position);
+            }
+        });
+        adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, int map_num, int position) {
+                Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
+                Map_test map = map_testList.get(position);
+                if (isLongClick == 0){
+                    holder.cardView.setCardBackgroundColor(Color.GRAY);
+                    mselectedpos = mselectedpos + " " + String.valueOf(map_num);
+                }else {
+                    Intent intent = new Intent(select_page.this, MainInterface.class);
+                    intent.putExtra("num", map.getM_num());
+                    select_page.this.startActivity(intent);
+                }
             }
         });
         //adapter.getItemSelected();
@@ -666,13 +695,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }catch (UnsupportedEncodingException e){
                 e.printStackTrace();
             }
-
-            //locError(data.getData().getHost());
-            /*locError(uri.toString());
-            String m_filePath = uri.toString().substring("content://com.android.fileexplorer.myprovider/".length());
-            m_filePath = "content://com.geopdfviewer.android.provider/" + m_filePath;
-            getGeoInfo(getRealPath(uri.toString()), URI_TYPE, m_filePath, findNameFromUri(uri));*/
-            //getGeoInfo(getRealPath(uri.toString()), URI_TYPE, uri.toString(), findNameFromUri(uri));
             locError(getRealPath(uri.toString()));
             locError(uri.toString());
             locError(findNameFromUri(uri));
@@ -692,28 +714,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
-        /*if (requestCode == PERMISSION_CODE) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //launchPicker();
-            }else {
-                Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
-                finish();
-            }
-        }*/
         switch (requestCode) {
-            /*case 66:
-                if (grantResults.length > 0) {
-                    for (int result : grantResults) {
-                        if (result != PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
-                            finish();
-                            return;
-                        }
-                    }
-
-                }
-                break;*/
             case 118:
                 if (grantResults.length > 0) {
                     for (int result : grantResults) {
@@ -736,28 +737,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
-
-        //pickFile();
         setTitle("地图列表");
         //申请动态权限
         requestAuthority();
-
-        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 66);
-        }*/
-        //getLocation();
-        /*Uri uri = Uri.parse("/storage/emulated/0/MIUI/sound_recorder/3月20日 上午10点36分.mp3");
-        MediaPlayer mediaPlayer = MediaPlayer.create(this, uri);
-        mediaPlayer.start();*/
-        //locError();
-        //Clear按钮事件编辑
-        /*Button btn_clear = (Button) findViewById(R.id.btn_clear);
-        btn_clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Btn_clearData();
-            }
-        });*/
         //子floating按钮事件编辑
         bt2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab02);
         bt2.setOnClickListener(new View.OnClickListener() {
@@ -767,7 +749,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
         });
         //初始化界面一
-        //initPage();
     }
 
     @Override

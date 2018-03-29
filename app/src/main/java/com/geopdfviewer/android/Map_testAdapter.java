@@ -39,6 +39,8 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
     private OnRecyclerItemLongListener mOnItemLong;
 
+    private OnRecyclerItemClickListener mOnItemClick;
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         //private OnRecyclerItemLongListener mOnItemLong = null;
         CardView cardView;
@@ -72,9 +74,11 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 Map_test map = mMapList.get(position);
+                mOnItemClick.onItemClick(v, map.getM_num(), position);
+                /*
                 Intent intent = new Intent(mContext, MainInterface.class);
                 intent.putExtra("num", map.getM_num());
-                mContext.startActivity(intent);
+                mContext.startActivity(intent);*/
             }
         });
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -84,7 +88,6 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                     int position = holder.getAdapterPosition();
                     Map_test map = mMapList.get(position);
                     mOnItemLong.onItemLongClick(v, map.getM_num(), position);
-                    //Toast.makeText(mContext, Integer.toString(map.getM_num()), Toast.LENGTH_LONG).show();
                     holder.cardView.setCardBackgroundColor(Color.GRAY);
                }
                 return true;
@@ -206,9 +209,16 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         void onItemLongClick(View view,int map_num, int position);
     }
     public void setOnItemLongClickListener(OnRecyclerItemLongListener listener){
-        //Log.w(TAG, "setOnItemLongClickListener: " );
         this.mOnItemLong =  listener;
     }
+
+    public interface OnRecyclerItemClickListener{
+        void onItemClick(View view,int map_num, int position);
+    }
+    public void setOnItemClickListener(OnRecyclerItemClickListener listener){
+        this.mOnItemClick =  listener;
+    }
+
     //距离量测(输入参数为 两点的经纬度)
     public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
 

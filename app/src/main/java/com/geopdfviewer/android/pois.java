@@ -58,25 +58,10 @@ public class pois extends AppCompatActivity {
 
     private void refreshCard(){
         mPOIobjList.clear();
-        //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
-        //List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-        //List<POI> pois = DataSupport.where("x >= " + String.valueOf(max_lat)).find(POI.class);
-        //List<POI> pois = DataSupport.where("y <= ?", String.valueOf(max_long)).where("y >= ?", String.valueOf(min_long)).where("x >= ?", String.valueOf(min_lat)).where("x <= ?", String.valueOf(max_lat)).find(POI.class);
-        //List<POI> pois = DataSupport.findAll(POI.class);
-        /*Log.w(TAG, "数量 : " + Integer.toString(pois.size()));
-        Log.w(TAG, " max_lat : " + Double.toString(max_lat) + " min_lat : " + Double.toString(min_lat) + " max_long : " + Double.toString(max_long) + " min_long : " + Double.toString(min_long));
-        for (POI poi : pois){
-            mPOIobj mPOIobj = new mPOIobj(poi.getPOIC(), poi.getX(), poi.getY(), poi.getTime(), poi.getTapenum(), poi.getPhotonum(), poi.getName(), poi.getDescription());
-            mPOIobjList.add(mPOIobj);
-        }*/
-        //SQLiteDatabase database = dbhelper.getReadableDatabase();
-        //Cursor cursor = database.rawQuery("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", new String[] {String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long)});
         Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
-        Log.w(TAG, cursor.getColumnName(0) + cursor.getColumnName(1) + cursor.getColumnName(2) + cursor.getColumnName(3));;
         if (cursor.moveToFirst()){
             do {
                 String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                //String POIC = "Xx";
                 String time = cursor.getString(cursor.getColumnIndex("time"));
                 String name = cursor.getString(cursor.getColumnIndex("name"));
                 String description = cursor.getString(cursor.getColumnIndex("description"));
@@ -100,6 +85,21 @@ public class pois extends AppCompatActivity {
                 selectedPOIC = POIC;
                 isLongClick = 0;
                 invalidateOptionsMenu();
+            }
+        });
+        adapter.setOnItemClickListener(new mPOIobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String map_num, int position) {
+                mPOIobjAdapter.ViewHolder holder = new mPOIobjAdapter.ViewHolder(view);
+                mPOIobj poi = mPOIobjList.get(position);
+                if (isLongClick == 0){
+                    holder.cardView.setCardBackgroundColor(Color.GRAY);
+                    selectedPOIC = selectedPOIC + " " + poi.getM_POIC();
+                }else {
+                    Intent intent = new Intent(pois.this, singlepoi.class);
+                    intent.putExtra("POIC", poi.getM_POIC());
+                    pois.this.startActivity(intent);
+                }
             }
         });
         recyclerView.setAdapter(adapter);
@@ -147,14 +147,30 @@ public class pois extends AppCompatActivity {
             case R.id.deletepoi:
                 isLongClick = 1;
                 setTitle("兴趣点列表");
-                DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
+                /*DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
                 DataSupport.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
-                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);
+                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);*/
+                parseSelectedPOIC();
                 refreshCard();
                 break;
             default:
                 break;
         }
         return true;
+    }
+
+    private void parseSelectedPOIC(){
+        if (selectedPOIC.contains(" ")){
+            String[] nums = selectedPOIC.split(" ");
+            for (int i = 0; i < nums.length; i++){
+                DataSupport.deleteAll(POI.class, "POIC = ?", nums[i]);
+                DataSupport.deleteAll(MTAPE.class, "POIC = ?", nums[i]);
+                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", nums[i]);
+            }
+        }else {
+            DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
+            DataSupport.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
+            DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);
+        }
     }
 }

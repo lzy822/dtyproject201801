@@ -60,6 +60,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -388,7 +389,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //显示GeoPDF
     private void displayFromAsset(String assetFileName) {
         pdfFileName = assetFileName;
-
         pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfView.setBackgroundColor(Color.BLACK);
         pdfView.fromAsset(SAMPLE_FILE)
@@ -405,7 +405,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         PointF pt1;
                         pt1 = getGeoLocFromPixL(pt);
                         if (isDrawType == POI_DRAW_TYPE && isQuery == false){
-                            //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
                             poi.setName("POI" + String.valueOf(POIs.size() + 1));
@@ -419,6 +418,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
+                            PointF pp = getPixLocFromGeoL(pt1);
+                            pdfView.zoomWithAnimation(pp.x, pp.y, 8);
                         }
                         if (isMessure == true){
                             poinum_messure++;
@@ -434,29 +435,52 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
-                            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
-                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-                            locError(Integer.toString(pois.size()));
+                            List<mPOIobj> pois =  new ArrayList<>();
+                            Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+                            if (cursor.moveToFirst()){
+                                do {
+                                    String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                                    String time = cursor.getString(cursor.getColumnIndex("time"));
+                                    String name = cursor.getString(cursor.getColumnIndex("name"));
+                                    String description = cursor.getString(cursor.getColumnIndex("description"));
+                                    int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                                    int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                                    float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                                    float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                                    mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                                    pois.add(mPOIobj);
+                                }while (cursor.moveToNext());
+                            }
+                            cursor.close();
+                            locError("size : " + Integer.toString(pois.size()));
                             int n = 0;
                             int num = 0;
                             if (pois.size() > 0){
-                                POI poii = pois.get(0);
-                                float delta = Math.abs( poii.getX() - pt1.x) + Math.abs( poii.getY() - pt1.y);
-                                //locError(Float.toString(delta));
-                                for (POI poi : pois){
-                                    if (Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < delta && Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < 0.01){
-                                        //locError(Float.toString(Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y)));
+                                mPOIobj poii = pois.get(0);
+                                PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
+                                pointF = getPixLocFromGeoL(pointF);
+                                pointF = new PointF(pointF.x, pointF.y - 70);
+                                //pointF = getGeoLocFromPixL(pointF);
+                                pt1 = getPixLocFromGeoL(pt1);
+                                locError("pt1 : " + pt1.toString());
+                                float delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
+                                for (mPOIobj poi : pois){
+                                    PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
+                                    mpointF = getPixLocFromGeoL(mpointF);
+                                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                                    if (Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < delta && Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < 35){
+                                        locError("mpointF : " + mpointF.toString());
+                                        delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
                                         num = n;
-                                        //break;
                                     }
                                     locError("n : " + Integer.toString(n));
                                     n++;
                                 }
                                 locError("num : " + Integer.toString(num));
-                                if (delta < 0.01 || num != 0){
-                                    locError("photonum : " + Integer.toString(pois.get(num).getPhotonum()));
+                                locError("delta : " + Float.toString(delta));
+                                if (delta < 35 || num != 0){
                                     Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                    intent.putExtra("POIC", pois.get(num).getPOIC());
+                                    intent.putExtra("POIC", pois.get(num).getM_POIC());
                                     startActivity(intent);
                                     //locError(Integer.toString(pois.get(num).getPhotonum()));
                                 }else locError("没有正常查询");
@@ -590,7 +614,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             isQuery = false;
                         }
 
-                        locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
+                        //locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
                         c_zoom = pdfView.getZoom();
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
@@ -689,8 +713,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     @Override
                     public boolean onTap(MotionEvent e) {
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
-                        PointF pt1;
-                        pt1 = getGeoLocFromPixL(pt);
+                        PointF pt1 = getGeoLocFromPixL(pt);
                         if (isDrawType == POI_DRAW_TYPE && isQuery == false){
                             List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
@@ -722,27 +745,52 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
-                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-                            locError(Integer.toString(pois.size()));
+                            List<mPOIobj> pois =  new ArrayList<>();
+                            Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+                            if (cursor.moveToFirst()){
+                                do {
+                                    String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                                    String time = cursor.getString(cursor.getColumnIndex("time"));
+                                    String name = cursor.getString(cursor.getColumnIndex("name"));
+                                    String description = cursor.getString(cursor.getColumnIndex("description"));
+                                    int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                                    int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                                    float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                                    float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                                    mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                                    pois.add(mPOIobj);
+                                }while (cursor.moveToNext());
+                            }
+                            cursor.close();
+                            locError("size : " + Integer.toString(pois.size()));
                             int n = 0;
                             int num = 0;
                             if (pois.size() > 0){
-                                POI poii = pois.get(0);
-                                float delta = Math.abs( poii.getX() - pt1.x) + Math.abs( poii.getY() - pt1.y);
-                                for (POI poi : pois){
-                                    if (Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < delta && Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y) < 0.001){
-                                        //locError(Float.toString(Math.abs( poi.getX() - pt1.x) + Math.abs( poi.getY() - pt1.y)));
+                                mPOIobj poii = pois.get(0);
+                                PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
+                                pointF = getPixLocFromGeoL(pointF);
+                                pointF = new PointF(pointF.x, pointF.y - 70);
+                                //pointF = getGeoLocFromPixL(pointF);
+                                pt1 = getPixLocFromGeoL(pt1);
+                                locError("pt1 : " + pt1.toString());
+                                float delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
+                                for (mPOIobj poi : pois){
+                                    PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
+                                    mpointF = getPixLocFromGeoL(mpointF);
+                                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                                    if (Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < delta && Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < 35){
+                                        locError("mpointF : " + mpointF.toString());
+                                        delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
                                         num = n;
-                                        //break;
                                     }
                                     locError("n : " + Integer.toString(n));
                                     n++;
                                 }
                                 locError("num : " + Integer.toString(num));
-                                if (delta < 0.01 || num != 0){
-                                    //locError("photonum : " + Integer.toString(pois.get(num).getPhotonum()));
+                                locError("delta : " + Float.toString(delta));
+                                if (delta < 35 || num != 0){
                                     Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                    intent.putExtra("POIC", pois.get(num).getPOIC());
+                                    intent.putExtra("POIC", pois.get(num).getM_POIC());
                                     startActivity(intent);
                                     //locError(Integer.toString(pois.get(num).getPhotonum()));
                                 }else locError("没有正常查询");
@@ -1383,9 +1431,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 //浮动按钮2 具体功能如下:
                 Toast.makeText(MainInterface.this, "定位到当前位置功能尚未添加", Toast.LENGTH_SHORT).show();
-                //DataSupport.deleteAll(POI.class);
-
-                //takePhoto();
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
@@ -1432,6 +1477,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getScreen();
         setTitle(pdfFileName);
         isQuery = false;
+        isDrawType = NONE_DRAW_TYPE;
     }
 
     @Override

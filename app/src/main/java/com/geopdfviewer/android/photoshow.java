@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,6 +60,18 @@ public class photoshow extends AppCompatActivity {
                 deletePath = path;
                 isLongClick = 0;
                 invalidateOptionsMenu();
+            }
+        });
+        adapter.setOnItemClickListener(new mPhotobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String path, int position) {
+                mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
+                if (isLongClick == 0){
+                    holder.cardView.setCardBackgroundColor(Color.GRAY);
+                    deletePath = deletePath + "wslzy" + path;
+                }else {
+
+                }
             }
         });
         recyclerView.setAdapter(adapter);
@@ -117,15 +130,16 @@ public class photoshow extends AppCompatActivity {
                 break;
             case R.id.restore_pois:
                 isLongClick = 1;
-                setTitle("录音列表");
+                setTitle("相片列表");
                 refreshCard();
                 invalidateOptionsMenu();
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;
-                setTitle("录音列表");
+                setTitle("相片列表");
                 invalidateOptionsMenu();
-                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
+                //DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
+                parseSelectedPath();
                 refreshCard();
                 break;
             case R.id.add_pois:
@@ -178,4 +192,17 @@ public class photoshow extends AppCompatActivity {
         }
         return filePath;
     }
+
+    private void parseSelectedPath(){
+        if (deletePath.contains("wslzy")){
+            String[] nums = deletePath.split("wslzy");
+            Log.w(TAG, "parseSelectedPath: " + nums[0] );
+            for (int i = 0; i < nums.length; i++){
+                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", nums[i]);
+            }
+        }else {
+            DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
+        }
+    }
+
 }

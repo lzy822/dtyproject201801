@@ -25,6 +25,8 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
 
     private mPhotobjAdapter.OnRecyclerItemLongListener mOnItemLong;
 
+    private mPhotobjAdapter.OnRecyclerItemClickListener mOnItemClick;
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         //private OnRecyclerItemLongListener mOnItemLong = null;
         CardView cardView;
@@ -58,9 +60,7 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 mPhotobj poi = mPhotobjList.get(position);
-                //Intent intent = new Intent(mContext, singlepoi.class);
-                //intent.putExtra("POIC", poi.getM_POIC());
-                //mContext.startActivity(intent);
+                mOnItemClick.onItemClick(v, poi.getM_path(), position);
             }
         });
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -103,5 +103,11 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
     public void setOnItemLongClickListener(mPhotobjAdapter.OnRecyclerItemLongListener listener){
         //Log.w(TAG, "setOnItemLongClickListener: " );
         this.mOnItemLong =  listener;
+    }
+    public interface OnRecyclerItemClickListener{
+        void onItemClick(View view,String path, int position);
+    }
+    public void setOnItemClickListener(OnRecyclerItemClickListener listener){
+        this.mOnItemClick =  listener;
     }
 }
