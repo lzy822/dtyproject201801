@@ -93,8 +93,23 @@ public class pois extends AppCompatActivity {
                 mPOIobjAdapter.ViewHolder holder = new mPOIobjAdapter.ViewHolder(view);
                 mPOIobj poi = mPOIobjList.get(position);
                 if (isLongClick == 0){
-                    holder.cardView.setCardBackgroundColor(Color.GRAY);
-                    selectedPOIC = selectedPOIC + " " + poi.getM_POIC();
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        selectedPOIC = selectedPOIC + " " + poi.getM_POIC();
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (selectedPOIC.contains(" ")) {
+                            String replace = " " + String.valueOf(map_num);
+                            selectedPOIC = selectedPOIC.replace(replace, "");
+                            if (selectedPOIC.length() == selectedPOIC.replace(replace, "").length()){
+                                String replace1 = String.valueOf(map_num) + " ";
+                                selectedPOIC = selectedPOIC.replace(replace1, "");
+                            }
+                        }else {
+                            resetView();
+                        }
+                    }
+                    //holder.cardView.setCardBackgroundColor(Color.GRAY);
                 }else {
                     Intent intent = new Intent(pois.this, singlepoi.class);
                     intent.putExtra("POIC", poi.getM_POIC());
@@ -132,6 +147,13 @@ public class pois extends AppCompatActivity {
         return super.onPrepareOptionsMenu(menu);
     }
 
+    private void resetView(){
+        isLongClick = 1;
+        setTitle("兴趣点列表");
+        refreshCard();
+        invalidateOptionsMenu();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -139,10 +161,7 @@ public class pois extends AppCompatActivity {
                 this.finish();
                 break;
             case R.id.restore_pois:
-                isLongClick = 1;
-                setTitle("兴趣点列表");
-                refreshCard();
-                invalidateOptionsMenu();
+                resetView();
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;

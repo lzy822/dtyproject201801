@@ -319,6 +319,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     //记录上一个所按的按钮
     private int selectedpos;
+
     //重新刷新Recycler
     public void refreshRecycler(){
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -328,19 +329,19 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, int map_num, int position) {
+                //Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
                 setTitle("正在进行长按操作");
                 bt2.setVisibility(View.INVISIBLE);
                 locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
                 selectedNum = map_num;
+                selectedpos = position;
+                mselectedpos = String.valueOf(map_num);
                 if (isLongClick != 0){
                     isLongClick = 0;
-                    selectedpos = position;
-                    mselectedpos = String.valueOf(position);
                 }else {
                     adapter.notifyItemChanged(selectedpos);
-                    selectedpos = position;
-                    mselectedpos = String.valueOf(position);
                 }
+                locError("mselectedpos: " + mselectedpos);
                 invalidateOptionsMenu();
             }
         });
@@ -350,8 +351,24 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
                 Map_test map = map_testList.get(position);
                 if (isLongClick == 0){
-                    holder.cardView.setCardBackgroundColor(Color.GRAY);
-                    mselectedpos = mselectedpos + " " + String.valueOf(map_num);
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        mselectedpos = mselectedpos + " " + String.valueOf(map_num);
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (mselectedpos.contains(" ")) {
+                            String replace = " " + String.valueOf(map_num);
+                            mselectedpos = mselectedpos.replace(replace, "");
+                            if (mselectedpos.length() == mselectedpos.replace(replace, "").length()){
+                                String replace1 = String.valueOf(map_num) + " ";
+                                mselectedpos = mselectedpos.replace(replace1, "");
+                            }
+                        }else {
+                            refreshRecycler();
+                            resetView();
+                        }
+                    }
+                    locError("mselectedpos: " + mselectedpos);
                 }else {
                     Intent intent = new Intent(select_page.this, MainInterface.class);
                     intent.putExtra("num", map.getM_num());

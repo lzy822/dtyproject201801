@@ -129,8 +129,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tooltipText="定位"
-            fab:fab_title="定位"
-            android:src="@drawable/ic_location_searching"/>
+            fab:fab_title="定位"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/restorezoom"
         android:layout_width="wrap_content"

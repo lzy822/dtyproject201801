@@ -59,7 +59,12 @@ public class singlepoi extends AppCompatActivity {
 
     private void refresh(){
         List<POI> pois = DataSupport.where("POIC = ?", POIC).find(POI.class);
+        List<MTAPE> tapes = DataSupport.where("POIC = ?", POIC).find(MTAPE.class);
+        List<MPHOTO> photos = DataSupport.where("POIC = ?", POIC).find(MPHOTO.class);
         POI poi = pois.get(0);
+        poi.setPhotonum(photos.size());
+        poi.setTapenum(tapes.size());
+        poi.updateAll("POIC = ?", POIC);
         name = poi.getName();
         editText_name = (EditText) findViewById(R.id.edit_name);
         editText_name.setText(name);
@@ -110,8 +115,6 @@ public class singlepoi extends AppCompatActivity {
             }
         });
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

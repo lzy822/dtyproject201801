@@ -67,8 +67,22 @@ public class photoshow extends AppCompatActivity {
             public void onItemClick(View view, String path, int position) {
                 mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
                 if (isLongClick == 0){
-                    holder.cardView.setCardBackgroundColor(Color.GRAY);
-                    deletePath = deletePath + "wslzy" + path;
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        deletePath = deletePath + "wslzy" + path;
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            String replace = "wslzy" + path;
+                            deletePath = deletePath.replace(replace, "");
+                            if (deletePath.length() == deletePath.replace(replace, "").length()){
+                                String replace1 = path + "wslzy";
+                                deletePath = deletePath.replace(replace1, "");
+                            }
+                        }else {
+                            resetView();
+                        }
+                    }
                 }else {
 
                 }
@@ -122,6 +136,13 @@ public class photoshow extends AppCompatActivity {
         return true;
     }
 
+    private void resetView(){
+        isLongClick = 1;
+        setTitle("相片列表");
+        refreshCard();
+        invalidateOptionsMenu();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -129,10 +150,7 @@ public class photoshow extends AppCompatActivity {
                 this.finish();
                 break;
             case R.id.restore_pois:
-                isLongClick = 1;
-                setTitle("相片列表");
-                refreshCard();
-                invalidateOptionsMenu();
+                resetView();
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;
@@ -198,10 +216,10 @@ public class photoshow extends AppCompatActivity {
             String[] nums = deletePath.split("wslzy");
             Log.w(TAG, "parseSelectedPath: " + nums[0] );
             for (int i = 0; i < nums.length; i++){
-                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", nums[i]);
+                DataSupport.deleteAll(MPHOTO.class, "POIC = ? and path = ?", POIC, nums[i]);
             }
         }else {
-            DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
+            DataSupport.deleteAll(MPHOTO.class, "POIC = ? and path = ?", POIC, deletePath);
         }
     }
 

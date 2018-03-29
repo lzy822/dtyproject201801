@@ -419,7 +419,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.save();
                             locError(pt1.toString());
                             PointF pp = getPixLocFromGeoL(pt1);
-                            pdfView.zoomWithAnimation(pp.x, pp.y, 8);
+                            c_zoom = pdfView.getZoom();
+                            pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
+
+                            //locError("ScaleX : " + String.valueOf(pdfView.getScaleX()) + "ScaleY : " + String.valueOf(pdfView.getScaleY()) + "Scale : " + String.valueOf(pdfView.getScaleX() * pdfView.getScaleY()));
                         }
                         if (isMessure == true){
                             poinum_messure++;
@@ -729,7 +732,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.save();
                             locError(pt1.toString());
                             PointF pp = getPixLocFromGeoL(pt1);
-                            pdfView.zoomWithAnimation(pp.x, pp.y, 8);
+                            c_zoom = pdfView.getZoom();
+                            pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
                         }
                         if (isMessure == true){
                             poinum_messure++;
@@ -1426,11 +1430,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         });
         final com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
+        button2.setIcon(R.drawable.ic_location_searching);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //浮动按钮2 具体功能如下:
-                Toast.makeText(MainInterface.this, "定位到当前位置功能尚未添加", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainInterface.this, "定位到当前位置功能尚未添加", Toast.LENGTH_SHORT).show();
+                if (pdfView.getZoom() != 1){
+                    button2.setIcon(R.drawable.ic_location_searching);
+                    pdfView.resetZoomWithAnimation();
+                    //PointF pp = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                    //pdfView.zoomWithAnimation(pp.x, pp.y, 10);
+                }else {
+                    button2.setIcon(R.drawable.ic_my_location);
+                    PointF pp = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                    //pdfView.zoomCenteredTo(10, pp);
+                    pdfView.zoomWithAnimation(pp.x, pp.y, 10);
+                    //pdfView.zoomWithAnimation(10);
+                }
             }
         });
         com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);

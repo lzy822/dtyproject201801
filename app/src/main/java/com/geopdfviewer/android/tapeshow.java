@@ -42,7 +42,7 @@ public class tapeshow extends AppCompatActivity {
         mTapeobjList.clear();
         List<MTAPE> mtapes = DataSupport.where("POIC = ?", POIC).find(MTAPE.class);
         for (MTAPE mtape : mtapes){
-            mTapeobj mtapeobj = new mTapeobj(mtape.getPOIC(), mtape.getPath(), mtape.getTime(), mtape.getPath());
+            mTapeobj mtapeobj = new mTapeobj(mtape.getPOIC(), mtape.getPOIC(), mtape.getTime(), mtape.getPath());
             mTapeobjList.add(mtapeobj);
         }
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_tape);
@@ -64,8 +64,18 @@ public class tapeshow extends AppCompatActivity {
             public void onItemClick(View view, String path, int position) {
                 mTapeobjAdapter.ViewHolder holder = new mTapeobjAdapter.ViewHolder(view);
                 if (isLongClick == 0){
-                    holder.cardView.setCardBackgroundColor(Color.GRAY);
-                    deletePath = deletePath + "wslzy" + path;
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        deletePath = deletePath + "wslzy" + path;
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            String replace = "wslzy" + path;
+                            deletePath = deletePath.replace(replace, "");
+                        }else {
+                            resetView();
+                        }
+                    }
                 }else {
                     MediaPlayer mediaPlayer = MediaPlayer.create(tapeshow.this, Uri.parse(path));
                     mediaPlayer.start();
@@ -74,6 +84,13 @@ public class tapeshow extends AppCompatActivity {
             }
         });
         recyclerView.setAdapter(adapter);
+    }
+
+    private void resetView(){
+        isLongClick = 1;
+        setTitle("录音列表");
+        refreshCard();
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -128,16 +145,15 @@ public class tapeshow extends AppCompatActivity {
                 this.finish();
                 break;
             case R.id.restore_pois:
-                isLongClick = 1;
-                refreshCard();
-                setTitle("录音列表");
-                invalidateOptionsMenu();
+                resetView();
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;
                 invalidateOptionsMenu();
-                DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
-                //parseSelectedPath();
+                //DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
+                //DataSupport.deleteAll(MTAPE.class, "path = ?", deletePath);
+                //DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC);
+                parseSelectedPath();
                 setTitle("录音列表");
                 refreshCard();
                 break;
@@ -161,7 +177,7 @@ public class tapeshow extends AppCompatActivity {
             POI poi = new POI();
             poi.setTapenum(POIs.get(0).getTapenum() + 1);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-            Date date = new Date(System.currentTimeMillis());
+            Date date = new Date(time);
             poi.updateAll("POIC = ?", POIC);
             MTAPE mtape = new MTAPE();
             mtape.setPath(getRealPathFromUri(this, uri));
@@ -192,11 +208,11 @@ public class tapeshow extends AppCompatActivity {
             String[] nums = deletePath.split("wslzy");
             for (int i = 0; i < nums.length; i++){
                 Log.w(TAG, "parseSelectedPath: " + nums[i]);
-                DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", nums[i]);
+                DataSupport.deleteAll(MTAPE.class, "POIC = ? and path = ?", POIC, nums[i]);
             }
         }else {
             Log.w(TAG, "parseSelectedPath111: " + deletePath);
-            DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
+            DataSupport.deleteAll(MTAPE.class, "POIC = ? and path = ?", POIC, deletePath);
         }
     }
 
