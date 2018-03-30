@@ -192,7 +192,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private boolean isPos = false;
 
     //声明Paint
-    Paint paint, paint1, paint2, paint3, paint4, paint5;
+    Paint paint, paint1, paint2, paint3, paint4, paint5, paint6;
 
     //记录测量坐标串
     private String messure_pts = "";
@@ -408,82 +408,84 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //解析测量字符串并绘制
     private void parseAndrawMessure(String mmessure_pts, Canvas canvas){
-        distanceSum = 0;
-        Paint paint6 = new Paint();
-        paint6.setStrokeWidth(10);
-        paint6.setStyle(Paint.Style.STROKE);
-        mmessure_pts = mmessure_pts.trim();
-        String[] pts = mmessure_pts.split(" ");
-        float[] mpts;
-        if (pts.length <= 4 & pts.length > 3) {
-            mpts = new float[pts.length];
-            for (int i = 0; i < pts.length; i++){
-                mpts[i] = Float.valueOf(pts[i]);
-            }
-            for (int i = 0; i < pts.length; i = i + 2){
-                //mpts[i] = Float.valueOf(pts[i]);
-                PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                PointF pt11 = getPixLocFromGeoL(xx);
-                mpts[i] = pt11.x;
-                mpts[i + 1] = pt11.y;
-            }
-            for (int i = 0; i < pts.length; i++){
-                locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
-            }
-            for (int i = 0; i < pts.length; i = i + 4){
-                //mpts[i] = Float.valueOf(pts[i]);
-                PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
-                PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
-                distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
-            }
-            //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-            locError(mmessure_pts);
-            locError("mpts : " + Integer.toString(mpts.length));
-            canvas.drawLines(mpts, paint6);
-        }else if (pts.length > 4){
-            mpts = new float[pts.length * 2 - 4];
-            locError("pts.length * 2 - 4 : " + Integer.toString(pts.length * 2 - 4));
-            for (int i = 0 ,  j = 0; i < ( pts.length * 2 - 4) ||  j < pts.length;j = j + 2){
-                if (j == 0 || i == ( pts.length * 2 - 6)){
-                    mpts[i] = Float.valueOf(pts[j]);
-                    mpts[i + 1] = Float.valueOf(pts[j + 1]);
-                    i = i + 2;
-                    locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
-                }else {
-                    mpts[i] = Float.valueOf(pts[j]);
-                    mpts[i + 1] = Float.valueOf(pts[j + 1]);
-                    mpts[i + 2] = Float.valueOf(pts[j]);
-                    mpts[i + 3] = Float.valueOf(pts[j + 1]);
-                    i = i + 4;
-                    locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+        if (isMessure) {
+            distanceSum = 0;
+            mmessure_pts = mmessure_pts.trim();
+            String[] pts = mmessure_pts.split(" ");
+            float[] mpts;
+            if (pts.length <= 4 & pts.length > 3) {
+                mpts = new float[pts.length];
+                for (int i = 0; i < pts.length; i++) {
+                    mpts[i] = Float.valueOf(pts[i]);
+                }
+                for (int i = 0; i < pts.length; i++) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                for (int i = 0; i < pts.length; i = i + 4) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
+                    PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
+                    distanceSum = algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                }
+                for (int i = 0; i < pts.length; i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                    PointF pt11 = getPixLocFromGeoL(xx);
+                    mpts[i] = pt11.x;
+                    mpts[i + 1] = pt11.y;
+                }
+                for (int i = 0; i < pts.length; i++) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                locError(mmessure_pts);
+                locError("mpts : " + Integer.toString(mpts.length));
+                canvas.drawLines(mpts, paint6);
+            } else if (pts.length > 4) {
+                mpts = new float[pts.length * 2 - 4];
+                locError("pts.length * 2 - 4 : " + Integer.toString(pts.length * 2 - 4));
+                for (int i = 0, j = 0; i < (pts.length * 2 - 4) || j < pts.length; j = j + 2) {
+                    if (j == 0 || i == (pts.length * 2 - 6)) {
+                        mpts[i] = Float.valueOf(pts[j]);
+                        mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                        i = i + 2;
+                        locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                    } else {
+                        mpts[i] = Float.valueOf(pts[j]);
+                        mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                        mpts[i + 2] = Float.valueOf(pts[j]);
+                        mpts[i + 3] = Float.valueOf(pts[j + 1]);
+                        i = i + 4;
+                        locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                    }
+
                 }
 
-            }
-            for (int i = 0; i < ( pts.length * 2 - 4); i = i + 2){
-                //mpts[i] = Float.valueOf(pts[i]);
-                PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                PointF pt11 = getPixLocFromGeoL(xx);
-                mpts[i] = pt11.x;
-                mpts[i + 1] = pt11.y;
-            }
-            for (int i = 0; i < pts.length; i++){
-                locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
-            }
-            for (int i = 0; i < pts.length; i = i + 4){
-                //mpts[i] = Float.valueOf(pts[i]);
-                PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
-                PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
-                distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
-            }
-            //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-            locError(mmessure_pts);
-            locError("mpts : " + Integer.toString(mpts.length));
-            canvas.drawLines(mpts, paint6);
-        }else {
+                for (int i = 0; i < pts.length - 2; i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
+                    PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
+                    distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                }
+                for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                    PointF pt11 = getPixLocFromGeoL(xx);
+                    mpts[i] = pt11.x;
+                    mpts[i + 1] = pt11.y;
+                }
+                for (int i = 0; i < pts.length; i++) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                locError(mmessure_pts);
+                locError("mpts : " + Integer.toString(mpts.length));
+                canvas.drawLines(mpts, paint6);
+            } else {
 
-        }
+            }
 
-        locError(Double.toString(distanceSum));
+            locError(Double.toString(distanceSum));
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
         PointF pt11 = getPixLocFromGeoL(xx);
@@ -495,7 +497,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
             //canvas.drawLine(mpts[0], mpts[1], mpts[2], mpts[3], paint6);
-
+        }
     }
 
     //显示GeoPDF
@@ -540,13 +542,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poinum_messure++;
                             if (poinum_messure == 1){
                                 poi111 = pt1;
-                                setTitle("正在测量" + " : 1/2");
-                            }
-                            if (poinum_messure == 2){
+                                messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                setTitle("正在测量");
+                            }else if (poinum_messure == 2){
                                 poi222 = pt1;
-                                setTitle(pdfFileName);
+                                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
                                 //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                Toast.makeText(MainInterface.this, "距离为" + Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)) + "米", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }else {
+                                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
                             }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
@@ -621,11 +629,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }
                         locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()));
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
+                        c_zoom = pdfView.getZoom();
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
 
+                        parseAndrawMessure(messure_pts, canvas);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -814,15 +824,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             if (poinum_messure == 1){
                                 poi111 = pt1;
                                 messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                setTitle("正在测量" + " : 1/2");
-                            }
-                            if (poinum_messure != 1){
+                                setTitle("正在测量");
+                            }else if (poinum_messure == 2){
                                 poi222 = pt1;
                                 messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                setTitle(pdfFileName);
+                                setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
                                 //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }else {
+                                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
                             }
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
@@ -1110,7 +1123,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 //pickFile();
                 popupWindow.dismiss();
-                setTitle("正在测量 : 0/2");
+                setTitle("正在测量");
                 isQuery = false;
                 isDrawType = NONE_DRAW_TYPE;
                 isLocate = 0;
@@ -1474,6 +1487,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         paint5.setColor(Color.rgb(123, 175, 212));
         paint5.setStrokeWidth((float)2.0);
         paint5.setStyle(Paint.Style.FILL);
+        paint6 = new Paint();
+        paint6.setStrokeWidth(10);
+        paint6.setStyle(Paint.Style.STROKE);
         android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
         Intent intent = getIntent();
@@ -1638,6 +1654,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //浮动按钮3 具体功能如下:
                 showAll = true;
                 pdfView.resetZoomWithAnimation();
+                isMessure = false;
+                setTitle(pdfFileName);
             }
         });
         button4 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addTape);
