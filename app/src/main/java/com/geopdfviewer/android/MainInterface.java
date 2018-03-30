@@ -179,7 +179,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //记录拍照后返回的URI
     private Uri imageUri;
 
-    //button声明
+    //FloatingActionButton声明
     com.getbase.floatingactionbutton.FloatingActionButton button1;
     com.getbase.floatingactionbutton.FloatingActionButton button2;
     com.getbase.floatingactionbutton.FloatingActionButton button3;
@@ -511,6 +511,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_width = pdfView.getWidth();
                             //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
+                        float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                        if (pdfView.getPositionOffset() != verx & isPos == true){
+                            button2.setIcon(R.drawable.ic_location_searching);
+                            isPos = false;
+                        }
+                        locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()));
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
@@ -536,11 +542,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint4.setColor(Color.YELLOW);
                         paint4.setStrokeWidth((float)2.0);
                         paint4.setStyle(Paint.Style.FILL);
+                        Paint paint5 = new Paint();
+                        paint5.setColor(Color.rgb(123, 175, 212));
+                        paint5.setStrokeWidth((float)2.0);
+                        paint5.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
                             pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
-                            canvas.drawCircle(pt.x, pt.y, 20, paint);
+                            canvas.drawCircle(pt.x, pt.y, 23, paint);
+                            canvas.drawCircle(pt.x, pt.y, 20, paint5);
+                            canvas.drawCircle(pt.x, pt.y, 10, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
                             List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
@@ -660,11 +672,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         paint4.setColor(Color.YELLOW);
                         paint4.setStrokeWidth((float)2.0);
                         paint4.setStyle(Paint.Style.FILL);
+                        Paint paint5 = new Paint();
+                        paint5.setColor(Color.rgb(123, 175, 212));
+                        paint5.setStrokeWidth((float)2.0);
+                        paint5.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
                             pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
-                            canvas.drawCircle(pt.x, pt.y, 20, paint);
+                            canvas.drawCircle(pt.x, pt.y, 23, paint);
+                            canvas.drawCircle(pt.x, pt.y, 20, paint5);
+                            canvas.drawCircle(pt.x, pt.y, 10, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
                             List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
@@ -1499,6 +1517,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         });
         button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addPhoto);
+        button1.setIcon(R.drawable.ic_add_a_photo);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1545,6 +1564,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         });
         button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
+        button3.setIcon(R.drawable.ic_autorenew);
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1554,6 +1574,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         });
         button4 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addTape);
+        button4.setIcon(R.drawable.ic_sound);
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1562,7 +1583,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 startActivityForResult(intent, REQUEST_CODE_TAPE);
             }
         });
-        button5= (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.messuredistance);
+        button5 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.messuredistance);
+        button5.setIcon(R.drawable.ic_straighten);
         button5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

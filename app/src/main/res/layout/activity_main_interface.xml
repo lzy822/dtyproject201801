@@ -113,17 +113,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_title="添加录音"
-            android:tooltipText="添加录音"
-            android:src="@drawable/ic_sound"
-            />
+            android:tooltipText="添加录音" />
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/addPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_title="添加照片"
-            android:tooltipText="添加照片"
-            android:src="@drawable/ic_add_a_photo"
-            />
+            android:tooltipText="添加照片" />
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/lochere"
             android:layout_width="wrap_content"
@@ -135,15 +131,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:tooltipText="重置"
-        fab:fab_title="重置"
-        android:src="@drawable/ic_autorenew"/>
+        fab:fab_title="重置"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/messuredistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tooltipText="测距"
-            fab:fab_title="测距"
-            android:src="@drawable/ic_straighten"/>
+            fab:fab_title="测距"/>
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 </android.support.design.widget.CoordinatorLayout>
