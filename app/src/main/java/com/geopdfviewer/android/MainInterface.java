@@ -63,6 +63,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -176,6 +178,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录拍照后返回的URI
     private Uri imageUri;
+
+    //button声明
+    com.getbase.floatingactionbutton.FloatingActionButton button1;
+    com.getbase.floatingactionbutton.FloatingActionButton button2;
+    com.getbase.floatingactionbutton.FloatingActionButton button3;
+    com.getbase.floatingactionbutton.FloatingActionButton button4;
+    com.getbase.floatingactionbutton.FloatingActionButton button5;
 
     private void recordTrail(Location location){
         isLocate++;
@@ -581,6 +590,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         setTitle(pdfFileName);
     }
 
+    private boolean isPos = false;
+
     private void displayFromFile(String filePath) {
         locError("filePath: " + filePath);
         setTitle(pdfFileName);
@@ -616,7 +627,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             setTitle(pdfFileName);
                             isQuery = false;
                         }
-
+                        float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                        if (pdfView.getPositionOffset() != verx & isPos == true){
+                            button2.setIcon(R.drawable.ic_location_searching);
+                            isPos = false;
+                        }
+                        locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()));
                         //locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
                         c_zoom = pdfView.getZoom();
                         current_pageheight = pageHeight;
@@ -958,7 +974,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
-    private void showPopueWindow(){
+    private void showPopueWindowForPhoto(){
         View popView = View.inflate(this,R.layout.popupwindow_camera_need,null);
         Button bt_album = (Button) popView.findViewById(R.id.btn_pop_album);
         Button bt_camera = (Button) popView.findViewById(R.id.btn_pop_camera);
@@ -986,6 +1002,68 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 takePhoto();
                 popupWindow.dismiss();
+
+            }
+        });
+        bt_cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+
+            }
+        });
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 0.5f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.BOTTOM,0,50);
+
+    }
+
+    private void showPopueWindowForMessure(){
+        View popView = View.inflate(this,R.layout.popupwindow_messure,null);
+        Button bt_distance = (Button) popView.findViewById(R.id.btn_pop_distance);
+        Button bt_area = (Button) popView.findViewById(R.id.btn_pop_area);
+        Button bt_cancle = (Button) popView.findViewById(R.id.btn_pop_cancel);
+        //获取屏幕宽高
+        int weight = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels*1/3;
+
+        final PopupWindow popupWindow = new PopupWindow(popView,weight,height);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(true);
+
+        bt_distance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //pickFile();
+                popupWindow.dismiss();
+                setTitle("正在测量 : 0/2");
+                isQuery = false;
+                isDrawType = NONE_DRAW_TYPE;
+                isLocate = 0;
+                isLocateEnd = true;
+                showAll = false;
+                isMessure = true;
+                poinum_messure = 0;
+            }
+        });
+        bt_area.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+                Toast.makeText(MainInterface.this, "暂时没有添加面积测算功能",Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -1420,16 +1498,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 linearLayout.setVisibility(View.GONE);
             }
         });
-        com.getbase.floatingactionbutton.FloatingActionButton button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addPhoto);
+        button1 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addPhoto);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //浮动按钮1 具体功能如下:
                 //pickFile();
-                showPopueWindow();
+                showPopueWindowForPhoto();
             }
         });
-        final com.getbase.floatingactionbutton.FloatingActionButton button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
+        button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
         button2.setIcon(R.drawable.ic_location_searching);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1439,18 +1517,34 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (pdfView.getZoom() != 1){
                     button2.setIcon(R.drawable.ic_location_searching);
                     pdfView.resetZoomWithAnimation();
+                    TimerTask task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            button2.setIcon(R.drawable.ic_my_location);
+                            PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
+                            ppz.x = ppz.x - 10;
+                            pdfView.zoomCenteredTo(8, ppz);
+                            float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                            pdfView.setPositionOffset(verx);
+                            isPos = true;
+                        }
+                    };
+                    Timer timer = new Timer();
+                    timer.schedule(task, 1000);
                     //PointF pp = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                     //pdfView.zoomWithAnimation(pp.x, pp.y, 10);
                 }else {
                     button2.setIcon(R.drawable.ic_my_location);
-                    PointF pp = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
-                    //pdfView.zoomCenteredTo(10, pp);
-                    pdfView.zoomWithAnimation(pp.x, pp.y, 10);
-                    //pdfView.zoomWithAnimation(10);
+                    PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
+                    ppz.x = ppz.x - 10;
+                    pdfView.zoomCenteredTo(8, ppz);
+                    float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                    pdfView.setPositionOffset(verx);
+                    isPos = true;
                 }
             }
         });
-        com.getbase.floatingactionbutton.FloatingActionButton button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
+        button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1459,7 +1553,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 pdfView.resetZoomWithAnimation();
             }
         });
-        com.getbase.floatingactionbutton.FloatingActionButton button4 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addTape);
+        button4 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addTape);
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1468,19 +1562,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 startActivityForResult(intent, REQUEST_CODE_TAPE);
             }
         });
-        com.getbase.floatingactionbutton.FloatingActionButton button5= (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.messuredistance);
+        button5= (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.messuredistance);
         button5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //浮动按钮5 具体功能如下:
-                setTitle("正在测量 : 0/2");
-                isQuery = false;
-                isDrawType = NONE_DRAW_TYPE;
-                isLocate = 0;
-                isLocateEnd = true;
-                showAll = false;
-                isMessure = true;
-                poinum_messure = 0;
+                showPopueWindowForMessure();
             }
         });
 
