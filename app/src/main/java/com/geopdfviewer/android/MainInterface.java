@@ -522,30 +522,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         current_pagewidth = pageWidth;
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
-                        Paint paint = new Paint();
-                        paint.setColor(Color.RED);
-                        paint.setStrokeWidth((float)3.0);
-                        paint.setStyle(Paint.Style.FILL);
-                        Paint paint1 = new Paint();
-                        paint1.setColor(Color.GREEN);
-                        paint1.setStrokeWidth((float)2.0);
-                        paint1.setStyle(Paint.Style.FILL);
-                        Paint paint2 = new Paint();
-                        paint2.setColor(Color.BLACK);
-                        paint2.setStrokeWidth((float)2.0);
-                        paint2.setStyle(Paint.Style.FILL);
-                        Paint paint3 = new Paint();
-                        paint3.setColor(Color.BLUE);
-                        paint3.setStrokeWidth((float)2.0);
-                        paint3.setStyle(Paint.Style.FILL);
-                        Paint paint4 = new Paint();
-                        paint4.setColor(Color.YELLOW);
-                        paint4.setStrokeWidth((float)2.0);
-                        paint4.setStyle(Paint.Style.FILL);
-                        Paint paint5 = new Paint();
-                        paint5.setColor(Color.rgb(123, 175, 212));
-                        paint5.setStrokeWidth((float)2.0);
-                        paint5.setStyle(Paint.Style.FILL);
+
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -652,30 +629,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
-                        Paint paint = new Paint();
-                        paint.setColor(Color.RED);
-                        paint.setStrokeWidth((float)3.0);
-                        paint.setStyle(Paint.Style.FILL);
-                        Paint paint1 = new Paint();
-                        paint1.setColor(Color.GREEN);
-                        paint1.setStrokeWidth((float)2.0);
-                        paint1.setStyle(Paint.Style.FILL);
-                        Paint paint2 = new Paint();
-                        paint2.setColor(Color.BLACK);
-                        paint2.setStrokeWidth((float)2.0);
-                        paint2.setStyle(Paint.Style.FILL);
-                        Paint paint3 = new Paint();
-                        paint3.setColor(Color.BLUE);
-                        paint3.setStrokeWidth((float)2.0);
-                        paint3.setStyle(Paint.Style.FILL);
-                        Paint paint4 = new Paint();
-                        paint4.setColor(Color.YELLOW);
-                        paint4.setStrokeWidth((float)2.0);
-                        paint4.setStyle(Paint.Style.FILL);
-                        Paint paint5 = new Paint();
-                        paint5.setColor(Color.rgb(123, 175, 212));
-                        paint5.setStrokeWidth((float)2.0);
-                        paint5.setStyle(Paint.Style.FILL);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -1403,10 +1356,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Integer.toString(pdfView.getMeasuredHeight()));
     }
 
+    //声明Paint
+    Paint paint, paint1, paint2, paint3, paint4, paint5;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStrokeWidth((float)3.0);
+        paint.setStyle(Paint.Style.FILL);
+        paint1 = new Paint();
+        paint1.setColor(Color.GREEN);
+        paint1.setStrokeWidth((float)2.0);
+        paint1.setStyle(Paint.Style.FILL);
+        paint2 = new Paint();
+        paint2.setColor(Color.BLACK);
+        paint2.setStrokeWidth((float)2.0);
+        paint2.setStyle(Paint.Style.FILL);
+        paint3 = new Paint();
+        paint3.setColor(Color.BLUE);
+        paint3.setStrokeWidth((float)2.0);
+        paint3.setStyle(Paint.Style.FILL);
+        paint4 = new Paint();
+        paint4.setColor(Color.YELLOW);
+        paint4.setStrokeWidth((float)2.0);
+        paint4.setStyle(Paint.Style.FILL);
+        paint5 = new Paint();
+        paint5.setColor(Color.rgb(123, 175, 212));
+        paint5.setStrokeWidth((float)2.0);
+        paint5.setStyle(Paint.Style.FILL);
         android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
         Intent intent = getIntent();
