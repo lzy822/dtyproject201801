@@ -20,6 +20,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
@@ -257,7 +258,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             startActivityForResult(intent, REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
             //alert user that file manager not working
-            //Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MyApplication.getContext(), R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
@@ -626,7 +632,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
         catch (IOException e) {
             Log.w(TAG, e.getMessage() );
-            //Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MyApplication.getContext(), "无法获取示例文件!", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         return outPath;
     }
@@ -734,7 +745,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             locError(getRealPath(uri.toString()));
                             locError(uri.toString());
                             locError(findNameFromUri(uri));
-                            LitePal.getDatabase();
+                            //LitePal.getDatabase();
                             Message message = new Message();
                             message.what = UPDATE_TEXT;
                             handler.sendMessage(message);
@@ -827,7 +838,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public void initDemo(){
-        getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                    getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
+                    LitePal.getDatabase();
+                    Message message = new Message();
+                    message.what = UPDATE_TEXT;
+                    handler.sendMessage(message);
+            }
+        }).start();
         Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
     }
 
@@ -1180,7 +1200,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
             //locError();
 
-            //Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MyApplication.getContext(), "获取完毕!", Toast.LENGTH_LONG).show();
+                }
+            });
             in.close();
             //locError("看这里"+m_name);
             //locError("WKT: " + m_WKT);
@@ -1193,6 +1218,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name + Long.toString(System.currentTimeMillis()));
             }
         } catch (IOException e) {
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MyApplication.getContext(), "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
+                }
+            });
+
             //Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }
 
