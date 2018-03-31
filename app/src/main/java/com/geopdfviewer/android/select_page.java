@@ -19,6 +19,8 @@ import android.location.LocationProvider;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -255,7 +257,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             startActivityForResult(intent, REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
             //alert user that file manager not working
-            Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -624,7 +626,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
         catch (IOException e) {
             Log.w(TAG, e.getMessage() );
-            Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "无法获取示例文件!", Toast.LENGTH_LONG).show();
         }
         return outPath;
     }
@@ -700,23 +702,55 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return count;
     }
 
+    //记录工作线程中的内容是否操作完成
+    private boolean isThreadEnd = false;
+    public static final int UPDATE_TEXT = 1;
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case UPDATE_TEXT:
+                    // 在这里进行UI操作
+                    refreshRecycler();
+                    Log.w(TAG, "handleMessage: " );
+            }
+        }
+    };
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
-            try {
-                String configPath = uri.toString();
-                configPath = URLDecoder.decode(configPath, "utf-8");
-                locError(configPath);
-                getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
-            }catch (UnsupportedEncodingException e){
-                e.printStackTrace();
-            }
             locError(getRealPath(uri.toString()));
+                //locError(configPath);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String configPath = uri.toString();
+                            configPath = URLDecoder.decode(configPath, "utf-8");
+                            getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
+                            locError(getRealPath(uri.toString()));
+                            locError(uri.toString());
+                            locError(findNameFromUri(uri));
+                            LitePal.getDatabase();
+                            Message message = new Message();
+                            message.what = UPDATE_TEXT;
+                            handler.sendMessage(message);
+                        }catch (UnsupportedEncodingException e){
+
+                        }
+
+                    }
+                }).start();
+                //getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
+
+            /*locError(getRealPath(uri.toString()));
             locError(uri.toString());
             locError(findNameFromUri(uri));
-            LitePal.getDatabase();
-            refreshRecycler();
+            LitePal.getDatabase();*/
+            //refreshRecycler();
         }
     }
 
@@ -1065,7 +1099,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     locError("BBox : " + m_BBox);
                 }
-                if (line.contains("GPTS") & line.contains("LPTS") & m_num_GPTS == 0){
+                /*if (line.contains("GPTS") & line.contains("LPTS") & m_num_GPTS == 0){
                     m_num_GPTS++;
                     m_LPTS = line.substring(line.indexOf("LPTS") + 5);
                     m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
@@ -1079,6 +1113,38 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     //locError(m_GPTS);
                     Log.w(TAG, "hold on" + m_GPTS );
+                    //Log.w(TAG, "hold on : " + line );
+
+                }*/
+                if (line.contains("GPTS") & line.contains("LPTS")){
+                    m_num_GPTS++;
+                    m_LPTS = line.substring(line.indexOf("LPTS") + 5);
+                    m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
+                    m_LPTS = m_LPTS.trim();
+                    if (m_LPTS.length() > 0){
+                        if (m_num_GPTS > 1){
+                        String m_GPTS1 = "";
+                        m_GPTS1 = line.substring(line.indexOf("GPTS") + 5);
+                        m_GPTS1 = m_GPTS1.substring(0, m_GPTS1.indexOf("]"));
+                        m_GPTS1 = m_GPTS1.trim();
+                        String[] m_gptstr = m_GPTS.split(" ");
+                        String[] m_gptstr1 = m_GPTS1.split(" ");
+                        if (Float.valueOf(m_gptstr1[0].substring(0, 4)) > Float.valueOf(m_gptstr[0].substring(0, 4))){
+                            m_GPTS = m_GPTS1;
+                        }
+                        //坐标飘移纠偏
+                        m_GPTS = getGPTS(m_GPTS, m_LPTS);
+                        }else {
+                            m_GPTS = line.substring(line.indexOf("GPTS") + 5);
+                            m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
+                            m_GPTS = m_GPTS.trim();
+                            //坐标飘移纠偏
+                            m_GPTS = getGPTS(m_GPTS, m_LPTS);
+                        }
+                    }
+                    //locError(m_GPTS);
+                    Log.w(TAG, "hold on" + m_GPTS );
+                    Log.w(TAG, "hold on : " + line );
 
                 }
                 if (line.contains("MediaBox")){
@@ -1114,7 +1180,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
             //locError();
 
-            Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "获取完毕!", Toast.LENGTH_LONG).show();
             in.close();
             //locError("看这里"+m_name);
             //locError("WKT: " + m_WKT);
@@ -1127,7 +1193,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name + Long.toString(System.currentTimeMillis()));
             }
         } catch (IOException e) {
-            Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }
 
     }
