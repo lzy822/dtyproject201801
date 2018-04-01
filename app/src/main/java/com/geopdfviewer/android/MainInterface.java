@@ -518,6 +518,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
                         PointF pt1;
                         pt1 = getGeoLocFromPixL(pt);
+                        //textView.setText();
                         if (isDrawType == POI_DRAW_TYPE && isQuery == false){
                             List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
@@ -1274,7 +1275,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //屏幕坐标位置到经纬度转化
     private PointF getGeoLocFromPixL(PointF pt){
-        textView = (TextView) findViewById(R.id.txt);
+        //textView = (TextView) findViewById(R.id.txt);
         DecimalFormat df = new DecimalFormat("0.0000");
         //精确定位算法
         float xxxx, yyyy;
@@ -1684,6 +1685,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     @Override
     protected void onResume() {
         super.onResume();
+        textView = (TextView) findViewById(R.id.txt);
         String currentProvider = LocationManager.NETWORK_PROVIDER;
         getScreen();
         setTitle(pdfFileName);

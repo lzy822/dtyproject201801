@@ -739,6 +739,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     @Override
                     public void run() {
                         try {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                }
+                            });
                             String configPath = uri.toString();
                             configPath = URLDecoder.decode(configPath, "utf-8");
                             getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
@@ -1149,11 +1155,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         m_GPTS1 = m_GPTS1.trim();
                         String[] m_gptstr = m_GPTS.split(" ");
                         String[] m_gptstr1 = m_GPTS1.split(" ");
-                        if (Float.valueOf(m_gptstr1[0].substring(0, 4)) > Float.valueOf(m_gptstr[0].substring(0, 4))){
-                            m_GPTS = m_GPTS1;
+                        locError("1 = " + m_gptstr1[0] + " 2 = " + m_gptstr[0]);
+                        if (Float.valueOf(m_gptstr1[0]) > Float.valueOf(m_gptstr[0])){
+                            m_GPTS = m_GPTS1;//BUG
+                            //坐标飘移纠偏
+                            m_GPTS = getGPTS(m_GPTS, m_LPTS);
                         }
-                        //坐标飘移纠偏
-                        m_GPTS = getGPTS(m_GPTS, m_LPTS);
+
                         }else {
                             m_GPTS = line.substring(line.indexOf("GPTS") + 5);
                             m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
