@@ -1,8 +1,11 @@
 package com.geopdfviewer.android;
 
 import android.content.ActivityNotFoundException;
+import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -23,6 +26,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
@@ -196,6 +200,27 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录测量坐标串
     private String messure_pts = "";
+
+    com.getbase.floatingactionbutton.FloatingActionsMenu floatingActionsMenu;
+
+    private int isMessureType = MESSURE_NONE_TYPE;
+    private final static int MESSURE_NONE_TYPE = 0;
+    private final static int MESSURE_DISTANCE_TYPE = 1;
+    private final static int MESSURE_AREA_TYPE = 2;
+
+    /*private RecordTrail.RecordTrailBinder recordTrailBinder;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            recordTrailBinder = (RecordTrail.RecordTrailBinder) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    }*/
 
     private void recordTrail(Location location){
         isLocate++;
@@ -480,12 +505,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                 locError(mmessure_pts);
                 locError("mpts : " + Integer.toString(mpts.length));
+                if (isMessureType == MESSURE_DISTANCE_TYPE){
                 canvas.drawLines(mpts, paint6);
+                }else if (isMessureType == MESSURE_AREA_TYPE){
+                    canvas.drawLines(mpts, paint6);
+                    canvas.drawLine(mpts[0], mpts[1], mpts[mpts.length - 2], mpts[mpts.length - 1], paint6);
+                }
             } else {
-
+                mpts = new float[pts.length];
+            }
+            DecimalFormat df1 = new DecimalFormat("0.00");
+            //locError(Double.toString(distanceSum));
+            if (isMessureType == MESSURE_DISTANCE_TYPE){
+                setTitle(df1.format(distanceSum) + "米");
+            }else if (isMessureType == MESSURE_AREA_TYPE){
+                double area = 0;
+                for (int i = 0; i < mpts.length - 3; i = i + 2){
+                    area = area + ( mpts[i] * mpts[i + 3] - mpts[i + 2] * mpts[i + 1]);
+                }
+                area = area - (mpts[0] * mpts[mpts.length - 1] - mpts[1] * mpts[mpts.length - 2]);
+                area = Math.abs((area) / 2);
+                setTitle(df1.format(area * 2.17) + "平方米");
             }
 
-            locError(Double.toString(distanceSum));
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
         PointF pt11 = getPixLocFromGeoL(xx);
@@ -837,7 +879,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
                                 setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                             }
+
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
                             List<mPOIobj> pois =  new ArrayList<>();
@@ -1131,6 +1175,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 isLocateEnd = true;
                 showAll = false;
                 isMessure = true;
+                isMessureType = MESSURE_DISTANCE_TYPE;
                 poinum_messure = 0;
             }
         });
@@ -1138,8 +1183,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
-                Toast.makeText(MainInterface.this, "暂时没有添加面积测算功能",Toast.LENGTH_SHORT).show();
-
+                //Toast.makeText(MainInterface.this, "暂时没有添加面积测算功能",Toast.LENGTH_SHORT).show();
+                setTitle("正在测量");
+                isQuery = false;
+                isDrawType = NONE_DRAW_TYPE;
+                isLocate = 0;
+                isLocateEnd = true;
+                showAll = false;
+                isMessure = true;
+                isMessureType = MESSURE_AREA_TYPE;
+                poinum_messure = 0;
             }
         });
         bt_cancle.setOnClickListener(new View.OnClickListener() {
@@ -1464,6 +1517,22 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        textView = (TextView) findViewById(R.id.txt);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        textView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                manager.setText(textView.getText());
+                Toast.makeText(MainInterface.this, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
         paint = new Paint();
         paint.setColor(Color.RED);
         paint.setStrokeWidth((float)3.0);
@@ -1493,7 +1562,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         paint6.setStyle(Paint.Style.STROKE);
         android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         int m_num = intent.getIntExtra("num", 0);
         getInfo(m_num);
         linearLayout = (LinearLayout) findViewById(R.id.search);
@@ -1509,6 +1578,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bbt3 = (ImageButton) findViewById(R.id.endtrail);
         bbt4 = (ImageButton) findViewById(R.id.addpoi);
         bbt5 = (ImageButton) findViewById(R.id.query_poi);
+        floatingActionsMenu = (com.getbase.floatingactionbutton.FloatingActionsMenu) findViewById(R.id.fam);
         bbt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1530,6 +1600,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 isLocateEnd = false;
                 isLocate = 0;
                 initTrail();
+                bbt2.setVisibility(View.INVISIBLE);
+                bbt4.setVisibility(View.INVISIBLE);
+                bbt5.setVisibility(View.INVISIBLE);
+                floatingActionsMenu.setVisibility(View.INVISIBLE);
+                Intent start_mService = new Intent(MainInterface.this, RecordTrail.class);
+                start_mService.putExtra("ic", ic);
+                startService(start_mService);
             }
         });
         bbt3.setOnClickListener(new View.OnClickListener() {
@@ -1540,18 +1617,21 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     isLocateEnd = true;
                     recordTrail(last_x, last_y);
                     locError(m_cTrail);
-                    Trail trail = new Trail();
+                    Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
+                    stopService(stop_mService);
+                    /*Trail trail = new Trail();
                     List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
                     trail.setIc(ic);
                     trail.setName("路径" + Integer.toString(trails.size() + 1));
                     trail.setPath(m_cTrail);
-                    trail.save();
+                    trail.save();*/
                 }else {
                     Toast.makeText(MainInterface.this, "你没有打开位置记录功能", Toast.LENGTH_SHORT).show();
                 }
                 bbt2.setVisibility(View.INVISIBLE);
                 bbt3.setVisibility(View.INVISIBLE);
                 bbt1.setVisibility(View.VISIBLE);
+                floatingActionsMenu.setVisibility(View.VISIBLE);
                 pdfView.resetZoomWithAnimation();
             }
         });
@@ -1568,6 +1648,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     isDrawType = POI_DRAW_TYPE;
                     isQuery = false;
                     setTitle("正在插放兴趣点");
+                    isMessureType = MESSURE_NONE_TYPE;
                 }
             }
         });
@@ -1578,6 +1659,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     setTitle("正在查询");
                     isQuery = true;
                     isDrawType = NONE_DRAW_TYPE;
+                    isMessureType = MESSURE_NONE_TYPE;
                 }else {
                     isQuery = false;
                     setTitle(pdfFileName);
@@ -1608,6 +1690,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //浮动按钮1 具体功能如下:
                 //pickFile();
                 showPopueWindowForPhoto();
+                isMessureType = MESSURE_NONE_TYPE;
             }
         });
         button2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.lochere);
@@ -1685,7 +1768,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     @Override
     protected void onResume() {
         super.onResume();
-        textView = (TextView) findViewById(R.id.txt);
         String currentProvider = LocationManager.NETWORK_PROVIDER;
         getScreen();
         setTitle(pdfFileName);
@@ -1772,7 +1854,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //判断GPS功能是否处于开启状态
     private boolean isGPSEnabled(){
-        textView = (TextView) findViewById(R.id.txt);
+        //textView = (TextView) findViewById(R.id.txt);
         //得到系统的位置服务，判断GPS是否激活
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         boolean ok = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);

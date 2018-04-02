@@ -635,7 +635,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MyApplication.getContext(), "无法获取示例文件!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MyApplication.getContext(), "无法获取缩略图!", Toast.LENGTH_SHORT).show();
                 }
             });
         }
