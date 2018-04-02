@@ -208,6 +208,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private final static int MESSURE_DISTANCE_TYPE = 1;
     private final static int MESSURE_AREA_TYPE = 2;
 
+    private int isCoordinateType = COORDINATE_DEFAULT_TYPE;
+    private final static int COORDINATE_DEFAULT_TYPE = 0;
+    private final static int COORDINATE_BLH_TYPE = 1;
+    private final static int COORDINATE_XYZ_TYPE = 2;
+
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -433,7 +438,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //解析测量字符串并绘制
     private void parseAndrawMessure(String mmessure_pts, Canvas canvas){
-        if (isMessure) {
+        if (isMessure & !mmessure_pts.isEmpty()) {
             distanceSum = 0;
             mmessure_pts = mmessure_pts.trim();
             String[] pts = mmessure_pts.split(" ");
@@ -524,8 +529,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     area = area + ( mpts[i] * mpts[i + 3] - mpts[i + 2] * mpts[i + 1]);
                 }
                 area = area - (mpts[0] * mpts[mpts.length - 1] - mpts[1] * mpts[mpts.length - 2]);
-                area = Math.abs((area) / 2);
-                setTitle(df1.format(area * 2.17) + "平方米");
+                area = Math.abs((area) / 2) / c_zoom / c_zoom;
+                area = area * algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2 + (max_long - min_long) / ( viewer_width - 2 * k_w), (max_lat + min_lat) / 2) * algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2, (max_lat + min_lat) / 2 + (max_lat - min_lat) / (viewer_height - 2 * k_h));
+                //area = area / 1.0965f;
+                setTitle(df1.format(area) + "平方米");
             }
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
@@ -590,13 +597,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }else if (poinum_messure == 2){
                                 poi222 = pt1;
                                 messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                setTitle("正在测量");
+                                //setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
                                 //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
                                 //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                             }else {
                                 messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                setTitle("正在测量");
+                                //setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
                             }
                         }
@@ -688,7 +695,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
-                            List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                            List<Trail> trails = DataSupport.findAll(Trail.class);
                             for (Trail trail : trails){
                                 String str1 = trail.getPath();
                                 String[] TrailString = str1.split(" ");
@@ -792,7 +799,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
-                            List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                            List<Trail> trails = DataSupport.findAll(Trail.class);
                             for (Trail trail : trails){
                                 String str1 = trail.getPath();
                                 String[] TrailString = str1.split(" ");
@@ -871,13 +878,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }else if (poinum_messure == 2){
                                 poi222 = pt1;
                                 messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                setTitle("正在测量");
+                                //setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
                                 //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
                                 //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                             }else {
                                 messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                setTitle("正在测量");
+                                //setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
                                 //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                             }
@@ -1338,14 +1345,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + page_height) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + page_width)) {
                 pt.x = (float)(max_lat - (yyyy) / current_pageheight * ( max_lat - min_lat));
                 pt.y = (float)(( xxxx) / current_pagewidth * ( max_long - min_long) + min_long);
-                textView.setText(df.format(pt.x) + "; " + df.format(pt.y));
+                if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
+                    textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
+                }else if (isCoordinateType == COORDINATE_BLH_TYPE){
+                    textView.setText(Integer.toString((int)pt.x) + "°" + Integer.toString((int)(( pt.x - (int)pt.x) * 60)) + "′" + Float.toString((( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60)) * 60) + "″;" + Integer.toString((int)pt.y) + "°" + Integer.toString((int)(( pt.y - (int)pt.y) * 60)) + "′" + Float.toString((( pt.y - (int)pt.y) * 60 - (int)(( pt.y - (int)pt.y) * 60)) * 60) + "″");
+                }else textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
             } else textView.setText("点击位置在区域之外");
         } else {
             xxxx = pt.x - (screen_width - viewer_width);
             yyyy = pt.y - (screen_height - viewer_height);
             pt.x = (float)(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat));
             pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
-            textView.setText(df.format(pt.x) + "; " + df.format(pt.y));
+            if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
+                textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
+            }else if (isCoordinateType == COORDINATE_BLH_TYPE){
+                textView.setText(Integer.toString((int)pt.x) + "°" + Integer.toString((int)(( pt.x - (int)pt.x) * 60)) + "′" + Float.toString((( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60)) * 60) + "″;" + Integer.toString((int)pt.y) + "°" + Integer.toString((int)(( pt.y - (int)pt.y) * 60)) + "′" + Float.toString((( pt.y - (int)pt.y) * 60 - (int)(( pt.y - (int)pt.y) * 60)) * 60) + "″");
+            }else textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
+            locError("常规 : " + df.format(pt.x) + "; " + df.format(pt.y));
+            locError("度分秒 : " + Integer.toString((int)pt.x) + "°" + Integer.toString((int)( pt.x - (int)pt.x) * 60) + "′" + Float.toString(( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60) * 60));
         }
         return pt;
         //
@@ -1522,6 +1539,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
 
+                String str = (String) textView.getText();
+                if (!str.contains("点击位置在区域之外") & !str.contains("在这里显示坐标值")){
+                if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
+                    String[] strs = str.split(";");
+                    PointF pt = new PointF(Float.valueOf(strs[0]), Float.valueOf(strs[1]));
+                    textView.setText(Integer.toString((int)pt.x) + "°" + Integer.toString((int)(( pt.x - (int)pt.x) * 60)) + "′" + Float.toString((( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60)) * 60) + "″;" + Integer.toString((int)pt.y) + "°" + Integer.toString((int)(( pt.y - (int)pt.y) * 60)) + "′" + Float.toString((( pt.y - (int)pt.y) * 60 - (int)(( pt.y - (int)pt.y) * 60)) * 60) + "″");
+                    isCoordinateType = COORDINATE_BLH_TYPE;
+                    locError(Integer.toString(textView.getHeight()));
+                }else if (isCoordinateType == COORDINATE_BLH_TYPE){
+                    String[] strs = str.split(";");
+                    //locError(strs[0] + "还有: " + strs[1]);
+                    PointF pt = new PointF(Float.valueOf(strs[0].substring(0, strs[0].indexOf("°"))) + (Float.valueOf(strs[0].substring(strs[0].indexOf("°") + 1, strs[0].indexOf("′"))) / 60) + (Float.valueOf(strs[0].substring(strs[0].indexOf("′") + 1, strs[0].indexOf("″"))) / 3600), Float.valueOf(strs[1].substring(0, strs[1].indexOf("°"))) + (Float.valueOf(strs[1].substring(strs[1].indexOf("°") + 1, strs[1].indexOf("′"))) / 60) + (Float.valueOf(strs[1].substring(strs[1].indexOf("′") + 1, strs[1].indexOf("″"))) / 3600));
+                    textView.setText(Float.toString(pt.x) + "; " + Float.toString(pt.y));
+                    isCoordinateType = COORDINATE_DEFAULT_TYPE;
+                    locError(Integer.toString(textView.getHeight()));
+                }
+                }
             }
         });
         textView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -1582,12 +1616,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bbt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (m_lat <= max_lat & m_lat >= min_lat & m_long <= max_long & m_long >= min_long){
                 setTitle("准备记录轨迹");
                 PointF mmm = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                 pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);
                 bbt2.setVisibility(View.VISIBLE);
                 bbt3.setVisibility(View.VISIBLE);
                 bbt1.setVisibility(View.INVISIBLE);
+                }else Toast.makeText(MainInterface.this, "你所在位置不在当前地图中, 不可记录轨迹", Toast.LENGTH_SHORT).show();
             }
         });
         bbt2.setOnClickListener(new View.OnClickListener() {
@@ -1625,6 +1661,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     trail.setName("路径" + Integer.toString(trails.size() + 1));
                     trail.setPath(m_cTrail);
                     trail.save();*/
+                    List<Trail> trails = DataSupport.findAll(Trail.class);
+                    locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
                 }else {
                     Toast.makeText(MainInterface.this, "你没有打开位置记录功能", Toast.LENGTH_SHORT).show();
                 }
@@ -1758,6 +1796,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //浮动按钮5 具体功能如下:
+                messure_pts = "";
                 showPopueWindowForMessure();
             }
         });
