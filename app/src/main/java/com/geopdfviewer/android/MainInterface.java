@@ -1786,8 +1786,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //浮动按钮4 具体功能如下:
-                Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-                startActivityForResult(intent, REQUEST_CODE_TAPE);
+                try {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, REQUEST_CODE_TAPE);
+                }catch (ActivityNotFoundException e){
+                    Toast.makeText(MyApplication.getContext(), "无法打开录音功能", Toast.LENGTH_LONG).show();
+                }
             }
         });
         button5 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.messuredistance);

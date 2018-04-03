@@ -110,8 +110,13 @@ public class singlepoi extends AppCompatActivity {
         addtape.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-                startActivityForResult(intent, REQUEST_CODE_TAPE);
+                try {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, REQUEST_CODE_TAPE);
+                }catch (ActivityNotFoundException e){
+                    Toast.makeText(MyApplication.getContext(), "无法打开录音功能", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
     }
@@ -136,7 +141,7 @@ public class singlepoi extends AppCompatActivity {
         }
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
             Uri uri = data.getData();
-            long time = System.currentTimeMillis();
+            //long time = System.currentTimeMillis();
             List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
             POI poi = new POI();
             poi.setTapenum(POIs.get(0).getTapenum() + 1);

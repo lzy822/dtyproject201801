@@ -247,13 +247,17 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             return;
         }
 
-        //launchPicker();
+        launchPicker();
     }
 
     void launchPicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setDataAndType(Uri.parse(DEF_DIR), "application/pdf");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        File file = new File(DEF_DIR);
+        if (file.exists()){
+            intent.setDataAndType(Uri.parse(DEF_DIR), "application/pdf");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }else intent.setType("application/pdf");
+
         try {
             startActivityForResult(intent, REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
@@ -813,7 +817,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchPicker();
+                pickFile();
             }
         });
         //初始化界面一
