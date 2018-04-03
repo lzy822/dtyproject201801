@@ -4,14 +4,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -19,6 +24,7 @@ import java.util.List;
  */
 
 public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHolder>{
+    private static final String TAG = "mPhotobjAdapter";
     private Context mContext;
 
     private List<mPhotobj> mPhotobjList;
@@ -81,7 +87,18 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
     @Override
     public void onBindViewHolder(mPhotobjAdapter.ViewHolder holder, int position) {
         mPhotobj mphoto = mPhotobjList.get(position);
-        holder.PhotoImage.setImageURI(Uri.parse(mphoto.getM_path()));
+        //holder.PhotoImage.setImageURI(Uri.parse(mphoto.getM_path()));
+        File outputImage = new File(mphoto.getM_path());
+        if (Build.VERSION.SDK_INT >= 24){
+            //locError(Environment.getExternalStorageDirectory() + "/maphoto/" + Long.toString(timenow) + ".jpg");
+            Uri imageUri = FileProvider.getUriForFile(mContext, "com.geopdfviewer.android.fileprovider", outputImage);
+            Log.w(TAG, "onBindViewHolder: " + imageUri.toString());
+            holder.PhotoImage.setImageURI(imageUri);
+        }else {
+            Uri imageUri = Uri.fromFile(outputImage);
+            Log.w(TAG, "onBindViewHolder: " + imageUri.toString());
+            holder.PhotoImage.setImageURI(imageUri);
+        }
         String data;
         data = "图片名称: " + mphoto.getM_name() + "\n" + "时间: " + mphoto.getM_time();
         // + "\n" + "录制地址为: " +

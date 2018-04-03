@@ -1,5 +1,6 @@
 package com.geopdfviewer.android;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
 
@@ -158,9 +160,13 @@ public class tapeshow extends AppCompatActivity {
                 refreshCard();
                 break;
             case R.id.add_pois:
-                Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-                startActivityForResult(intent, REQUEST_CODE_TAPE);
-                refreshCard();
+                try {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, REQUEST_CODE_TAPE);
+                    refreshCard();
+                }catch (ActivityNotFoundException e){
+                    Toast.makeText(MyApplication.getContext(), "无法打开录音功能", Toast.LENGTH_LONG).show();
+                }
                 break;
             default:
                 break;

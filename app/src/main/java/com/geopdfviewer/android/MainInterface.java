@@ -1456,7 +1456,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         if (location != null) {
             try {
                 addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                Toast.makeText(this, "你当前在: " + addresses.get(0).getAddressLine(0), Toast.LENGTH_LONG).show();
+                if (addresses.size() > 0) Toast.makeText(this, "你当前在: " + addresses.get(0).getAddressLine(0), Toast.LENGTH_LONG).show();
+                else Toast.makeText(this, "你当前没有连接网络, 无法进行详细地址查询", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "updateView.addresses = " + addresses);
                 if (addresses.size() > 0) {
                     msg += addresses.get(0).getAdminArea().substring(0,2);
@@ -1738,18 +1739,26 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 //浮动按钮2 具体功能如下:
                 //Toast.makeText(MainInterface.this, "定位到当前位置功能尚未添加", Toast.LENGTH_SHORT).show();
+                locError(Double.toString(m_lat));
+                if (m_lat != 0 & m_long != 0){
+                    if (m_lat <= max_lat & m_lat >= min_lat & m_long >= min_long & m_long<= max_long){
                 if (pdfView.getZoom() != 1){
                     button2.setIcon(R.drawable.ic_location_searching);
                     pdfView.resetZoomWithAnimation();
                     TimerTask task = new TimerTask() {
                         @Override
                         public void run() {
-                            button2.setIcon(R.drawable.ic_my_location);
-                            PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
+                            final PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
                             ppz.x = ppz.x - 10;
-                            pdfView.zoomCenteredTo(8, ppz);
-                            float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
-                            pdfView.setPositionOffset(verx);
+                            final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    button2.setIcon(R.drawable.ic_my_location);
+                                    pdfView.zoomCenteredTo(8, ppz);
+                                    pdfView.setPositionOffset(verx);
+                                }
+                            });
                             isPos = true;
                         }
                     };
@@ -1766,6 +1775,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     pdfView.setPositionOffset(verx);
                     isPos = true;
                 }
+                }else Toast.makeText(MyApplication.getContext(), "你当前不在该地图中", Toast.LENGTH_LONG).show();
+                }else Toast.makeText(MyApplication.getContext(), "无法完成定位操作, 请开启网络或GPS设备", Toast.LENGTH_LONG).show();
             }
         });
         button3 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.restorezoom);

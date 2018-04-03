@@ -256,19 +256,20 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (file.exists()){
             intent.setDataAndType(Uri.parse(DEF_DIR), "application/pdf");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-        }else intent.setType("application/pdf");
-
+        }else {
+            intent.setType("application/pdf");
+        }
         try {
             startActivityForResult(intent, REQUEST_CODE);
-        } catch (ActivityNotFoundException e) {
-            //alert user that file manager not working
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MyApplication.getContext(), R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+    } catch (ActivityNotFoundException e) {
+        //alert user that file manager not working
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MyApplication.getContext(), R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     }
 
     private void requestAuthority(){
@@ -472,8 +473,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (location != null) {
             try {
                 addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                if (addresses.size() > 0){
                 m_latlong_description = addresses.get(0).getAddressLine(0);
                 Toast.makeText(this, "你当前在: " + m_latlong_description, Toast.LENGTH_LONG).show();
+                }else Toast.makeText(this, "你当前没有连接网络, 无法进行详细地址查询", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "updateView.addresses = " + addresses);
                 if (addresses.size() > 0) {
                     msg += addresses.get(0).getAdminArea().substring(0,2);

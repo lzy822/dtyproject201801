@@ -135,6 +135,7 @@ public class singlepoi extends AppCompatActivity {
             MPHOTO mphoto = new MPHOTO();
             mphoto.setPdfic(POIs.get(0).getIc());
             mphoto.setPOIC(POIC);
+            Log.w(TAG, "onActivityResult: " + getRealPath(uri.getPath()) );
             mphoto.setPath(getRealPath(uri.getPath()));
             mphoto.setTime(simpleDateFormat.format(date));
             mphoto.save();
