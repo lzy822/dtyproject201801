@@ -2,7 +2,10 @@ package com.geopdfviewer.android;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -16,7 +19,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 
 /**
@@ -126,5 +131,27 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
     }
     public void setOnItemClickListener(OnRecyclerItemClickListener listener){
         this.mOnItemClick =  listener;
+    }
+
+    public static void sizeCompress(Bitmap bmp, File file) {
+        // 尺寸压缩倍数,值越大，图片尺寸越小
+        int ratio = 8;
+        // 压缩Bitmap到对应尺寸
+        Bitmap result = Bitmap.createBitmap(bmp.getWidth() / ratio, bmp.getHeight() / ratio, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        Rect rect = new Rect(0, 0, bmp.getWidth() / ratio, bmp.getHeight() / ratio);
+        canvas.drawBitmap(bmp, null, rect, null);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        // 把压缩后的数据存放到baos中
+        result.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(baos.toByteArray());
+            fos.flush();
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
