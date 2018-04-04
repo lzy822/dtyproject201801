@@ -1,8 +1,10 @@
 package com.geopdfviewer.android;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -198,9 +200,28 @@ public class photoshow extends AppCompatActivity {
             MPHOTO mphoto = new MPHOTO();
             mphoto.setPdfic(POIs.get(0).getIc());
             mphoto.setPOIC(POIC);
-            mphoto.setPath(getRealPath(uri.getPath()));
+            //Log.w(TAG, "onActivityResult: " + uri.getPath() );
+            //mphoto.setPath(getRealPath(uri.getPath()));
+            mphoto.setPath(getRealPathFromUriForPhoto(this, uri));
             mphoto.setTime(simpleDateFormat.format(date));
             mphoto.save();
+        }
+    }
+
+    //获取照片文件路径
+    public static String getRealPathFromUriForPhoto(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        Log.w(TAG, contentUri.toString() );
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 
