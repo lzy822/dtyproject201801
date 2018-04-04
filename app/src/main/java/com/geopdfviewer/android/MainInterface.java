@@ -1008,7 +1008,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             Uri uri = data.getData();
             float[] latandlong = new float[2];
             try{
-                ExifInterface exifInterface = new ExifInterface(getRealPath(uri.getPath()));
+                ExifInterface exifInterface = new ExifInterface(getRealPathFromUriForPhoto(this, uri));
                 exifInterface.getLatLong(latandlong);
                 locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
                     List<POI> POIs = DataSupport.findAll(POI.class);
@@ -1027,7 +1027,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     MPHOTO mphoto = new MPHOTO();
                     mphoto.setPdfic(ic);
                     mphoto.setPOIC("POI" + String.valueOf(time));
-                    mphoto.setPath(getRealPath(uri.getPath()));
+                    mphoto.setPath(getRealPathFromUriForPhoto(this, uri));
                     mphoto.setTime(simpleDateFormat.format(date));
                     mphoto.save();
                     showAll = true;
@@ -1064,13 +1064,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             pdfView.resetZoomWithAnimation();
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
-            String imageuri = getRealPath(imageUri.getPath());
+            locError(imageUri.toString());
+            //String imageuri = getRealPathFromUriForPhoto(this, imageUri);
+            String imageuri = getRealPath(imageUri.toString());
             locError("imageUri : " + imageuri.toString());
             float[] latandlong = new float[2];
             try{
                 ExifInterface exifInterface = new ExifInterface(imageuri);
                 exifInterface.getLatLong(latandlong);
-                locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                locError("see here" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
                     //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
                     List<POI> POIs = DataSupport.findAll(POI.class);
                     POI poi = new POI();
@@ -1079,8 +1081,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     poi.setPOIC("POI" + String.valueOf(time));
                     poi.setPhotonum(1);
                     poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
-                    poi.setX(latandlong[0]);
-                    poi.setY(latandlong[1]);
+                    if (latandlong[0] != 0 & latandlong[1] != 0){
+                        poi.setX(latandlong[0]);
+                        poi.setY(latandlong[1]);
+                    }else {
+                        poi.setX((float)m_lat);
+                        poi.setY((float)m_long);
+                    }
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
                     Date date = new Date(System.currentTimeMillis());
                     poi.setTime(simpleDateFormat.format(date));
@@ -1261,8 +1268,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //获取File可使用路径
     public String getRealPath(String filePath) {
+        locError("see here : " + filePath);
         if (!filePath.contains("raw")) {
-            String str = "/external_files";
+            String str = "content://com.geopdfviewer.android.fileprovider/external_files";
             String Dir = Environment.getExternalStorageDirectory().toString();
             filePath = Dir + filePath.substring(str.length());
         }else {
@@ -1270,6 +1278,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             //locError("here");
             //locError(filePath);
         }
+        locError("see here : " + filePath);
         return filePath;
     }
 

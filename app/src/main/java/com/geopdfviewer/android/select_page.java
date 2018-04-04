@@ -2,6 +2,7 @@ package com.geopdfviewer.android;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -739,11 +740,28 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     };
 
+    //获取照片文件路径
+    public static String getRealPathFromUriForPhoto(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        Log.w(TAG, contentUri.toString() );
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
-            locError(getRealPath(uri.toString()));
+            locError(uri.toString());
                 //locError(configPath);
                 new Thread(new Runnable() {
                     @Override
@@ -755,12 +773,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
                                 }
                             });
-                            String configPath = uri.toString();
+                            String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                             configPath = URLDecoder.decode(configPath, "utf-8");
-                            getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
-                            locError(getRealPath(uri.toString()));
-                            locError(uri.toString());
-                            locError(findNameFromUri(uri));
+                            getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
+                            locError(configPath);
+                            //locError(uri.toString());
+                            //locError(findNameFromUri(uri));
                             //LitePal.getDatabase();
                             Message message = new Message();
                             message.what = UPDATE_TEXT;
@@ -783,9 +801,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     //获取File可使用路径
     public String getRealPath(String filePath) {
-        String str = "content://com.android.fileexplorer.myprovider/external_files";
+        //String str = "content://com.android.fileexplorer.myprovider/external_files";
+        String str = filePath.substring(1);
+        str = str.substring(str.indexOf("/"));
         String Dir = Environment.getExternalStorageDirectory().toString();
-        filePath = Dir + filePath.substring(str.length());
+        filePath = Dir + str;
+        locError("see here : " + filePath);
         return filePath;
     }
 
