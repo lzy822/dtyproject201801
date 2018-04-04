@@ -140,6 +140,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //记录长按的position
     private String mselectedpos = "";
 
+    //记录进入app的次数
+    private int m_join = 0;
+
     com.getbase.floatingactionbutton.FloatingActionButton bt2;
 
     @Override
@@ -251,7 +254,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     void launchPicker() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
         File file = new File(DEF_DIR);
         if (file.exists()){
             intent.setDataAndType(Uri.parse(DEF_DIR), "application/pdf");
@@ -291,7 +294,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             ActivityCompat.requestPermissions(select_page.this, permissions, 118);
         }else {
             getLocation();
-            initPage();
+            //initPage();
         }
     }
 
@@ -824,19 +827,27 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
         });
         //初始化界面一
+        Log.w(TAG, "onCreate: " );
+        if (num_pdf != 0){
+            isLongClick = 1;
+            selectedNum = 0;
+            refreshRecycler();
+        }else initPage();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.w(TAG, "onResume: " );
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (num_pdf != 0){
+        /*if (num_pdf != 0){
         isLongClick = 1;
         selectedNum = 0;
         refreshRecycler();
-        }
+        }*/
+        refreshRecycler();
     }
 
     public void initPage(){

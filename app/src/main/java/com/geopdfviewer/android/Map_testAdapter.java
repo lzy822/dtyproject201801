@@ -124,7 +124,10 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         //latandlong1 = map.getM_center_latlong().split(",");
         //double the_lat = Double.valueOf(latandlong1[0]);
         //double the_long = Double.valueOf(latandlong1[1]);
-        double distance = getDistancebtptandmap(map.getM_GPTS(), m_lat, m_long) / 1000;
+            double distance;
+            if (!map.getM_GPTS().isEmpty()){
+         distance = getDistancebtptandmap(map.getM_GPTS(), m_lat, m_long) / 1000;
+            }else distance = 0;
         if (distance != 0) {
             holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
         } else holder.MapName.setText(map.getM_name() + "\n" + "在地图上 ");

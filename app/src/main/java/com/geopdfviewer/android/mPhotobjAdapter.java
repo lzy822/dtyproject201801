@@ -3,9 +3,11 @@ package com.geopdfviewer.android;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -93,17 +95,12 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
     public void onBindViewHolder(mPhotobjAdapter.ViewHolder holder, int position) {
         mPhotobj mphoto = mPhotobjList.get(position);
         //holder.PhotoImage.setImageURI(Uri.parse(mphoto.getM_path()));
-        File outputImage = new File(mphoto.getM_path());
-        if (Build.VERSION.SDK_INT >= 24){
-            //locError(Environment.getExternalStorageDirectory() + "/maphoto/" + Long.toString(timenow) + ".jpg");
-            Uri imageUri = FileProvider.getUriForFile(mContext, "com.geopdfviewer.android.fileprovider", outputImage);
-            Log.w(TAG, "onBindViewHolder: " + imageUri.toString());
-            holder.PhotoImage.setImageURI(imageUri);
-        }else {
-            Uri imageUri = Uri.fromFile(outputImage);
-            Log.w(TAG, "onBindViewHolder: " + imageUri.toString());
-            holder.PhotoImage.setImageURI(imageUri);
-        }
+        //File outputImage = new File(mphoto.getM_path());
+        /*if (Build.VERSION.SDK_INT >= 24){
+            holder.PhotoImage.setImageBitmap(getImageThumbnail(mphoto.getM_path(), 100, 120));
+        }else {*/
+        holder.PhotoImage.setImageBitmap(getImageThumbnail(mphoto.getM_path(), 100, 120));
+        //}
         String data;
         data = "图片名称: " + mphoto.getM_name() + "\n" + "时间: " + mphoto.getM_time();
         // + "\n" + "录制地址为: " +
@@ -133,25 +130,33 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
         this.mOnItemClick =  listener;
     }
 
-    public static void sizeCompress(Bitmap bmp, File file) {
-        // 尺寸压缩倍数,值越大，图片尺寸越小
-        int ratio = 8;
-        // 压缩Bitmap到对应尺寸
-        Bitmap result = Bitmap.createBitmap(bmp.getWidth() / ratio, bmp.getHeight() / ratio, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(result);
-        Rect rect = new Rect(0, 0, bmp.getWidth() / ratio, bmp.getHeight() / ratio);
-        canvas.drawBitmap(bmp, null, rect, null);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        // 把压缩后的数据存放到baos中
-        result.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(baos.toByteArray());
-            fos.flush();
-            fos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    private Bitmap getImageThumbnail(String imagePath, int width, int height) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        // 获取这个图片的宽和高，注意此处的bitmap为null
+        bitmap = BitmapFactory.decodeFile(imagePath, options);
+        options.inJustDecodeBounds = false; // 设为 false
+        // 计算缩放比
+        int h = options.outHeight;
+        int w = options.outWidth;
+        int beWidth = w / width;
+        int beHeight = h / height;
+        int be = 1;
+        if (beWidth < beHeight) {
+            be = beWidth;
+        } else {
+            be = beHeight;
         }
+        if (be <= 0) {
+            be = 1;
+        }
+        options.inSampleSize = be;
+        // 重新读入图片，读取缩放后的bitmap，注意这次要把options.inJustDecodeBounds 设为 false
+        bitmap = BitmapFactory.decodeFile(imagePath, options);
+        // 利用ThumbnailUtils来创建缩略图，这里要指定要缩放哪个Bitmap对象
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height,
+                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+        return bitmap;
     }
 }

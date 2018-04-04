@@ -3,26 +3,39 @@ package com.geopdfviewer.android;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.ExifInterface;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -84,7 +97,8 @@ public class photoshow extends AppCompatActivity {
                         }
                     }
                 }else {
-
+                    //Log.w(TAG, "onItemClick: " + path );
+                    showPopueWindowForPhoto(path);
                 }
             }
         });
@@ -148,6 +162,7 @@ public class photoshow extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.back_pois:
                 this.finish();
+                //showPopueWindowForPhoto("/storage/emulated/0/DCIM/Camera/IMG_20180322_230831.jpg");
                 break;
             case R.id.restore_pois:
                 resetView();
@@ -221,6 +236,78 @@ public class photoshow extends AppCompatActivity {
         }else {
             DataSupport.deleteAll(MPHOTO.class, "POIC = ? and path = ?", POIC, deletePath);
         }
+    }
+
+    private void showPopueWindowForPhoto(String path){
+        //final RelativeLayout linearLayout= (RelativeLayout) getLayoutInflater().inflate(R.layout.popupwindow_photo_show, null);
+        View popView = View.inflate(this,R.layout.popupwindow_photo_show,null);
+        ImageView imageView1 = (ImageView) popView.findViewById(R.id.photoshow_all1);
+        Log.w(TAG, "showPopueWindowForPhoto: " + path);
+        //File outputImage = new File(path);
+        if (Build.VERSION.SDK_INT >= 24){
+            //Uri output = FileProvider.getUriForFile(MyApplication.getContext(), "com.geopdfviewer.android.fileprovider", outputImage);
+            //imageView.setImageURI(Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20180320_182344_1.jpg"));
+            //imageView1.setImageURI(output);
+            imageView1.setImageBitmap(getImageThumbnail(path, 2048, 2048 ));
+        }else {
+            //Uri output = Uri.fromFile(outputImage);
+            //imageView1.setImageURI(output);
+            imageView1.setImageBitmap(getImageThumbnail(path, 2048, 2048 ));
+        }
+        //获取屏幕宽高
+        int weight = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels * 2 / 3;
+
+        final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(true);
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 0.5f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.BOTTOM,0,50);
+
+    }
+
+    private Bitmap getImageThumbnail(String imagePath, int width, int height) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        // 获取这个图片的宽和高，注意此处的bitmap为null
+        bitmap = BitmapFactory.decodeFile(imagePath, options);
+        options.inJustDecodeBounds = false; // 设为 false
+        // 计算缩放比
+        int h = options.outHeight;
+        int w = options.outWidth;
+        int beWidth = w / width;
+        int beHeight = h / height;
+        int be = 1;
+        if (beWidth < beHeight) {
+            be = beWidth;
+        } else {
+            be = beHeight;
+        }
+        if (be <= 0) {
+            be = 1;
+        }
+        options.inSampleSize = be;
+        // 重新读入图片，读取缩放后的bitmap，注意这次要把options.inJustDecodeBounds 设为 false
+        bitmap = BitmapFactory.decodeFile(imagePath, options);
+        // 利用ThumbnailUtils来创建缩略图，这里要指定要缩放哪个Bitmap对象
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height,
+                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+        return bitmap;
     }
 
 }
