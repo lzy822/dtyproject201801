@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -262,7 +263,7 @@ public class photoshow extends AppCompatActivity {
     private void showPopueWindowForPhoto(String path){
         //final RelativeLayout linearLayout= (RelativeLayout) getLayoutInflater().inflate(R.layout.popupwindow_photo_show, null);
         View popView = View.inflate(this,R.layout.popupwindow_photo_show,null);
-        ImageView imageView1 = (ImageView) popView.findViewById(R.id.photoshow_all1);
+        final ImageView imageView1 = (ImageView) popView.findViewById(R.id.photoshow_all1);
         Log.w(TAG, "showPopueWindowForPhoto: " + path);
         //File outputImage = new File(path);
         if (Build.VERSION.SDK_INT >= 24){
@@ -277,10 +278,11 @@ public class photoshow extends AppCompatActivity {
         }
         //获取屏幕宽高
         int weight = getResources().getDisplayMetrics().widthPixels;
-        int height = getResources().getDisplayMetrics().heightPixels * 2 / 3;
+        int height = getResources().getDisplayMetrics().heightPixels * 1 / 3;
 
         final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
         //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+
         popupWindow.setFocusable(true);
         //点击外部popueWindow消失
         popupWindow.setOutsideTouchable(true);
@@ -293,6 +295,14 @@ public class photoshow extends AppCompatActivity {
                 getWindow().setAttributes(lp);
             }
         });
+        /*popupWindow.setTouchInterceptor(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //imageView1.setVisibility(View.INVISIBLE);
+                popupWindow.dismiss();
+                return false;
+            }
+        });*/
         //popupWindow出现屏幕变为半透明
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.alpha = 0.5f;

@@ -39,6 +39,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -144,7 +145,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //记录进入app的次数
     private int m_join = 0;
 
-    com.getbase.floatingactionbutton.FloatingActionButton bt2;
+    com.github.clans.fab.FloatingActionButton bt2;
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -258,10 +259,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
         File file = new File(DEF_DIR);
         if (file.exists()){
-            intent.setDataAndType(Uri.parse(DEF_DIR), "application/pdf");
+            intent.setDataAndType(Uri.parse(DEF_DIR), "application/dt");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
         }else {
-            intent.setType("application/pdf");
+            intent.setType("application/dt");
         }
         try {
             startActivityForResult(intent, REQUEST_CODE);
@@ -395,6 +396,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         });
         //adapter.getItemSelected();
         recyclerView.setAdapter(adapter);
+        /*bt2.hide(false);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                bt2.show(true);
+                bt2.setShowAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.show_from_bottom));
+                bt2.setHideAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.hide_to_bottom));
+            }
+        }, 300);*/
     }
 
     //获取当前坐标位置
@@ -470,12 +480,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     //更新坐标信息
     private void updateView(Location location) {
+        if (location != null){
             m_lat = location.getLatitude();
             m_long = location.getLongitude();
             SharedPreferences.Editor editor = getSharedPreferences("latlong", MODE_PRIVATE).edit();
             editor.clear().commit();
             editor.putString("mlatlong", Double.toString(m_lat) + "," + Double.toString(m_long));
             editor.apply();
+        }
     }
 
     public void deleteData(int selectedNum){
@@ -680,7 +692,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             for (int i = 1; i <= num; i++){
                 str = str.substring(str.indexOf("/") + 1);
             }
-            str = str.substring(0, str.length() - 4);
+            str = str.substring(0, str.length() - 3);
 
         }catch (UnsupportedEncodingException e){
             e.printStackTrace();
@@ -736,8 +748,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
-            locError(uri.toString());
+            //locError(uri.toString());
                 //locError(configPath);
+            if (uri.toString().contains(".dt")){
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -748,7 +761,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
                                 }
                             });
-                            String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                            //locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
+                            String configPath;
+                            configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                            if (configPath.substring(8).contains(":")){
+                                configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                            }else configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                            //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                             configPath = URLDecoder.decode(configPath, "utf-8");
                             getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
                             locError(configPath);
@@ -764,6 +783,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
                     }
                 }).start();
+            }else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
                 //getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
 
             /*locError(getRealPath(uri.toString()));
@@ -815,7 +835,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //申请动态权限
         requestAuthority();
         //子floating按钮事件编辑
-        bt2 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab02);
+        bt2 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.fab02);
         bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1118,9 +1138,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             while((line = bufferedReader.readLine()) != null) {
                 //sb.append(line + "/n");
                 if(line.contains("PROJCS")) {
-
+                    //locError(line);
                     m_WKT = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
-
                 }
                 if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
                 {

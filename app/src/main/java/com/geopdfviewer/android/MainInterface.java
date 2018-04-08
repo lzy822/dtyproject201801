@@ -23,6 +23,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.media.ExifInterface;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -554,6 +555,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
+    //获取图片缩略图
+    private Bitmap getImageThumbnail(String imagePath, int width, int height) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        // 获取这个图片的宽和高，注意此处的bitmap为null
+        bitmap = BitmapFactory.decodeFile(imagePath, options);
+        options.inJustDecodeBounds = false; // 设为 false
+        // 计算缩放比
+        int h = options.outHeight;
+        int w = options.outWidth;
+        int beWidth = w / width;
+        int beHeight = h / height;
+        int be = 1;
+        if (beWidth < beHeight) {
+            be = beWidth;
+        } else {
+            be = beHeight;
+        }
+        if (be <= 0) {
+            be = 1;
+        }
+        options.inSampleSize = be;
+        // 重新读入图片，读取缩放后的bitmap，注意这次要把options.inJustDecodeBounds 设为 false
+        bitmap = BitmapFactory.decodeFile(imagePath, options);
+        // 利用ThumbnailUtils来创建缩略图，这里要指定要缩放哪个Bitmap对象
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height,
+                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+        return bitmap;
+    }
+
     //显示GeoPDF
     private void displayFromAsset(String assetFileName) {
         pdfFileName = assetFileName;
@@ -836,9 +868,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
                                         } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
                                     }else {
+                                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
-                                        }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                            canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint1);
+                                        }else {
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                            canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
+                                        }
                                     }
                                 }}
                         }
