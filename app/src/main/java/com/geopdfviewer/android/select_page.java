@@ -470,37 +470,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     //更新坐标信息
     private void updateView(Location location) {
-        Geocoder gc = new Geocoder(this);
-        List<Address> addresses = null;
-        String msg = "";
-        Log.d(TAG, "updateView.location = " + location);
-        if (location != null) {
-            try {
-                addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                if (addresses.size() > 0){
-                m_latlong_description = addresses.get(0).getAddressLine(0);
-                Toast.makeText(this, "你当前在: " + m_latlong_description, Toast.LENGTH_LONG).show();
-                }else Toast.makeText(this, "你当前没有连接网络, 无法进行详细地址查询", Toast.LENGTH_LONG).show();
-                Log.d(TAG, "updateView.addresses = " + addresses);
-                if (addresses.size() > 0) {
-                    msg += addresses.get(0).getAdminArea().substring(0,2);
-                    msg += " " + addresses.get(0).getLocality().substring(0,2);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             m_lat = location.getLatitude();
             m_long = location.getLongitude();
             SharedPreferences.Editor editor = getSharedPreferences("latlong", MODE_PRIVATE).edit();
             editor.clear().commit();
             editor.putString("mlatlong", Double.toString(m_lat) + "," + Double.toString(m_long));
             editor.apply();
-            //setHereLocation();
-            //locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
-
-        } else {
-
-        }
     }
 
     public void deleteData(int selectedNum){

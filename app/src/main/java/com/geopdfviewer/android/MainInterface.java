@@ -213,6 +213,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private final static int COORDINATE_BLH_TYPE = 1;
     private final static int COORDINATE_XYZ_TYPE = 2;
 
+    //记录是否需要详细地址信息
+    private boolean isFullLocation = false;
+
+    //记录verx
+    float verx = 0;
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -672,7 +677,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_width = pdfView.getWidth();
                             //Log.d(TAG, Integer.toString(viewer_top) + "here" + Float.toString(viewer_height) + "here" + Integer.toString(viewer_bottom));
                         }
-                        float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                        //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                         if (pdfView.getPositionOffset() != verx & isPos == true){
                             button2.setIcon(R.drawable.ic_location_searching);
                             isPos = false;
@@ -777,12 +782,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             setTitle(pdfFileName);
                             isQuery = false;
                         }*/
-                        float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                        //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                         if (pdfView.getPositionOffset() != verx & isPos == true){
                             button2.setIcon(R.drawable.ic_location_searching);
                             isPos = false;
                         }
-                        locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()));
+                        locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()) + "verx : " + Float.toString(verx));
                         //locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
                         c_zoom = pdfView.getZoom();
                         current_pageheight = pageHeight;
@@ -1458,30 +1463,35 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //更新坐标信息
     private void updateView(Location location) {
-        Geocoder gc = new Geocoder(this);
+        /*
+        locError("isFullLocation : " + Boolean.toString(isFullLocation));
+        locError("location : " + location.toString());
+        if(isFullLocation & location != null){
+        Geocoder gc = new Geocoder(MainInterface.this);
         List<Address> addresses = null;
         String msg = "";
         Log.d(TAG, "updateView.location = " + location);
-        if (location != null) {
             try {
                 addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                if (addresses.size() > 0) Toast.makeText(this, "你当前在: " + addresses.get(0).getAddressLine(0), Toast.LENGTH_LONG).show();
+                //Log.d(TAG, "updateView.addresses = " + Integer.toString(addresses.size()));
+                if (addresses.size() > 0) Toast.makeText(MainInterface.this, "当前位置: " + addresses.get(0).getAddressLine(0), Toast.LENGTH_LONG).show();
                 else Toast.makeText(this, "你当前没有连接网络, 无法进行详细地址查询", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "updateView.addresses = " + addresses);
                 if (addresses.size() > 0) {
                     msg += addresses.get(0).getAdminArea().substring(0,2);
                     msg += " " + addresses.get(0).getLocality().substring(0,2);
+                    Log.d(TAG, "updateView.addresses = " + msg);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }*/
+        if (location != null){
             m_lat = location.getLatitude();
             m_long = location.getLongitude();
+            verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
             //setHereLocation();
             locError(Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
-
-        } else {
-
         }
     }
 
@@ -1627,12 +1637,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 if (m_lat <= max_lat & m_lat >= min_lat & m_long <= max_long & m_long >= min_long){
-                setTitle("准备记录轨迹");
-                PointF mmm = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
-                pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);
-                bbt2.setVisibility(View.VISIBLE);
-                bbt3.setVisibility(View.VISIBLE);
-                bbt1.setVisibility(View.INVISIBLE);
+                    setTitle("准备记录轨迹");
+                /*PointF mmm = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);*/
+                    pdfView.resetZoomWithAnimation();
+                    TimerTask task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            final PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
+                            ppz.x = ppz.x - 10;
+                            //final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pdfView.zoomCenteredTo(8, ppz);
+                                    pdfView.setPositionOffset(verx);
+                                }
+                            });
+                        }
+                    };
+                    Timer timer = new Timer();
+                    timer.schedule(task, 1000);
+                    bbt2.setVisibility(View.VISIBLE);
+                    bbt3.setVisibility(View.VISIBLE);
+                    bbt1.setVisibility(View.INVISIBLE);
                 }else Toast.makeText(MainInterface.this, "你所在位置不在当前地图中, 不可记录轨迹", Toast.LENGTH_SHORT).show();
             }
         });
@@ -1780,7 +1808,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
                     ppz.x = ppz.x - 10;
                     pdfView.zoomCenteredTo(8, ppz);
-                    float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                    //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                     pdfView.setPositionOffset(verx);
                     isPos = true;
                 }
@@ -1798,6 +1826,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 pdfView.resetZoomWithAnimation();
                 isMessure = false;
                 setTitle(pdfFileName);
+                if (!isFullLocation) {
+                    isFullLocation = true;
+                    if (location != null){
+                        updateView(location);
+                    }else Toast.makeText(MainInterface.this, "LOCATION ERROR!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         button4 = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.addTape);
