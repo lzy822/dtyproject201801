@@ -1838,7 +1838,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 bbt2.setVisibility(View.INVISIBLE);
                 bbt3.setVisibility(View.INVISIBLE);
                 bbt1.setVisibility(View.VISIBLE);
-                //floatingActionsMenu.setVisibility(View.VISIBLE);
                 pdfView.resetZoomWithAnimation();
             }
         });
