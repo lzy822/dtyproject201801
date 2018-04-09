@@ -99,45 +99,49 @@
         android:translationZ="0dp"
         android:elevation="0dp"/>
 </LinearLayout>
-    <com.getbase.floatingactionbutton.FloatingActionsMenu
+    <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fam"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="4dp"
-        fab:fab_addButtonStrokeVisible="false"
-        fab:fab_labelsPosition="left"
-        >
-        <com.getbase.floatingactionbutton.FloatingActionButton
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        fab:menu_labels_ellipsize="end"
+        fab:menu_labels_singleLine="true"
+        fab:menu_backgroundColor="#ccffffff"
+        fab:menu_fab_label="返回">
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addTape"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_title="添加录音"
-            android:tooltipText="添加录音" />
-        <com.getbase.floatingactionbutton.FloatingActionButton
+            fab:fab_size="mini"
+            fab:fab_label="添加录音"/>
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_title="添加照片"
-            android:tooltipText="添加照片" />
-        <com.getbase.floatingactionbutton.FloatingActionButton
+            fab:fab_size="mini"
+            fab:fab_label="添加照片"/>
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/lochere"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:tooltipText="定位"
-            fab:fab_title="定位"/>
-        <com.getbase.floatingactionbutton.FloatingActionButton
+            fab:fab_size="mini"
+            fab:fab_label="定位"/>
+        <com.github.clans.fab.FloatingActionButton
         android:id="@+id/restorezoom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:tooltipText="重置"
-        fab:fab_title="重置"/>
-        <com.getbase.floatingactionbutton.FloatingActionButton
+            fab:fab_size="mini"
+            fab:fab_label="重置"/>
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/messuredistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:tooltipText="测距"
-            fab:fab_title="测距"/>
-    </com.getbase.floatingactionbutton.FloatingActionsMenu>
+            fab:fab_size="mini"
+            fab:fab_label="测量"/>
+    </com.github.clans.fab.FloatingActionMenu>
 
 </android.support.design.widget.CoordinatorLayout>

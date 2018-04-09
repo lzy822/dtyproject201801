@@ -748,8 +748,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
-            //locError(uri.toString());
+            locError(uri.toString());
                 //locError(configPath);
+            String filepath = "";
             if (uri.toString().contains(".dt")){
                 new Thread(new Runnable() {
                     @Override
@@ -761,7 +762,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
                                 }
                             });
-                            //locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
+                            locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
                             String configPath;
                             configPath = URLDecoder.decode(uri.toString(), "utf-8");
                             if (configPath.substring(8).contains(":")){
@@ -783,6 +784,35 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
                     }
                 }).start();
+            }else if (getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")){
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                try
+                                {
+                                    String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                    configPath = URLDecoder.decode(configPath, "utf-8");
+                                    getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
+                                } catch (IOException e){
+
+                                }
+                                //locError(uri.toString());
+                                //locError(findNameFromUri(uri));
+                                //LitePal.getDatabase();
+                                Message message = new Message();
+                                message.what = UPDATE_TEXT;
+                                handler.sendMessage(message);
+
+
+                        }
+                    }).start();
+
             }else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
                 //getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
 

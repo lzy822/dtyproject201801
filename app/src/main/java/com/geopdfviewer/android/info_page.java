@@ -59,6 +59,7 @@ public class info_page extends AppCompatActivity implements OnPageChangeListener
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.info).setVisible(false);
         menu.findItem(R.id.queryPOI).setVisible(false);
+        menu.findItem(R.id.query).setVisible(false);
         return true;
 
     }
