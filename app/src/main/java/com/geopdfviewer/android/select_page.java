@@ -100,6 +100,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
 
+    //记录地图文件添加过程
+    private int add_current = 0, add_max = 0;
+
     //记录当前坐标信息
     double m_lat, m_long;
     String m_latlong_description;
@@ -722,6 +725,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 case UPDATE_TEXT:
                     // 在这里进行UI操作
                     refreshRecycler();
+                    if (add_current == add_max){
+                    toolbar.setTitle("地图列表");
+                    }
                     Log.w(TAG, "handleMessage: " );
             }
         }
@@ -755,10 +761,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        add_max ++;
                         try {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
                                     Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
                                 }
                             });
@@ -781,16 +789,17 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }catch (UnsupportedEncodingException e){
 
                         }
-
                     }
                 }).start();
             }else if (getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")){
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            add_max ++;
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
                                         Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
                                     }
                                 });
@@ -1274,6 +1283,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    add_current ++;
+                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
                     Toast.makeText(MyApplication.getContext(), "获取完毕!", Toast.LENGTH_LONG).show();
                 }
             });

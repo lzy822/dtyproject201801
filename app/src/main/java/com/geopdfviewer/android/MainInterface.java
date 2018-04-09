@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
@@ -97,6 +98,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     LinearLayout linearLayout;
     TextView textView;
 
+    //声明bts容器
+    List<bt> bts;
+
 
 
 
@@ -137,6 +141,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private String m_cTrail = "";
 
     private boolean isGetStretchRatio = false;
+
+    //记录是否自动切换地图
+    private boolean isAutoTrans = false;
+    //按钮声明
+    ImageButton autoTrans;
 
     Location location;
 
@@ -186,6 +195,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录当前图号
     private int num_map;
+
+    //记录上一张图图号
+    private int num_map1;
 
     //记录拍照后返回的URI
     private Uri imageUri;
@@ -376,6 +388,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void getGPTS() {
+        locError("gpts: " + GPTS);
         String[] GPTString = GPTS.split(" ");
         float[] GPTSs = new float[GPTString.length];
         for (int i = 0; i < GPTString.length; i++) {
@@ -781,14 +794,178 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
                                         } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
                                     }else {
+                                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
-                                        }else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            int size = bts.size();
+                                            for (int i = 0; i < size; i++){
+                                                if (bts.get(i).getM_path() == mphotos.get(0).getPath()){
+                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                }
+                                            }
+                                        }else {
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
+                                            int size = bts.size();
+                                            for (int i = 0; i < size; i++){
+                                                if (bts.get(i).getM_path() == mphotos.get(0).getPath()){
+                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                }
+                                            }
+                                        }
                                     }
                                 }}
                         }
                         getCurrentScreenLoc();
+                        if ((c_zoom >= 8) & isAutoTrans){
+                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+                            int size = pref1.getInt("num", 0);
+                            if (size != 0){
+                                float thedelta = 0;
+                                int thenum = 0;
+                                for (int j = 1; j <= size; j ++){
+                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                                    String str = "n_" + j + "_";
+                                    String Muri = pref2.getString(str + "uri", "");
+                                    String MGPTS = pref2.getString(str + "GPTS", "");
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; i++) {
+                                        GPTSs[i] = Float.valueOf(GPTString[i]);
+                                    }
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2){
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    locError("see here");
+                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                                    locError("see here");
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (mmax_lat < cs_top & mmin_lat > cs_bottom & mmax_long < cs_right & mmin_long > cs_left){
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        if (thedelta == 0) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }else if (thedelta1 < thedelta) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }
+                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+                                        /*num_map1 = num_map;
+                                        getInfo(j);
+                                        toolbar.setTitle(pdfFileName);
+                                        getBitmap();
+                                        displayFromFile(uri);
+                                        isAutoTrans = false;
+                                        autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
+                                    }
+                                }
+                                if (thenum != 0){
+                                num_map1 = num_map;
+                                getInfo(thenum);
+                                toolbar.setTitle(pdfFileName);
+                                getBitmap();
+                                displayFromFile(uri);
+                                isAutoTrans = false;
+                                autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                }
+                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                        }else if (c_zoom <= 2 & isAutoTrans){
 
+                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+                            int size = pref1.getInt("num", 0);
+                            if (size != 0){
+                                float thedelta = 0;
+                                int thenum = 0;
+                                for (int j = 1; j <= size; j ++){
+                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                                    String str = "n_" + j + "_";
+                                    String Muri = pref2.getString(str + "uri", "");
+                                    String MGPTS = pref2.getString(str + "GPTS", "");
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; i++) {
+                                        GPTSs[i] = Float.valueOf(GPTString[i]);
+                                    }
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2){
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    locError("see here");
+                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                                    locError("see here");
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (mmax_lat > max_lat & mmin_lat < min_lat & mmax_long > max_long & mmin_long < min_long){
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        if (thedelta == 0) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }else if (thedelta1 < thedelta) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }
+                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+
+                                    }
+                                }
+                                if (thenum != num_map & thenum != 0){
+                                    num_map1 = num_map;
+                                    getInfo(thenum);
+                                    toolbar.setTitle(pdfFileName);
+                                    getBitmap();
+                                    displayFromFile(uri);
+                                    isAutoTrans = false;
+                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                }
+                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                        }
 
                     }
                 })
@@ -889,15 +1066,176 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
-                                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint1);
+                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            int size = bts.size();
+                                            for (int i = 0; i < size; i++){
+                                                if (bts.get(i).getM_path().contains(mphotos.get(0).getPath())){
+                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
                                         }else {
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
+                                            int size = bts.size();
+                                            for (int i = 0; i < size; i++){
+                                                if (bts.get(i).getM_path().contains(mphotos.get(0).getPath())){
+                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
                                         }
                                     }
                                 }}
                         }
                         getCurrentScreenLoc();
+                        if ((c_zoom >= 8) & isAutoTrans){
+                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+                            int size = pref1.getInt("num", 0);
+                            if (size != 0){
+                                float thedelta = 0;
+                                int thenum = 0;
+                                for (int j = 1; j <= size; j ++){
+                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                                    String str = "n_" + j + "_";
+                                    String Muri = pref2.getString(str + "uri", "");
+                                    String MGPTS = pref2.getString(str + "GPTS", "");
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; i++) {
+                                        GPTSs[i] = Float.valueOf(GPTString[i]);
+                                    }
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2){
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    locError("see here");
+                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                                    locError("see here");
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (mmax_lat < cs_top & mmin_lat > cs_bottom & mmax_long < cs_right & mmin_long > cs_left){
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        if (thedelta == 0) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }else if (thedelta1 < thedelta) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }
+                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+                                        /*num_map1 = num_map;
+                                        getInfo(j);
+                                        toolbar.setTitle(pdfFileName);
+                                        getBitmap();
+                                        displayFromFile(uri);
+                                        isAutoTrans = false;
+                                        autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
+                                    }
+                                }
+                                if (thenum != 0){
+                                    num_map1 = num_map;
+                                    getInfo(thenum);
+                                    toolbar.setTitle(pdfFileName);
+                                    getBitmap();
+                                    displayFromFile(uri);
+                                    isAutoTrans = false;
+                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                }
+                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                        }else if (c_zoom <= 2 & isAutoTrans){
+                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+                            int size = pref1.getInt("num", 0);
+                            if (size != 0){
+                                float thedelta = 0;
+                                int thenum = 0;
+                                for (int j = 1; j <= size; j ++){
+                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                                    String str = "n_" + j + "_";
+                                    String Muri = pref2.getString(str + "uri", "");
+                                    String MGPTS = pref2.getString(str + "GPTS", "");
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; i++) {
+                                        GPTSs[i] = Float.valueOf(GPTString[i]);
+                                    }
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2){
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis){
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    locError("see here");
+                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                                    locError("see here");
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (mmax_lat > max_lat & mmin_lat < min_lat & mmax_long > max_long & mmin_long < min_long){
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        if (thedelta == 0) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }else if (thedelta1 < thedelta) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }
+                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+
+                                    }
+                                }
+                                if (thenum != num_map & thenum != 0){
+                                    num_map1 = num_map;
+                                    getInfo(thenum);
+                                    toolbar.setTitle(pdfFileName);
+                                    getBitmap();
+                                    displayFromFile(uri);
+                                    isAutoTrans = false;
+                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                }
+                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .onRender(new OnRenderListener() {
@@ -1698,6 +2036,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Integer.toString(pdfView.getMeasuredHeight()));
     }
 
+    //记录是否可以看缩略图
+    private boolean isCreateBitmap = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1705,6 +2046,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
+        autoTrans = (ImageButton) findViewById(R.id.trans);
+        autoTrans.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isAutoTrans){
+                    isAutoTrans = false;
+                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                }else {
+                    isAutoTrans = true;
+                    autoTrans.setBackgroundResource(R.drawable.ic_check_black_24dp);
+                }
+            }
+        });
         textView = (TextView) findViewById(R.id.txt);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1770,6 +2124,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         final Intent intent = getIntent();
         int m_num = intent.getIntExtra("num", 0);
         getInfo(m_num);
+        num_map1 = m_num;
         linearLayout = (LinearLayout) findViewById(R.id.search);
         if (uri != "") {
             FILE_TYPE = FILE_FILE_TYPE;
@@ -1988,20 +2343,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                floatingActionsMenu.close(false);
                 //浮动按钮3 具体功能如下:
-                showAll = true;
-                pdfView.resetZoomWithAnimation();
-                isMessure = false;
-                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                    toolbar.setTitle("正在记录轨迹");
-                }else toolbar.setTitle(pdfFileName);
-                if (!isFullLocation) {
-                    isFullLocation = true;
-                    if (location != null){
-                        updateView(location);
-                        floatingActionsMenu.close(false);
-                    }else Toast.makeText(MainInterface.this, "LOCATION ERROR!", Toast.LENGTH_SHORT).show();
-                }
+                if (isCreateBitmap) {
+                    showAll = true;
+                    pdfView.resetZoomWithAnimation();
+                    isMessure = false;
+                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在记录轨迹");
+                    } else toolbar.setTitle(pdfFileName);
+                    if (!isFullLocation) {
+                        isFullLocation = true;
+                        if (location != null) {
+                            updateView(location);
+                        } else
+                            Toast.makeText(MainInterface.this, "重置失败", Toast.LENGTH_SHORT).show();
+                    }
+                }else Toast.makeText(MainInterface.this, "奇怪的错误!", Toast.LENGTH_SHORT).show();
             }
         });
         button4 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape);
@@ -2034,6 +2392,42 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
+    public void getBitmap(){
+        ////////////////////////缓存Bitmap//////////////////////////////
+        bts = new ArrayList<bt>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                bts.clear();
+                List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+                if (pois.size() > 0){
+                    for (POI poi : pois){
+                        //PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                        //locError(Boolean.toString(poi.getPath().isEmpty()));
+                        //locError(Integer.toString(poi.getPath().length()));
+                        //locError(poi.getPath());
+                        if (poi.getPhotonum() == 0){
+                            if (poi.getTapenum() == 0){
+                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                            } else {
+                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
+                            }
+                        }else {
+                            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
+                            locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
+                            bt btt = new bt(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
+                            bts.add(btt);
+                        }
+                    }
+                }
+                locError("需要显示的缩略图数量2 : " + Integer.toString(bts.size()));
+                isCreateBitmap = true;
+            }
+        }).start();
+        //////////////////////////////////////////////////////////////////
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -2044,6 +2438,40 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }else toolbar.setTitle(pdfFileName);
         isQuery = false;
         isDrawType = NONE_DRAW_TYPE;
+        ////////////////////////缓存Bitmap//////////////////////////////
+        getBitmap();
+        /*bts = new ArrayList<bt>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                bts.clear();
+                List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+                if (pois.size() > 0){
+                    for (POI poi : pois){
+                        //PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                        //locError(Boolean.toString(poi.getPath().isEmpty()));
+                        //locError(Integer.toString(poi.getPath().length()));
+                        //locError(poi.getPath());
+                        if (poi.getPhotonum() == 0){
+                            if (poi.getTapenum() == 0){
+                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                            } else {
+                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
+                            }
+                        }else {
+                            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
+                            locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
+                            bt btt = new bt(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
+                            bts.add(btt);
+                        }
+                    }
+                }
+                locError("需要显示的缩略图数量2 : " + Integer.toString(bts.size()));
+                isCreateBitmap = true;
+            }
+        }).start();*/
+        //////////////////////////////////////////////////////////////////
     }
 
     @Override
