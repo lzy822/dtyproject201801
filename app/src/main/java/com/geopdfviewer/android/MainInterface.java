@@ -1590,19 +1590,26 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public void onBackPressed() {
         //super.onBackPressed();
         if (isDrawTrail == TRAIL_DRAW_TYPE){
+            popBackWindow("Back");
+        }else super.onBackPressed();
+    }
+
+    //退出提醒弹窗
+    public void popBackWindow(String str)
+    {
+        if (str == "Destroy"){
             AlertDialog.Builder backAlert = new AlertDialog.Builder(this);
             backAlert.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    if (!isLocateEnd){
-                        isDrawType = NONE_DRAW_TYPE;
-                        isDrawTrail = NONE_DRAW_TYPE;
-                        isLocateEnd = true;
-                        recordTrail(last_x, last_y);
-                        locError(m_cTrail);
-                        invalidateOptionsMenu();
-                        Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
-                        stopService(stop_mService);
+                    isDrawType = NONE_DRAW_TYPE;
+                    isDrawTrail = NONE_DRAW_TYPE;
+                    isLocateEnd = true;
+                    recordTrail(last_x, last_y);
+                    locError(m_cTrail);
+                    invalidateOptionsMenu();
+                    Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
+                    stopService(stop_mService);
                     /*Trail trail = new Trail();
                     List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
                     trail.setIc(ic);
@@ -1611,9 +1618,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     trail.save();*/
                     List<Trail> trails = DataSupport.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
-            }else {
-                Toast.makeText(MainInterface.this, "没有打开位置记录功能", Toast.LENGTH_SHORT).show();
-            }
+                    MainInterface.this.finish();
+                }
+            });
+            backAlert.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            backAlert.setMessage("确定要取消轨迹绘制吗?");
+            backAlert.setTitle("警告");
+            backAlert.show();
+        }else {
+
+            AlertDialog.Builder backAlert = new AlertDialog.Builder(this);
+            backAlert.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
+                    stopService(stop_mService);
+                    List<Trail> trails = DataSupport.findAll(Trail.class);
+                    locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
+                    System.exit(0);
                 }
             });
             backAlert.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -1627,7 +1654,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             backAlert.show();
         }
     }
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         switch (isDrawTrail){
@@ -2026,6 +2052,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             locationManager.removeUpdates(locationListener);
         }catch (SecurityException e){
         }
+        /*if (isDrawTrail == TRAIL_DRAW_TYPE){
+            popBackWindow("Destroy");
+        }else super.onDestroy();*/
         super.onDestroy();
     }
 
