@@ -19,6 +19,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,6 +36,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -293,6 +295,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
         if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.CAMERA);
+        }
+        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.READ_PHONE_STATE);
         }
         if (!permissionList.isEmpty()){
             String[] permissions = permissionList.toArray(new String[permissionList.size()]);
@@ -844,6 +849,31 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return filePath;
     }
 
+    //获取设备IMEI码
+    private String getIMEI(){
+        String deviceId = "";
+        try {
+            TelephonyManager telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+            /*if (Build.VERSION.SDK_INT > 16) deviceId = telephonyManager.getImei();
+            else */
+            deviceId = telephonyManager.getDeviceId();
+            try {
+                String str1 = "3";
+                String str2 = "a";
+                int i1 = Integer.valueOf(str1);
+                int i2 = Integer.valueOf(str2);
+            }catch (NumberFormatException e){
+
+            }
+        }catch (SecurityException e){
+
+        }catch (NullPointerException e){
+
+        }
+
+        return deviceId;
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
@@ -871,6 +901,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
         setTitle("地图列表");
+        //locError("deviceId : " + getIMEI());
         //申请动态权限
         requestAuthority();
         //子floating按钮事件编辑
@@ -920,11 +951,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         new Thread(new Runnable() {
             @Override
             public void run() {
-                    getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
-                    LitePal.getDatabase();
-                    Message message = new Message();
-                    message.what = UPDATE_TEXT;
-                    handler.sendMessage(message);
+                add_max ++;
+                getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
+                LitePal.getDatabase();
+                Message message = new Message();
+                message.what = UPDATE_TEXT;
+                handler.sendMessage(message);
             }
         }).start();
         Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
