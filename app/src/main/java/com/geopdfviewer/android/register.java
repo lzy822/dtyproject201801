@@ -21,7 +21,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class register extends AppCompatActivity {
@@ -34,9 +37,46 @@ public class register extends AppCompatActivity {
     //计算识别码
     private String getPassword(String deviceId){
         String password;
-        password = "l" + deviceId + "ZY";
+        password = "l" + encryption(deviceId) + "ZY";
         Log.w(TAG, "getPassword: " +  password);
         return password;
+    }
+
+    //编码
+    private String encryption(String password){
+        password = password.replace("0", "q");
+        password = password.replace("1", "R");
+        password = password.replace("2", "V");
+        password = password.replace("3", "z");
+        password = password.replace("4", "T");
+        password = password.replace("5", "b");
+        password = password.replace("6", "L");
+        password = password.replace("7", "s");
+        password = password.replace("8", "W");
+        password = password.replace("9", "F");
+        password = password.replace("A", "d");
+        password = password.replace("B", "o");
+        password = password.replace("C", "O");
+        password = password.replace("D", "n");
+        password = password.replace("E", "v");
+        password = password.replace("F", "C");
+        return password;
+    }
+
+    private boolean verifyDate(String endDate){
+        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+        Date nowDate = new Date(System.currentTimeMillis());
+        Date endTimeDate = null;
+        try {
+            if (!endDate.isEmpty()){
+            endTimeDate = df.parse(endDate);
+            }
+        }catch (ParseException e){
+            Toast.makeText(register.this, "发生错误, 请联系我们!", Toast.LENGTH_LONG).show();
+        }
+        if (nowDate.getTime() > endTimeDate.getTime()){
+            return false;
+        }else return true;
     }
 
     //获取设备IMEI码
@@ -47,18 +87,32 @@ public class register extends AppCompatActivity {
             /*if (Build.VERSION.SDK_INT > 16) deviceId = telephonyManager.getImei();
             else */
             deviceId = telephonyManager.getDeviceId();
-            deviceId = deviceId.substring(9);
+            //deviceId = deviceId.substring(9);
             SharedPreferences pref1 = getSharedPreferences("imei", MODE_PRIVATE);
             boolean isLicense = pref1.getBoolean("type", false);
+            String endDate = pref1.getString("endDate", "");
+            Log.w(TAG, "password: " + getPassword(deviceId.substring(9)) );
             Log.w(TAG, "getIMEI: islicense" + Boolean.toString(isLicense) );
+            Log.w(TAG, "endDate: " +  endDate);
             if (isLicense){
+                if (verifyDate(endDate)){
+                Log.w(TAG, "endDate: " +  endDate);
                 Intent intent = new Intent(register.this, select_page.class);
                 startActivity(intent);
                 this.finish();
+                }else {
+                    Log.w(TAG, "see here: " );
+                    SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
+                    editor.putString("mimei", deviceId);
+                    editor.putString("password", getPassword(deviceId.substring(9)));
+                    editor.putBoolean("type", false);
+                    editor.apply();
+                }
             }else {
+                Log.w(TAG, "see here: " );
                 SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
                 editor.putString("mimei", deviceId);
-                editor.putString("password", getPassword(deviceId));
+                editor.putString("password", getPassword(deviceId.substring(9)));
                 editor.putBoolean("type", false);
                 editor.apply();
             }
@@ -115,6 +169,8 @@ public class register extends AppCompatActivity {
                         }else {
                             //getLocation();
                             //initPage();
+                            final String imei = getIMEI();
+                            textView.setText("请求码: " + imei + "(长按复制)");
                         }
                     }
 
@@ -122,6 +178,22 @@ public class register extends AppCompatActivity {
                 break;
             default:
         }
+    }
+
+    //Day:日期字符串例如 2015-3-10  Num:需要减少的天数例如 7
+    public static String getDateStr(String day,int Num) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+        Date nowDate = null;
+        try {
+            nowDate = df.parse(day);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        //如果需要向后计算日期 -改为+
+        Date newDate2 = new Date(nowDate.getTime() + (long)(Num * 24 * 60 * 60 * 1000));
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+        String dateOk = simpleDateFormat.format(newDate2);
+        return dateOk;
     }
 
     @Override
@@ -152,15 +224,32 @@ public class register extends AppCompatActivity {
             public void onClick(View v) {
                 SharedPreferences pref1 = getSharedPreferences("imei", MODE_PRIVATE);
                 String password = pref1.getString("password", "");
+                SimpleDateFormat df2 = new SimpleDateFormat("yyyy年MM月dd日");
+                Date date = new Date(System.currentTimeMillis());
+                String startTime = df2.format(date);
                 Log.w(TAG, "onClick: " + password );
-                if (editText.getText().toString().contentEquals(password) ){
+                String edittxt = editText.getText().toString();
+                if(edittxt.length() >= 9 & edittxt.length() <= 10){
+                Log.w(TAG, "str: " + edittxt.substring(0, edittxt.length() - 2) );
+                if (edittxt.substring(0, edittxt.length() - 1).contentEquals(password) ){
                     SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
                     editor.putBoolean("type", true);
+                    if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("x")){
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", getDateStr(startTime, 7));
+                    }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("X")){
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", getDateStr(startTime, 180));
+                    }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("y")){
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", getDateStr(startTime, 366));
+                    }
                     editor.apply();
                     Intent intent = new Intent(register.this, select_page.class);
                     startActivity(intent);
                     register.this.finish();
                 }else Toast.makeText(MyApplication.getContext(), "请联系我们获取授权码", Toast.LENGTH_LONG).show();
+            }
             }
         });
         /*Intent intent = new Intent(register.this, select_page.class);
