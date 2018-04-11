@@ -1,9 +1,14 @@
 package com.geopdfviewer.android;
 
+import android.Manifest;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +21,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class register extends AppCompatActivity {
     EditText editText;
     Button button1;
@@ -26,7 +34,7 @@ public class register extends AppCompatActivity {
     //计算识别码
     private String getPassword(String deviceId){
         String password;
-        password = "l" + deviceId.substring(8) + "Zy";
+        password = "l" + deviceId + "ZY";
         Log.w(TAG, "getPassword: " +  password);
         return password;
     }
@@ -39,6 +47,7 @@ public class register extends AppCompatActivity {
             /*if (Build.VERSION.SDK_INT > 16) deviceId = telephonyManager.getImei();
             else */
             deviceId = telephonyManager.getDeviceId();
+            deviceId = deviceId.substring(9);
             SharedPreferences pref1 = getSharedPreferences("imei", MODE_PRIVATE);
             boolean isLicense = pref1.getBoolean("type", false);
             Log.w(TAG, "getIMEI: islicense" + Boolean.toString(isLicense) );
@@ -66,11 +75,61 @@ public class register extends AppCompatActivity {
         return deviceId;
     }
 
+    private void requestAuthority(){
+        List<String> permissionList = new ArrayList<>();
+        if (ContextCompat.checkSelfPermission(register.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (ContextCompat.checkSelfPermission(register.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+        if (ContextCompat.checkSelfPermission(register.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.RECORD_AUDIO);
+        }
+        if (ContextCompat.checkSelfPermission(register.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.CAMERA);
+        }
+        if (ContextCompat.checkSelfPermission(register.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.READ_PHONE_STATE);
+        }
+        if (!permissionList.isEmpty()){
+            String[] permissions = permissionList.toArray(new String[permissionList.size()]);
+            ActivityCompat.requestPermissions(register.this, permissions, 118);
+        }else {
+            //getLocation();
+            //initPage();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 118:
+                if (grantResults.length > 0) {
+                    for (int result : grantResults) {
+                        if (result != PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
+                            finish();
+                            return;
+                        }else {
+                            //getLocation();
+                            //initPage();
+                        }
+                    }
+
+                }
+                break;
+            default:
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        //申请动态权限
+        requestAuthority();
         tb = (Toolbar) findViewById(R.id.toolbar6) ;
         setSupportActionBar(tb);
         getSupportActionBar().setTitle("授权页面");
@@ -78,7 +137,7 @@ public class register extends AppCompatActivity {
         button1 = (Button) findViewById(R.id.ok_button);
         textView = (TextView) findViewById(R.id.ic_text);
         final String imei = getIMEI();
-        textView.setText("本机识别号: " + imei + "(长按复制)");
+        textView.setText("请求码: " + imei + "(长按复制)");
         textView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {

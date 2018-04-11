@@ -875,35 +875,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 118:
-                if (grantResults.length > 0) {
-                    for (int result : grantResults) {
-                        if (result != PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
-                            finish();
-                            return;
-                        }else {
-                            getLocation();
-                            initPage();
-                        }
-                    }
-
-                }
-                break;
-            default:
-        }
-    }
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
         setTitle("地图列表");
+        //获取定位信息
+        getLocation();
         //locError("deviceId : " + getIMEI());
-        //申请动态权限
-        requestAuthority();
         //子floating按钮事件编辑
         bt2 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.fab02);
         bt2.setOnClickListener(new View.OnClickListener() {
