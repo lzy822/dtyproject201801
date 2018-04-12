@@ -24,6 +24,7 @@ import android.widget.Toast;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -107,6 +108,7 @@ public class register extends AppCompatActivity {
                     editor.putString("password", getPassword(deviceId.substring(9)));
                     editor.putBoolean("type", false);
                     editor.apply();
+                    Toast.makeText(register.this, "授权码已经过期, 请重新获取", Toast.LENGTH_LONG).show();
                 }
             }else {
                 Log.w(TAG, "see here: " );
@@ -191,9 +193,24 @@ public class register extends AppCompatActivity {
         }
         //如果需要向后计算日期 -改为+
         Date newDate2 = new Date(nowDate.getTime() + (long)(Num * 24 * 60 * 60 * 1000));
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
-        String dateOk = simpleDateFormat.format(newDate2);
+        String dateOk = df.format(newDate2);
         return dateOk;
+    }
+
+    public static String datePlus(String day, int days) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+        Date base = null;
+        try {
+            base = df.parse(day);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(base);
+        cal.add(Calendar.DATE, days);
+        String dateOK = df.format(cal.getTime());
+
+        return dateOK;
     }
 
     @Override
@@ -227,6 +244,7 @@ public class register extends AppCompatActivity {
                 SimpleDateFormat df2 = new SimpleDateFormat("yyyy年MM月dd日");
                 Date date = new Date(System.currentTimeMillis());
                 String startTime = df2.format(date);
+                Log.w(TAG, "startTime: " + startTime );
                 Log.w(TAG, "onClick: " + password );
                 String edittxt = editText.getText().toString();
                 if(edittxt.length() >= 9 & edittxt.length() <= 10){
@@ -236,13 +254,13 @@ public class register extends AppCompatActivity {
                     editor.putBoolean("type", true);
                     if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("x")){
                         editor.putString("startDate", startTime);
-                        editor.putString("endDate", getDateStr(startTime, 7));
+                        editor.putString("endDate", datePlus(startTime, 7));
                     }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("X")){
                         editor.putString("startDate", startTime);
-                        editor.putString("endDate", getDateStr(startTime, 180));
+                        editor.putString("endDate", datePlus(startTime, 180));
                     }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("y")){
                         editor.putString("startDate", startTime);
-                        editor.putString("endDate", getDateStr(startTime, 366));
+                        editor.putString("endDate", datePlus(startTime, 366));
                     }
                     editor.apply();
                     Intent intent = new Intent(register.this, select_page.class);

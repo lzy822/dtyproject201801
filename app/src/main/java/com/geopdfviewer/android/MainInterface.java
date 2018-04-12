@@ -865,14 +865,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
                                     float mmin_long = (pt_lt.y + pt_lb.y) / 2;
                                     float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                                    if (mmax_lat < cs_top & mmin_lat > cs_bottom & mmax_long < cs_right & mmin_long > cs_left){
+                                    if (verifyArea(mmax_lat, mmin_lat, mmax_long, mmin_long)){
                                         float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        if (j != num_map){
                                         if (thedelta == 0) {
                                             thedelta = thedelta1;
                                             thenum = j;
-                                        }else if (thedelta1 < thedelta) {
+                                        }
+                                        if (thedelta1 < thedelta) {
                                             thedelta = thedelta1;
                                             thenum = j;
+                                        }
                                         }
                                         locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
                                         /*num_map1 = num_map;
@@ -884,14 +887,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
                                     }
                                 }
-                                if (thenum != 0){
-                                num_map1 = num_map;
-                                getInfo(thenum);
-                                toolbar.setTitle(pdfFileName);
-                                getBitmap();
-                                displayFromFile(uri);
-                                isAutoTrans = false;
-                                autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                double deltaK;
+                                //deltaK = (max_lat - min_lat) * 0.02;
+                                deltaK = 0.1;
+                                if (thenum != num_map & thenum != 0 & thedelta < deltaK){
+                                    num_map1 = num_map;
+                                    getInfo(thenum);
+                                    toolbar.setTitle(pdfFileName);
+                                    getBitmap();
+                                    pdfView.recycle();
+                                    displayFromFile(uri);
+                                    isAutoTrans = false;
+                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                 }
                             }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
                         }else if (c_zoom <= 2 & isAutoTrans){
@@ -947,7 +954,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         if (thedelta == 0) {
                                             thedelta = thedelta1;
                                             thenum = j;
-                                        }else if (thedelta1 < thedelta) {
+                                        }
+                                        if (thedelta1 < thedelta) {
                                             thedelta = thedelta1;
                                             thenum = j;
                                         }
@@ -960,6 +968,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     getInfo(thenum);
                                     toolbar.setTitle(pdfFileName);
                                     getBitmap();
+                                    pdfView.recycle();
                                     displayFromFile(uri);
                                     isAutoTrans = false;
                                     autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
@@ -1136,15 +1145,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
                                     float mmin_long = (pt_lt.y + pt_lb.y) / 2;
                                     float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                                    if (mmax_lat < cs_top & mmin_lat > cs_bottom & mmax_long < cs_right & mmin_long > cs_left){
+                                    if (verifyArea(mmax_lat, mmin_lat, mmax_long, mmin_long)){
                                         float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        locError("find delta1: " + Float.toString(thedelta1));
+                                        locError("find delta: " + Float.toString(thedelta));
+                                        locError("find num: " + Integer.toString(j));
+                                        if (j != num_map){
                                         if (thedelta == 0) {
                                             thedelta = thedelta1;
                                             thenum = j;
-                                        }else if (thedelta1 < thedelta) {
+                                        }
+                                        if (thedelta1 < thedelta) {
                                             thedelta = thedelta1;
                                             thenum = j;
-                                        }
+                                        }}
                                         locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
                                         /*num_map1 = num_map;
                                         getInfo(j);
@@ -1155,11 +1169,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
                                     }
                                 }
-                                if (thenum != 0){
+                                double deltaK;
+                                //deltaK = (max_lat - min_lat) * 0.02;
+                                deltaK = 0.1;
+                                if (thenum != num_map & thenum != 0 & thedelta < deltaK){
                                     num_map1 = num_map;
                                     getInfo(thenum);
                                     toolbar.setTitle(pdfFileName);
                                     getBitmap();
+                                    pdfView.recycle();
                                     displayFromFile(uri);
                                     isAutoTrans = false;
                                     autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
@@ -1230,6 +1248,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     getInfo(thenum);
                                     toolbar.setTitle(pdfFileName);
                                     getBitmap();
+                                    pdfView.recycle();
                                     displayFromFile(uri);
                                     isAutoTrans = false;
                                     autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
@@ -1364,6 +1383,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //locError(Float.toString(m_top_x) + "&&" + Float.toString(m_top_y));
         //locError(Float.toString(b_top_x) + "&&" + Float.toString(b_top_y));
         //locError(Float.toString(b_bottom_x) + "&&" + Float.toString(b_bottom_y));
+    }
+
+    private boolean verifyArea(double mmax_lat, double mmin_lat, double mmax_long, double mmin_long){
+        double deltaLatK, deltaLongK;
+        deltaLatK = (max_lat - min_lat) * 0.014;
+        deltaLongK = (max_long - min_long) * 0.014;
+        if ((mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmin_long - deltaLongK) < cs_left) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
+        else return false;
     }
 
     //获取文件读取权限
@@ -1742,7 +1773,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             cs_left = (float)(( Math.abs(pdfView.getCurrentXOffset()) / current_pagewidth) * w + min_long);
             cs_right = (float)(( viewer_width - pdfView.getCurrentXOffset()) / current_pagewidth * w + min_long);
         }
-        //locError(Float.toString(cs_top) + "%" + Float.toString(cs_bottom) + "%" + Float.toString(cs_left) + "%" + Float.toString(cs_right));
+        locError(Float.toString(cs_top) + "%" + Float.toString(cs_bottom) + "%" + Float.toString(cs_left) + "%" + Float.toString(cs_right));
         //cs_top = pdfView.getCurrentYOffset()
     }
 
