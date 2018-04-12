@@ -98,7 +98,7 @@ public class mPOIobjAdapter extends RecyclerView.Adapter<mPOIobjAdapter.ViewHold
             holder.POIImage.setImageResource(R.drawable.ic_pin_yellow1);
         }
         String data;
-        data = "POI名称: " + poi.getM_name() + "\n" + "描述: " + poi.getM_description() + "\n" + "时间: " + poi.getM_time() + "\n" + "有" +
+        data = "兴趣点名称: " + poi.getM_name() + "\n" + "描述: " + poi.getM_description() + "\n" + "时间: " + poi.getM_time() + "\n" + "有" +
                 poi.getM_tapenum() + "个录音, 有" + poi.getM_photonum() + "个图片";
         holder.POIName.setText(data);
     }

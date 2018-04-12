@@ -160,13 +160,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
                 menu.findItem(R.id.delete).setVisible(false);
                 menu.findItem(R.id.mmcancel).setVisible(false);
-                menu.findItem(R.id.showinfo).setVisible(false);
+                menu.findItem(R.id.showinfo).setVisible(true);
                 break;
             case 0:
                 toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
                 menu.findItem(R.id.delete).setVisible(true);
                 menu.findItem(R.id.mmcancel).setVisible(true);
-                menu.findItem(R.id.showinfo).setVisible(true);
                 break;
         }
         return super.onPrepareOptionsMenu(menu);
@@ -218,10 +217,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
             case  R.id.showinfo:
-                if (selectedNum != 0){
+                //if (selectedNum != 0){
                     showInfo(selectedNum);
-                    resetView();
-                }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
+                    //resetView();
+                //}else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
                 break;
         }
         return true;
@@ -229,9 +228,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private void showInfo(int num){
         refreshRecycler();
-        Intent intent = new Intent(select_page.this, info_page.class);
+        /*Intent intent = new Intent(select_page.this, info_page.class);
         intent.putExtra("extra_data", getWKT(num));
-        startActivity(intent);
+        startActivity(intent);*/
     }
 
     private String getWKT(int num) {
