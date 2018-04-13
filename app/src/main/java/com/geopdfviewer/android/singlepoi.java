@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -98,7 +99,8 @@ public class singlepoi extends AppCompatActivity {
             }
         });
         TextView textView_loc = (TextView) findViewById(R.id.txt_locshow);
-        textView_loc.setText(Float.toString(poi.getX()) + ", " + Float.toString(poi.getY()));
+        DecimalFormat df = new DecimalFormat("0.0000");
+        textView_loc.setText(df.format(poi.getX()) + ", " + df.format(poi.getY()));
         ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
         addphoto.setOnClickListener(new View.OnClickListener() {
             @Override

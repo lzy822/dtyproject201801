@@ -17,6 +17,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -97,6 +101,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     PDFView pdfView;
     LinearLayout linearLayout;
     TextView textView;
+    TextView scaleShow;
 
     //声明bts容器
     List<bt> bts;
@@ -246,6 +251,35 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录是否开始绘制轨迹
     private int isDrawTrail = NONE_DRAW_TYPE;
+
+    //记录点选的坐标位置
+    private float locLatForTap, locLongForTap;
+
+    //记录是否渲染完文件
+    private boolean isRomance = false;
+
+    //初始化传感器管理器
+    private SensorManager sensorManager;
+    private float predegree = 0;
+    private float degree = 0;
+    private SensorEventListener listener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (degree != 0 & predegree != degree & Math.abs(degree - predegree) > 10){
+                predegree = degree;
+                if (isRomance){
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+            degree = event.values[0];
+            locError("predegree: " + Float.toString(predegree) + " degree: " + Float.toString(degree));
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -763,6 +797,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         locError("zoom: " + Float.toString(c_zoom));
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
+                        scaleShow.setText(Double.toString((max_long - min_long) / pageWidth * 100));
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
 
@@ -774,6 +809,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y, 23, paint);
                             canvas.drawCircle(pt.x, pt.y, 20, paint5);
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
+                            canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(degree)), (float)(pt.y + 50 * Math.cos(degree)), paint6);
+                            //canvas.drawArc(pt.x - 100, pt.y + 100, pt.x + 100, pt.y - 100, degree - 15, 30, false, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
                             List<Trail> trails = DataSupport.findAll(Trail.class);
@@ -805,11 +842,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     if (poi.getPhotonum() == 0){
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
+                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                     }else {
                                         List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
@@ -818,7 +855,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                 }
                                             }
                                         }else {
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
@@ -994,6 +1031,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
         toolbar.setTitle(pdfFileName);
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                isRomance = true;
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(task, 2500);
     }
 
     private void displayFromFile(String filePath) {
@@ -1048,6 +1093,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         locError("zoom: " + Float.toString(c_zoom));
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
+                        scaleShow.setText(Double.toString((max_long - min_long) / pageWidth * 100));
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
@@ -1058,6 +1104,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y, 23, paint);
                             canvas.drawCircle(pt.x, pt.y, 20, paint5);
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
+                            /*if (predegree >= 0 & predegree < 90){
+                                locError("您当前处于第一象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(predegree)), (float)(pt.y - 50 * Math.cos(predegree)), paint6);
+                            }else if (predegree >= 90 & predegree < 180){
+                                locError("您当前处于第二象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(180 - predegree)), (float)(pt.y + 50 * Math.cos(180 - predegree)), paint6);
+                            }else if (predegree >= 180 & predegree < 270){
+                                locError("您当前处于第三象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(predegree - 180)), (float)(pt.y + 50 * Math.cos(predegree - 180)), paint6);
+                            }else {
+                                locError("您当前处于第四象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(360 - predegree)), (float)(pt.y - 50 * Math.cos(360 - predegree)), paint6);
+                            }*/
+                            canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
                             List<Trail> trails = DataSupport.findAll(Trail.class);
@@ -1090,11 +1154,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     if (poi.getPhotonum() == 0){
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
+                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                     }else {
                                         List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
@@ -1104,7 +1168,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                 }
                                             }
                                         }else {
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
@@ -1391,6 +1455,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .spacing(10) // in dp
                 .onPageError(this)
                 .load();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                isRomance = true;
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(task, 2500);
     }
 
     //设置当前地图切换查询的容许误差值
@@ -1822,22 +1894,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + page_height) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + page_width)) {
                 pt.x = (float)(max_lat - (yyyy) / current_pageheight * ( max_lat - min_lat));
                 pt.y = (float)(( xxxx) / current_pagewidth * ( max_long - min_long) + min_long);
+                locLatForTap = pt.x;
+                locLongForTap = pt.y;
                 if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
-                    textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
+                    textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
                 }else if (isCoordinateType == COORDINATE_BLH_TYPE){
-                    textView.setText(Integer.toString((int)pt.x) + "°" + Integer.toString((int)(( pt.x - (int)pt.x) * 60)) + "′" + Float.toString((( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60)) * 60) + "″;" + Integer.toString((int)pt.y) + "°" + Integer.toString((int)(( pt.y - (int)pt.y) * 60)) + "′" + Float.toString((( pt.y - (int)pt.y) * 60 - (int)(( pt.y - (int)pt.y) * 60)) * 60) + "″");
-                }else textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
-            } else textView.setText("点击位置在区域之外");
+                    textView.setText(Integer.toString((int)locLatForTap) + "°" + Integer.toString((int)(( locLatForTap - (int)locLatForTap) * 60)) + "′" + Integer.toString((int)((( locLatForTap - (int)locLatForTap) * 60 - (int)(( locLatForTap - (int)locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int)locLongForTap) + "°" + Integer.toString((int)(( locLongForTap - (int)locLongForTap) * 60)) + "′" + Integer.toString((int)((( locLongForTap - (int)locLongForTap) * 60 - (int)(( locLongForTap - (int)locLongForTap) * 60)) * 60)) + "″");
+                }else textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
+            } else {
+                textView.setText("点击位置在区域之外");
+            }
         } else {
             xxxx = pt.x - (screen_width - viewer_width);
             yyyy = pt.y - (screen_height - viewer_height);
             pt.x = (float)(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat));
             pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
+            locLatForTap = pt.x;
+            locLongForTap = pt.y;
             if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
-                textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
+                textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
             }else if (isCoordinateType == COORDINATE_BLH_TYPE){
-                textView.setText(Integer.toString((int)pt.x) + "°" + Integer.toString((int)(( pt.x - (int)pt.x) * 60)) + "′" + Float.toString((( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60)) * 60) + "″;" + Integer.toString((int)pt.y) + "°" + Integer.toString((int)(( pt.y - (int)pt.y) * 60)) + "′" + Float.toString((( pt.y - (int)pt.y) * 60 - (int)(( pt.y - (int)pt.y) * 60)) * 60) + "″");
-            }else textView.setText(df.format(pt.x) + ";" + df.format(pt.y));
+                textView.setText(Integer.toString((int)locLatForTap) + "°" + Integer.toString((int)(( locLatForTap - (int)locLatForTap) * 60)) + "′" + Integer.toString((int)((( locLatForTap - (int)locLatForTap) * 60 - (int)(( locLatForTap - (int)locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int)locLongForTap) + "°" + Integer.toString((int)(( locLongForTap - (int)locLongForTap) * 60)) + "′" + Integer.toString((int)((( locLongForTap - (int)locLongForTap) * 60 - (int)(( locLongForTap - (int)locLongForTap) * 60)) * 60)) + "″");
+            }else {
+                textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
+            }
             locError("常规 : " + df.format(pt.x) + "; " + df.format(pt.y));
             locError("度分秒 : " + Integer.toString((int)pt.x) + "°" + Integer.toString((int)( pt.x - (int)pt.x) * 60) + "′" + Float.toString(( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60) * 60));
         }
@@ -2107,6 +2187,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        //初始化比例尺信息
+        scaleShow = (TextView) findViewById(R.id.scale);
+        //获取传感器管理器系统服务
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
@@ -2127,20 +2211,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                DecimalFormat df = new DecimalFormat("0.0000");
                 String str = (String) textView.getText();
                 if (!str.contains("点击位置在区域之外") & !str.contains("在这里显示坐标值")){
                 if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
-                    String[] strs = str.split(";");
-                    PointF pt = new PointF(Float.valueOf(strs[0]), Float.valueOf(strs[1]));
-                    textView.setText(Integer.toString((int)pt.x) + "°" + Integer.toString((int)(( pt.x - (int)pt.x) * 60)) + "′" + Float.toString((( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60)) * 60) + "″;" + Integer.toString((int)pt.y) + "°" + Integer.toString((int)(( pt.y - (int)pt.y) * 60)) + "′" + Float.toString((( pt.y - (int)pt.y) * 60 - (int)(( pt.y - (int)pt.y) * 60)) * 60) + "″");
+                    //String[] strs = str.split(";");
+                    //PointF pt = new PointF(Float.valueOf(strs[0]), Float.valueOf(strs[1]));
+                    textView.setText(Integer.toString((int)locLatForTap) + "°" + Integer.toString((int)(( locLatForTap - (int)locLatForTap) * 60)) + "′" + Integer.toString((int)((( locLatForTap - (int)locLatForTap) * 60 - (int)(( locLatForTap - (int)locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int)locLongForTap) + "°" + Integer.toString((int)(( locLongForTap - (int)locLongForTap) * 60)) + "′" + Integer.toString((int)((( locLongForTap - (int)locLongForTap) * 60 - (int)(( locLongForTap - (int)locLongForTap) * 60)) * 60)) + "″");
                     isCoordinateType = COORDINATE_BLH_TYPE;
                     locError(Integer.toString(textView.getHeight()));
                 }else if (isCoordinateType == COORDINATE_BLH_TYPE){
-                    String[] strs = str.split(";");
+                    //String[] strs = str.split(";");
                     //locError(strs[0] + "还有: " + strs[1]);
-                    PointF pt = new PointF(Float.valueOf(strs[0].substring(0, strs[0].indexOf("°"))) + (Float.valueOf(strs[0].substring(strs[0].indexOf("°") + 1, strs[0].indexOf("′"))) / 60) + (Float.valueOf(strs[0].substring(strs[0].indexOf("′") + 1, strs[0].indexOf("″"))) / 3600), Float.valueOf(strs[1].substring(0, strs[1].indexOf("°"))) + (Float.valueOf(strs[1].substring(strs[1].indexOf("°") + 1, strs[1].indexOf("′"))) / 60) + (Float.valueOf(strs[1].substring(strs[1].indexOf("′") + 1, strs[1].indexOf("″"))) / 3600));
-                    textView.setText(Float.toString(pt.x) + "; " + Float.toString(pt.y));
+                    //PointF pt = new PointF(Float.valueOf(strs[0].substring(0, strs[0].indexOf("°"))) + (Float.valueOf(strs[0].substring(strs[0].indexOf("°") + 1, strs[0].indexOf("′"))) / 60) + (Float.valueOf(strs[0].substring(strs[0].indexOf("′") + 1, strs[0].indexOf("″"))) / 3600), Float.valueOf(strs[1].substring(0, strs[1].indexOf("°"))) + (Float.valueOf(strs[1].substring(strs[1].indexOf("°") + 1, strs[1].indexOf("′"))) / 60) + (Float.valueOf(strs[1].substring(strs[1].indexOf("′") + 1, strs[1].indexOf("″"))) / 3600));
+                    textView.setText(df.format(locLatForTap) + "; " + df.format(locLongForTap));
                     isCoordinateType = COORDINATE_DEFAULT_TYPE;
                     locError(Integer.toString(textView.getHeight()));
                 }
@@ -2539,6 +2623,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();*/
         //////////////////////////////////////////////////////////////////
+        //注册传感器监听器
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    protected void onPause() {
+        sensorManager.unregisterListener(listener);
+        super.onPause();
     }
 
     @Override
