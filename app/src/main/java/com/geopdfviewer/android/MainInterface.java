@@ -53,9 +53,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.github.barteksc.pdfviewer.PDFView;
@@ -67,6 +69,8 @@ import com.github.barteksc.pdfviewer.listener.OnRenderListener;
 import com.github.barteksc.pdfviewer.listener.OnTapListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
+import com.github.clans.fab.FloatingActionButton;
+
 import org.litepal.crud.DataSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -219,6 +223,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     com.github.clans.fab.FloatingActionButton button3;
     com.github.clans.fab.FloatingActionButton button4;
     com.github.clans.fab.FloatingActionButton button5;
+    com.github.clans.fab.FloatingActionButton whiteblank;
+
+    //记录是否开启白板功能
+    private boolean isOpenWhiteBlank = false;
 
     private double w, h;
 
@@ -280,6 +288,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         }
     };
+
+    //记录比例尺格式
+    DecimalFormat scale_df;
+
+    //记录总view
+    RelativeLayout rl;
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -654,6 +668,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return bitmap;
     }
 
+    //pdfView的ontouchlistener功能监控
+    private void onTouchListenerForView(){
+        if (isOpenWhiteBlank){
+            rl.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    locError("RawX = " + event.getRawX() + "; RawY = " + event.getRawY());
+                    return true;
+                }
+            });
+        }else rl.setOnTouchListener(null);
+    }
+
     //显示GeoPDF
     private void displayFromAsset(String assetFileName) {
         pdfFileName = assetFileName;
@@ -797,10 +824,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         locError("zoom: " + Float.toString(c_zoom));
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
-                        scaleShow.setText(Double.toString((max_long - min_long) / pageWidth * 100));
+                        getCurrentScreenLoc();
+                        double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
+                        double scale_distance = algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
+                        scale_distance = scale_distance * 2.53;
+                        scaleShow.setText(scale_df.format(scale_distance) + "米");
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
-
+                        /*if (isOpenWhiteBlank){
+                            //白板功能监控
+                            onTouchListenerForView();
+                        }*/
                         parseAndrawMessure(messure_pts, canvas);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
@@ -867,7 +901,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     }
                                 }}
                         }
-                        getCurrentScreenLoc();
                         if ((c_zoom >= 8) & isAutoTrans & (isZoom == ZOOM_IN || c_zoom == 10)){
                             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
                             int size = pref1.getInt("num", 0);
@@ -1093,7 +1126,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         locError("zoom: " + Float.toString(c_zoom));
                         current_pageheight = pageHeight;
                         current_pagewidth = pageWidth;
-                        scaleShow.setText(Double.toString((max_long - min_long) / pageWidth * 100));
+                        getCurrentScreenLoc();
+                        double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
+                        double scale_distance = algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
+                        scale_distance = scale_distance * 2.53;
+                        scaleShow.setText(scale_df.format(scale_distance) + "米");
+                        /*if (isOpenWhiteBlank){
+                        //白板功能监控
+                        onTouchListenerForView();
+                        }*/
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
                         getK(pageWidth, pageHeight);
                         getStretchRatio(pageWidth, pageHeight);
@@ -1181,7 +1222,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     }
                                 }}
                         }
-                        getCurrentScreenLoc();
                         if ((c_zoom >= 8) & isAutoTrans & (isZoom == ZOOM_IN || c_zoom == 10)){
                             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
                             int size = pref1.getInt("num", 0);
@@ -1773,6 +1813,59 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
+    private void showPopueWindowForWhiteblank(){
+        final View popView = View.inflate(this,R.layout.popupwindow_whiteblank,null);
+
+        FloatingActionButton popwhiteblank = (FloatingActionButton) popView.findViewById(R.id.whiteblank_pop);
+        FrameLayout frameLayout = (FrameLayout) popView.findViewById(R.id.fml_pop);
+        //获取屏幕宽高
+        final int weight = getResources().getDisplayMetrics().widthPixels;
+        final int height = getResources().getDisplayMetrics().heightPixels - 60;
+
+        final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(true);
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow OnTouchListener
+        frameLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                locError("RawX = " + event.getRawX() + "; RawY = " + event.getRawY());
+                /*if (event.getRawY() >= height - 100 & event.getRawY() <= height & event.getRawX() >= 50 & event.getRawX() <= 150){
+                    popupWindow.dismiss();
+                    whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
+                }*/
+                return true;
+            }
+        });
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 1f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.NO_GRAVITY,0,0);
+        popwhiteblank.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+                isOpenWhiteBlank = false;
+                whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
+                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                    toolbar.setTitle("轨迹记录中");
+                }else toolbar.setTitle(pdfFileName);
+            }
+        });
+    }
+
     //获取音频文件路径
     public static String getRealPathFromUriForAudio(Context context, Uri contentUri) {
         Cursor cursor = null;
@@ -2187,6 +2280,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        //初始化View
+        rl = (RelativeLayout) findViewById(R.id.mainView);
+        //初始化白板按钮
+        whiteblank = (FloatingActionButton) findViewById(R.id.whiteblank);
+        whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
+        whiteblank.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isOpenWhiteBlank){
+                    isOpenWhiteBlank = true;
+                    whiteblank.setImageResource(R.drawable.ic_cancel_black_24dp);
+                    if (isDrawTrail == TRAIL_DRAW_TYPE){
+                        toolbar.setTitle("正在进行白板绘图(轨迹记录中)");
+                    }else toolbar.setTitle("正在进行白板绘图");
+                    showPopueWindowForWhiteblank();
+                }else {
+                    isOpenWhiteBlank = false;
+                    whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
+                }
+            }
+        });
+        //初始化比例尺格式信息
+        scale_df = new DecimalFormat("0.0");
         //初始化比例尺信息
         scaleShow = (TextView) findViewById(R.id.scale);
         //获取传感器管理器系统服务

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:fab="http://schemas.android.com/apk/res-auto">
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
 <LinearLayout
     android:orientation="vertical"
@@ -123,49 +125,71 @@
         android:textColor="@color/black"
         android:layout_gravity="center"/>
     </LinearLayout>
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/whiteblank"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentBottom="true"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_brush_black_24dp"
+        fab:fab_colorNormal="#F50057"
+        fab:fab_colorPressed="#E8004A"
+        fab:fab_colorRipple="#C20024"
+        fab:fab_elevationCompat="6dp"
+        fab:fab_shadowColor="#000"
+        fab:fab_size="mini" />
+
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fam"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:paddingRight="10dp"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        fab:menu_labels_ellipsize="end"
-        fab:menu_labels_singleLine="true"
+        android:paddingRight="10dp"
         fab:menu_backgroundColor="#ccffffff"
-        fab:menu_fab_label="返回">
+        fab:menu_fab_label="返回"
+        fab:menu_labels_ellipsize="end"
+        fab:menu_labels_singleLine="true">
+
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addTape"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_label="添加录音"/>
+            fab:fab_label="添加录音"
+            fab:fab_size="mini" />
+
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_label="添加照片"/>
+            fab:fab_label="添加照片"
+            fab:fab_size="mini" />
+
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/lochere"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_label="定位"/>
+            fab:fab_label="定位"
+            fab:fab_size="mini" />
+
         <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/restorezoom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_label="重置"/>
+            android:id="@+id/restorezoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_label="重置"
+            fab:fab_size="mini" />
+
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/messuredistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_size="mini"
-            fab:fab_label="测量"/>
+            fab:fab_label="测量"
+            fab:fab_size="mini" />
     </com.github.clans.fab.FloatingActionMenu>
 
-</FrameLayout>
+</RelativeLayout>
