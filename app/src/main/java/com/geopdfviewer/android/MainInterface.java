@@ -60,6 +60,11 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnDrawListener;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
@@ -292,8 +297,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //记录比例尺格式
     DecimalFormat scale_df;
 
-    //记录总view
-    RelativeLayout rl;
+    //记录上一个绘图点
+    PointF pt_last;
+
+    //记录当前绘图点
+    PointF pt_current;
+
+
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -637,6 +647,204 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
+    //解析白板字符串并绘制
+    private void parseAndrawLinesforWhiteBlank(Canvas canvas){
+        int size = geometry_whiteBlanks.size();
+        for (int k = 0; k < size; k++){
+            locError("geometry: " + geometry_whiteBlanks.get(k).getM_lines());
+            Paint paint7 = new Paint();
+            paint7.setStrokeWidth(10);
+            paint7.setColor(geometry_whiteBlanks.get(k).getM_color());
+            paint7.setStyle(Paint.Style.STROKE);
+        if (isWhiteBlank & !geometry_whiteBlanks.get(k).getM_lines().isEmpty()) {
+            geometry_whiteBlanks.get(k).setM_lines(geometry_whiteBlanks.get(k).getM_lines());
+            String[] pts = geometry_whiteBlanks.get(k).getM_lines().split(" ");
+            float[] mpts;
+            if (pts.length <= 4 & pts.length > 3) {
+                mpts = new float[pts.length];
+                for (int i = 0; i < pts.length; i++) {
+                    mpts[i] = Float.valueOf(pts[i]);
+                }
+                for (int i = 0; i < pts.length; i++) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                for (int i = 0; i < pts.length; i = i + 4) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
+                    PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
+                }
+                for (int i = 0; i < pts.length; i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                    PointF pt11 = getPixLocFromGeoL(xx);
+                    mpts[i] = pt11.x;
+                    mpts[i + 1] = pt11.y;
+                }
+                for (int i = 0; i < pts.length; i++) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                locError(geometry_whiteBlanks.get(k).getM_lines());
+                locError("mpts : " + Integer.toString(mpts.length));
+                canvas.drawLines(mpts, paint7);
+            } else if (pts.length > 4) {
+                mpts = new float[pts.length * 2 - 4];
+                locError("pts.length * 2 - 4 : " + Integer.toString(pts.length * 2 - 4));
+                for (int i = 0, j = 0; i < (pts.length * 2 - 4) || j < pts.length; j = j + 2) {
+                    if (j == 0 || i == (pts.length * 2 - 6)) {
+                        mpts[i] = Float.valueOf(pts[j]);
+                        mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                        i = i + 2;
+                        locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                    } else {
+                        mpts[i] = Float.valueOf(pts[j]);
+                        mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                        mpts[i + 2] = Float.valueOf(pts[j]);
+                        mpts[i + 3] = Float.valueOf(pts[j + 1]);
+                        i = i + 4;
+                        locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                    }
+
+                }
+
+                for (int i = 0; i < pts.length - 2; i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
+                    PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
+                    distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                }
+                for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                    PointF pt11 = getPixLocFromGeoL(xx);
+                    mpts[i] = pt11.x;
+                    mpts[i + 1] = pt11.y;
+                }
+                for (int i = 0; i < pts.length; i++) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                locError(geometry_whiteBlanks.get(k).getM_lines());
+                locError("mpts : " + Integer.toString(mpts.length));
+                canvas.drawLines(mpts, paint7);
+            } else {
+                mpts = new float[pts.length];
+            }
+
+
+        /*PointF xx = new PointF(mpts[0], mpts[1]);
+        PointF yy = new PointF(mpts[2], mpts[3]);
+        PointF pt11 = getPixLocFromGeoL(xx);
+        PointF pt22 = getPixLocFromGeoL(yy);
+        mpts[0] = pt11.x;
+        mpts[1] = pt11.y;
+        mpts[2] = pt22.x;
+        mpts[3] = pt22.y;*/
+
+
+            //canvas.drawLine(mpts[0], mpts[1], mpts[2], mpts[3], paint6);
+        }
+        }
+    }
+
+    //解析白板字符串并绘制1
+    private void parseAndrawLinesforWhiteBlank(String mmessure_pts, Canvas canvas){
+            locError("geometry: " + mmessure_pts);
+            Paint paint7 = new Paint();
+            paint7.setStrokeWidth(10);
+            paint7.setColor(color_Whiteblank);
+            paint7.setStyle(Paint.Style.STROKE);
+            if (isWhiteBlank & !mmessure_pts.isEmpty()) {
+                mmessure_pts = mmessure_pts.trim();
+                String[] pts = mmessure_pts.split(" ");
+                float[] mpts;
+                if (pts.length <= 4 & pts.length > 3) {
+                    mpts = new float[pts.length];
+                    for (int i = 0; i < pts.length; i++) {
+                        mpts[i] = Float.valueOf(pts[i]);
+                    }
+                    for (int i = 0; i < pts.length; i++) {
+                        locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                    }
+                    for (int i = 0; i < pts.length; i = i + 4) {
+                        //mpts[i] = Float.valueOf(pts[i]);
+                        PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
+                        PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
+                    }
+                    for (int i = 0; i < pts.length; i = i + 2) {
+                        //mpts[i] = Float.valueOf(pts[i]);
+                        PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                        PointF pt11 = getPixLocFromGeoL(xx);
+                        mpts[i] = pt11.x;
+                        mpts[i + 1] = pt11.y;
+                    }
+                    for (int i = 0; i < pts.length; i++) {
+                        locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                    }
+                    //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                    locError(mmessure_pts);
+                    locError("mpts : " + Integer.toString(mpts.length));
+                    canvas.drawLines(mpts, paint7);
+                } else if (pts.length > 4) {
+                    mpts = new float[pts.length * 2 - 4];
+                    locError("pts.length * 2 - 4 : " + Integer.toString(pts.length * 2 - 4));
+                    for (int i = 0, j = 0; i < (pts.length * 2 - 4) || j < pts.length; j = j + 2) {
+                        if (j == 0 || i == (pts.length * 2 - 6)) {
+                            mpts[i] = Float.valueOf(pts[j]);
+                            mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                            i = i + 2;
+                            locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                        } else {
+                            mpts[i] = Float.valueOf(pts[j]);
+                            mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                            mpts[i + 2] = Float.valueOf(pts[j]);
+                            mpts[i + 3] = Float.valueOf(pts[j + 1]);
+                            i = i + 4;
+                            locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                        }
+
+                    }
+
+                    for (int i = 0; i < pts.length - 2; i = i + 2) {
+                        //mpts[i] = Float.valueOf(pts[i]);
+                        PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
+                        PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
+                        distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    }
+                    for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
+                        //mpts[i] = Float.valueOf(pts[i]);
+                        PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                        PointF pt11 = getPixLocFromGeoL(xx);
+                        mpts[i] = pt11.x;
+                        mpts[i + 1] = pt11.y;
+                    }
+                    for (int i = 0; i < pts.length; i++) {
+                        locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                    }
+                    //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                    locError(mmessure_pts);
+                    locError("mpts : " + Integer.toString(mpts.length));
+                    canvas.drawLines(mpts, paint7);
+                } else {
+                    mpts = new float[pts.length];
+                }
+
+
+        /*PointF xx = new PointF(mpts[0], mpts[1]);
+        PointF yy = new PointF(mpts[2], mpts[3]);
+        PointF pt11 = getPixLocFromGeoL(xx);
+        PointF pt22 = getPixLocFromGeoL(yy);
+        mpts[0] = pt11.x;
+        mpts[1] = pt11.y;
+        mpts[2] = pt22.x;
+        mpts[3] = pt22.y;*/
+
+
+                //canvas.drawLine(mpts[0], mpts[1], mpts[2], mpts[3], paint6);
+            }
+
+    }
+
     //获取图片缩略图
     private Bitmap getImageThumbnail(String imagePath, int width, int height) {
         Bitmap bitmap = null;
@@ -670,15 +878,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //pdfView的ontouchlistener功能监控
     private void onTouchListenerForView(){
-        if (isOpenWhiteBlank){
-            rl.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    locError("RawX = " + event.getRawX() + "; RawY = " + event.getRawY());
-                    return true;
-                }
-            });
-        }else rl.setOnTouchListener(null);
     }
 
     //显示GeoPDF
@@ -835,6 +1034,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             //白板功能监控
                             onTouchListenerForView();
                         }*/
+                        if (isWhiteBlank){
+                            parseAndrawLinesforWhiteBlank(canvas);
+                            parseAndrawLinesforWhiteBlank(messure_pts, canvas);
+                        }
                         parseAndrawMessure(messure_pts, canvas);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
@@ -1131,6 +1334,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         double scale_distance = algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
                         scale_distance = scale_distance * 2.53;
                         scaleShow.setText(scale_df.format(scale_distance) + "米");
+
+
                         /*if (isOpenWhiteBlank){
                         //白板功能监控
                         onTouchListenerForView();
@@ -1181,7 +1386,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                             }
                         }
-                        parseAndrawMessure(messure_pts, canvas);
+                        if (isWhiteBlank){
+                            parseAndrawLinesforWhiteBlank(canvas);
+                            parseAndrawLinesforWhiteBlank(messure_pts, canvas);
+                        }
+
                         if(isDrawType == POI_DRAW_TYPE || showAll){
                             //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
@@ -1813,8 +2022,51 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
+    //记录当前记录的点数
+    int num_drawpt;
+    //记录是否处于白板画图状态
+    private boolean isWhiteBlank = false;
+    //记录画笔颜色
+    private int color_Whiteblank;
+    //记录当前List<geometry_WhiteBlank>
+    private List<geometry_WhiteBlank> geometry_whiteBlanks;
+
     private void showPopueWindowForWhiteblank(){
         final View popView = View.inflate(this,R.layout.popupwindow_whiteblank,null);
+        isWhiteBlank = true;
+        FloatingActionButton fff = (FloatingActionButton) popView.findViewById(R.id.colorSeeker_pop);
+        fff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorPickerDialogBuilder
+                        .with(MainInterface.this)
+                        .setTitle("Choose color")
+                        .initialColor(Color.RED)
+                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .density(12)
+                        .setOnColorSelectedListener(new OnColorSelectedListener() {
+                            @Override
+                            public void onColorSelected(int selectedColor) {
+                                locError("onColorSelected: 0x" + Integer.toHexString(selectedColor));
+                            }
+                        })
+                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                                //changeBackgroundColor(selectedColor);
+                                locError(Integer.toString(selectedColor));
+                                color_Whiteblank = selectedColor;
+                            }
+                        })
+                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .build()
+                        .show();
+            }
+        });
 
         FloatingActionButton popwhiteblank = (FloatingActionButton) popView.findViewById(R.id.whiteblank_pop);
         FrameLayout frameLayout = (FrameLayout) popView.findViewById(R.id.fml_pop);
@@ -1840,11 +2092,56 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         frameLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                locError("RawX = " + event.getRawX() + "; RawY = " + event.getRawY());
+                switch (event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        //按下
+                        locError("按下!!!");
+                        messure_pts = "";
+                        num_drawpt = 0;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        //抬起
+                        locError("抬起!!!");
+                        //Toast.makeText(MainInterface.this, "抬起", Toast.LENGTH_SHORT).show();
+                        geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(messure_pts, color_Whiteblank);
+                        geometry_whiteBlanks.add(geometry_whiteBlank);
+                        Lines_WhiteBlank lines = new Lines_WhiteBlank();
+                        lines.setM_ic(ic);
+                        lines.setM_color(color_Whiteblank);
+                        lines.setM_lines(messure_pts);
+                        lines.save();
+                        break;
+                }
+
+                PointF pt = new PointF(event.getRawX(), event.getRawY());
+                pt = getGeoLocFromPixL(pt);
+                locError("RawX : " + pt.x + "; RawY : " + pt.y);
+                //pt_last = pt_current;
+                //pt_current = pt;
+                pdfView.zoomWithAnimation(c_zoom);
                 /*if (event.getRawY() >= height - 100 & event.getRawY() <= height & event.getRawX() >= 50 & event.getRawX() <= 150){
                     popupWindow.dismiss();
                     whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
                 }*/
+                if (isWhiteBlank){
+                    num_drawpt ++;
+                    if (num_drawpt == 1){
+                        messure_pts = Float.toString(pt.x) + " " + Float.toString(pt.y);
+                    }else if (num_drawpt == 2){
+                        messure_pts = messure_pts + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                        //setTitle("正在测量");
+                        pdfView.zoomWithAnimation(c_zoom);
+                        //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                        //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                    }else {
+                        messure_pts = messure_pts + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                        //setTitle("正在测量");
+                        pdfView.zoomWithAnimation(c_zoom);
+                        //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+
                 return true;
             }
         });
@@ -2280,8 +2577,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
-        //初始化View
-        rl = (RelativeLayout) findViewById(R.id.mainView);
+        //初始化白板要素List
+        geometry_whiteBlanks = new ArrayList<geometry_WhiteBlank>();
         //初始化白板按钮
         whiteblank = (FloatingActionButton) findViewById(R.id.whiteblank);
         whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
@@ -2383,6 +2680,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         paint6 = new Paint();
         paint6.setStrokeWidth(10);
         paint6.setStyle(Paint.Style.STROKE);
+        color_Whiteblank = Color.RED;
         final android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
         final Intent intent = getIntent();
@@ -2613,6 +2911,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 floatingActionsMenu.close(false);
                 //浮动按钮3 具体功能如下:
                 if (isCreateBitmap) {
+                    isWhiteBlank = true;
                     showAll = true;
                     pdfView.resetZoomWithAnimation();
                     isMessure = false;
@@ -2655,7 +2954,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 showPopueWindowForMessure();
             }
         });
-
+        List<Lines_WhiteBlank> lines = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
+        if (lines.size() >= 0){
+            for (Lines_WhiteBlank line : lines){
+                geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getM_lines(), line.getM_color());
+                geometry_whiteBlanks.add(geometry_whiteBlank);
+            }
+        }
 
     }
 

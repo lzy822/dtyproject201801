@@ -218,9 +218,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 break;
             case  R.id.showinfo:
                 //if (selectedNum != 0){
-                    showInfo(selectedNum);
+                    //showInfo(selectedNum);
                     //resetView();
-                //}else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
+                //}else
+                Toast.makeText(this, "当前版本: 1.0", Toast.LENGTH_LONG).show();
                 break;
         }
         return true;

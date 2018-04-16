@@ -142,15 +142,13 @@
         fab:fab_shadowColor="#000"
         fab:fab_size="mini" />
 
+
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fam"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:paddingBottom="10dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         fab:menu_backgroundColor="#ccffffff"
         fab:menu_fab_label="返回"
         fab:menu_labels_ellipsize="end"
