@@ -1280,12 +1280,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<m_color>").append(lines_whiteBlanks.get(i).getM_color()).append("</m_color>").append("\n");
                         }
                         sb.append("</Lines_WhiteBlank>").append("\n");
-                        File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi");
+                        File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhiOUTPUT");
                         if (!file.exists() && !file.isDirectory()){
                             file.mkdirs();
                         }
                         String outputPath = Long.toString(System.currentTimeMillis());
-                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi",  outputPath + ".dtdb");
+                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhiOUTPUT",  outputPath + ".dtdb");
                         try {
                             FileOutputStream of = new FileOutputStream(file1);
                             of.write(sb.toString().getBytes());
@@ -1302,7 +1302,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     toolbar.setTitle("数据打包中");
                                 }
                             });
-                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi",  outputPath + ".zip");
+                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhiOUTPUT",  outputPath + ".zip");
                             InputStream inputStream = null;
                             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                             zipOut.setComment("test");
