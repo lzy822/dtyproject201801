@@ -65,9 +65,11 @@ import org.litepal.crud.DataSupport;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -82,6 +84,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class select_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
@@ -878,6 +882,236 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return deviceId;
     }
 
+    //数据库入库函数
+    private void addToDataBase(String filePath){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(select_page.this, "数据入库中!", Toast.LENGTH_LONG).show();
+                toolbar.setTitle("数据入库中");
+            }
+        });
+        File file = new File(filePath);
+        InputStream in = null;
+        int READ_TYPE;
+        final int POI_TYPE = 0;
+        final int TRAIL_TYPE = 1;
+        final int MPHOTO_TYPE = 2;
+        final int MTAPE_TYPE = 3;
+        final int LINES_WHITEBLANK_TYPE = 4;
+        final int NONE_TYPE = -1;
+        try {
+            String line;
+            in = new FileInputStream(file);
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            READ_TYPE = NONE_TYPE;
+            String ic = "", name = "", poic = "", description = "", time = "", starttime = "", endtime = "", m_ic = "", m_lines = "", path = "";
+            int color = 0, photonum = 0, tapenum = 0, id = 0;
+            float x = 0, y = 0;
+            while((line = bufferedReader.readLine()) != null) {
+                if (line.contains("</POI>") || line.contains("</Trail>") || line.contains("</MPHOTO>") || line.contains("</MTAPE>") || line.contains("</Lines_WhiteBlank>")) READ_TYPE = NONE_TYPE;
+                if (line.contains("<POI>")) {
+                    READ_TYPE = POI_TYPE;
+                    continue;
+                }
+                if (line.contains("<Trail>")) {
+                    READ_TYPE = TRAIL_TYPE;
+                    continue;
+                }
+                if (line.contains("<MPHOTO>")) {
+                    READ_TYPE = MPHOTO_TYPE;
+                    continue;
+                }
+                if (line.contains("<MTAPE>")) {
+                    READ_TYPE = MTAPE_TYPE;
+                    continue;
+                }
+                if (line.contains("<Lines_WhiteBlank>")) {
+                    READ_TYPE = LINES_WHITEBLANK_TYPE;
+                    continue;
+                }
+                if (READ_TYPE == POI_TYPE){
+                    if (line.contains("<id>")){
+                        id = Integer.valueOf(line.substring(4, line.indexOf("</id>")));
+                        continue;
+                    }
+                    if (line.contains("<ic>")){
+                        ic = line.substring(4, line.indexOf("</ic>"));
+                        continue;
+                    }
+                    if (line.contains("<name>")){
+                        name = line.substring(6, line.indexOf("</name>"));
+                        continue;
+                    }
+                    if (line.contains("<POIC>")){
+                        poic = line.substring(6, line.indexOf("</POIC>"));
+                        continue;
+                    }
+                    if (line.contains("<photonum>")){
+                        photonum = Integer.valueOf(line.substring(10, line.indexOf("</photonum>")));
+                        continue;
+                    }
+                    if (line.contains("<description>")){
+                        description = line.substring(13, line.indexOf("</description>"));
+                        continue;
+                    }
+                    if (line.contains("<tapenum>")){
+                        tapenum = Integer.valueOf(line.substring(9, line.indexOf("</tapenum>")));
+                        continue;
+                    }
+                    if (line.contains("<x>")){
+                        x = Float.valueOf(line.substring(3, line.indexOf("</x>")));
+                        continue;
+                    }
+                    if (line.contains("<y>")){
+                        y = Float.valueOf(line.substring(3, line.indexOf("</y>")));
+                        continue;
+                    }
+                    if (line.contains("<time>")){
+                        time = line.substring(6, line.indexOf("</time>"));
+                        POI poi = new POI();
+                        poi.setId(id);
+                        poi.setIc(ic);
+                        poi.setPOIC(poic);
+                        poi.setTime(time);
+                        poi.setName(name);
+                        poi.setX(x);
+                        poi.setY(y);
+                        poi.setTapenum(tapenum);
+                        poi.setPhotonum(photonum);
+                        poi.setDescription(description);
+                        poi.save();
+                        continue;
+                    }
+                }
+                if (READ_TYPE == TRAIL_TYPE){
+                    if (line.contains("<id>")){
+                        id = Integer.valueOf(line.substring(4, line.indexOf("</id>")));
+                        continue;
+                    }
+                    if (line.contains("<ic>")){
+                        ic = line.substring(4, line.indexOf("</ic>"));
+                        continue;
+                    }
+                    if (line.contains("<name>")){
+                        name = line.substring(6, line.indexOf("</name>"));
+                        continue;
+                    }
+                    if (line.contains("<path>")){
+                        path = line.substring(6, line.indexOf("</path>"));
+                        continue;
+                    }
+                    if (line.contains("<starttime>")){
+                        starttime = line.substring(10, line.indexOf("</starttime>"));
+                        continue;
+                    }
+                    if (line.contains("<endtime>")){
+                        endtime = line.substring(13, line.indexOf("</endtime>"));
+                        Trail trail = new Trail();
+                        trail.setId(id);
+                        trail.setIc(ic);
+                        trail.setName(name);
+                        trail.setPath(path);
+                        trail.setStarttime(starttime);
+                        trail.setEndtime(endtime);
+                        trail.save();
+                        continue;
+                    }
+                }
+                if (READ_TYPE == MPHOTO_TYPE){
+                    if (line.contains("<id>")){
+                        id = Integer.valueOf(line.substring(4, line.indexOf("</id>")));
+                        continue;
+                    }
+                    if (line.contains("<pdfic>")){
+                        ic = line.substring(7, line.indexOf("</pdfic>"));
+                        continue;
+                    }
+                    if (line.contains("<POIC>")){
+                        poic = line.substring(6, line.indexOf("</POIC>"));
+                        continue;
+                    }
+                    if (line.contains("<path>")){
+                        path = line.substring(6, line.indexOf("</path>"));
+                        path = Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi/" + path.substring(path.lastIndexOf("/") + 1);
+                        locError("path : " + path);
+                        continue;
+                    }
+                    if (line.contains("<time>")){
+                        time = line.substring(6, line.indexOf("</time>"));
+                        MPHOTO mphoto = new MPHOTO();
+                        mphoto.setId(id);
+                        mphoto.setPdfic(ic);
+                        mphoto.setPOIC(poic);
+                        mphoto.setPath(path);
+                        mphoto.setTime(time);
+                        mphoto.save();
+                        continue;
+                    }
+                }
+                if (READ_TYPE == MTAPE_TYPE){
+                    if (line.contains("<id>")){
+                        id = Integer.valueOf(line.substring(4, line.indexOf("</id>")));
+                        continue;
+                    }
+                    if (line.contains("<pdfic>")){
+                        ic = line.substring(7, line.indexOf("</pdfic>"));
+                        continue;
+                    }
+                    if (line.contains("<POIC>")){
+                        poic = line.substring(6, line.indexOf("</POIC>"));
+                        continue;
+                    }
+                    if (line.contains("<path>")){
+                        path = line.substring(6, line.indexOf("</path>"));
+                        path = Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi/" + path.substring(path.lastIndexOf("/") + 1);
+                        continue;
+                    }
+                    if (line.contains("<time>")){
+                        time = line.substring(6, line.indexOf("</time>"));
+                        MTAPE mtape = new MTAPE();
+                        mtape.setId(id);
+                        mtape.setPdfic(ic);
+                        mtape.setPOIC(poic);
+                        mtape.setPath(path);
+                        mtape.setTime(time);
+                        mtape.save();
+                        continue;
+                    }
+                }
+                if (READ_TYPE == LINES_WHITEBLANK_TYPE){
+                    if (line.contains("<m_ic>")){
+                        m_ic = line.substring(6, line.indexOf("</m_ic>"));
+                        continue;
+                    }
+                    if (line.contains("<m_lines>")){
+                        m_lines = line.substring(9, line.indexOf("</m_lines>"));
+                        continue;
+                    }
+                    if (line.contains("<m_color>")){
+                        color = Integer.valueOf(line.substring(9, line.indexOf("</m_color>")));
+                        Lines_WhiteBlank lines_whiteBlank = new Lines_WhiteBlank();
+                        lines_whiteBlank.setM_ic(m_ic);
+                        lines_whiteBlank.setM_lines(m_lines);
+                        lines_whiteBlank.setM_color(color);
+                        lines_whiteBlank.save();
+                        continue;
+                    }
+                }
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(select_page.this, "入库成功", Toast.LENGTH_LONG).show();
+                    toolbar.setTitle("地图列表");
+                }
+            });
+        }catch (IOException e){
+            locError(e.toString());
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -896,6 +1130,83 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 pickFile();
             }
         });
+        //解压zip文件并将文件内容添加到database中
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi");
+                    if (!file.exists() && !file.isDirectory()){
+                        file.mkdirs();
+                    }
+                    File[] files = file.listFiles();
+                    int size = files.length;
+                    boolean needUnZip = false;
+                    for (int i = 0; i < size; i++){
+                        if (files[i].toString().contains(".zip")) needUnZip = true;
+                    }
+                    if (needUnZip){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, "正在解压, 请稍后!", Toast.LENGTH_LONG).show();
+                                toolbar.setTitle("正在解压");
+                            }
+                        });
+                    File outFile = null ;   // 输出文件的时候要有文件夹的操作
+                    ZipFile zipFile = new ZipFile(files[0]) ;   // 实例化ZipFile对象
+                    ZipInputStream zipInput = null ;    // 定义压缩输入流
+                    OutputStream out = null ;   // 定义输出流，用于输出每一个实体内容
+                    InputStream input = null ;  // 定义输入流，读取每一个ZipEntry
+                    ZipEntry entry = null ; // 每一个压缩实体
+                    zipInput = new ZipInputStream(new FileInputStream(files[0])) ;  // 实例化ZIpInputStream
+                    while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
+                        //System.out.println("解压缩" + entry.getName() + "文件。") ;
+                        locError(entry.toString());
+                        outFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi", entry.getName()) ;   // 定义输出的文件路径
+                        input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
+                        out = new FileOutputStream(outFile) ;   // 实例化文件输出流
+                        byte buffer[] = new byte[4096];
+                        int realLength;
+                        while ((realLength = input.read(buffer)) > 0){
+                            out.write(buffer, 0, realLength);
+                        }
+                        input.close() ;     // 关闭输入流
+                        out.close() ;   // 关闭输出流
+                    }
+                    input.close() ;
+                    files[0].delete();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, "解压成功!", Toast.LENGTH_LONG).show();
+                                toolbar.setTitle("地图列表");
+                            }
+                        });
+                        //入库操作
+                        File ff = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi");
+                        if (!ff.exists() && !ff.isDirectory()){
+                            ff.mkdirs();
+                        }
+                        File[] ffs = ff.listFiles();
+                        int size1 = ffs.length;
+                        for (int i = 0; i < size1; i++){
+                            if (ffs[i].toString().contains(".dtdb")) {
+                                addToDataBase(ffs[i].toString());
+                                locError(ffs[i].toString());
+                            }
+                        }
+
+
+                    }
+                }catch (IOException e){
+                    locError("出错!");
+                    locError(e.toString());
+                }
+
+
+            }
+        }).start();
         //output_selectpage按钮事件编辑
         outputbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.outputData_selectpage);
         outputbt.setOnClickListener(new View.OnClickListener() {
@@ -904,6 +1215,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();
                         List<POI> pois = DataSupport.findAll(POI.class);
                         int size_POI = pois.size();
@@ -940,7 +1252,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
                             sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
                             sb.append("<POIC>").append(mphotos.get(i).getPOIC()).append("</POIC>").append("\n");
-                            sb.append("<path>").append(mphotos.get(i).getPath()).append("</path>").append("\n");
+                            String path = mphotos.get(i).getPath();
+                            sb.append("<path>").append(path).append("</path>").append("\n");
+                            files.add(new File(path));
                             sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
                         }
                         sb.append("</MPHOTO>").append("\n");
@@ -951,7 +1265,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
                             sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
                             sb.append("<POIC>").append(mtapes.get(i).getPOIC()).append("</POIC>").append("\n");
-                            sb.append("<path>").append(mtapes.get(i).getPath()).append("</path>").append("\n");
+                            String path = mtapes.get(i).getPath();
+                            sb.append("<path>").append(path).append("</path>").append("\n");
+                            files.add(new File(path));
                             sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
                         }
                         sb.append("</MTAPE>").append("\n");
@@ -968,11 +1284,51 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         if (!file.exists() && !file.isDirectory()){
                             file.mkdirs();
                         }
-                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi", Long.toString(System.currentTimeMillis()) + ".dtdb");
+                        String outputPath = Long.toString(System.currentTimeMillis());
+                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi",  outputPath + ".dtdb");
                         try {
                             FileOutputStream of = new FileOutputStream(file1);
                             of.write(sb.toString().getBytes());
                             of.close();
+                            files.add(file1);
+                        }catch (IOException e){
+                            locError("出错!");
+                        }
+                        try {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(select_page.this, "正在打包数据, 请稍后!", Toast.LENGTH_LONG).show();
+                                    toolbar.setTitle("数据打包中");
+                                }
+                            });
+                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi",  outputPath + ".zip");
+                            InputStream inputStream = null;
+                            ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
+                            zipOut.setComment("test");
+                            int size = files.size();
+                            for (int i = 0; i < size; i++){
+                                inputStream = new FileInputStream(files.get(i));
+                                zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
+                                /*int temp = 0;
+                                while ((temp = inputStream.read()) != -1){
+                                    zipOut.write(temp);
+                                }*/
+                                byte buffer[] = new byte[4096];
+                                int realLength;
+                                while ((realLength = inputStream.read(buffer)) > 0){
+                                    zipOut.write(buffer, 0, realLength);
+                                }
+                                inputStream.close();
+                            }
+                            zipOut.close();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(select_page.this, "打包成功!", Toast.LENGTH_LONG).show();
+                                    toolbar.setTitle("地图列表");
+                                }
+                            });
                         }catch (IOException e){
                             locError("出错!");
                         }
@@ -988,6 +1344,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             selectedNum = 0;
             refreshRecycler();
         }else initPage();
+
+
     }
 
     @Override
