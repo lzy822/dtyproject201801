@@ -56,6 +56,7 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 
 
 import com.github.barteksc.pdfviewer.util.FitPolicy;
+import com.github.clans.fab.FloatingActionMenu;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
@@ -150,7 +151,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //记录进入app的次数
     private int m_join = 0;
 
-    com.github.clans.fab.FloatingActionButton bt2;
+    //fab声明
+    com.github.clans.fab.FloatingActionButton addbt;
+    com.github.clans.fab.FloatingActionButton outputbt;
+    FloatingActionMenu floatingActionsMenu;
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -183,7 +187,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         selectedNum = 0;
         isLongClick = 1;
         invalidateOptionsMenu();
-        bt2.setVisibility(View.VISIBLE);
+        addbt.setVisibility(View.VISIBLE);
     }
 
     private void parseSelectedpos(){
@@ -357,7 +361,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             public void onItemLongClick(View view, int map_num, int position) {
                 //Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
                 setTitle("正在进行长按操作");
-                bt2.setVisibility(View.INVISIBLE);
+                addbt.setVisibility(View.INVISIBLE);
                 locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
                 selectedNum = map_num;
                 selectedpos = position;
@@ -404,13 +408,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         });
         //adapter.getItemSelected();
         recyclerView.setAdapter(adapter);
-        /*bt2.hide(false);
+        /*addbt.hide(false);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                bt2.show(true);
-                bt2.setShowAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.show_from_bottom));
-                bt2.setHideAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.hide_to_bottom));
+                addbt.show(true);
+                addbt.setShowAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.show_from_bottom));
+                addbt.setHideAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.hide_to_bottom));
             }
         }, 300);*/
     }
@@ -878,16 +882,103 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
+        floatingActionsMenu.setClosedOnTouchOutside(true);
         setTitle("地图列表");
         //获取定位信息
         getLocation();
         //locError("deviceId : " + getIMEI());
-        //子floating按钮事件编辑
-        bt2 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.fab02);
-        bt2.setOnClickListener(new View.OnClickListener() {
+        //addMap_selectpage按钮事件编辑
+        addbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addMap_selectpage);
+        addbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 pickFile();
+            }
+        });
+        //output_selectpage按钮事件编辑
+        outputbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.outputData_selectpage);
+        outputbt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        StringBuffer sb = new StringBuffer();
+                        List<POI> pois = DataSupport.findAll(POI.class);
+                        int size_POI = pois.size();
+                        sb = sb.append("<POI>").append("\n");
+                        for (int i = 0; i < size_POI; i++){
+                            sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
+                            sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
+                            sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
+                            sb.append("<POIC>").append(pois.get(i).getPOIC()).append("</POIC>").append("\n");
+                            sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
+                            sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
+                            sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
+                            sb.append("<x>").append(pois.get(i).getX()).append("</x>").append("\n");
+                            sb.append("<y>").append(pois.get(i).getY()).append("</y>").append("\n");
+                            sb.append("<time>").append(pois.get(i).getTime()).append("</time>").append("\n");
+                        }
+                        sb.append("</POI>").append("\n");
+                        List<Trail> trails = DataSupport.findAll(Trail.class);
+                        int size_trail = trails.size();
+                        sb = sb.append("<Trail>").append("\n");
+                        for (int i = 0; i < size_trail; i++){
+                            sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
+                            sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
+                            sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
+                            sb.append("<path>").append(trails.get(i).getPath()).append("</path>").append("\n");
+                            sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
+                            sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
+                        }
+                        sb.append("</Trail>").append("\n");
+                        List<MPHOTO> mphotos = DataSupport.findAll(MPHOTO.class);
+                        int size_mphoto = mphotos.size();
+                        sb = sb.append("<MPHOTO>").append("\n");
+                        for (int i = 0; i < size_mphoto; i++){
+                            sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
+                            sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
+                            sb.append("<POIC>").append(mphotos.get(i).getPOIC()).append("</POIC>").append("\n");
+                            sb.append("<path>").append(mphotos.get(i).getPath()).append("</path>").append("\n");
+                            sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
+                        }
+                        sb.append("</MPHOTO>").append("\n");
+                        List<MTAPE> mtapes = DataSupport.findAll(MTAPE.class);
+                        int size_mtape = mtapes.size();
+                        sb = sb.append("<MTAPE>").append("\n");
+                        for (int i = 0; i < size_mtape; i++){
+                            sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
+                            sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
+                            sb.append("<POIC>").append(mtapes.get(i).getPOIC()).append("</POIC>").append("\n");
+                            sb.append("<path>").append(mtapes.get(i).getPath()).append("</path>").append("\n");
+                            sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
+                        }
+                        sb.append("</MTAPE>").append("\n");
+                        List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
+                        int size_lines_whiteBlank = lines_whiteBlanks.size();
+                        sb = sb.append("<Lines_WhiteBlank>").append("\n");
+                        for (int i = 0; i < size_lines_whiteBlank; i++){
+                            sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getM_ic()).append("</m_ic>").append("\n");
+                            sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getM_lines()).append("</m_lines>").append("\n");
+                            sb.append("<m_color>").append(lines_whiteBlanks.get(i).getM_color()).append("</m_color>").append("\n");
+                        }
+                        sb.append("</Lines_WhiteBlank>").append("\n");
+                        File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi");
+                        if (!file.exists() && !file.isDirectory()){
+                            file.mkdirs();
+                        }
+                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi", Long.toString(System.currentTimeMillis()) + ".dtdb");
+                        try {
+                            FileOutputStream of = new FileOutputStream(file1);
+                            of.write(sb.toString().getBytes());
+                            of.close();
+                        }catch (IOException e){
+                            locError("出错!");
+                        }
+                    }
+                }).start();
+
             }
         });
         //初始化界面一
