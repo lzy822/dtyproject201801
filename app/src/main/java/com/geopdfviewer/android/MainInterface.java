@@ -2,11 +2,9 @@ package com.geopdfviewer.android;
 
 import android.content.ActivityNotFoundException;
 import android.content.ClipboardManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -21,8 +19,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -32,8 +28,6 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.IBinder;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
@@ -57,7 +51,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,7 +71,6 @@ import com.github.clans.fab.FloatingActionButton;
 
 import org.litepal.crud.DataSupport;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -93,7 +85,7 @@ import java.util.regex.Pattern;
 public class MainInterface extends AppCompatActivity  implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener, OnDrawListener {
     private static final String TAG = "MainInterface";
-    public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
+    public static final String SAMPLE_FILE = "dt/cangyuan.dt";
     private final static int REQUEST_CODE_PHOTO = 42;
     private final static int REQUEST_CODE_TAPE = 43;
     public static final int PERMISSION_CODE = 42042;
@@ -2200,7 +2192,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public String getRealPath(String filePath) {
         locError("see here : " + filePath);
         if (!filePath.contains("raw")) {
-            String str = "content://com.geopdfviewer.android.fileprovider/external_files";
+            String str = "content://com.android.tuzhi.fileprovider/external_files";
             String Dir = Environment.getExternalStorageDirectory().toString();
             filePath = Dir + filePath.substring(str.length());
         }else {
@@ -3084,7 +3076,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         if (Build.VERSION.SDK_INT >= 24){
         //locError(Environment.getExternalStorageDirectory() + "/maphoto/" + Long.toString(timenow) + ".jpg");
-            imageUri = FileProvider.getUriForFile(MainInterface.this, "com.geopdfviewer.android.fileprovider", outputImage);
+            imageUri = FileProvider.getUriForFile(MainInterface.this, "com.android.tuzhi.fileprovider", outputImage);
 
         }else imageUri = Uri.fromFile(outputImage);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);

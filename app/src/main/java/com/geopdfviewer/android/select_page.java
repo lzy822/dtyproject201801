@@ -9,26 +9,19 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.PointF;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -41,21 +34,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
-import android.support.annotation.NonNull;
 
-import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
-import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 
 
-
-import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.github.clans.fab.FloatingActionMenu;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
@@ -65,11 +50,8 @@ import org.litepal.crud.DataSupport;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -78,7 +60,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -97,11 +78,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     public static final int URI_TYPE = 2;
     private final String DEF_DIR =  Environment.getExternalStorageDirectory().toString() + "/tencent/TIMfile_recv/";
 
-    public static final String SAMPLE_FILE = "pdf/cangyuan.pdf";
+    public static final String SAMPLE_FILE = "dt/cangyuan.dt";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     public static final String LOC_DELETE_ITEM = "map_num";
-    private Map_test[] map_tests = new Map_test[15];
+    private Map_test[] map_tests = new Map_test[30];
     private List<Map_test> map_testList = new ArrayList<>();
     private Map_testAdapter adapter;
     private RecyclerView recyclerView;
@@ -174,6 +155,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
                 menu.findItem(R.id.delete).setVisible(true);
                 menu.findItem(R.id.mmcancel).setVisible(true);
+                menu.findItem(R.id.showinfo).setVisible(false);
                 break;
         }
         return super.onPrepareOptionsMenu(menu);
@@ -191,7 +173,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         selectedNum = 0;
         isLongClick = 1;
         invalidateOptionsMenu();
-        addbt.setVisibility(View.VISIBLE);
+        floatingActionsMenu.setVisibility(View.VISIBLE);
     }
 
     private void parseSelectedpos(){
@@ -365,7 +347,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             public void onItemLongClick(View view, int map_num, int position) {
                 //Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
                 setTitle("正在进行长按操作");
-                addbt.setVisibility(View.INVISIBLE);
+                floatingActionsMenu.setVisibility(View.INVISIBLE);
                 locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
                 selectedNum = map_num;
                 selectedpos = position;
@@ -616,12 +598,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public String createThumbnails(String fileName, String filePath, int Type){
-        File file = new File(Environment.getExternalStorageDirectory() + "/PdfReader");
+        File file = new File(Environment.getExternalStorageDirectory() + "/jpgForTuZhi");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         fileName = fileName + Long.toString(System.currentTimeMillis());
-        String outPath = Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".jpg";
+        String outPath = Environment.getExternalStorageDirectory() + "/jpgForTuZhi/" + fileName + ".jpg";
         PdfiumCore pdfiumCore = new PdfiumCore(this);
         int pageNum = 0;
         File m_pdf_file;
@@ -635,14 +617,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             Bitmap bitmap = Bitmap.createBitmap(120, 180, Bitmap.Config.RGB_565);
             pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 120, 180);
             pdfiumCore.closeDocument(pdf);
-            File of = new File(Environment.getExternalStorageDirectory() + "/PdfReader", fileName + ".jpg");
+            File of = new File(Environment.getExternalStorageDirectory() + "/jpgForTuZhi", fileName + ".jpg");
             FileOutputStream outputStream = new FileOutputStream(of);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream);
             outputStream.flush();
             outputStream.close();
-            if (Type == SAMPLE_TYPE){
-                deletemFile(Environment.getExternalStorageDirectory() + "/PdfReader/" + fileName + ".pdf");
-            }
         }
         catch (IOException e) {
             Log.w(TAG, e.getMessage() );
@@ -763,52 +742,57 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
+    private boolean isOKForAddMap(String name){
+        SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+        int size = pref1.getInt("num", num_pdf);
+        SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+        boolean isSameName = false;
+        for (int i = 1; i <= size; i++){
+            String str = "n_" + Integer.toString(i) + "_";
+            if (pref2.getString(str + "name", "").equals(name)) {
+                isSameName = true;
+                break;
+            }
+        }
+        if (isSameName) return false;
+        else return true;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             uri = data.getData();
             locError(uri.toString());
-                //locError(configPath);
-            String filepath = "";
+            boolean isOKForAddMap = false;
             if (uri.toString().contains(".dt")){
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        add_max ++;
-                        try {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                    Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
-                                }
-                            });
-                            locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
-                            String configPath;
-                            configPath = URLDecoder.decode(uri.toString(), "utf-8");
-                            if (configPath.substring(8).contains(":")){
-                                configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
-                            }else configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                            //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                            configPath = URLDecoder.decode(configPath, "utf-8");
-                            getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
-                            locError(configPath);
-                            //locError(uri.toString());
-                            //locError(findNameFromUri(uri));
-                            //LitePal.getDatabase();
-                            Message message = new Message();
-                            message.what = UPDATE_TEXT;
-                            handler.sendMessage(message);
-                        }catch (UnsupportedEncodingException e){
+                try {
+                    String configPath;
+                    configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                    if (configPath.substring(8).contains(":")){
+                        configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                    }else configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                    //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                    configPath = URLDecoder.decode(configPath, "utf-8");
+                    isOKForAddMap = isOKForAddMap(findNameFromUri(Uri.parse(configPath)));
+                }catch (UnsupportedEncodingException e){
 
-                        }
-                    }
-                }).start();
+                }
             }else if (getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")){
+                try {
+                    String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                    configPath = URLDecoder.decode(configPath, "utf-8");
+                    isOKForAddMap = isOKForAddMap(findNameFromUri(Uri.parse(configPath)));
+                }catch (UnsupportedEncodingException e){
+
+                }
+            }else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+            if (isOKForAddMap) {
+                if (uri.toString().contains(".dt")) {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            add_max ++;
+                            add_max++;
+                            try {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -816,26 +800,60 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
                                     }
                                 });
-                                try
-                                {
-                                    String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                    configPath = URLDecoder.decode(configPath, "utf-8");
-                                    getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
-                                } catch (IOException e){
-
-                                }
+                                locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
+                                String configPath;
+                                configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                                if (configPath.substring(8).contains(":")) {
+                                    configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                                } else
+                                    configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                configPath = URLDecoder.decode(configPath, "utf-8");
+                                getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
+                                locError(configPath);
                                 //locError(uri.toString());
                                 //locError(findNameFromUri(uri));
                                 //LitePal.getDatabase();
                                 Message message = new Message();
                                 message.what = UPDATE_TEXT;
                                 handler.sendMessage(message);
+                            } catch (UnsupportedEncodingException e) {
+
+                            }
+                        }
+                    }).start();
+                } else if (getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            add_max++;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                    Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            try {
+                                String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                configPath = URLDecoder.decode(configPath, "utf-8");
+                                getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
+                            } catch (IOException e) {
+
+                            }
+                            //locError(uri.toString());
+                            //locError(findNameFromUri(uri));
+                            //LitePal.getDatabase();
+                            Message message = new Message();
+                            message.what = UPDATE_TEXT;
+                            handler.sendMessage(message);
 
 
                         }
                     }).start();
 
-            }else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+            }else Toast.makeText(this, "已经添加过该地图!", Toast.LENGTH_SHORT).show();
                 //getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
 
             /*locError(getRealPath(uri.toString()));
@@ -1034,7 +1052,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN/" + path.substring(path.lastIndexOf("/") + 1);
                         locError("path : " + path);
                         continue;
                     }
@@ -1065,7 +1083,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN/" + path.substring(path.lastIndexOf("/") + 1);
                         continue;
                     }
                     if (line.contains("<time>")){
@@ -1135,7 +1153,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void run() {
                 try {
-                    File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi");
+                    File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN");
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
                     }
@@ -1163,7 +1181,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
                         //System.out.println("解压缩" + entry.getName() + "文件。") ;
                         locError(entry.toString());
-                        outFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi", entry.getName()) ;   // 定义输出的文件路径
+                        outFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN", entry.getName()) ;   // 定义输出的文件路径
                         input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
                         out = new FileOutputStream(outFile) ;   // 实例化文件输出流
                         byte buffer[] = new byte[4096];
@@ -1184,7 +1202,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             }
                         });
                         //入库操作
-                        File ff = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhi");
+                        File ff = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN");
                         if (!ff.exists() && !ff.isDirectory()){
                             ff.mkdirs();
                         }
@@ -1280,12 +1298,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<m_color>").append(lines_whiteBlanks.get(i).getM_color()).append("</m_color>").append("\n");
                         }
                         sb.append("</Lines_WhiteBlank>").append("\n");
-                        File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhiOUTPUT");
+                        File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiOUT");
                         if (!file.exists() && !file.isDirectory()){
                             file.mkdirs();
                         }
                         String outputPath = Long.toString(System.currentTimeMillis());
-                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhiOUTPUT",  outputPath + ".dtdb");
+                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiOUT",  outputPath + ".dtdb");
                         try {
                             FileOutputStream of = new FileOutputStream(file1);
                             of.write(sb.toString().getBytes());
@@ -1302,7 +1320,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     toolbar.setTitle("数据打包中");
                                 }
                             });
-                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabasefortuzhiOUTPUT",  outputPath + ".zip");
+                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiOUT",  outputPath + ".zip");
                             InputStream inputStream = null;
                             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                             zipOut.setComment("test");
@@ -1753,10 +1771,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             if (filePath != "") {
                 //locError(m_MediaBox + "&" + m_BBox + "&" + m_GPTS);
                 m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
-                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name + Long.toString(System.currentTimeMillis()));
+                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
             } else {
                 m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
-                saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name + Long.toString(System.currentTimeMillis()));
+                saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
             }
         } catch (IOException e) {
 

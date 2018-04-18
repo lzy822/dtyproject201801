@@ -1,6 +1,7 @@
 package com.geopdfviewer.android;
 
 import android.Manifest;
+import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -148,6 +149,9 @@ public class register extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(register.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.READ_PHONE_STATE);
         }
+        if (ContextCompat.checkSelfPermission(register.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
         if (!permissionList.isEmpty()){
             String[] permissions = permissionList.toArray(new String[permissionList.size()]);
             ActivityCompat.requestPermissions(register.this, permissions, 118);
@@ -231,7 +235,10 @@ public class register extends AppCompatActivity {
             @Override
             public boolean onLongClick(View v) {
                 ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                manager.setText(imei);
+                ClipData myClip;
+                myClip = ClipData.newPlainText("设备码", imei);
+                manager.setPrimaryClip(myClip);
+                Log.w(TAG, "onLongClick: " + imei  );
                 Toast.makeText(MyApplication.getContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
                 return true;
             }
