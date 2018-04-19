@@ -1783,7 +1783,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             Uri uri = data.getData();
             float[] latandlong = new float[2];
             try{
-                ExifInterface exifInterface = new ExifInterface(getRealPathFromUriForPhoto(this, uri));
+                ExifInterface exifInterface = new ExifInterface(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 exifInterface.getLatLong(latandlong);
                 locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
                     List<POI> POIs = DataSupport.findAll(POI.class);
@@ -1802,7 +1802,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     MPHOTO mphoto = new MPHOTO();
                     mphoto.setPdfic(ic);
                     mphoto.setPOIC("POI" + String.valueOf(time));
-                    mphoto.setPath(getRealPathFromUriForPhoto(this, uri));
+                    mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                     mphoto.setTime(simpleDateFormat.format(date));
                     mphoto.save();
                     getBitmap();
@@ -1831,7 +1831,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             poi.setTime(simpleDateFormat.format(date));
             poi.save();
             MTAPE mtape = new MTAPE();
-            mtape.setPath(getRealPathFromUriForAudio(this, uri));
+            mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
             mtape.setPdfic(ic);
             mtape.setPOIC(POIC);
             mtape.setTime(simpleDateFormat.format(date));
@@ -1842,7 +1842,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
             locError(imageUri.toString());
             //String imageuri = getRealPathFromUriForPhoto(this, imageUri);
-            String imageuri = getRealPath(imageUri.toString());
+            String imageuri = DataUtil.getRealPath(imageUri.toString());
             locError("imageUri : " + imageuri.toString());
             float[] latandlong = new float[2];
             try{
@@ -2032,7 +2032,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 ColorPickerDialogBuilder
                         .with(MainInterface.this)
-                        .setTitle("Choose color")
+                        .setTitle("选择颜色")
                         .initialColor(Color.RED)
                         .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                         .density(12)
@@ -2042,7 +2042,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 locError("onColorSelected: 0x" + Integer.toHexString(selectedColor));
                             }
                         })
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                        .setPositiveButton("确定", new ColorPickerClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                 //changeBackgroundColor(selectedColor);
@@ -2050,7 +2050,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 color_Whiteblank = selectedColor;
                             }
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -2153,55 +2153,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }else toolbar.setTitle(pdfFileName);
             }
         });
-    }
-
-    //获取音频文件路径
-    public static String getRealPathFromUriForAudio(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Audio.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    //获取照片文件路径
-    public static String getRealPathFromUriForPhoto(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        Log.w(TAG, contentUri.toString() );
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    //获取File可使用路径
-    public String getRealPath(String filePath) {
-        locError("see here : " + filePath);
-        if (!filePath.contains("raw")) {
-            String str = "content://com.android.tuzhi.fileprovider/external_files";
-            String Dir = Environment.getExternalStorageDirectory().toString();
-            filePath = Dir + filePath.substring(str.length());
-        }else {
-            filePath = filePath.substring(5);
-            //locError("here");
-            //locError(filePath);
-        }
-        locError("see here : " + filePath);
-        return filePath;
     }
 
     //经纬度到屏幕坐标位置转化

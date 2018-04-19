@@ -93,7 +93,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     //记录当前坐标信息
     double m_lat, m_long;
-    String m_latlong_description;
 
     Location location;
 
@@ -133,12 +132,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //记录长按的position
     private String mselectedpos = "";
 
-    //记录进入app的次数
-    private int m_join = 0;
-
-    //fab声明
+    //添加地图按钮声明
     com.github.clans.fab.FloatingActionButton addbt;
+    //导出数据按钮声明
     com.github.clans.fab.FloatingActionButton outputbt;
+    //fam菜单声明
     FloatingActionMenu floatingActionsMenu;
 
     @Override
@@ -270,32 +268,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
         });
     }
-    }
-
-    private void requestAuthority(){
-        List<String> permissionList = new ArrayList<>();
-        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
-        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.RECORD_AUDIO);
-        }
-        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.CAMERA);
-        }
-        if (ContextCompat.checkSelfPermission(select_page.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.READ_PHONE_STATE);
-        }
-        if (!permissionList.isEmpty()){
-            String[] permissions = permissionList.toArray(new String[permissionList.size()]);
-            ActivityCompat.requestPermissions(select_page.this, permissions, 118);
-        }else {
-            getLocation();
-            //initPage();
-        }
     }
 
     public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic, String center_latlong) {
@@ -675,37 +647,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return result;
     }
 
-    public String findNameFromUri(Uri uri){
-        int num;
-        String str = "";
-        num = appearNumber(uri.toString(), "/");
-        try {
-            String configPath = uri.toString();
-            configPath = URLDecoder.decode(configPath, "utf-8");
-            locError(configPath);
-            str = configPath;
-            for (int i = 1; i <= num; i++){
-                str = str.substring(str.indexOf("/") + 1);
-            }
-            str = str.substring(0, str.length() - 3);
-
-        }catch (UnsupportedEncodingException e){
-            e.printStackTrace();
-        }
-        return str;
-
-    }
-
-    public static int appearNumber(String srcText, String findText) {
-        int count = 0;
-        Pattern p = Pattern.compile(findText);
-        Matcher m = p.matcher(srcText);
-        while (m.find()) {
-            count++;
-        }
-        return count;
-    }
-
     //记录工作线程中的内容是否操作完成
     private boolean isThreadEnd = false;
     public static final int UPDATE_TEXT = 1;
@@ -725,22 +666,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     };
 
-    //获取照片文件路径
-    public static String getRealPathFromUriForPhoto(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        Log.w(TAG, contentUri.toString() );
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
 
     private boolean isOKForAddMap(String name){
         SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
@@ -770,18 +695,18 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     configPath = URLDecoder.decode(uri.toString(), "utf-8");
                     if (configPath.substring(8).contains(":")){
                         configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
-                    }else configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                    }else configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                     //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                     configPath = URLDecoder.decode(configPath, "utf-8");
-                    isOKForAddMap = isOKForAddMap(findNameFromUri(Uri.parse(configPath)));
+                    isOKForAddMap = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
                 }catch (UnsupportedEncodingException e){
 
                 }
-            }else if (getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")){
+            }else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")){
                 try {
-                    String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                    String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                     configPath = URLDecoder.decode(configPath, "utf-8");
-                    isOKForAddMap = isOKForAddMap(findNameFromUri(Uri.parse(configPath)));
+                    isOKForAddMap = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
                 }catch (UnsupportedEncodingException e){
 
                 }
@@ -806,10 +731,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 if (configPath.substring(8).contains(":")) {
                                     configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
                                 } else
-                                    configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                    configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                                 //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                                 configPath = URLDecoder.decode(configPath, "utf-8");
-                                getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
+                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)));
                                 locError(configPath);
                                 //locError(uri.toString());
                                 //locError(findNameFromUri(uri));
@@ -822,7 +747,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             }
                         }
                     }).start();
-                } else if (getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
+                } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -835,9 +760,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 }
                             });
                             try {
-                                String configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
                                 configPath = URLDecoder.decode(configPath, "utf-8");
-                                getGeoInfo(configPath, URI_TYPE, configPath, findNameFromUri(Uri.parse(configPath)));
+                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)));
                             } catch (IOException e) {
 
                             }
@@ -873,31 +798,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         filePath = Dir + str;
         locError("see here : " + filePath);
         return filePath;
-    }
-
-    //获取设备IMEI码
-    private String getIMEI(){
-        String deviceId = "";
-        try {
-            TelephonyManager telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-            /*if (Build.VERSION.SDK_INT > 16) deviceId = telephonyManager.getImei();
-            else */
-            deviceId = telephonyManager.getDeviceId();
-            try {
-                String str1 = "3";
-                String str2 = "a";
-                int i1 = Integer.valueOf(str1);
-                int i2 = Integer.valueOf(str2);
-            }catch (NumberFormatException e){
-
-            }
-        }catch (SecurityException e){
-
-        }catch (NullPointerException e){
-
-        }
-
-        return deviceId;
     }
 
     //数据库入库函数
@@ -1146,6 +1046,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void onClick(View v) {
                 pickFile();
+                floatingActionsMenu.close(false);
             }
         });
         //解压zip文件并将文件内容添加到database中
@@ -1340,6 +1241,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 inputStream.close();
                             }
                             zipOut.close();
+                            file1.delete();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -1352,7 +1254,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }
                     }
                 }).start();
-
+                floatingActionsMenu.close(false);
             }
         });
         //初始化界面一
@@ -1397,7 +1299,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void run() {
                 add_max ++;
-                getGeoInfo("", SAMPLE_TYPE, "", findNamefromSample(SAMPLE_FILE));
+                manageGeoInfo("", SAMPLE_TYPE, "", DataUtil.findNamefromSample(SAMPLE_FILE));
                 LitePal.getDatabase();
                 Message message = new Message();
                 message.what = UPDATE_TEXT;
@@ -1405,11 +1307,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
         }).start();
         Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
-    }
-
-    public String findNamefromSample(String str){
-        str = str.substring(4, str.indexOf("."));
-        return str;
     }
 
     public void locError(){
@@ -1420,211 +1317,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.e(TAG, str );
     }
 
-    private boolean isDrift(String LPTS){
-        locError("Drift : " + LPTS);
-        boolean isDrift = false;
-        String[] LPTSStrings = LPTS.split(" ");
-        //locError(Integer.toString(LPTSStrings.length));
-        for (int i = 0; i < LPTSStrings.length; i++){
-            //locError(LPTSStrings[i]);
-            if (Float.valueOf(LPTSStrings[i]) != 0 && Float.valueOf(LPTSStrings[i]) != 1){
-                isDrift = true;
-                break;
-            }
-        }
-        return isDrift;
-    }
-
-    private String rubberCoordination(String MediaBox, String BBox, String GPTS){
-        locError("GPTS: " + GPTS);
-        locError(MediaBox + "&" + BBox + "&" + GPTS);
-        String[] MediaBoxString = MediaBox.split(" ");
-        String[] BBoxString = BBox.split(" ");
-        String[] GPTSString = GPTS.split(" ");
-        //将String 数组转换为 Float 数组
-        float[] MediaBoxs = new float[MediaBoxString.length];
-        float[] BBoxs = new float[BBoxString.length];
-        float[] GPTSs = new float[GPTSString.length];
-        for (int i = 0; i < MediaBoxString.length; i++) {
-            MediaBoxs[i] = Float.valueOf(MediaBoxString[i]);
-            //locError("MediaBoxs : " + MediaBoxs[i]);
-        }
-        for (int i = 0; i < BBoxString.length; i++) {
-            BBoxs[i] = Float.valueOf(BBoxString[i]);
-            //locError("BBoxs : " + Float.toString(BBoxs[i]));
-        }
-        //优化BBOX拉伸算法
-        float del;
-        /*if (BBoxs[0] > BBoxs[2]){
-            del = BBoxs[0];
-            BBoxs[0] = BBoxs[2];
-            BBoxs[2] = del;
-        }*/
-        if (BBoxs[1] < BBoxs[3]){
-            del = BBoxs[1];
-            BBoxs[1] = BBoxs[3];
-            BBoxs[3] = del;
-        }
-        //
-        for (int i = 0; i < GPTSString.length; i++) {
-            GPTSs[i] = Float.valueOf(GPTSString[i]);
-        }
-
-        if (Math.floor(MediaBoxs[2]) != Math.floor(BBoxs[2]) && Math.floor(MediaBoxs[3]) != Math.floor(BBoxs[3])) {
-            PointF pt1_lb = new PointF(), pt1_lt = new PointF(), pt1_rt = new PointF(), pt1_rb = new PointF();
-            PointF pt_lb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF(), pt_rb = new PointF();
-            pt1_lb.x = BBoxs[0] / MediaBoxs[2];
-            pt1_lb.y = BBoxs[3] / MediaBoxs[3];
-            pt1_lt.x = BBoxs[0] / MediaBoxs[2];
-            pt1_lt.y = BBoxs[1] / MediaBoxs[3];
-            pt1_rt.x = BBoxs[2] / MediaBoxs[2];
-            pt1_rt.y = BBoxs[1] / MediaBoxs[3];
-            pt1_rb.x = BBoxs[2] / MediaBoxs[2];
-            pt1_rb.y = BBoxs[3] / MediaBoxs[3];
-            float lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-            float long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-            for (int i = 0; i < GPTSs.length; i = i + 2) {
-                if (GPTSs[i] < lat_axis) {
-                    if (GPTSs[i + 1] < long_axis) {
-                        pt_lb.x = GPTSs[i];
-                        pt_lb.y = GPTSs[i + 1];
-                    } else {
-                        pt_rb.x = GPTSs[i];
-                        pt_rb.y = GPTSs[i + 1];
-                    }
-                } else {
-                    if (GPTSs[i + 1] < long_axis) {
-                        pt_lt.x = GPTSs[i];
-                        pt_lt.y = GPTSs[i + 1];
-                    } else {
-                        pt_rt.x = GPTSs[i];
-                        pt_rt.y = GPTSs[i + 1];
-                    }
-                }
-            }
-            GPTS = Float.toString(pt1_lb.x) + " " + Float.toString(pt1_lb.y) + " " + Float.toString(pt1_lt.x) + " " + Float.toString(pt1_lt.y) + " " + Float.toString(pt1_rt.x) + " " + Float.toString(pt1_rt.y) + " " + Float.toString(pt1_rb.x) + " " + Float.toString(pt1_rb.y);
-            locError(GPTS);
-            float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
-            float delta_width = pt1_rb.x - pt1_lb.x, delta_height = pt1_lt.y - pt1_lb.y;
-            pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt1_lb.y - 0));
-            pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt1_lb.x - 0));
-            pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt1_lt.y - 1));
-            pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt1_lt.x - 0));
-            pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt1_rb.y - 0));
-            pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt1_rb.x - 1));
-            pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt1_rt.y - 1));
-            pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt1_rt.x - 1));
-            m_center_x = ( pt_lb.x + pt_lt.x + pt_rb.x + pt_rt.x) / 4;
-            m_center_y = ( pt_lb.y + pt_lt.y + pt_rb.y + pt_rt.y) / 4;
-            //locError("GETGPTS: " + Double.toString(m_center_x));
-            GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-        }else {
-            m_center_x = ( GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-            m_center_y = ( GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-            //locError("GETGPTS: " + Double.toString(m_center_x));
-        }
-        locError("GPTS : test" + GPTS);
-            return GPTS;
-
-    }
-
-    private String getGPTS(String GPTS, String LPTS){
-        //locError("看这里: " + " & LPTS " + LPTS);
-        if (isDrift(LPTS) == true) {
-            //locError("看这里: " + GPTS + " & LPTS " + LPTS);
-            float lat_axis, long_axis;
-            float lat_axis1, long_axis1;
-            DecimalFormat df = new DecimalFormat("0.0");
-            String[] GPTSStrings = GPTS.split(" ");
-            String[] LPTSStrings = LPTS.split(" ");
-            //将String 数组转换为 Float 数组
-            float[] GPTSs = new float[GPTSStrings.length];
-            float[] LPTSs = new float[LPTSStrings.length];
-            for (int i = 0; i < LPTSStrings.length; i++) {
-                LPTSs[i] = Float.valueOf(LPTSStrings[i]);
-            }
-            for (int i = 0; i < GPTSStrings.length; i++) {
-                GPTSs[i] = Float.valueOf(GPTSStrings[i]);
-            }
-            //
-            //构建两个矩形
-            //构建经纬度矩形
-            PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-            //PointF pt_lb1 = new PointF(), pt_rb1 = new PointF(), pt_lt1 = new PointF(), pt_rt1 = new PointF();
-            lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-            long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-            for (int i = 0; i < GPTSs.length; i = i + 2){
-                if (GPTSs[i] < lat_axis) {
-                    if (GPTSs[i + 1] < long_axis){
-                        pt_lb.x = GPTSs[i];
-                        pt_lb.y = GPTSs[i + 1];
-                    } else {
-                        pt_rb.x = GPTSs[i];
-                        pt_rb.y = GPTSs[i + 1];
-                    }
-                } else {
-                    if (GPTSs[i + 1] < long_axis){
-                        pt_lt.x = GPTSs[i];
-                        pt_lt.y = GPTSs[i + 1];
-                    } else {
-                        pt_rt.x = GPTSs[i];
-                        pt_rt.y = GPTSs[i + 1];
-                    }
-                }
-            }
-            //GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            //locError(GPTS);
-            //
-            //构建LPTS 矩形
-            //预处理LPTS
-            for (int i = 0; i < LPTSs.length; i++){
-                LPTSs[i] = Float.valueOf(df.format(LPTSs[i]));
-            }
-            //
-            PointF pt_lb1 = new PointF(), pt_rb1 = new PointF(), pt_lt1 = new PointF(), pt_rt1 = new PointF();
-            lat_axis1 = (LPTSs[0] + LPTSs[2] + LPTSs[4] + LPTSs[6]) / 4;
-            long_axis1 = (LPTSs[1] + LPTSs[3] + LPTSs[5] + LPTSs[7]) / 4;
-            for (int i = 0; i < LPTSs.length; i = i + 2){
-                if (LPTSs[i] < lat_axis1) {
-                    if (LPTSs[i + 1] < long_axis1){
-                        pt_lb1.x = LPTSs[i];
-                        pt_lb1.y = LPTSs[i + 1];
-                    } else {
-                        pt_rb1.x = LPTSs[i];
-                        pt_rb1.y = LPTSs[i + 1];
-                    }
-                } else {
-                    if (LPTSs[i + 1] < long_axis1){
-                        pt_lt1.x = LPTSs[i];
-                        pt_lt1.y = LPTSs[i + 1];
-                    } else {
-                        pt_rt1.x = LPTSs[i];
-                        pt_rt1.y = LPTSs[i + 1];
-                    }
-                }
-            }
-            GPTS = Float.toString(pt_lb1.x) + " " + Float.toString(pt_lb1.y) + " " + Float.toString(pt_lt1.x) + " " + Float.toString(pt_lt1.y) + " " + Float.toString(pt_rt1.x) + " " + Float.toString(pt_rt1.y) + " " + Float.toString(pt_rb1.x) + " " + Float.toString(pt_rb1.y);
-            locError("GETGPTS: " + GPTS);
-            float delta_lat = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2, delta_long = ((pt_rb.y - pt_lb.y) + (pt_rt.y - pt_lt.y)) / 2;
-            float delta_width = pt_rb1.y - pt_lb1.y, delta_height = pt_lt1.x - pt_lb1.x;
-            pt_lb.x = pt_lb.x - (delta_lat / delta_height * (pt_lb1.x - 0));
-            pt_lb.y = pt_lb.y - (delta_long / delta_width * (pt_lb1.y - 0));
-            pt_lt.x = pt_lt.x - (delta_lat / delta_height * (pt_lt1.x - 1));
-            pt_lt.y = pt_lt.y - (delta_long / delta_width * (pt_lt1.y - 0));
-            pt_rb.x = pt_rb.x - (delta_lat / delta_height * (pt_rb1.x - 0));
-            pt_rb.y = pt_rb.y - (delta_long / delta_width * (pt_rb1.y - 1));
-            pt_rt.x = pt_rt.x - (delta_lat / delta_height * (pt_rt1.x - 1));
-            pt_rt.y = pt_rt.y - (delta_long / delta_width * (pt_rt1.y - 1));
-            GPTS = Float.toString(pt_lb.x) + " " + Float.toString(pt_lb.y) + " " + Float.toString(pt_lt.x) + " " + Float.toString(pt_lt.y) + " " + Float.toString(pt_rt.x) + " " + Float.toString(pt_rt.y) + " " + Float.toString(pt_rb.x) + " " + Float.toString(pt_rb.y);
-            //locError(GPTS);
-            //
-            //
-        }
-        //locError(Boolean.toString(isDrift));
-        return GPTS;
-    }
-
-    public void getGeoInfo(String filePath, int Type, String uri, String name) {
+    public String[] getGeoInfo(String filePath, int Type, String uri, String name) {
         //locError(name);
         String m_name = name;
         String m_uri = uri;
@@ -1634,6 +1327,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         String m_WKT = "";
         Boolean isESRI = false;
         int num_line = 0;
+        String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "", m_LPTS = "";
         try {
             if (Type == SAMPLE_TYPE){
                 in = getAssets().open(SAMPLE_FILE);
@@ -1648,7 +1342,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String line;
-            String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "", m_LPTS = "";
             int m_num_GPTS = 0;
             //line = bufferedReader.readLine()
             while((line = bufferedReader.readLine()) != null) {
@@ -1708,7 +1401,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         if (Float.valueOf(m_gptstr1[0]) > Float.valueOf(m_gptstr[0])){
                             m_GPTS = m_GPTS1;//BUG
                             //坐标飘移纠偏
-                            m_GPTS = getGPTS(m_GPTS, m_LPTS);
+                            m_GPTS = DataUtil.getGPTS(m_GPTS, m_LPTS);
                         }
 
                         }else {
@@ -1716,7 +1409,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
                             m_GPTS = m_GPTS.trim();
                             //坐标飘移纠偏
-                            m_GPTS = getGPTS(m_GPTS, m_LPTS);
+                            m_GPTS = DataUtil.getGPTS(m_GPTS, m_LPTS);
                         }
                     }
                     //locError(m_GPTS);
@@ -1768,14 +1461,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             in.close();
             //locError("看这里"+m_name);
             //locError("WKT: " + m_WKT);
-            if (filePath != "") {
-                //locError(m_MediaBox + "&" + m_BBox + "&" + m_GPTS);
-                m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
-                saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
-            } else {
-                m_GPTS = rubberCoordination(m_MediaBox, m_BBox, m_GPTS);
-                saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
-            }
+
         } catch (IOException e) {
 
             runOnUiThread(new Runnable() {
@@ -1787,7 +1473,23 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
             //Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
         }
+        if (filePath != "") {
+            //locError(m_MediaBox + "&" + m_BBox + "&" + m_GPTS);
+            m_GPTS = DataUtil.rubberCoordinate(m_MediaBox, m_BBox, m_GPTS);
+            //saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
+            String[] strings = new String[]{m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
+            return strings;
+        } else {
+            m_GPTS = DataUtil.rubberCoordinate(m_MediaBox, m_BBox, m_GPTS);
+            //saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
+            String[] strings = new String[]{"Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
+            return strings;
+        }
+    }
 
+    private void manageGeoInfo(String filePath, int Type, String uri, String name){
+            String[] strings = getGeoInfo(filePath, Type, uri, name);
+            saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
     }
 
 

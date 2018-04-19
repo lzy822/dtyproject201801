@@ -123,23 +123,6 @@ public class singlepoi extends AppCompatActivity {
         });
     }
 
-    //获取照片文件路径
-    public static String getRealPathFromUriForPhoto(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        Log.w(TAG, contentUri.toString() );
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
@@ -154,9 +137,8 @@ public class singlepoi extends AppCompatActivity {
             MPHOTO mphoto = new MPHOTO();
             mphoto.setPdfic(POIs.get(0).getIc());
             mphoto.setPOIC(POIC);
-            Log.w(TAG, "onActivityResult: " + getRealPath(uri.getPath()) );
             //mphoto.setPath(getRealPath(uri.getPath()));
-            mphoto.setPath(getRealPathFromUriForPhoto(this, uri));
+            mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
             mphoto.setTime(simpleDateFormat.format(date));
             mphoto.save();
         }
@@ -170,7 +152,7 @@ public class singlepoi extends AppCompatActivity {
             Date date = new Date(System.currentTimeMillis());
             poi.updateAll("POIC = ?", POIC);
             MTAPE mtape = new MTAPE();
-            mtape.setPath(getRealPathFromUri(this, uri));
+            mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
             mtape.setPdfic(POIs.get(0).getIc());
             mtape.setPOIC(POIC);
             mtape.setTime(simpleDateFormat.format(date));
@@ -186,18 +168,6 @@ public class singlepoi extends AppCompatActivity {
             //alert user that file manager not working
             Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    //获取File可使用路径
-    public String getRealPath(String filePath) {
-        if (!filePath.contains("raw")) {
-            String str = "/external_files";
-            String Dir = Environment.getExternalStorageDirectory().toString();
-            filePath = Dir + filePath.substring(str.length());
-        }else {
-            filePath = filePath.substring(5);
-        }
-        return filePath;
     }
 
     @Override
@@ -230,20 +200,5 @@ public class singlepoi extends AppCompatActivity {
             default:
         }
         return true;
-    }
-
-    public static String getRealPathFromUri(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Audio.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 }

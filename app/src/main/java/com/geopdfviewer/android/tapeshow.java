@@ -186,26 +186,11 @@ public class tapeshow extends AppCompatActivity {
             Date date = new Date(time);
             poi.updateAll("POIC = ?", POIC);
             MTAPE mtape = new MTAPE();
-            mtape.setPath(getRealPathFromUri(this, uri));
+            mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
             mtape.setPdfic(POIs.get(0).getIc());
             mtape.setPOIC(POIC);
             mtape.setTime(simpleDateFormat.format(date));
             mtape.save();
-        }
-    }
-
-    public static String getRealPathFromUri(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Audio.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
     }
 

@@ -203,26 +203,9 @@ public class photoshow extends AppCompatActivity {
             mphoto.setPOIC(POIC);
             //Log.w(TAG, "onActivityResult: " + uri.getPath() );
             //mphoto.setPath(getRealPath(uri.getPath()));
-            mphoto.setPath(getRealPathFromUriForPhoto(this, uri));
+            mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
             mphoto.setTime(simpleDateFormat.format(date));
             mphoto.save();
-        }
-    }
-
-    //获取照片文件路径
-    public static String getRealPathFromUriForPhoto(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        Log.w(TAG, contentUri.toString() );
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
     }
 
@@ -234,18 +217,6 @@ public class photoshow extends AppCompatActivity {
             //alert user that file manager not working
             Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    //获取File可使用路径
-    public String getRealPath(String filePath) {
-        if (!filePath.contains("raw")) {
-            String str = "/external_files";
-            String Dir = Environment.getExternalStorageDirectory().toString();
-            filePath = Dir + filePath.substring(str.length());
-        }else {
-            filePath = filePath.substring(5);
-        }
-        return filePath;
     }
 
     private void parseSelectedPath(){
@@ -278,7 +249,7 @@ public class photoshow extends AppCompatActivity {
         }
         //获取屏幕宽高
         int weight = getResources().getDisplayMetrics().widthPixels;
-        int height = getResources().getDisplayMetrics().heightPixels * 1 / 3;
+        int height = getResources().getDisplayMetrics().heightPixels * 2 / 3;
 
         final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
         //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
