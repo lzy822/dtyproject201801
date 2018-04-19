@@ -2957,12 +2957,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void takePhoto(){
-        File file = new File(Environment.getExternalStorageDirectory() + "TuZhi" + "/maphoto");
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         long timenow = System.currentTimeMillis();
-        File outputImage = new File(Environment.getExternalStorageDirectory() + "TuZhi" + "/maphoto", Long.toString(timenow) + ".jpg");
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto", Long.toString(timenow) + ".jpg");
         try {
             if (outputImage.exists()){
                 outputImage.delete();
