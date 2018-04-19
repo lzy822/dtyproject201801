@@ -325,16 +325,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
-    public static int appearNumber(String srcText, String findText) {
-        int count = 0;
-        Pattern p = Pattern.compile(findText);
-        Matcher m = p.matcher(srcText);
-        while (m.find()) {
-            count++;
-        }
-        return count;
-    }
-
     //记录轨迹
     private void recordTrail(float x, float y){
         isLocate++;
@@ -345,7 +335,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (isLocateEnd || isLocate == 1){
                 if (!m_cTrail.isEmpty()){
                     if (isLocate > 2) {
-                        int num = appearNumber(m_cTrail, " ");
+                        int num = DataUtil.appearNumber(m_cTrail, " ");
                         String str = m_cTrail;
                         for (int i = 0; i <= num - 2; i++) {
                             str = str.substring(str.indexOf(" ") + 1);
@@ -379,12 +369,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-        //Log.w(TAG, Float.toString(pdfView.getZoom()) );
-        //pdfView.moveRelativeTo(500, 300);
-        canvas.drawLine(0, pageHeight, pageWidth, 0,  new Paint(1));
-        //canvas.drawLine(30, 1177, 826, 35,  new Paint(1));
 
-        locError(Float.toString(pageWidth) + "%%" + Float.toString(pageHeight));
     }
 
     @Override
@@ -539,7 +524,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
                     PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
-                    distanceSum = algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceSum = DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                 }
                 for (int i = 0; i < pts.length; i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
@@ -579,7 +564,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                     PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
-                    distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceSum = distanceSum + DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                 }
                 for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
@@ -617,7 +602,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 area = area - (mpts[0] * mpts[mpts.length - 1] - mpts[1] * mpts[mpts.length - 2]);
                 area = Math.abs((area) / 2) / c_zoom / c_zoom;
-                area = area * algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2 + (max_long - min_long) / ( viewer_width - 2 * k_w), (max_lat + min_lat) / 2) * algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2, (max_lat + min_lat) / 2 + (max_lat - min_lat) / (viewer_height - 2 * k_h));
+                area = area * DataUtil.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2 + (max_long - min_long) / ( viewer_width - 2 * k_w), (max_lat + min_lat) / 2) * DataUtil.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2, (max_lat + min_lat) / 2 + (max_lat - min_lat) / (viewer_height - 2 * k_h));
                 //area = area / 1.0965f;
                 //setTitle(df1.format(area) + "平方米");
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
@@ -703,7 +688,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                     PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
-                    distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceSum = distanceSum + DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                 }
                 for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
@@ -801,7 +786,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                         PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
-                        distanceSum = distanceSum + algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                        distanceSum = distanceSum + DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                     }
                     for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                         //mpts[i] = Float.valueOf(pts[i]);
@@ -1017,7 +1002,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         current_pagewidth = pageWidth;
                         getCurrentScreenLoc();
                         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
-                        double scale_distance = algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
+                        double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
                         scale_distance = scale_distance * 2.53;
                         scaleShow.setText(scale_df.format(scale_distance) + "米");
                         getK(pageWidth, pageHeight);
@@ -1167,7 +1152,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 double deltaK_trans;
                                 //deltaK = (max_lat - min_lat) * 0.02;
-                                deltaK_trans = deltaK_trans = getDeltaKforTrans(pageWidth);
+                                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this);
                                 locError("deltaK_trans: " + Double.toString(deltaK_trans));
                                 if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
                                     num_map1 = num_map;
@@ -1323,7 +1308,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         current_pagewidth = pageWidth;
                         getCurrentScreenLoc();
                         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
-                        double scale_distance = algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
+                        double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
                         scale_distance = scale_distance * 2.53;
                         scaleShow.setText(scale_df.format(scale_distance) + "米");
 
@@ -1497,7 +1482,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 double deltaK_trans;
                                 //deltaK = (max_lat - min_lat) * 0.02;
-                                deltaK_trans = getDeltaKforTrans(pageWidth);
+                                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this);
                                 locError("deltaK_trans: " + Double.toString(deltaK_trans));
                                 if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
                                     num_map1 = num_map;
@@ -1704,15 +1689,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         };
         Timer timer = new Timer();
         timer.schedule(task, 2500);
-    }
-
-    //设置当前地图切换查询的容许误差值
-    private double getDeltaKforTrans(float page_width){
-        WindowManager wm = this.getWindowManager();
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(outMetrics);
-        int deviceWidth = outMetrics.widthPixels;
-        return (max_long - min_long) / page_width * deviceWidth * 1;
     }
 
     //获取当前页面的经纬度拉伸比例
@@ -2371,36 +2347,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
-    //距离量测(输入参数为 两点的经纬度)
-    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
-
-        double Lat1 = rad(latitude1); // 纬度
-
-        double Lat2 = rad(latitude2);
-
-        double a = Lat1 - Lat2;//两点纬度之差
-
-        double b = rad(longitude1) - rad(longitude2); //经度之差
-
-        double s = 2 * Math.asin(Math
-
-                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
-
-        s = s * 6378137.0;//弧长乘地球半径（半径为米）
-
-        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
-
-        return s;
-
-    }
-
-    //将角度转化为弧度
-    private static double rad(double d) {
-
-        return d * Math.PI / 180.00; //角度转换成弧度
-
-    }
-
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
@@ -3011,12 +2957,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void takePhoto(){
-        File file = new File(Environment.getExternalStorageDirectory() + "/maphoto");
+        File file = new File(Environment.getExternalStorageDirectory() + "TuZhi" + "/maphoto");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         long timenow = System.currentTimeMillis();
-        File outputImage = new File(Environment.getExternalStorageDirectory() + "/maphoto", Long.toString(timenow) + ".jpg");
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "TuZhi" + "/maphoto", Long.toString(timenow) + ".jpg");
         try {
             if (outputImage.exists()){
                 outputImage.delete();
@@ -3057,7 +3003,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         float density = dm.density;
         int screenWidth = (int) (screen_width / density);
         int screenHeight = (int) (screen_height / density);
-        pdfView = (PDFView) findViewById(R.id.pdfView);
 
         //Log.d(TAG, Float.toString(screen_width) + "^" + Float.toString(screen_height) + "^" + Float.toString(screenWidth) + "^" + Float.toString(screenHeight));
     }

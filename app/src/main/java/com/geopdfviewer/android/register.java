@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -21,6 +22,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -111,8 +114,10 @@ public class register extends AppCompatActivity {
                             finish();
                             return;
                         }else {
-                            //getLocation();
-                            //initPage();
+                            File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi");
+                            if (!file.exists() && !file.isDirectory()){
+                                file.mkdirs();
+                            }
                             final String imei = getIMEI();
                             textView.setText("请求码: " + imei + "(长按复制)");
                         }

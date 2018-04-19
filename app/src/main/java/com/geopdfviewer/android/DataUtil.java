@@ -1,15 +1,11 @@
 package com.geopdfviewer.android;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
@@ -53,6 +49,7 @@ public class DataUtil {
         return password;
     }
 
+    //核对日期
     public static boolean verifyDate(String endDate){
         SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
         Date nowDate = new Date(System.currentTimeMillis());
@@ -69,6 +66,7 @@ public class DataUtil {
         }else return true;
     }
 
+    //日期加法
     public static String datePlus(String day, int days) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
         Date base = null;
@@ -85,8 +83,7 @@ public class DataUtil {
         return dateOK;
     }
 
-
-
+    //坐标飘移判断
     public static boolean isDrift(String LPTS){
         boolean isDrift = false;
         String[] LPTSStrings = LPTS.split(" ");
@@ -101,6 +98,7 @@ public class DataUtil {
         return isDrift;
     }
 
+    //坐标拉伸算法
     public static String rubberCoordinate(String MediaBox, String BBox, String GPTS){
         String[] MediaBoxString = MediaBox.split(" ");
         String[] BBoxString = BBox.split(" ");
@@ -190,6 +188,7 @@ public class DataUtil {
 
     }
 
+    //获取GPTS值
     public static String getGPTS(String GPTS, String LPTS){
         //locError("看这里: " + " & LPTS " + LPTS);
         if (isDrift(LPTS) == true) {
@@ -300,7 +299,7 @@ public class DataUtil {
         }
     }
 
-
+    //获取地图名称
     public static String findNameFromUri(Uri uri){
         int num;
         String str = "";
@@ -320,7 +319,6 @@ public class DataUtil {
         return str;
 
     }
-
     public static String findNamefromSample(String str){
         str = str.substring(4, str.indexOf("."));
         return str;
@@ -337,7 +335,6 @@ public class DataUtil {
         return count;
     }
 
-
     //获取File可使用路径
     public static String getRealPath(String filePath) {
         if (!filePath.contains("raw")) {
@@ -351,7 +348,6 @@ public class DataUtil {
         }
         return filePath;
     }
-
 
     //获取音频文件路径
     public static String getRealPathFromUriForAudio(Context context, Uri contentUri) {
@@ -367,6 +363,36 @@ public class DataUtil {
                 cursor.close();
             }
         }
+    }
+
+    //距离量测(输入参数为 两点的经纬度)
+    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
+
+        double Lat1 = rad(latitude1); // 纬度
+
+        double Lat2 = rad(latitude2);
+
+        double a = Lat1 - Lat2;//两点纬度之差
+
+        double b = rad(longitude1) - rad(longitude2); //经度之差
+
+        double s = 2 * Math.asin(Math
+
+                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
+
+        s = s * 6378137.0;//弧长乘地球半径（半径为米）
+
+        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
+
+        return s;
+
+    }
+
+    //将角度转化为弧度
+    private static double rad(double d) {
+
+        return d * Math.PI / 180.00; //角度转换成弧度
+
     }
 
 

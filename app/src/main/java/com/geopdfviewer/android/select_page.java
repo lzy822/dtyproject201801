@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +25,7 @@ import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -41,6 +43,7 @@ import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 
 
+import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
@@ -73,6 +76,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private static final String TAG = "select_page";
     private final static int REQUEST_CODE = 42;
+    private final static int REQUEST_CODE_INPUT = 41;
     public static final int PERMISSION_CODE = 42042;
     public static final int SAMPLE_TYPE = 1;
     public static final int URI_TYPE = 2;
@@ -136,6 +140,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     com.github.clans.fab.FloatingActionButton addbt;
     //导出数据按钮声明
     com.github.clans.fab.FloatingActionButton outputbt;
+    //导入数据按钮声明
+    com.github.clans.fab.FloatingActionButton inputbt;
     //fam菜单声明
     FloatingActionMenu floatingActionsMenu;
 
@@ -250,13 +256,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     void launchPicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
-        File file = new File(DEF_DIR);
-        if (file.exists()){
-            intent.setDataAndType(Uri.parse(DEF_DIR), "application/dt");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-        }else {
-            intent.setType("application/dt");
-        }
+        SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
+        String filepath = prf1.getString("mapath", "");
+        locError("mapath: " + filepath);
+        if (filepath.isEmpty()) intent.setType("application/dt");
+        else intent.setDataAndType(Uri.parse(filepath), "application/dt");
+        locError("path2: " + FileProvider.getUriForFile(this, "com.android.tuzhi.fileprovider", new File(filepath)).toString());
+
         try {
             startActivityForResult(intent, REQUEST_CODE);
     } catch (ActivityNotFoundException e) {
@@ -570,12 +576,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     public String createThumbnails(String fileName, String filePath, int Type){
-        File file = new File(Environment.getExternalStorageDirectory() + "/jpgForTuZhi");
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Thumbnails");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         fileName = fileName + Long.toString(System.currentTimeMillis());
-        String outPath = Environment.getExternalStorageDirectory() + "/jpgForTuZhi/" + fileName + ".jpg";
+        String outPath = Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Thumbnails/" + fileName + ".jpg";
         PdfiumCore pdfiumCore = new PdfiumCore(this);
         int pageNum = 0;
         File m_pdf_file;
@@ -589,7 +595,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             Bitmap bitmap = Bitmap.createBitmap(120, 180, Bitmap.Config.RGB_565);
             pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 120, 180);
             pdfiumCore.closeDocument(pdf);
-            File of = new File(Environment.getExternalStorageDirectory() + "/jpgForTuZhi", fileName + ".jpg");
+            File of = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Thumbnails", fileName + ".jpg");
             FileOutputStream outputStream = new FileOutputStream(of);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream);
             outputStream.flush();
@@ -686,38 +692,78 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            uri = data.getData();
-            locError(uri.toString());
-            boolean isOKForAddMap = false;
-            if (uri.toString().contains(".dt")){
-                try {
-                    String configPath;
-                    configPath = URLDecoder.decode(uri.toString(), "utf-8");
-                    if (configPath.substring(8).contains(":")){
-                        configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
-                    }else configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                    //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                    configPath = URLDecoder.decode(configPath, "utf-8");
-                    isOKForAddMap = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
-                }catch (UnsupportedEncodingException e){
-
-                }
-            }else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")){
-                try {
-                    String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                    configPath = URLDecoder.decode(configPath, "utf-8");
-                    isOKForAddMap = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
-                }catch (UnsupportedEncodingException e){
-
-                }
-            }else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
-            if (isOKForAddMap) {
+            switch (requestCode){
+                case REQUEST_CODE:
+                uri = data.getData();
+                locError(uri.toString());
+                boolean isOKForAddMap = false;
                 if (uri.toString().contains(".dt")) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            add_max++;
-                            try {
+                    try {
+                        String configPath;
+                        configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                        if (configPath.substring(8).contains(":")) {
+                            configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                        } else
+                            configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        isOKForAddMap = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
+                    } catch (UnsupportedEncodingException e) {
+
+                    }
+                } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
+                    try {
+                        String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        isOKForAddMap = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
+                    } catch (UnsupportedEncodingException e) {
+
+                    }
+                } else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+                if (isOKForAddMap) {
+                    if (uri.toString().contains(".dt")) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                add_max++;
+                                try {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                            Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                    locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
+                                    String configPath;
+                                    configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                                    if (configPath.substring(8).contains(":")) {
+                                        configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                                    } else
+                                        configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                    //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                    configPath = URLDecoder.decode(configPath, "utf-8");
+                                    SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                    editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                    editor.apply();
+                                    manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)));
+                                    locError(configPath);
+                                    //locError(uri.toString());
+                                    //locError(findNameFromUri(uri));
+                                    //LitePal.getDatabase();
+                                    Message message = new Message();
+                                    message.what = UPDATE_TEXT;
+                                    handler.sendMessage(message);
+                                } catch (UnsupportedEncodingException e) {
+
+                                }
+                            }
+                        }).start();
+                    } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                add_max++;
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -725,67 +771,200 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
                                     }
                                 });
-                                locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
-                                String configPath;
-                                configPath = URLDecoder.decode(uri.toString(), "utf-8");
-                                if (configPath.substring(8).contains(":")) {
-                                    configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
-                                } else
-                                    configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                configPath = URLDecoder.decode(configPath, "utf-8");
-                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)));
-                                locError(configPath);
+                                try {
+                                    String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                    configPath = URLDecoder.decode(configPath, "utf-8");
+                                    SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                    editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                    editor.apply();
+                                    manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)));
+                                } catch (IOException e) {
+
+                                }
                                 //locError(uri.toString());
                                 //locError(findNameFromUri(uri));
                                 //LitePal.getDatabase();
                                 Message message = new Message();
                                 message.what = UPDATE_TEXT;
                                 handler.sendMessage(message);
-                            } catch (UnsupportedEncodingException e) {
+
 
                             }
-                        }
-                    }).start();
-                } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            add_max++;
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                    Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
-                                }
-                            });
-                            try {
-                                String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                configPath = URLDecoder.decode(configPath, "utf-8");
-                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)));
-                            } catch (IOException e) {
+                        }).start();
 
-                            }
-                            //locError(uri.toString());
-                            //locError(findNameFromUri(uri));
-                            //LitePal.getDatabase();
-                            Message message = new Message();
-                            message.what = UPDATE_TEXT;
-                            handler.sendMessage(message);
-
-
-                        }
-                    }).start();
-
-                } else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
-            }else Toast.makeText(this, "已经添加过该地图!", Toast.LENGTH_SHORT).show();
+                    } else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(this, "已经添加过该地图!", Toast.LENGTH_SHORT).show();
                 //getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
 
             /*locError(getRealPath(uri.toString()));
             locError(uri.toString());
             locError(findNameFromUri(uri));
             LitePal.getDatabase();*/
-            //refreshRecycler();
+                //refreshRecycler();
+                    break;
+                case REQUEST_CODE_INPUT:
+                    final File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
+                    if (!file.exists() && !file.isDirectory()){
+                        file.mkdirs();
+                    }
+                    uri = data.getData();
+                    locError(uri.toString());
+                        if (uri.toString().contains(".zip")) {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                toolbar.setTitle("正在解析数据");
+                                                Toast.makeText(MyApplication.getContext(), "正在解析数据, 请稍后", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                                        locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
+                                        String configPath;
+                                        configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                                        if (configPath.substring(8).contains(":")) {
+                                            configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                                        } else configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                        //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                        configPath = URLDecoder.decode(configPath, "utf-8");
+                                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                        editor.putString("inputpath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                        editor.apply();
+                                        locError("filepath" + configPath.substring(0, configPath.lastIndexOf("/")));
+                                        File file1 = new File(configPath);
+                                        File outFile = null ;   // 输出文件的时候要有文件夹的操作
+                                        ZipFile zipFile = new ZipFile(file1) ;   // 实例化ZipFile对象
+                                        ZipInputStream zipInput = null ;    // 定义压缩输入流
+                                        OutputStream out = null ;   // 定义输出流，用于输出每一个实体内容
+                                        InputStream input = null ;  // 定义输入流，读取每一个ZipEntry
+                                        ZipEntry entry = null ; // 每一个压缩实体
+                                        zipInput = new ZipInputStream(new FileInputStream(file1)) ;  // 实例化ZIpInputStream
+                                        while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
+                                            //System.out.println("解压缩" + entry.getName() + "文件。") ;
+                                            locError(entry.toString());
+                                            outFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input", entry.getName()) ;   // 定义输出的文件路径
+                                            input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
+                                            out = new FileOutputStream(outFile) ;   // 实例化文件输出流
+                                            byte buffer[] = new byte[4096];
+                                            int realLength;
+                                            while ((realLength = input.read(buffer)) > 0){
+                                                out.write(buffer, 0, realLength);
+                                            }
+                                            input.close() ;     // 关闭输入流
+                                            out.close() ;   // 关闭输出流
+                                        }
+                                        input.close() ;
+                                        locError(configPath);
+                                        //locError(uri.toString());
+                                        //locError(findNameFromUri(uri));
+                                        //LitePal.getDatabase();
+                                    } catch (UnsupportedEncodingException e) {
+                                        Log.w(TAG, "出错" );
+                                    }catch (IOException e){
+                                        Log.w(TAG, "出错" );
+                                    }
+                                    //入库操作
+                                    File ff = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
+                                    if (!ff.exists() && !ff.isDirectory()){
+                                        ff.mkdirs();
+                                    }
+                                    File[] ffs = ff.listFiles();
+                                    int size1 = ffs.length;
+                                    for (int i = 0; i < size1; i++){
+                                        if (ffs[i].toString().contains(".dtdb")){
+                                            addToDataBase(ffs[i].toString());
+                                            locError(ffs[i].toString());
+                                            ffs[i].delete();
+                                        }
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toolbar.setTitle("地图列表");
+                                            Toast.makeText(MyApplication.getContext(), "数据导入完成", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }).start();
+                        } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".zip")) {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toolbar.setTitle("正在解析数据");
+                                            Toast.makeText(MyApplication.getContext(), "正在解析数据, 请稍后", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                    try {
+                                        String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                                        configPath = URLDecoder.decode(configPath, "utf-8");
+                                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                        editor.putString("inputpath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                        editor.apply();
+                                        locError("filepath" + configPath.substring(0, configPath.lastIndexOf("/")));
+                                        File file1 = new File(configPath);
+                                        File outFile = null ;   // 输出文件的时候要有文件夹的操作
+                                        ZipFile zipFile = new ZipFile(file1) ;   // 实例化ZipFile对象
+                                        ZipInputStream zipInput = null ;    // 定义压缩输入流
+                                        OutputStream out = null ;   // 定义输出流，用于输出每一个实体内容
+                                        InputStream input = null ;  // 定义输入流，读取每一个ZipEntry
+                                        ZipEntry entry = null ; // 每一个压缩实体
+                                        zipInput = new ZipInputStream(new FileInputStream(file1)) ;  // 实例化ZIpInputStream
+                                        while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
+                                            //System.out.println("解压缩" + entry.getName() + "文件。") ;
+                                            locError(entry.toString());
+                                            outFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input", entry.getName()) ;   // 定义输出的文件路径
+                                            input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
+                                            out = new FileOutputStream(outFile) ;   // 实例化文件输出流
+                                            byte buffer[] = new byte[4096];
+                                            int realLength;
+                                            while ((realLength = input.read(buffer)) > 0){
+                                                out.write(buffer, 0, realLength);
+                                            }
+                                            input.close() ;     // 关闭输入流
+                                            out.close() ;   // 关闭输出流
+                                        }
+                                        input.close() ;
+                                    } catch (IOException e) {
+                                        Log.w(TAG, "出错" );
+                                    }
+                                    //locError(uri.toString());
+                                    //locError(findNameFromUri(uri));
+                                    //LitePal.getDatabase();
+//入库操作
+                                    File ff = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
+                                    if (!ff.exists() && !ff.isDirectory()){
+                                        ff.mkdirs();
+                                    }
+                                    File[] ffs = ff.listFiles();
+                                    int size1 = ffs.length;
+                                    for (int i = 0; i < size1; i++){
+                                        if (ffs[i].toString().contains(".dtdb")){
+                                            addToDataBase(ffs[i].toString());
+                                            locError(ffs[i].toString());
+                                            ffs[i].delete();
+                                        }
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toolbar.setTitle("地图列表");
+                                            Toast.makeText(MyApplication.getContext(), "数据导入完成", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+
+                                }
+                            }).start();
+
+                        } else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+
+                        break;
+
+            }
         }
     }
 
@@ -952,7 +1131,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         locError("path : " + path);
                         continue;
                     }
@@ -983,7 +1162,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         continue;
                     }
                     if (line.contains("<time>")){
@@ -1049,83 +1228,21 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 floatingActionsMenu.close(false);
             }
         });
-        //解压zip文件并将文件内容添加到database中
-        new Thread(new Runnable() {
+        inputbt = (FloatingActionButton) findViewById(R.id.inputData_selectpage);
+        inputbt.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                try {
-                    File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN");
-                    if (!file.exists() && !file.isDirectory()){
-                        file.mkdirs();
-                    }
-                    File[] files = file.listFiles();
-                    int size = files.length;
-                    boolean needUnZip = false;
-                    for (int i = 0; i < size; i++){
-                        if (files[i].toString().contains(".zip")) needUnZip = true;
-                    }
-                    if (needUnZip){
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(select_page.this, "正在解压, 请稍后!", Toast.LENGTH_LONG).show();
-                                toolbar.setTitle("正在解压");
-                            }
-                        });
-                    File outFile = null ;   // 输出文件的时候要有文件夹的操作
-                    ZipFile zipFile = new ZipFile(files[0]) ;   // 实例化ZipFile对象
-                    ZipInputStream zipInput = null ;    // 定义压缩输入流
-                    OutputStream out = null ;   // 定义输出流，用于输出每一个实体内容
-                    InputStream input = null ;  // 定义输入流，读取每一个ZipEntry
-                    ZipEntry entry = null ; // 每一个压缩实体
-                    zipInput = new ZipInputStream(new FileInputStream(files[0])) ;  // 实例化ZIpInputStream
-                    while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
-                        //System.out.println("解压缩" + entry.getName() + "文件。") ;
-                        locError(entry.toString());
-                        outFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN", entry.getName()) ;   // 定义输出的文件路径
-                        input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
-                        out = new FileOutputStream(outFile) ;   // 实例化文件输出流
-                        byte buffer[] = new byte[4096];
-                        int realLength;
-                        while ((realLength = input.read(buffer)) > 0){
-                            out.write(buffer, 0, realLength);
-                        }
-                        input.close() ;     // 关闭输入流
-                        out.close() ;   // 关闭输出流
-                    }
-                    input.close() ;
-                    files[0].delete();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(select_page.this, "解压成功!", Toast.LENGTH_LONG).show();
-                                toolbar.setTitle("地图列表");
-                            }
-                        });
-                        //入库操作
-                        File ff = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiIN");
-                        if (!ff.exists() && !ff.isDirectory()){
-                            ff.mkdirs();
-                        }
-                        File[] ffs = ff.listFiles();
-                        int size1 = ffs.length;
-                        for (int i = 0; i < size1; i++){
-                            if (ffs[i].toString().contains(".dtdb")) {
-                                addToDataBase(ffs[i].toString());
-                                locError(ffs[i].toString());
-                            }
-                        }
-
-
-                    }
-                }catch (IOException e){
-                    locError("出错!");
-                    locError(e.toString());
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
+                SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
+                String filepath = prf1.getString("inputpath", "");
+                if (filepath.isEmpty()) intent.setType("application/x-gzip");
+                else {
+                    intent.setDataAndType(Uri.parse(filepath), "application/x-gzip");
                 }
-
-
+                startActivityForResult(intent, REQUEST_CODE_INPUT);
+                floatingActionsMenu.close(false);
             }
-        }).start();
+        });
         //output_selectpage按钮事件编辑
         outputbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.outputData_selectpage);
         outputbt.setOnClickListener(new View.OnClickListener() {
@@ -1199,12 +1316,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<m_color>").append(lines_whiteBlanks.get(i).getM_color()).append("</m_color>").append("\n");
                         }
                         sb.append("</Lines_WhiteBlank>").append("\n");
-                        File file = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiOUT");
+                        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
                         if (!file.exists() && !file.isDirectory()){
                             file.mkdirs();
                         }
                         String outputPath = Long.toString(System.currentTimeMillis());
-                        File file1 = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiOUT",  outputPath + ".dtdb");
+                        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
                         try {
                             FileOutputStream of = new FileOutputStream(file1);
                             of.write(sb.toString().getBytes());
@@ -1221,7 +1338,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     toolbar.setTitle("数据打包中");
                                 }
                             });
-                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/dtdatabaseForTuZhiOUT",  outputPath + ".zip");
+                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
                             InputStream inputStream = null;
                             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                             zipOut.setComment("test");

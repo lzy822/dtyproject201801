@@ -126,7 +126,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         //double the_long = Double.valueOf(latandlong1[1]);
             double distance;
             if (!map.getM_GPTS().isEmpty()){
-         distance = getDistancebtptandmap(map.getM_GPTS(), m_lat, m_long) / 1000;
+         distance = getDistanceWithMap(map.getM_GPTS(), m_lat, m_long) / 1000;
             }else distance = 0;
         if (distance != 0) {
             holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
@@ -149,7 +149,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
 
     }
 
-    private Double getDistancebtptandmap(String GPTS, double lat, double longi){
+    private Double getDistanceWithMap(String GPTS, double lat, double longi){
         double distance = 0;
         //Log.w(TAG, "catch you" + GPTS);
         String[] GPTString = GPTS.split(" ");
@@ -189,17 +189,17 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             distance = 0;
         }else if (lat >= min_lat && lat <= max_lat && (longi < min_long || longi > max_long)){
             if (longi < min_long ){
-            distance = algorithm(longi, 0, min_long, 0);
-            }else distance = algorithm(longi, 0, max_long, 0);
+            distance = DataUtil.algorithm(longi, 0, min_long, 0);
+            }else distance = DataUtil.algorithm(longi, 0, max_long, 0);
         }else if (( lat < min_lat || lat > max_lat) && longi >= min_long && longi <= max_long){
             if (lat < min_lat){
-                distance = algorithm(0, lat, 0, min_lat);
-            }else distance = algorithm(0, lat, 0, max_lat);
+                distance = DataUtil.algorithm(0, lat, 0, min_lat);
+            }else distance = DataUtil.algorithm(0, lat, 0, max_lat);
         }else {
-            if (lat > max_lat && longi > max_long) distance = algorithm(longi, lat, max_long, max_lat);
-            else if (lat > max_lat && longi < min_long) distance = algorithm(longi, lat, min_long, max_lat);
-            else if (lat < min_lat && longi < min_long) distance = algorithm(longi, lat, min_long, min_lat);
-            else distance = algorithm(longi, lat, max_long, min_lat);
+            if (lat > max_lat && longi > max_long) distance = DataUtil.algorithm(longi, lat, max_long, max_lat);
+            else if (lat > max_lat && longi < min_long) distance = DataUtil.algorithm(longi, lat, min_long, max_lat);
+            else if (lat < min_lat && longi < min_long) distance = DataUtil.algorithm(longi, lat, min_long, min_lat);
+            else distance = DataUtil.algorithm(longi, lat, max_long, min_lat);
         }
         return distance;
     }
@@ -223,35 +223,5 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     }
     public void setOnItemClickListener(OnRecyclerItemClickListener listener){
         this.mOnItemClick =  listener;
-    }
-
-    //距离量测(输入参数为 两点的经纬度)
-    public static double algorithm(double longitude1, double latitude1, double longitude2, double latitude2) {
-
-        double Lat1 = rad(latitude1); // 纬度
-
-        double Lat2 = rad(latitude2);
-
-        double a = Lat1 - Lat2;//两点纬度之差
-
-        double b = rad(longitude1) - rad(longitude2); //经度之差
-
-        double s = 2 * Math.asin(Math
-
-                .sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));//计算两点距离的公式
-
-        s = s * 6378137.0;//弧长乘地球半径（半径为米）
-
-        s = Math.round(s * 10000d) / 10000d;//精确距离的数值
-
-        return s;
-
-    }
-
-    //将角度转化为弧度
-    private static double rad(double d) {
-
-        return d * Math.PI / 180.00; //角度转换成弧度
-
     }
 }
