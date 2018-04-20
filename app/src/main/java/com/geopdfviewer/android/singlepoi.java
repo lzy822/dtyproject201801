@@ -5,24 +5,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,6 +44,8 @@ public class singlepoi extends AppCompatActivity {
     private EditText editText_des;
     private final static int REQUEST_CODE_PHOTO = 42;
     private final static int REQUEST_CODE_TAPE = 43;
+    private final static int TAKE_PHOTO = 41;
+    Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +114,7 @@ public class singlepoi extends AppCompatActivity {
         addphoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchPicker();
+                showPopueWindowForPhoto();
             }
         });
         ImageButton addtape = (ImageButton)findViewById(R.id.addTape_singlepoi);
@@ -121,6 +130,86 @@ public class singlepoi extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showPopueWindowForPhoto(){
+        View popView = View.inflate(this,R.layout.popupwindow_camera_need,null);
+        Button bt_album = (Button) popView.findViewById(R.id.btn_pop_album);
+        Button bt_camera = (Button) popView.findViewById(R.id.btn_pop_camera);
+        Button bt_cancle = (Button) popView.findViewById(R.id.btn_pop_cancel);
+        //获取屏幕宽高
+        int weight = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels * 1/3;
+
+        final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(true);
+
+        bt_album.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchPicker();
+                popupWindow.dismiss();
+
+            }
+        });
+        bt_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePhoto();
+                popupWindow.dismiss();
+
+            }
+        });
+        bt_cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+
+            }
+        });
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 0.5f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.BOTTOM,0,50);
+
+    }
+
+    private void takePhoto(){
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        long timenow = System.currentTimeMillis();
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto", Long.toString(timenow) + ".jpg");
+        try {
+            if (outputImage.exists()){
+                outputImage.delete();
+            }
+            outputImage.createNewFile();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        if (Build.VERSION.SDK_INT >= 24){
+            //locError(Environment.getExternalStorageDirectory() + "/maphoto/" + Long.toString(timenow) + ".jpg");
+            imageUri = FileProvider.getUriForFile(singlepoi.this, "com.android.tuzhi.fileprovider", outputImage);
+
+        }else imageUri = Uri.fromFile(outputImage);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(intent, TAKE_PHOTO);
     }
 
     @Override
@@ -157,6 +246,21 @@ public class singlepoi extends AppCompatActivity {
             mtape.setPOIC(POIC);
             mtape.setTime(simpleDateFormat.format(date));
             mtape.save();
+        }
+        if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
+            String imageuri = DataUtil.getRealPath(imageUri.toString());
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            Date date = new Date(System.currentTimeMillis());
+            List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+            POI poi = new POI();
+            long time = System.currentTimeMillis();
+            poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
+            poi.updateAll("POIC = ?", POIC);
+            MPHOTO mphoto = new MPHOTO();
+            mphoto.setPOIC(POIC);
+            mphoto.setPath(imageuri);
+            mphoto.setTime(simpleDateFormat.format(date));
+            mphoto.save();
         }
     }
 

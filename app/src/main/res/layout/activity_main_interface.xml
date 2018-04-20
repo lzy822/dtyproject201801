@@ -142,6 +142,56 @@
         fab:fab_shadowColor="#000"
         fab:fab_size="mini" />
 
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/backpts_messure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="90dp"
+        android:layout_alignParentBottom="true"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_arrow_back"
+        fab:fab_colorNormal="#F50057"
+        fab:fab_colorPressed="#E8004A"
+        fab:fab_colorRipple="#C20024"
+        fab:fab_elevationCompat="6dp"
+        fab:fab_shadowColor="#000"
+        fab:fab_size="mini"
+        android:visibility="gone"/>
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/cancel_messure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentBottom="true"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_cancel_black_24dp"
+        fab:fab_colorNormal="#F50057"
+        fab:fab_colorPressed="#E8004A"
+        fab:fab_colorRipple="#C20024"
+        fab:fab_elevationCompat="6dp"
+        fab:fab_shadowColor="#000"
+        fab:fab_size="mini"
+        android:visibility="gone"/>
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/delete_messure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_alignParentBottom="true"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_crop_5_4_black_24dp"
+        fab:fab_colorNormal="#F50057"
+        fab:fab_colorPressed="#E8004A"
+        fab:fab_colorRipple="#C20024"
+        fab:fab_elevationCompat="6dp"
+        fab:fab_shadowColor="#000"
+        fab:fab_size="mini"
+        android:visibility="gone"/>
+
+
 
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fam"

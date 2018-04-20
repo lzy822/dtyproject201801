@@ -227,6 +227,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     com.github.clans.fab.FloatingActionButton button5;
     com.github.clans.fab.FloatingActionButton whiteblank;
 
+    //声明测量相关按钮
+    FloatingActionButton delete_messure;
+    FloatingActionButton cancel_messure;
+    FloatingActionButton backpt_messure;
+
     //记录是否开启白板功能
     private boolean isOpenWhiteBlank = false;
 
@@ -675,15 +680,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     //解析白板字符串并绘制1
-    private void parseAndrawLinesforWhiteBlank(String mmessure_pts, Canvas canvas){
-            locError("geometry: " + mmessure_pts);
+    private void parseAndrawLinesforWhiteBlank(String whiteBlankPt, Canvas canvas){
+            locError("geometry: " + whiteBlankPt);
             Paint paint7 = new Paint();
             paint7.setStrokeWidth(10);
             paint7.setColor(color_Whiteblank);
             paint7.setStyle(Paint.Style.STROKE);
-            if (isWhiteBlank & !mmessure_pts.isEmpty()) {
-                mmessure_pts = mmessure_pts.trim();
-                String[] pts = mmessure_pts.split(" ");
+            if (isWhiteBlank & !whiteBlankPt.isEmpty()) {
+                whiteBlankPt = whiteBlankPt.trim();
+                String[] pts = whiteBlankPt.split(" ");
                 float[] mpts;
                 if (pts.length <= 4 & pts.length > 3) {
                     mpts = new float[pts.length];
@@ -709,7 +714,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
                     }
                     //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                    locError(mmessure_pts);
+                    locError(whiteBlankPt);
                     locError("mpts : " + Integer.toString(mpts.length));
                     canvas.drawLines(mpts, paint7);
                 } else if (pts.length > 4) {
@@ -749,7 +754,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
                     }
                     //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                    locError(mmessure_pts);
+                    locError(whiteBlankPt);
                     locError("mpts : " + Integer.toString(mpts.length));
                     canvas.drawLines(mpts, paint7);
                 } else {
@@ -968,7 +973,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }*/
                         if (isWhiteBlank){
                             parseAndrawLinesforWhiteBlank(canvas);
-                            parseAndrawLinesforWhiteBlank(messure_pts, canvas);
+                            parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
                         }
                         parseAndrawMessure(messure_pts, canvas);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
@@ -1326,7 +1331,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }
                         if (isWhiteBlank){
                             parseAndrawLinesforWhiteBlank(canvas);
-                            parseAndrawLinesforWhiteBlank(messure_pts, canvas);
+                            parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
                         }
 
                         if(isDrawType == POI_DRAW_TYPE || showAll){
@@ -1897,8 +1902,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bt_distance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //pickFile();
                 popupWindow.dismiss();
+                delete_messure.setVisibility(View.VISIBLE);
+                backpt_messure.setVisibility(View.VISIBLE);
+                cancel_messure.setVisibility(View.VISIBLE);
+                whiteblank.setVisibility(View.GONE);
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("正在测量(轨迹记录中)");
                 }else toolbar.setTitle("正在测量");
@@ -1916,6 +1924,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
+                delete_messure.setVisibility(View.VISIBLE);
+                backpt_messure.setVisibility(View.VISIBLE);
+                cancel_messure.setVisibility(View.VISIBLE);
+                whiteblank.setVisibility(View.GONE);
                 //Toast.makeText(MainInterface.this, "暂时没有添加面积测算功能",Toast.LENGTH_SHORT).show();
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("正在测量(轨迹记录中)");
@@ -1956,16 +1968,42 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录当前记录的点数
     int num_drawpt;
+    //记录白板绘图坐标点对数量
+    int num_whiteBlankPt;
     //记录是否处于白板画图状态
     private boolean isWhiteBlank = false;
     //记录画笔颜色
     private int color_Whiteblank;
+    //记录白板绘图独立字符串
+    private String whiteBlankPt = "";
     //记录当前List<geometry_WhiteBlank>
     private List<geometry_WhiteBlank> geometry_whiteBlanks;
 
     private void showPopueWindowForWhiteblank(){
         final View popView = View.inflate(this,R.layout.popupwindow_whiteblank,null);
         isWhiteBlank = true;
+        FloatingActionButton back_pop = (FloatingActionButton) popView.findViewById(R.id.back_pop) ;
+        back_pop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
+                int size = lines_whiteBlanks.size();
+                int size1 = geometry_whiteBlanks.size();
+                if (size == 0) {
+                    whiteBlankPt = "";
+                    geometry_whiteBlanks.clear();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    //Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    whiteBlankPt = "";
+                    DataSupport.deleteAll(Lines_WhiteBlank.class , "id = ? and m_ic = ?", Integer.toString(size - 1), ic);
+                    geometry_whiteBlanks.remove(size1 - 1);
+                    pdfView.zoomWithAnimation(c_zoom);
+                    //Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         FloatingActionButton fff = (FloatingActionButton) popView.findViewById(R.id.colorSeeker_pop);
         fff.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -2007,13 +2045,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
                 int size = lines_whiteBlanks.size();
                 if (size == 0) {
-                    messure_pts = "";
+                    whiteBlankPt = "";
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
                     Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    messure_pts = "";
+                    whiteBlankPt = "";
                     DataSupport.deleteAll(Lines_WhiteBlank.class, "m_ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
@@ -2050,19 +2088,21 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     case MotionEvent.ACTION_DOWN:
                         //按下
                         locError("按下!!!");
-                        messure_pts = "";
-                        num_drawpt = 0;
+                        whiteBlankPt = "";
+                        num_whiteBlankPt = 0;
                         break;
                     case MotionEvent.ACTION_UP:
                         //抬起
                         locError("抬起!!!");
                         //Toast.makeText(MainInterface.this, "抬起", Toast.LENGTH_SHORT).show();
-                        geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(messure_pts, color_Whiteblank);
+                        geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(whiteBlankPt, color_Whiteblank);
                         geometry_whiteBlanks.add(geometry_whiteBlank);
+                        List<Lines_WhiteBlank> liness = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
                         Lines_WhiteBlank lines = new Lines_WhiteBlank();
                         lines.setM_ic(ic);
                         lines.setM_color(color_Whiteblank);
-                        lines.setM_lines(messure_pts);
+                        lines.setM_lines(whiteBlankPt);
+                        lines.setId(liness.size());
                         lines.save();
                         break;
                 }
@@ -2078,17 +2118,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
                 }*/
                 if (isWhiteBlank){
-                    num_drawpt ++;
-                    if (num_drawpt == 1){
-                        messure_pts = Float.toString(pt.x) + " " + Float.toString(pt.y);
-                    }else if (num_drawpt == 2){
-                        messure_pts = messure_pts + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                    num_whiteBlankPt ++;
+                    if (num_whiteBlankPt == 1){
+                        whiteBlankPt = Float.toString(pt.x) + " " + Float.toString(pt.y);
+                    }else if (num_whiteBlankPt == 2){
+                        whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
                         //setTitle("正在测量");
                         pdfView.zoomWithAnimation(c_zoom);
                         //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
                         //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                     }else {
-                        messure_pts = messure_pts + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                        whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
                         //setTitle("正在测量");
                         pdfView.zoomWithAnimation(c_zoom);
                         //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
@@ -2108,6 +2148,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
+                whiteblank.setVisibility(View.VISIBLE);
                 isOpenWhiteBlank = false;
                 whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
@@ -2458,6 +2499,46 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        //初始化测量相关按钮
+        cancel_messure = (FloatingActionButton) findViewById(R.id.cancel_messure);
+        cancel_messure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isMessure = false;
+                poinum_messure = 0;
+                messure_pts = "";
+                delete_messure.setVisibility(View.GONE);
+                backpt_messure.setVisibility(View.GONE);
+                cancel_messure.setVisibility(View.GONE);
+                whiteblank.setVisibility(View.VISIBLE);
+                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                    toolbar.setTitle("轨迹记录中");
+                }else toolbar.setTitle(pdfFileName);
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        delete_messure = (FloatingActionButton) findViewById(R.id.delete_messure);
+        delete_messure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                messure_pts = "";
+                poinum_messure = 0;
+                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                    toolbar.setTitle("正在测量(轨迹记录中)");
+                }else toolbar.setTitle("正在测量");
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        backpt_messure = (FloatingActionButton) findViewById(R.id.backpts_messure);
+        backpt_messure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                poinum_messure --;
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
         //初始化白板要素List
         geometry_whiteBlanks = new ArrayList<geometry_WhiteBlank>();
         //初始化白板按钮
@@ -2473,9 +2554,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         toolbar.setTitle("正在进行白板绘图(轨迹记录中)");
                     }else toolbar.setTitle("正在进行白板绘图");
                     showPopueWindowForWhiteblank();
-                }else {
-                    isOpenWhiteBlank = false;
-                    whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
+                    whiteblank.setVisibility(View.INVISIBLE);
                 }
             }
         });

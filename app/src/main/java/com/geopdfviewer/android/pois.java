@@ -164,13 +164,11 @@ public class pois extends AppCompatActivity {
                 resetView();
                 break;
             case R.id.deletepoi:
-                isLongClick = 1;
-                setTitle("兴趣点列表");
                 /*DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
                 DataSupport.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
                 DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);*/
                 parseSelectedPOIC();
-                refreshCard();
+                resetView();
                 break;
             default:
                 break;

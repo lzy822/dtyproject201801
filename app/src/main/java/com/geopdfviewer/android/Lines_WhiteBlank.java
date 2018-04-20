@@ -6,6 +6,15 @@ public class Lines_WhiteBlank extends DataSupport {
     private String m_ic;
     private String m_lines;
     private int m_color;
+    private int id;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getM_ic() {
         return m_ic;

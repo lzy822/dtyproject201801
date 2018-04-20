@@ -39,7 +39,8 @@
     fab:fab_colorRipple="#C20024"
     fab:fab_elevationCompat="6dp"
     fab:fab_shadowColor="#000"
-    fab:fab_size="mini" /><com.github.clans.fab.FloatingActionButton
+    fab:fab_size="mini" />
+    <com.github.clans.fab.FloatingActionButton
     android:id="@+id/eraseContent"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -54,6 +55,21 @@
     fab:fab_elevationCompat="6dp"
     fab:fab_shadowColor="#000"
     fab:fab_size="mini" />
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/back_pop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="130dp"
+        android:layout_alignParentBottom="true"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_arrow_back"
+        fab:fab_colorNormal="#000000"
+        fab:fab_colorPressed="#000000"
+        fab:fab_colorRipple="#000000"
+        fab:fab_elevationCompat="6dp"
+        fab:fab_shadowColor="#000"
+        fab:fab_size="mini" />
 
 
 </RelativeLayout>
