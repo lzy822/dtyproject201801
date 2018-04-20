@@ -847,6 +847,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             //locError("ScaleX : " + String.valueOf(pdfView.getScaleX()) + "ScaleY : " + String.valueOf(pdfView.getScaleY()) + "Scale : " + String.valueOf(pdfView.getScaleX() * pdfView.getScaleY()));
                         }
                         if (isMessure == true){
+                            locError("messure_pts" + messure_pts);
                             poinum_messure++;
                             if (poinum_messure == 1){
                                 poi111 = pt1;
@@ -1269,7 +1270,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
                         scale_distance = scale_distance * 2.53;
                         scaleShow.setText(scale_df.format(scale_distance) + "米");
-
+                        parseAndrawMessure(messure_pts, canvas);
 
                         /*if (isOpenWhiteBlank){
                         //白板功能监控
@@ -1561,6 +1562,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
                         }
                         if (isMessure == true){
+                            locError("messure_pts" + messure_pts);
                             poinum_messure++;
                             if (poinum_messure == 1){
                                 poi111 = pt1;
