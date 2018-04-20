@@ -190,6 +190,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //记录是否开始查询操作
     private boolean isQuery = false;
 
+    //记录当前点击像素点与当前地图的关系
+    public static final int OUT = -1;
+    public static final int IN_FULL = 1;
+    public static final int IN_NOTFULL = 2;
+
     //记录当前设置点位数
     private int poinum_messure = 0;
 
@@ -288,12 +293,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录比例尺格式
     DecimalFormat scale_df;
-
-    //记录上一个绘图点
-    PointF pt_last;
-
-    //记录当前绘图点
-    PointF pt_current;
 
 
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
@@ -421,85 +420,36 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Log.w(TAG, "CropBox : " + CropBox );
         Log.w(TAG, "ic : " + ic );
         //GPTSList = new double[8];
-        getGPTS();
-        getBBox();
-        getCropBox();
-        getMediaBox();
 
     }
 
-    private void getGPTS() {
-        locError("gpts: " + GPTS);
-        String[] GPTString = GPTS.split(" ");
-        float[] GPTSs = new float[GPTString.length];
-        for (int i = 0; i < GPTString.length; i++) {
-            GPTSs[i] = Float.valueOf(GPTString[i]);
-        }
-        float lat_axis, long_axis;
-        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-        for (int i = 0; i < GPTSs.length; i = i + 2){
-            if (GPTSs[i] < lat_axis) {
-                if (GPTSs[i + 1] < long_axis){
-                    pt_lb.x = GPTSs[i];
-                    pt_lb.y = GPTSs[i + 1];
-                } else {
-                    pt_rb.x = GPTSs[i];
-                    pt_rb.y = GPTSs[i + 1];
-                }
-            } else {
-                if (GPTSs[i + 1] < long_axis){
-                    pt_lt.x = GPTSs[i];
-                    pt_lt.y = GPTSs[i + 1];
-                } else {
-                    pt_rt.x = GPTSs[i];
-                    pt_rt.y = GPTSs[i + 1];
-                }
-            }
-        }
-        locError("see here");
-        w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-        h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-        locError("see here");
-        min_lat = (pt_lb.x + pt_rb.x) / 2;
-        max_lat = (pt_lt.x + pt_rt.x) / 2;
-        min_long = (pt_lt.y + pt_lb.y) / 2;
-        max_long = (pt_rt.y + pt_rb.y) / 2;
-        locError(Double.toString(min_lat));
-        locError(Double.toString(max_lat));
+    //处理地理信息
+    private void manageInfo(){
+        double[] gpts = DataUtil.getGPTS(GPTS);
+        min_lat = gpts[0];
+        max_lat = gpts[1];
+        min_long = gpts[2];
+        max_long = gpts[3];
+        w = gpts[4];
+        h = gpts[5];
         if (isGPSEnabled()) {
             getLocation();
         }else locError("请打开GPS功能");
-    }
-
-    private void getBBox() {
-        String[] BBoxString = BBox.split(" ");
-        b_bottom_x = Float.valueOf(BBoxString[0]);
-        b_bottom_y = Float.valueOf(BBoxString[1]);
-        b_top_x = Float.valueOf(BBoxString[2]);
-        b_top_y = Float.valueOf(BBoxString[3]);
-
-    }
-
-    private void getMediaBox() {
-        String[] MediaBoxString = MediaBox.split(" ");
-        m_bottom_x = Float.valueOf(MediaBoxString[0]);
-        m_bottom_y = Float.valueOf(MediaBoxString[1]);
-        m_top_x = Float.valueOf(MediaBoxString[2]);
-        m_top_y = Float.valueOf(MediaBoxString[3]);
-        locError(Integer.toString(MediaBoxString.length));
-
-    }
-
-    private void getCropBox() {
-        String[] CropBoxString = CropBox.split(" ");
-        c_bottom_x = Float.valueOf(CropBoxString[0]);
-        c_bottom_y = Float.valueOf(CropBoxString[1]);
-        c_top_x = Float.valueOf(CropBoxString[2]);
-        c_top_y = Float.valueOf(CropBoxString[3]);
-        locError(Integer.toString(CropBoxString.length));
-
+        float[] bboxs = DataUtil.getBox(BBox);
+        b_bottom_x = bboxs[0];
+        b_bottom_y = bboxs[1];
+        b_top_x = bboxs[2];
+        b_top_y = bboxs[3];
+        float[] mediaboxs = DataUtil.getBox(MediaBox);
+        m_bottom_x = mediaboxs[0];
+        m_bottom_y = mediaboxs[1];
+        m_top_x = mediaboxs[2];
+        m_top_y = mediaboxs[3];
+        float[] cropbox = DataUtil.getBox(CropBox);
+        c_bottom_x = cropbox[0];
+        c_bottom_y = cropbox[1];
+        c_top_x = cropbox[2];
+        c_top_y = cropbox[3];
     }
 
     //记录距离之和
@@ -529,7 +479,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 for (int i = 0; i < pts.length; i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = getPixLocFromGeoL(xx);
+                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, page_width, page_height, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -569,7 +519,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = getPixLocFromGeoL(xx);
+                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, page_width, page_height, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -612,8 +562,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
-        PointF pt11 = getPixLocFromGeoL(xx);
-        PointF pt22 = getPixLocFromGeoL(yy);
+        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx);
+        PointF pt22 = RenderUtil.getPixLocFromGeoL(yy);
         mpts[0] = pt11.x;
         mpts[1] = pt11.y;
         mpts[2] = pt22.x;
@@ -653,7 +603,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 for (int i = 0; i < pts.length; i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = getPixLocFromGeoL(xx);
+                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, page_width, page_height, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -693,7 +643,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = getPixLocFromGeoL(xx);
+                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, page_width, page_height, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -711,8 +661,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
-        PointF pt11 = getPixLocFromGeoL(xx);
-        PointF pt22 = getPixLocFromGeoL(yy);
+        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx);
+        PointF pt22 = RenderUtil.getPixLocFromGeoL(yy);
         mpts[0] = pt11.x;
         mpts[1] = pt11.y;
         mpts[2] = pt22.x;
@@ -751,7 +701,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     for (int i = 0; i < pts.length; i = i + 2) {
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                        PointF pt11 = getPixLocFromGeoL(xx);
+                        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, page_width, page_height, w, h, min_long, min_lat);
                         mpts[i] = pt11.x;
                         mpts[i + 1] = pt11.y;
                     }
@@ -791,7 +741,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                        PointF pt11 = getPixLocFromGeoL(xx);
+                        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, page_width, page_height, w, h, min_long, min_lat);
                         mpts[i] = pt11.x;
                         mpts[i + 1] = pt11.y;
                     }
@@ -809,8 +759,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
-        PointF pt11 = getPixLocFromGeoL(xx);
-        PointF pt22 = getPixLocFromGeoL(yy);
+        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx);
+        PointF pt22 = RenderUtil.getPixLocFromGeoL(yy);
         mpts[0] = pt11.x;
         mpts[1] = pt11.y;
         mpts[2] = pt22.x;
@@ -890,7 +840,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
-                            PointF pp = getPixLocFromGeoL(pt1);
+                            PointF pp = RenderUtil.getPixLocFromGeoL(pt1, page_width, page_height, w, h, min_long, min_lat);
                             c_zoom = pdfView.getZoom();
                             pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
 
@@ -942,15 +892,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             if (pois.size() > 0){
                                 mPOIobj poii = pois.get(0);
                                 PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
-                                pointF = getPixLocFromGeoL(pointF);
+                                pointF = RenderUtil.getPixLocFromGeoL(pointF, page_width, page_height, w, h, min_long, min_lat);
                                 pointF = new PointF(pointF.x, pointF.y - 70);
                                 //pointF = getGeoLocFromPixL(pointF);
-                                pt1 = getPixLocFromGeoL(pt1);
+                                pt1 = RenderUtil.getPixLocFromGeoL(pt1, page_width, page_height, w, h, min_long, min_lat);
                                 locError("pt1 : " + pt1.toString());
                                 float delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
                                 for (mPOIobj poi : pois){
                                     PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
-                                    mpointF = getPixLocFromGeoL(mpointF);
+                                    mpointF = RenderUtil.getPixLocFromGeoL(mpointF, page_width, page_height, w, h, min_long, min_lat);
                                     mpointF = new PointF(mpointF.x, mpointF.y - 70);
                                     if (Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < delta && Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < 35){
                                         locError("mpointF : " + mpointF.toString());
@@ -977,6 +927,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onDraw(new OnDrawListener() {
                     @Override
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+                        page_height = pageHeight;
+                        page_width = pageWidth;
+                        current_pageheight = pageHeight;
+                        current_pagewidth = pageWidth;
                         if (isGetStretchRatio == false){
                             getStretchRatio(pageWidth, pageHeight);
                             viewer_height = pdfView.getHeight();
@@ -998,14 +952,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             else if ((c_zoom - c_zoom1) < 0) isZoom = ZOOM_OUT;
                         }else isZoom = ZOOM_NONE;
                         locError("zoom: " + Float.toString(c_zoom));
-                        current_pageheight = pageHeight;
-                        current_pagewidth = pageWidth;
                         getCurrentScreenLoc();
                         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
                         double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
                         scale_distance = scale_distance * 2.53;
                         scaleShow.setText(scale_df.format(scale_distance) + "米");
-                        getK(pageWidth, pageHeight);
+                        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
+                        k_w = k[0];
+                        k_h = k[1];
                         getStretchRatio(pageWidth, pageHeight);
                         /*if (isOpenWhiteBlank){
                             //白板功能监控
@@ -1019,7 +973,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
-                            pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
+                            pt = RenderUtil.getPixLocFromGeoL(pt, page_width, page_height, w, h, min_long, min_lat);
                             canvas.drawCircle(pt.x, pt.y, 23, paint);
                             canvas.drawCircle(pt.x, pt.y, 20, paint5);
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
@@ -1037,8 +991,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 for (int j = 0; j < Trails.length - 2; j = j + 2){
                                     PointF pt11, pt12;
-                                    pt11 = getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]));
-                                    pt12 = getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]));
+                                    pt11 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), page_width, page_height, w, h, min_long, min_lat);
+                                    pt12 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), page_width, page_height, w, h, min_long, min_lat);
                                     canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint);
                                 }
                             }
@@ -1048,7 +1002,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
                                 for (POI poi : pois){
-                                    PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), page_width, page_height, w, h, min_long, min_lat);
                                     canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                                     //locError(Boolean.toString(poi.getPath().isEmpty()));
                                     //locError(Integer.toString(poi.getPath().length()));
@@ -1064,7 +1018,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path() == mphotos.get(0).getPath()){
+                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
                                                     canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                                                 }
                                             }
@@ -1073,7 +1027,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path() == mphotos.get(0).getPath()){
+                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
                                                     canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                                                 }
                                             }
@@ -1157,6 +1111,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
                                     num_map1 = num_map;
                                     getInfo(thenum);
+                                    manageInfo();
                                     toolbar.setTitle(pdfFileName);
                                     getBitmap();
                                     pdfView.recycle();
@@ -1229,6 +1184,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 if (thenum != num_map & thenum != 0){
                                     num_map1 = num_map;
                                     getInfo(thenum);
+                                    manageInfo();
                                     toolbar.setTitle(pdfFileName);
                                     getBitmap();
                                     pdfView.recycle();
@@ -1268,6 +1224,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .onDraw(new OnDrawListener() {
                     @Override
                     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+                        page_height = pageHeight;
+                        page_width = pageWidth;
+                        current_pageheight = pageHeight;
+                        current_pagewidth = pageWidth;
                         if (isGetStretchRatio == false){
                             getStretchRatio(pageWidth, pageHeight);
                             viewer_height = pdfView.getHeight();
@@ -1304,8 +1264,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             else if ((c_zoom - c_zoom1) < 0) isZoom = ZOOM_OUT;
                         }else isZoom = ZOOM_NONE;
                         locError("zoom: " + Float.toString(c_zoom));
-                        current_pageheight = pageHeight;
-                        current_pagewidth = pageWidth;
                         getCurrentScreenLoc();
                         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
                         double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
@@ -1318,12 +1276,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         onTouchListenerForView();
                         }*/
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
-                        getK(pageWidth, pageHeight);
+                        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
+                        k_w = k[0];
+                        k_h = k[1];
                         getStretchRatio(pageWidth, pageHeight);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
-                            pt = getPixLocFromGeoL(pt, pageWidth, pageHeight);
+                            pt = RenderUtil.getPixLocFromGeoL(pt, page_width, page_height, w, h, min_long, min_lat);
                             canvas.drawCircle(pt.x, pt.y, 23, paint);
                             canvas.drawCircle(pt.x, pt.y, 20, paint5);
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
@@ -1357,8 +1317,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 for (int j = 0; j < Trails.length - 2; j = j + 2){
                                     PointF pt11, pt12;
-                                    pt11 = getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]));
-                                    pt12 = getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]));
+                                    pt11 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), page_width, page_height, w, h, min_long, min_lat);
+                                    pt12 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), page_width, page_height, w, h, min_long, min_lat);
                                     canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint);
                                 }
                             }
@@ -1373,7 +1333,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
                                 for (POI poi : pois){
-                                    PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), page_width, page_height, w, h, min_long, min_lat);
                                     canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                                     //locError(Boolean.toString(poi.getPath().isEmpty()));
                                     //locError(Integer.toString(poi.getPath().length()));
@@ -1389,7 +1349,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path().contains(mphotos.get(0).getPath())){
+                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
                                                     canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                                                     locError("lzy");
                                                 }
@@ -1399,7 +1359,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
                                             int size = bts.size();
                                             for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path().contains(mphotos.get(0).getPath())){
+                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
                                                     canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                                                     locError("lzy");
                                                 }
@@ -1487,6 +1447,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
                                     num_map1 = num_map;
                                     getInfo(thenum);
+                                    manageInfo();
                                     toolbar.setTitle(pdfFileName);
                                     getBitmap();
                                     pdfView.recycle();
@@ -1558,6 +1519,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 if (thenum != num_map & thenum != 0){
                                     num_map1 = num_map;
                                     getInfo(thenum);
+                                    manageInfo();
                                     toolbar.setTitle(pdfFileName);
                                     getBitmap();
                                     pdfView.recycle();
@@ -1594,7 +1556,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
-                            PointF pp = getPixLocFromGeoL(pt1);
+                            PointF pp = RenderUtil.getPixLocFromGeoL(pt1, page_width, page_height, w, h, min_long, min_lat);
                             c_zoom = pdfView.getZoom();
                             pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
                         }
@@ -1645,15 +1607,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             if (pois.size() > 0){
                                 mPOIobj poii = pois.get(0);
                                 PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
-                                pointF = getPixLocFromGeoL(pointF);
+                                pointF = RenderUtil.getPixLocFromGeoL(pointF, page_width, page_height, w, h, min_long, min_lat);
                                 pointF = new PointF(pointF.x, pointF.y - 70);
                                 //pointF = getGeoLocFromPixL(pointF);
-                                pt1 = getPixLocFromGeoL(pt1);
+                                pt1 = RenderUtil.getPixLocFromGeoL(pt1, page_width, page_height, w, h, min_long, min_lat);
                                 locError("pt1 : " + pt1.toString());
                                 float delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
                                 for (mPOIobj poi : pois){
                                     PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
-                                    mpointF = getPixLocFromGeoL(mpointF);
+                                    mpointF = RenderUtil.getPixLocFromGeoL(mpointF, page_width, page_height, w, h, min_long, min_lat);
                                     mpointF = new PointF(mpointF.x, mpointF.y - 70);
                                     if (Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < delta && Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < 35){
                                         locError("mpointF : " + mpointF.toString());
@@ -2036,6 +1998,28 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         });
 
+        FloatingActionButton eraseContent = (FloatingActionButton) popView.findViewById(R.id.eraseContent);
+        eraseContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
+                int size = lines_whiteBlanks.size();
+                if (size == 0) {
+                    messure_pts = "";
+                    geometry_whiteBlanks.clear();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    messure_pts = "";
+                    DataSupport.deleteAll(Lines_WhiteBlank.class, "m_ic = ?", ic);
+                    geometry_whiteBlanks.clear();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         FloatingActionButton popwhiteblank = (FloatingActionButton) popView.findViewById(R.id.whiteblank_pop);
         FrameLayout frameLayout = (FrameLayout) popView.findViewById(R.id.fml_pop);
         //获取屏幕宽高
@@ -2131,37 +2115,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         });
     }
 
-    //经纬度到屏幕坐标位置转化
-    private PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight){
-        double y_ratio = ((pt.x - min_lat) / h);
-        double x_ratio = ((pt.y - min_long) / w);
-        pt.x = (float) ( x_ratio * pageWidth);
-        pt.y = (float) ( (1 - y_ratio) * pageHeight);
-        return pt;
-    }
-
-    private PointF getPixLocFromGeoL(PointF pt){
-        double y_ratio = ((pt.x - min_lat) / h);
-        double x_ratio = ((pt.y - min_long) / w);
-        pt.x = (float) ( x_ratio * current_pagewidth);
-        pt.y = (float) ( (1 - y_ratio) * current_pageheight);
-        return pt;
-    }
-
-    //获取pdf阅读器和pdf页面的拉伸比例
-    private void getK(float width, float height){
-        //精确定位算法
-        page_height = height;
-        page_width = width;
-        if (viewer_height > page_height){
-            k_h = (viewer_height - page_height) / 2;
-        } else k_h = 0;
-        if (viewer_width > page_width){
-            k_w = (viewer_width - page_width) / 2;
-        } else k_w = 0;
-        //locError(Float.toString(k_w) + "see" + Float.toString(k_h));
-    }
-
     //获取当前屏幕所视区域的经纬度与像素范围
     private void getCurrentScreenLoc(){
         if (pdfView.getCurrentYOffset() > 0 || pdfView.getCurrentXOffset() > 0) {
@@ -2227,9 +2180,46 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }else {
                 textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
             }
-            locError("常规 : " + df.format(pt.x) + "; " + df.format(pt.y));
-            locError("度分秒 : " + Integer.toString((int)pt.x) + "°" + Integer.toString((int)( pt.x - (int)pt.x) * 60) + "′" + Float.toString(( pt.x - (int)pt.x) * 60 - (int)(( pt.x - (int)pt.x) * 60) * 60));
         }
+        return pt;
+        //
+    }
+
+    //判断该像素点位置是否在地图区域内
+    public static int verifyPixL(PointF pt, float k_w, float k_h, float screen_width, float screen_height, float viewer_width, float viewer_height, float page_width, float page_height){
+        final int OUT = -1;
+        final int IN_FULL = 1;
+        final int IN_NOTFULL = 2;
+        if (page_height < viewer_height || page_width < viewer_width) {
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + page_height) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + page_width)) return IN_NOTFULL;
+            else return OUT;
+        } else return IN_FULL;
+    }
+
+    //屏幕坐标位置到经纬度转化1
+    private PointF getGeoLocFromPixLForFull(PointF pt){
+        //精确定位算法
+        float xxxx, yyyy;
+        xxxx = pt.x - (screen_width - viewer_width);
+        yyyy = pt.y - (screen_height - viewer_height);
+        pt.x = (float)(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat));
+        pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
+        locLatForTap = pt.x;
+        locLongForTap = pt.y;
+        return pt;
+        //
+    }
+
+    //屏幕坐标位置到经纬度转化2
+    private PointF getGeoLocFromPixLForNotFull(PointF pt){
+        //精确定位算法
+        float xxxx, yyyy;
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            pt.x = (float) (max_lat - (yyyy) / current_pageheight * (max_lat - min_lat));
+            pt.y = (float) ((xxxx) / current_pagewidth * (max_long - min_long) + min_long);
+            locLatForTap = pt.x;
+            locLongForTap = pt.y;
         return pt;
         //
     }
@@ -2515,7 +2505,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 DecimalFormat df = new DecimalFormat("0.0000");
                 String str = (String) textView.getText();
-                if (!str.contains("点击位置在区域之外") & !str.contains("在这里显示坐标值")){
+                if (!str.equals("点击位置在区域之外") & !str.equals("在这里显示坐标值")){
                 if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
                     //String[] strs = str.split(";");
                     //PointF pt = new PointF(Float.valueOf(strs[0]), Float.valueOf(strs[1]));
@@ -2575,6 +2565,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         final Intent intent = getIntent();
         int m_num = intent.getIntExtra("num", 0);
         getInfo(m_num);
+        manageInfo();
         num_map1 = m_num;
         linearLayout = (LinearLayout) findViewById(R.id.search);
         if (uri != "") {
@@ -2596,13 +2587,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 if (m_lat <= max_lat & m_lat >= min_lat & m_long <= max_long & m_long >= min_long){
                     toolbar.setTitle("准备记录轨迹");
-                /*PointF mmm = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                /*PointF mmm = RenderUtil.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                 pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);*/
                     pdfView.resetZoomWithAnimation();
                     TimerTask task = new TimerTask() {
                         @Override
                         public void run() {
-                            final PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
+                            final PointF ppz = RenderUtil.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), page_width, page_height, w, h, min_long, min_lat);
                             ppz.x = ppz.x - 10;
                             //final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                             runOnUiThread(new Runnable() {
@@ -2759,7 +2750,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     TimerTask task = new TimerTask() {
                         @Override
                         public void run() {
-                            final PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
+                            final PointF ppz = RenderUtil.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), page_width, page_height, w, h, min_long, min_lat);
                             ppz.x = ppz.x - 10;
                             final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                             runOnUiThread(new Runnable() {
@@ -2776,11 +2767,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     };
                     Timer timer = new Timer();
                     timer.schedule(task, 1000);
-                    //PointF pp = getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                    //PointF pp = RenderUtil.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                     //pdfView.zoomWithAnimation(pp.x, pp.y, 10);
                 }else {
                     button2.setImageResource(R.drawable.ic_my_location);
-                    PointF ppz = getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long));
+                    PointF ppz = RenderUtil.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), page_width, page_height, w, h, min_long, min_lat);
                     ppz.x = ppz.x - 10;
                     pdfView.zoomCenteredTo(8, ppz);
                     //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
@@ -2863,7 +2854,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
-                        //PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));
@@ -2909,7 +2900,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
-                        //PointF pt2 = getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));

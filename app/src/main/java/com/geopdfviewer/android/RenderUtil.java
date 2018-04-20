@@ -1,6 +1,7 @@
 package com.geopdfviewer.android;
 
 import android.app.Activity;
+import android.graphics.PointF;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
@@ -13,5 +14,28 @@ public class RenderUtil {
         wm.getDefaultDisplay().getMetrics(outMetrics);
         int deviceWidth = outMetrics.widthPixels;
         return (max_long - min_long) / page_width * deviceWidth * 1;
+    }
+
+    //获取pdf阅读器和pdf页面的拉伸比例
+    public static float[] getK(float width, float height, float viewer_width, float viewer_height){
+        float k_w = 0;
+        float k_h = 0;
+        if (viewer_height > height){
+            k_h = (viewer_height - height) / 2;
+        } else k_h = 0;
+        if (viewer_width > width){
+            k_w = (viewer_width - width) / 2;
+        } else k_w = 0;
+        return new float[]{k_w, k_h};
+        //locError(Float.toString(k_w) + "see" + Float.toString(k_h));
+    }
+
+    //经纬度到屏幕坐标位置转化
+    public static PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight, double deltaLong, double deltaLat, double min_long, double min_lat){
+        double y_ratio = ((pt.x - min_lat) / deltaLat);
+        double x_ratio = ((pt.y - min_long) / deltaLong);
+        pt.x = (float) ( x_ratio * pageWidth);
+        pt.y = (float) ( (1 - y_ratio) * pageHeight);
+        return pt;
     }
 }

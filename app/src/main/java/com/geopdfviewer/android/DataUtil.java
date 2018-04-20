@@ -395,5 +395,52 @@ public class DataUtil {
 
     }
 
+    public static double[] getGPTS(String GPTS) {
+        String[] GPTString = GPTS.split(" ");
+        float[] GPTSs = new float[GPTString.length];
+        for (int i = 0; i < GPTString.length; i++) {
+            GPTSs[i] = Float.valueOf(GPTString[i]);
+        }
+        float lat_axis, long_axis;
+        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+        for (int i = 0; i < GPTSs.length; i = i + 2){
+            if (GPTSs[i] < lat_axis) {
+                if (GPTSs[i + 1] < long_axis){
+                    pt_lb.x = GPTSs[i];
+                    pt_lb.y = GPTSs[i + 1];
+                } else {
+                    pt_rb.x = GPTSs[i];
+                    pt_rb.y = GPTSs[i + 1];
+                }
+            } else {
+                if (GPTSs[i + 1] < long_axis){
+                    pt_lt.x = GPTSs[i];
+                    pt_lt.y = GPTSs[i + 1];
+                } else {
+                    pt_rt.x = GPTSs[i];
+                    pt_rt.y = GPTSs[i + 1];
+                }
+            }
+        }
+        //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+        //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+        double[] gpts = new double[]{(pt_lb.x + pt_rb.x) / 2, (pt_lt.x + pt_rt.x) / 2, (pt_lt.y + pt_lb.y) / 2, (pt_rt.y + pt_rb.y) / 2, ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2, ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2};
+        /*min_lat = (pt_lb.x + pt_rb.x) / 2;
+        max_lat = (pt_lt.x + pt_rt.x) / 2;
+        min_long = (pt_lt.y + pt_lb.y) / 2;
+        max_long = (pt_rt.y + pt_rb.y) / 2;*/
+        //locError(Double.toString(min_lat));
+        //locError(Double.toString(max_lat));
+
+        return gpts;
+    }
+
+    public static float[] getBox(String Box) {
+        String[] BoxString = Box.split(" ");
+        return new float[]{Float.valueOf(BoxString[0]), Float.valueOf(BoxString[1]), Float.valueOf(BoxString[2]), Float.valueOf(BoxString[3])};
+    }
+
 
 }

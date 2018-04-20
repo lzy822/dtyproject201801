@@ -175,7 +175,7 @@ public class register extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     String edittxt = editText.getText().toString();
-                    if (edittxt.length() >= 9 & edittxt.length() <= 10) {
+                    if (edittxt.length() >= 9 & edittxt.length() <= 11) {
                         Log.w(TAG, "str: " + edittxt.substring(0, edittxt.length() - 2));
                         manageInputLisence(edittxt);
                     }

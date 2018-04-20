@@ -261,8 +261,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         locError("mapath: " + filepath);
         if (filepath.isEmpty()) intent.setType("application/dt");
         else intent.setDataAndType(Uri.parse(filepath), "application/dt");
-        locError("path2: " + FileProvider.getUriForFile(this, "com.android.tuzhi.fileprovider", new File(filepath)).toString());
-
         try {
             startActivityForResult(intent, REQUEST_CODE);
     } catch (ActivityNotFoundException e) {
