@@ -1,8 +1,23 @@
 package com.geopdfviewer.android;
 
 public class geometry_WhiteBlank {
+    private String ic;
     private String m_lines;
     private int m_color;
+
+    public geometry_WhiteBlank(String ic, String m_lines, int m_color) {
+        this.ic = ic;
+        this.m_lines = m_lines;
+        this.m_color = m_color;
+    }
+
+    public String getIc() {
+        return ic;
+    }
+
+    public void setIc(String ic) {
+        this.ic = ic;
+    }
 
     public geometry_WhiteBlank(String m_lines, int m_color) {
         this.m_lines = m_lines;

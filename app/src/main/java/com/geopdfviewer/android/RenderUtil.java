@@ -6,14 +6,14 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 public class RenderUtil {
-
     //设置当前地图切换查询的容许误差值
-    public static double getDeltaKforTrans(float page_width, double max_long, double min_long, Activity activity){
+    public static double getDeltaKforTrans(float page_width, double max_long, double min_long, Activity activity, int type){
         WindowManager wm = activity.getWindowManager();
         DisplayMetrics outMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(outMetrics);
         int deviceWidth = outMetrics.widthPixels;
-        return (max_long - min_long) / page_width * deviceWidth * 1;
+        if (type == 2) return (max_long - min_long) / page_width * deviceWidth * 1;
+        else return (max_long - min_long) * 24;
     }
 
     //获取pdf阅读器和pdf页面的拉伸比例
