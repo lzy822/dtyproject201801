@@ -206,7 +206,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     ImageButton bbt1, bbt2, bbt3, bbt4, bbt5;
 
     //记录当前缩放比例
-    private float c_zoom;
+    private float c_zoom = 1;
 
     //记录当前图号
     private int num_map;
@@ -943,7 +943,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }
                         locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()));
                         //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
-                        float c_zoom1 = 1;
+                        //float c_zoom1 = 1;
                         if (c_zoom != pdfView.getZoom()){
                             c_zoom1 = c_zoom;
                             c_zoom = pdfView.getZoom();
@@ -1221,6 +1221,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         timer.schedule(task, 2500);
     }
 
+    float c_zoom1 = 1;
     private void displayFromFile(String filePath) {
         locError("filePath: " + filePath);
         toolbar.setTitle(pdfFileName);
@@ -1261,12 +1262,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }
                         locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()) + "verx : " + Float.toString(verx));
                         //locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
-                        float c_zoom1 = 1;
                         if (c_zoom != pdfView.getZoom()){
                             c_zoom1 = c_zoom;
                             c_zoom = pdfView.getZoom();
-                            if ((c_zoom - c_zoom1) > 0) isZoom = ZOOM_IN;
-                            else if ((c_zoom - c_zoom1) < 0) isZoom = ZOOM_OUT;
+                            if ((c_zoom - c_zoom1) > 0) {
+                                locError("zoom: " + Float.toString(c_zoom - c_zoom1));
+                                isZoom = ZOOM_IN;
+                            }
+                            else if ((c_zoom - c_zoom1) < 0) {
+                                locError("zoom: " + Float.toString(c_zoom - c_zoom1));
+                                isZoom = ZOOM_OUT;
+                            }
                         }else isZoom = ZOOM_NONE;
                         locError("zoom: " + Float.toString(c_zoom));
                         getCurrentScreenLoc();
