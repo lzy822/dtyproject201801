@@ -11,7 +11,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar1"
+        android:id="@+id/toolBar1"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
@@ -25,7 +25,7 @@
         android:translationZ="10dp"
         android:elevation="10dp">
         <ImageButton
-            android:id="@+id/starttrail"
+            android:id="@+id/startTrail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_play"
@@ -40,7 +40,7 @@
             android:background="@drawable/ic_subway_black"
             />
         <ImageButton
-            android:id="@+id/endtrail"
+            android:id="@+id/endTrail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_stop"
@@ -54,7 +54,7 @@
             android:layout_gravity="center_horizontal"
             android:text="在这里显示坐标值"/>
         <ImageButton
-            android:id="@+id/addpoi"
+            android:id="@+id/addPoi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_location"
@@ -127,7 +127,7 @@
     </LinearLayout>
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/whiteblank"
+        android:id="@+id/whiteBlank"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -219,21 +219,21 @@
             fab:fab_size="mini" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/lochere"
+            android:id="@+id/locHere"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_label="定位"
             fab:fab_size="mini" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/restorezoom"
+            android:id="@+id/restoreZoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_label="重置"
             fab:fab_size="mini" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/messuredistance"
+            android:id="@+id/messureDistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_label="测量"

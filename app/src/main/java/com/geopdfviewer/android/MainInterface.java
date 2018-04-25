@@ -149,7 +149,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //记录是否自动切换地图
     private boolean isAutoTrans = false;
     //按钮声明
-    ImageButton autoTrans;
+    ImageButton autoTrans_imgbt;
 
     Location location;
 
@@ -203,7 +203,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private PointF poi111, poi222;
 
     //按键声明
-    ImageButton bbt1, bbt2, bbt3, bbt4, bbt5;
+    ImageButton trail_imgbt, startTrail_imgbt, endTrail_imgbt, addPoi_imgbt, query_poi_imgbt;
 
     //记录当前缩放比例
     private float c_zoom = 1;
@@ -218,17 +218,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private Uri imageUri;
 
     //FloatingActionButton声明
-    com.github.clans.fab.FloatingActionButton button1;
-    com.github.clans.fab.FloatingActionButton button2;
-    com.github.clans.fab.FloatingActionButton button3;
-    com.github.clans.fab.FloatingActionButton button4;
-    com.github.clans.fab.FloatingActionButton button5;
-    com.github.clans.fab.FloatingActionButton whiteblank;
+    com.github.clans.fab.FloatingActionButton addPhoto_fab;
+    com.github.clans.fab.FloatingActionButton locHere_fab;
+    com.github.clans.fab.FloatingActionButton restoreZoom_fab;
+    com.github.clans.fab.FloatingActionButton addTape_fab;
+    com.github.clans.fab.FloatingActionButton messureDistance_fab;
+    com.github.clans.fab.FloatingActionButton whiteBlank_fab;
 
     //声明测量相关按钮
-    FloatingActionButton delete_messure;
-    FloatingActionButton cancel_messure;
-    FloatingActionButton backpt_messure;
+    FloatingActionButton delete_messure_fab;
+    FloatingActionButton cancel_messure_fab;
+    FloatingActionButton backpt_messure_fab;
 
     //记录是否开启白板功能
     private boolean isOpenWhiteBlank = false;
@@ -776,37 +776,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
-    //获取图片缩略图
-    private Bitmap getImageThumbnail(String imagePath, int width, int height) {
-        Bitmap bitmap = null;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        // 获取这个图片的宽和高，注意此处的bitmap为null
-        bitmap = BitmapFactory.decodeFile(imagePath, options);
-        options.inJustDecodeBounds = false; // 设为 false
-        // 计算缩放比
-        int h = options.outHeight;
-        int w = options.outWidth;
-        int beWidth = w / width;
-        int beHeight = h / height;
-        int be = 1;
-        if (beWidth < beHeight) {
-            be = beWidth;
-        } else {
-            be = beHeight;
-        }
-        if (be <= 0) {
-            be = 1;
-        }
-        options.inSampleSize = be;
-        // 重新读入图片，读取缩放后的bitmap，注意这次要把options.inJustDecodeBounds 设为 false
-        bitmap = BitmapFactory.decodeFile(imagePath, options);
-        // 利用ThumbnailUtils来创建缩略图，这里要指定要缩放哪个Bitmap对象
-        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height,
-                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-        return bitmap;
-    }
-
     //pdfView的ontouchlistener功能监控
     private void onTouchListenerForView(){
     }
@@ -938,7 +907,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_width = pdfView.getWidth();
                         //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                         if (pdfView.getPositionOffset() != verx & isPos == true){
-                            button2.setImageResource(R.drawable.ic_location_searching);
+                            locHere_fab.setImageResource(R.drawable.ic_location_searching);
                             isPos = false;
                         }
                         locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()));
@@ -1119,7 +1088,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     pdfView.recycle();
                                     displayFromFile(uri);
                                     isAutoTrans = false;
-                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
                             }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
@@ -1200,7 +1169,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     pdfView.recycle();
                                     displayFromFile(uri);
                                     isAutoTrans = false;
-                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
                             }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
@@ -1257,7 +1226,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }*/
                         //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                         if (pdfView.getPositionOffset() != verx & isPos == true){
-                            button2.setImageResource(R.drawable.ic_location_searching);
+                            locHere_fab.setImageResource(R.drawable.ic_location_searching);
                             isPos = false;
                         }
                         locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()) + "verx : " + Float.toString(verx));
@@ -1466,7 +1435,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     pdfView.recycle();
                                     displayFromFile(uri);
                                     isAutoTrans = false;
-                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
                             }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
@@ -1546,7 +1515,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     pdfView.recycle();
                                     displayFromFile(uri);
                                     isAutoTrans = false;
-                                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
                             }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
@@ -1926,10 +1895,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
-                delete_messure.setVisibility(View.VISIBLE);
-                backpt_messure.setVisibility(View.VISIBLE);
-                cancel_messure.setVisibility(View.VISIBLE);
-                whiteblank.setVisibility(View.GONE);
+                delete_messure_fab.setVisibility(View.VISIBLE);
+                backpt_messure_fab.setVisibility(View.VISIBLE);
+                cancel_messure_fab.setVisibility(View.VISIBLE);
+                whiteBlank_fab.setVisibility(View.GONE);
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("正在测量(轨迹记录中)");
                 }else toolbar.setTitle("正在测量");
@@ -1947,10 +1916,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
-                delete_messure.setVisibility(View.VISIBLE);
-                backpt_messure.setVisibility(View.VISIBLE);
-                cancel_messure.setVisibility(View.VISIBLE);
-                whiteblank.setVisibility(View.GONE);
+                delete_messure_fab.setVisibility(View.VISIBLE);
+                backpt_messure_fab.setVisibility(View.VISIBLE);
+                cancel_messure_fab.setVisibility(View.VISIBLE);
+                whiteBlank_fab.setVisibility(View.GONE);
                 //Toast.makeText(MainInterface.this, "暂时没有添加面积测算功能",Toast.LENGTH_SHORT).show();
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("正在测量(轨迹记录中)");
@@ -2171,9 +2140,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
-                whiteblank.setVisibility(View.VISIBLE);
+                whiteBlank_fab.setVisibility(View.VISIBLE);
                 isOpenWhiteBlank = false;
-                whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
+                whiteBlank_fab.setImageResource(R.drawable.ic_brush_black_24dp);
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("轨迹记录中");
                 }else toolbar.setTitle(pdfFileName);
@@ -2523,25 +2492,25 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
         //初始化测量相关按钮
-        cancel_messure = (FloatingActionButton) findViewById(R.id.cancel_messure);
-        cancel_messure.setOnClickListener(new View.OnClickListener() {
+        cancel_messure_fab = (FloatingActionButton) findViewById(R.id.cancel_messure);
+        cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isMessure = false;
                 poinum_messure = 0;
                 messure_pts = "";
-                delete_messure.setVisibility(View.GONE);
-                backpt_messure.setVisibility(View.GONE);
-                cancel_messure.setVisibility(View.GONE);
-                whiteblank.setVisibility(View.VISIBLE);
+                delete_messure_fab.setVisibility(View.GONE);
+                backpt_messure_fab.setVisibility(View.GONE);
+                cancel_messure_fab.setVisibility(View.GONE);
+                whiteBlank_fab.setVisibility(View.VISIBLE);
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("轨迹记录中");
                 }else toolbar.setTitle(pdfFileName);
                 pdfView.zoomWithAnimation(c_zoom);
             }
         });
-        delete_messure = (FloatingActionButton) findViewById(R.id.delete_messure);
-        delete_messure.setOnClickListener(new View.OnClickListener() {
+        delete_messure_fab = (FloatingActionButton) findViewById(R.id.delete_messure);
+        delete_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 messure_pts = "";
@@ -2552,8 +2521,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 pdfView.zoomWithAnimation(c_zoom);
             }
         });
-        backpt_messure = (FloatingActionButton) findViewById(R.id.backpts_messure);
-        backpt_messure.setOnClickListener(new View.OnClickListener() {
+        backpt_messure_fab = (FloatingActionButton) findViewById(R.id.backpts_messure);
+        backpt_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
@@ -2565,19 +2534,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //初始化白板要素List
         geometry_whiteBlanks = new ArrayList<geometry_WhiteBlank>();
         //初始化白板按钮
-        whiteblank = (FloatingActionButton) findViewById(R.id.whiteblank);
-        whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
-        whiteblank.setOnClickListener(new View.OnClickListener() {
+        whiteBlank_fab = (FloatingActionButton) findViewById(R.id.whiteBlank);
+        whiteBlank_fab.setImageResource(R.drawable.ic_brush_black_24dp);
+        whiteBlank_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!isOpenWhiteBlank){
                     isOpenWhiteBlank = true;
-                    whiteblank.setImageResource(R.drawable.ic_cancel_black_24dp);
+                    whiteBlank_fab.setImageResource(R.drawable.ic_cancel_black_24dp);
                     if (isDrawTrail == TRAIL_DRAW_TYPE){
                         toolbar.setTitle("正在进行白板绘图(轨迹记录中)");
                     }else toolbar.setTitle("正在进行白板绘图");
                     showPopueWindowForWhiteblank();
-                    whiteblank.setVisibility(View.INVISIBLE);
+                    whiteBlank_fab.setVisibility(View.INVISIBLE);
                 }
             }
         });
@@ -2588,18 +2557,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //获取传感器管理器系统服务
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         //声明ToolBar
-        toolbar = (Toolbar) findViewById(R.id.toolbar1);
+        toolbar = (Toolbar) findViewById(R.id.toolBar1);
         setSupportActionBar(toolbar);
-        autoTrans = (ImageButton) findViewById(R.id.trans);
-        autoTrans.setOnClickListener(new View.OnClickListener() {
+        autoTrans_imgbt = (ImageButton) findViewById(R.id.trans);
+        autoTrans_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (isAutoTrans){
                     isAutoTrans = false;
-                    autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                 }else {
                     isAutoTrans = true;
-                    autoTrans.setBackgroundResource(R.drawable.ic_check_black_24dp);
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_check_black_24dp);
                 }
             }
         });
@@ -2664,7 +2633,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         paint6.setStrokeWidth(10);
         paint6.setStyle(Paint.Style.STROKE);
         color_Whiteblank = Color.RED;
-        final android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
         final Intent intent = getIntent();
         int m_num = intent.getIntExtra("num", 0);
@@ -2679,14 +2647,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             FILE_TYPE = ASSET_FILE_TYPE;
             displayFromAsset("Demo");
         }
-        bbt1 = (ImageButton) findViewById(R.id.trail);
-        bbt2 = (ImageButton) findViewById(R.id.starttrail);
-        bbt3 = (ImageButton) findViewById(R.id.endtrail);
-        bbt4 = (ImageButton) findViewById(R.id.addpoi);
-        bbt5 = (ImageButton) findViewById(R.id.query_poi);
+        trail_imgbt = (ImageButton) findViewById(R.id.trail);
+        startTrail_imgbt = (ImageButton) findViewById(R.id.startTrail);
+        endTrail_imgbt = (ImageButton) findViewById(R.id.endTrail);
+        addPoi_imgbt = (ImageButton) findViewById(R.id.addPoi);
+        query_poi_imgbt = (ImageButton) findViewById(R.id.query_poi);
         floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam);
         floatingActionsMenu.setClosedOnTouchOutside(true);
-        bbt1.setOnClickListener(new View.OnClickListener() {
+        trail_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (m_lat <= max_lat & m_lat >= min_lat & m_long <= max_long & m_long >= min_long){
@@ -2711,13 +2679,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     };
                     Timer timer = new Timer();
                     timer.schedule(task, 1000);
-                    bbt2.setVisibility(View.VISIBLE);
-                    bbt3.setVisibility(View.VISIBLE);
-                    bbt1.setVisibility(View.INVISIBLE);
+                    startTrail_imgbt.setVisibility(View.VISIBLE);
+                    endTrail_imgbt.setVisibility(View.VISIBLE);
+                    trail_imgbt.setVisibility(View.INVISIBLE);
                 }else Toast.makeText(MainInterface.this, "所在位置不在当前地图中, 不可记录轨迹", Toast.LENGTH_SHORT).show();
             }
         });
-        bbt2.setOnClickListener(new View.OnClickListener() {
+        startTrail_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toolbar.setTitle("正在记录轨迹");
@@ -2728,9 +2696,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 isLocateEnd = false;
                 isLocate = 0;
                 initTrail();
-                bbt2.setVisibility(View.INVISIBLE);
-                //bbt4.setVisibility(View.INVISIBLE);
-                //bbt5.setVisibility(View.INVISIBLE);
+                startTrail_imgbt.setVisibility(View.INVISIBLE);
+                //addpoi.setVisibility(View.INVISIBLE);
+                //query_poi.setVisibility(View.INVISIBLE);
                 //floatingActionsMenu.setVisibility(View.INVISIBLE);
                 invalidateOptionsMenu();
                 Intent start_mService = new Intent(MainInterface.this, RecordTrail.class);
@@ -2738,7 +2706,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 startService(start_mService);
             }
         });
-        bbt3.setOnClickListener(new View.OnClickListener() {
+        endTrail_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toolbar.setTitle(pdfFileName);
@@ -2762,13 +2730,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }else {
                     Toast.makeText(MainInterface.this, "没有打开位置记录功能", Toast.LENGTH_SHORT).show();
                 }
-                bbt2.setVisibility(View.INVISIBLE);
-                bbt3.setVisibility(View.INVISIBLE);
-                bbt1.setVisibility(View.VISIBLE);
+                startTrail_imgbt.setVisibility(View.INVISIBLE);
+                endTrail_imgbt.setVisibility(View.INVISIBLE);
+                trail_imgbt.setVisibility(View.VISIBLE);
                 pdfView.resetZoomWithAnimation();
             }
         });
-        bbt4.setOnClickListener(new View.OnClickListener() {
+        addPoi_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAll = true;
@@ -2790,7 +2758,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
         });
-        bbt5.setOnClickListener(new View.OnClickListener() {
+        query_poi_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAll = true;
@@ -2826,9 +2794,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 linearLayout.setVisibility(View.GONE);
             }
         });
-        button1 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addPhoto);
-        button1.setImageResource(R.drawable.ic_add_a_photo);
-        button1.setOnClickListener(new View.OnClickListener() {
+        addPhoto_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addPhoto);
+        addPhoto_fab.setImageResource(R.drawable.ic_add_a_photo);
+        addPhoto_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //添加照片按钮具体功能如下:
@@ -2838,9 +2806,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 isMessureType = MESSURE_NONE_TYPE;
             }
         });
-        button2 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.lochere);
-        button2.setImageResource(R.drawable.ic_location_searching);
-        button2.setOnClickListener(new View.OnClickListener() {
+        locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
+        locHere_fab.setImageResource(R.drawable.ic_location_searching);
+        locHere_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //定位按钮具体功能如下:
@@ -2849,7 +2817,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (m_lat != 0 & m_long != 0){
                     if (m_lat <= max_lat & m_lat >= min_lat & m_long >= min_long & m_long<= max_long){
                 if (pdfView.getZoom() != 1){
-                    button2.setImageResource(R.drawable.ic_location_searching);
+                    locHere_fab.setImageResource(R.drawable.ic_location_searching);
                     pdfView.resetZoomWithAnimation();
                     TimerTask task = new TimerTask() {
                         @Override
@@ -2860,7 +2828,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    button2.setImageResource(R.drawable.ic_my_location);
+                                    locHere_fab.setImageResource(R.drawable.ic_my_location);
                                     pdfView.zoomCenteredTo(8, ppz);
                                     pdfView.setPositionOffset(verx);
                                     floatingActionsMenu.close(false);
@@ -2874,7 +2842,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //PointF pp = RenderUtil.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                     //pdfView.zoomWithAnimation(pp.x, pp.y, 10);
                 }else {
-                    button2.setImageResource(R.drawable.ic_my_location);
+                    locHere_fab.setImageResource(R.drawable.ic_my_location);
                     PointF ppz = RenderUtil.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     ppz.x = ppz.x - 10;
                     pdfView.zoomCenteredTo(8, ppz);
@@ -2887,9 +2855,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }else Toast.makeText(MyApplication.getContext(), "无法完成定位操作, 请开启网络或GPS设备", Toast.LENGTH_LONG).show();
             }
         });
-        button3 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.restorezoom);
-        button3.setImageResource(R.drawable.ic_autorenew);
-        button3.setOnClickListener(new View.OnClickListener() {
+        restoreZoom_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.restoreZoom);
+        restoreZoom_fab.setImageResource(R.drawable.ic_autorenew);
+        restoreZoom_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 floatingActionsMenu.close(false);
@@ -2912,9 +2880,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }else Toast.makeText(MainInterface.this, "奇怪的错误!", Toast.LENGTH_SHORT).show();
             }
         });
-        button4 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape);
-        button4.setImageResource(R.drawable.ic_sound);
-        button4.setOnClickListener(new View.OnClickListener() {
+        addTape_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape);
+        addTape_fab.setImageResource(R.drawable.ic_sound);
+        addTape_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //浮动按钮4 具体功能如下:
@@ -2927,9 +2895,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
         });
-        button5 = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.messuredistance);
-        button5.setImageResource(R.drawable.ic_straighten);
-        button5.setOnClickListener(new View.OnClickListener() {
+        messureDistance_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.messureDistance);
+        messureDistance_fab.setImageResource(R.drawable.ic_straighten);
+        messureDistance_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //浮动按钮5 具体功能如下:
@@ -2975,7 +2943,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }else {
                             List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
-                            bt btt = new bt(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
+                            bt btt = new bt(DataUtil.getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
                             bts.add(btt);
                         }
                     }

@@ -1,6 +1,7 @@
 package com.geopdfviewer.android;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -228,12 +229,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         /*Intent intent = new Intent(select_page.this, info_page.class);
         intent.putExtra("extra_data", getWKT(num));
         startActivity(intent);*/
-    }
-
-    private String getWKT(int num) {
-        SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
-        String str = "n_" + num + "_";
-        return pref1.getString(str + "WKT", "");
     }
 
     void pickFile() {
@@ -575,44 +570,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox, ic, center_latlong);
     }
 
-    public String createThumbnails(String fileName, String filePath, int Type){
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Thumbnails");
-        if (!file.exists() && !file.isDirectory()){
-            file.mkdirs();
-        }
-        fileName = fileName + Long.toString(System.currentTimeMillis());
-        String outPath = Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Thumbnails/" + fileName + ".jpg";
-        PdfiumCore pdfiumCore = new PdfiumCore(this);
-        int pageNum = 0;
-        File m_pdf_file;
-        OutputStream outputStream1 = null;
-        InputStream ip = null;
-        try {
-            m_pdf_file = new File(filePath);
-            PdfDocument pdf = pdfiumCore.newDocument(ParcelFileDescriptor.open(m_pdf_file, ParcelFileDescriptor.MODE_READ_WRITE));
-            Log.w(TAG, Integer.toString(pdfiumCore.getPageCount(pdf)));
-            pdfiumCore.openPage(pdf, pageNum);
-            Bitmap bitmap = Bitmap.createBitmap(120, 180, Bitmap.Config.RGB_565);
-            pdfiumCore.renderPageBitmap(pdf, bitmap, pageNum, 0, 0, 120, 180);
-            pdfiumCore.closeDocument(pdf);
-            File of = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Thumbnails", fileName + ".jpg");
-            FileOutputStream outputStream = new FileOutputStream(of);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream);
-            outputStream.flush();
-            outputStream.close();
-        }
-        catch (IOException e) {
-            Log.w(TAG, e.getMessage() );
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MyApplication.getContext(), "无法获取缩略图!", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-        return outPath;
-    }
-
     public void Btn_clearData(){
         SharedPreferences.Editor pref = getSharedPreferences("data_num", MODE_PRIVATE).edit();
         pref.clear().commit();
@@ -652,9 +609,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
         return result;
     }
-
-    //记录工作线程中的内容是否操作完成
-    private boolean isThreadEnd = false;
     public static final int UPDATE_TEXT = 1;
 
     private Handler handler = new Handler() {
@@ -882,7 +836,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     });
                     dialog.show();
                 } else Toast.makeText(this, "已经添加过该地图!", Toast.LENGTH_SHORT).show();
-                //getGeoInfo(getRealPath(configPath), URI_TYPE, configPath, findNameFromUri(uri));
 
             /*locError(getRealPath(uri.toString()));
             locError(uri.toString());
@@ -1054,17 +1007,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
             }
         }
-    }
-
-    //获取File可使用路径
-    public String getRealPath(String filePath) {
-        //String str = "content://com.android.fileexplorer.myprovider/external_files";
-        String str = filePath.substring(1);
-        str = str.substring(str.indexOf("/"));
-        String Dir = Environment.getExternalStorageDirectory().toString();
-        filePath = Dir + str;
-        locError("see here : " + filePath);
-        return filePath;
     }
 
     //数据库入库函数
@@ -1522,176 +1464,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.e(TAG, str );
     }
 
-    public String[] getGeoInfo(String filePath, int Type, String uri, String name) {
-        //locError(name);
-        String m_name = name;
-        String m_uri = uri;
-        String bmPath = "";
-        File file = new File(filePath);
-        InputStream in = null;
-        String m_WKT = "";
-        Boolean isESRI = false;
-        int num_line = 0;
-        String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "", m_LPTS = "";
-        try {
-            if (Type == SAMPLE_TYPE){
-                in = getAssets().open(SAMPLE_FILE);
-                //bmPath = createThumbnails(name, filePath, SAMPLE_TYPE);
-                //locError(getAssets().open("image/cangyuan.jpg").toString());
-                //bmPath = getAssets().open("image/cangyuan.jpg").toString();
-            }
-            else {
-                in = new FileInputStream(file);
-                bmPath = createThumbnails(name, filePath, URI_TYPE);
-            }
-            InputStreamReader inputStreamReader = new InputStreamReader(in);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String line;
-            int m_num_GPTS = 0;
-            //line = bufferedReader.readLine()
-            while((line = bufferedReader.readLine()) != null) {
-                //sb.append(line + "/n");
-                if(line.contains("PROJCS")) {
-                    //locError(line);
-                    m_WKT = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
-                }
-                if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
-                {
-                    isESRI = true;
-                }
-                if (line.contains("/BBox") & line.contains("Viewport")){
-                    //Log.w(TAG, "the line loc = " + Integer.toString(num_line) );
-                    m_BBox = line.substring(line.indexOf("BBox") + 5);
-                    if(!m_BBox.contains("BBox")){
-                    m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
-                    m_BBox = m_BBox.trim();
-                    }else {
-                        m_BBox = m_BBox.substring(m_BBox.indexOf("BBox") + 5);
-                        m_BBox = m_BBox.substring(0, m_BBox.indexOf("]"));
-                        m_BBox = m_BBox.trim();
-                    }
-                    locError("BBox : " + m_BBox);
-                }
-                /*if (line.contains("GPTS") & line.contains("LPTS") & m_num_GPTS == 0){
-                    m_num_GPTS++;
-                    m_LPTS = line.substring(line.indexOf("LPTS") + 5);
-                    m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
-                    m_LPTS = m_LPTS.trim();
-                    if (m_LPTS.length() > 0){
-                        m_GPTS = line.substring(line.indexOf("GPTS") + 5);
-                        m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
-                        m_GPTS = m_GPTS.trim();
-                        //坐标飘移纠偏
-                        m_GPTS = getGPTS(m_GPTS, m_LPTS);
-                    }
-                    //locError(m_GPTS);
-                    Log.w(TAG, "hold on" + m_GPTS );
-                    //Log.w(TAG, "hold on : " + line );
-
-                }*/
-                if (line.contains("GPTS") & line.contains("LPTS")){
-                    m_num_GPTS++;
-                    m_LPTS = line.substring(line.indexOf("LPTS") + 5);
-                    m_LPTS = m_LPTS.substring(0, m_LPTS.indexOf("]"));
-                    m_LPTS = m_LPTS.trim();
-                    if (m_LPTS.length() > 0){
-                        if (m_num_GPTS > 1){
-                        String m_GPTS1 = "";
-                        m_GPTS1 = line.substring(line.indexOf("GPTS") + 5);
-                        m_GPTS1 = m_GPTS1.substring(0, m_GPTS1.indexOf("]"));
-                        m_GPTS1 = m_GPTS1.trim();
-                        String[] m_gptstr = m_GPTS.split(" ");
-                        String[] m_gptstr1 = m_GPTS1.split(" ");
-                        locError("1 = " + m_gptstr1[0] + " 2 = " + m_gptstr[0]);
-                        if (Float.valueOf(m_gptstr1[0]) > Float.valueOf(m_gptstr[0])){
-                            m_GPTS = m_GPTS1;//BUG
-                            //坐标飘移纠偏
-                            m_GPTS = DataUtil.getGPTS(m_GPTS, m_LPTS);
-                        }
-
-                        }else {
-                            m_GPTS = line.substring(line.indexOf("GPTS") + 5);
-                            m_GPTS = m_GPTS.substring(0, m_GPTS.indexOf("]"));
-                            m_GPTS = m_GPTS.trim();
-                            //坐标飘移纠偏
-                            m_GPTS = DataUtil.getGPTS(m_GPTS, m_LPTS);
-                        }
-                    }
-                    //locError(m_GPTS);
-                    Log.w(TAG, "hold on" + m_GPTS );
-                    Log.w(TAG, "hold on : " + line );
-
-                }
-                if (line.contains("MediaBox")){
-                    line = line.substring(line.indexOf("MediaBox"));
-                    m_MediaBox = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
-                    m_MediaBox = m_MediaBox.trim();
-                    Log.w(TAG, "MediaBox : " + m_MediaBox );
-                }
-                if (line.contains("CropBox")){
-                    m_CropBox = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
-                    m_CropBox = m_CropBox.trim();
-                    //Log.w(TAG, m_CropBox );
-                }
-                num_line += 1;
-            }
-            if (m_CropBox.isEmpty()){
-                m_CropBox = m_MediaBox;
-            }
-            locError(Integer.toString(m_num_GPTS));
-            //Log.w(TAG, "GPTS:" + m_GPTS );
-            //Log.w(TAG, "BBox:" + m_BBox );
-            if (isESRI == true) {
-                m_WKT = "ESRI::" + m_WKT;
-                //save(content);
-            } else {
-                //save(content);
-            }
-            Log.w(TAG, m_WKT );
-            if (Type == SAMPLE_TYPE) {
-                //setTitle(findTitle(pdfFileName));
-            } else {
-                //getFileName(Uri.parse(filePath));
-            }
-            //locError();
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    add_current ++;
-                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                    Toast.makeText(MyApplication.getContext(), "获取完毕!", Toast.LENGTH_LONG).show();
-                }
-            });
-            in.close();
-            //locError("看这里"+m_name);
-            //locError("WKT: " + m_WKT);
-
-        } catch (IOException e) {
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MyApplication.getContext(), "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
-                }
-            });
-
-            //Toast.makeText(this, "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
-        }
-        if (filePath != "") {
-            //locError(m_MediaBox + "&" + m_BBox + "&" + m_GPTS);
-            m_GPTS = DataUtil.rubberCoordinate(m_MediaBox, m_BBox, m_GPTS);
-            //saveGeoInfo(m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
-            String[] strings = new String[]{m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
-            return strings;
-        } else {
-            m_GPTS = DataUtil.rubberCoordinate(m_MediaBox, m_BBox, m_GPTS);
-            //saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
-            String[] strings = new String[]{"Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
-            return strings;
-        }
-    }
-
     public String[] getGeoInfo(String filePath, int Type, String uri, String name, boolean type) {
         //locError(name);
         String m_name = name;
@@ -1712,7 +1484,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
             else {
                 in = new FileInputStream(file);
-                bmPath = createThumbnails(name, filePath, URI_TYPE);
+                bmPath = DataUtil.getDtThumbnail(name, "/TuZhi/" + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
             }
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -1868,11 +1640,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String[] strings = new String[]{"Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
             return strings;
         }
-    }
-
-    private void manageGeoInfo(String filePath, int Type, String uri, String name){
-            String[] strings = getGeoInfo(filePath, Type, uri, name);
-            saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
     }
 
     private void manageGeoInfo(String filePath, int Type, String uri, String name, boolean type){
