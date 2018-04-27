@@ -984,19 +984,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
                                             int size = bts.size();
-                                            for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
-                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                            if (mphotos.size() != 0) {
+                                                for (int i = 0; i < size; i++) {
+                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
+                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                    }
                                                 }
+                                            }else {
+                                                POI poi1 = new POI();
+                                                poi1.setPhotonum(mphotos.size());
+                                                poi1.updateAll("poic = ?", poi.getPOIC());
                                             }
                                         }else {
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
                                             int size = bts.size();
-                                            for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
-                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                            if (mphotos.size() != 0) {
+                                                for (int i = 0; i < size; i++) {
+                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
+                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                    }
                                                 }
+                                            }else {
+                                                POI poi1 = new POI();
+                                                poi1.setPhotonum(mphotos.size());
+                                                poi1.updateAll("poic = ?", poi.getPOIC());
                                             }
                                         }
                                     }
@@ -1322,26 +1334,38 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
                                         } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                     }else {
-                                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
+                                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPOIC()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
                                             int size = bts.size();
-                                            for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
-                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
-                                                    locError("lzy");
+                                            if (mphotos.size() != 0) {
+                                                for (int i = 0; i < size; i++) {
+                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
+                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
                                                 }
+                                            }else {
+                                                POI poi1 = new POI();
+                                                poi1.setPhotonum(mphotos.size());
+                                                poi1.updateAll("poic = ?", poi.getPOIC());
                                             }
                                         }else {
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
                                             int size = bts.size();
-                                            for (int i = 0; i < size; i++){
-                                                if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())){
-                                                    canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
-                                                    locError("lzy");
+                                            if (mphotos.size() != 0) {
+                                                for (int i = 0; i < size; i++) {
+                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
+                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
                                                 }
+                                            }else {
+                                                POI poi1 = new POI();
+                                                poi1.setPhotonum(mphotos.size());
+                                                poi1.updateAll("poic = ?", poi.getPOIC());
                                             }
                                         }
                                     }
@@ -2186,7 +2210,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         back_pop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
+                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                 int size = lines_whiteBlanks.size();
                 int size1 = geometry_whiteBlanks.size();
                 if (size == 0) {
@@ -2197,7 +2221,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 else {
                     whiteBlankPt = "";
-                    DataSupport.deleteAll(Lines_WhiteBlank.class , "id = ? and m_ic = ?", Integer.toString(size - 1), ic);
+                    DataSupport.deleteAll(Lines_WhiteBlank.class , "id = ? and ic = ?", Integer.toString(size - 1), ic);
                     geometry_whiteBlanks.remove(size1 - 1);
                     pdfView.zoomWithAnimation(c_zoom);
                     //Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
@@ -2242,7 +2266,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         eraseContent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
+                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                 int size = lines_whiteBlanks.size();
                 if (size == 0) {
                     whiteBlankPt = "";
@@ -2252,7 +2276,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 else {
                     whiteBlankPt = "";
-                    DataSupport.deleteAll(Lines_WhiteBlank.class, "m_ic = ?", ic);
+                    DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
                     Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
@@ -2297,11 +2321,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //Toast.makeText(MainInterface.this, "抬起", Toast.LENGTH_SHORT).show();
                         geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(ic, whiteBlankPt, color_Whiteblank);
                         geometry_whiteBlanks.add(geometry_whiteBlank);
-                        List<Lines_WhiteBlank> liness = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
+                        List<Lines_WhiteBlank> liness = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                         Lines_WhiteBlank lines = new Lines_WhiteBlank();
-                        lines.setM_ic(ic);
-                        lines.setM_color(color_Whiteblank);
-                        lines.setM_lines(whiteBlankPt);
+                        lines.setIc(ic);
+                        lines.setColor(color_Whiteblank);
+                        lines.setLines(whiteBlankPt);
                         lines.setId(liness.size());
                         lines.save();
                         break;
@@ -3123,10 +3147,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void getWhiteBlankData(){
-        List<Lines_WhiteBlank> lines = DataSupport.where("m_ic = ?", ic).find(Lines_WhiteBlank.class);
+        List<Lines_WhiteBlank> lines = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
         if (lines.size() >= 0){
             for (Lines_WhiteBlank line : lines){
-                geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getM_ic(), line.getM_lines(), line.getM_color());
+                geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getIc(), line.getLines(), line.getColor());
                 geometry_whiteBlanks.add(geometry_whiteBlank);
             }
         }
@@ -3142,22 +3166,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
+                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPOIC()).find(MPHOTO.class);
                         //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));
                         //locError(poi.getPath());
-                        if (poi.getPhotonum() == 0){
-                            if (poi.getTapenum() == 0){
-                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                            } else {
-                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
-                            }
-                        }else {
-                            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
+                        if (poi.getPhotonum() != 0 & mphotos.size() != 0){
+                            locError("poic = " + poi.getPOIC());
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
-                            bt btt = new bt(DataUtil.getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
-                            bts.add(btt);
+                            if (mphotos.size() != 0) {
+                                bt btt = new bt(DataUtil.getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
+                                bts.add(btt);
+                        }
+                        }else {
+                            POI poi1 = new POI();
+                            poi1.setPhotonum(mphotos.size());
+                            poi1.updateAll("poic = ?", poi.getPOIC());
                         }
                     }
                 }

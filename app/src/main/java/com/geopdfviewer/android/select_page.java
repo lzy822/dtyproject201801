@@ -1219,9 +1219,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     if (line.contains("<m_color>")){
                         color = Integer.valueOf(line.substring(9, line.indexOf("</m_color>")));
                         Lines_WhiteBlank lines_whiteBlank = new Lines_WhiteBlank();
-                        lines_whiteBlank.setM_ic(m_ic);
-                        lines_whiteBlank.setM_lines(m_lines);
-                        lines_whiteBlank.setM_color(color);
+                        lines_whiteBlank.setIc(m_ic);
+                        lines_whiteBlank.setLines(m_lines);
+                        lines_whiteBlank.setColor(color);
                         lines_whiteBlank.save();
                         continue;
                     }
@@ -1341,9 +1341,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         int size_lines_whiteBlank = lines_whiteBlanks.size();
                         sb = sb.append("<Lines_WhiteBlank>").append("\n");
                         for (int i = 0; i < size_lines_whiteBlank; i++){
-                            sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getM_ic()).append("</m_ic>").append("\n");
-                            sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getM_lines()).append("</m_lines>").append("\n");
-                            sb.append("<m_color>").append(lines_whiteBlanks.get(i).getM_color()).append("</m_color>").append("\n");
+                            sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
+                            sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
+                            sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
                         }
                         sb.append("</Lines_WhiteBlank>").append("\n");
                         File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");

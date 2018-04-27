@@ -24,10 +24,13 @@ import java.util.regex.Pattern;
 
 public class RecordTrail extends Service {
     private static final String TAG = "RecordTrail";
+
     //当前记录的坐标点个数
     private int isLocate = 0;
+
     //记录当前轨迹
     private String m_cTrail = "";
+
     Location location;
 
     private LocationManager locationManager;
