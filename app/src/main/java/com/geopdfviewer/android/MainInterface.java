@@ -475,6 +475,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private void parseAndrawMessure(String mmessure_pts, Canvas canvas){
         if (isMessure & !mmessure_pts.isEmpty()) {
             distanceSum = 0;
+            double distanceCurrent = 0;
             mmessure_pts = mmessure_pts.trim();
             String[] pts = mmessure_pts.split(" ");
             float[] mpts;
@@ -490,7 +491,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
                     PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
-                    distanceSum = DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceCurrent = DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceSum = distanceCurrent;
                 }
                 for (int i = 0; i < pts.length; i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
@@ -530,7 +532,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                     PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
-                    distanceSum = distanceSum + DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceCurrent = DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceSum = distanceSum + distanceCurrent;
                 }
                 for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
@@ -558,8 +561,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             //locError(Double.toString(distanceSum));
             if (isMessureType == MESSURE_DISTANCE_TYPE){
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
-                    toolbar.setTitle(df1.format(distanceSum) + "米(轨迹记录中)");
-                }else toolbar.setTitle(df1.format(distanceSum) + "米");
+                    toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米(轨迹记录中)");
+                }else toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米");
                 //setTitle(df1.format(distanceSum) + "米");
             }else if (isMessureType == MESSURE_AREA_TYPE){
                 double area = 0;
@@ -811,7 +814,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         PointF pt1;
                         pt1 = getGeoLocFromPixL(pt);
                         //textView.setText();
-                        if (isDrawType == POI_DRAW_TYPE && isQuery == false){
+                        if (isDrawType == POI_DRAW_TYPE & !isQuery){
                             List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
                             poi.setName("POI" + String.valueOf(POIs.size() + 1));
@@ -831,7 +834,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
                             //locError("ScaleX : " + String.valueOf(pdfView.getScaleX()) + "ScaleY : " + String.valueOf(pdfView.getScaleY()) + "Scale : " + String.valueOf(pdfView.getScaleX() * pdfView.getScaleY()));
                         }
-                        if (isMessure == true){
+                        if (isMessure & showMode == NOCENTERMODE){
                             locError("messure_pts" + messure_pts);
                             poinum_messure++;
                             if (poinum_messure == 1){
@@ -853,6 +856,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
                             }
+                        }
+                        if (isMessure & showMode == CENTERMODE){
+                            locError("messure_pts" + messure_pts);
+                            poinum_messure++;
+                            if (poinum_messure == 1){
+                                poi111 = centerPointLoc;
+                                messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                    toolbar.setTitle("正在测量(轨迹记录中)");
+                                }else toolbar.setTitle("正在测量");
+                            }else if (poinum_messure == 2){
+                                poi222 = centerPointLoc;
+                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }else {
+                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }
+
                         }
                         if (isQuery && isDrawType == NONE_DRAW_TYPE){
                             List<mPOIobj> pois =  new ArrayList<>();
@@ -948,7 +975,36 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             parseAndrawLinesforWhiteBlank(canvas);
                             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
                         }
-                        parseAndrawMessure(messure_pts, canvas);
+                        if (isMessure & showMode == CENTERMODE){
+                            String messure_pts1 = messure_pts;
+                            locError("messure_pts1" + messure_pts1);
+                            int poinum_messure1 = poinum_messure + 1;
+                            //poinum_messure++;
+                            if (poinum_messure1 == 1){
+                                poi111 = centerPointLoc;
+                                messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                    toolbar.setTitle("正在测量(轨迹记录中)");
+                                }else toolbar.setTitle("正在测量");
+                            }else if (poinum_messure1 == 2){
+                                poi222 = centerPointLoc;
+                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }else {
+                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }
+                            parseAndrawMessure(messure_pts1, canvas);
+
+                        }
+                        if (isMessure & showMode == NOCENTERMODE){
+                            parseAndrawMessure(messure_pts, canvas);
+                        }
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -1274,7 +1330,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
                         scale_distance = scale_distance * 2.53;
                         scaleShow.setText(scale_df.format(scale_distance) + "米");
-                        parseAndrawMessure(messure_pts, canvas);
+
+                        if (isMessure & showMode == CENTERMODE){
+                            String messure_pts1 = messure_pts;
+                            locError("messure_pts1" + messure_pts1);
+                            int poinum_messure1 = poinum_messure + 1;
+                            //poinum_messure++;
+                            if (poinum_messure1 == 1){
+                                poi111 = centerPointLoc;
+                                messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                    toolbar.setTitle("正在测量(轨迹记录中)");
+                                }else toolbar.setTitle("正在测量");
+                            }else if (poinum_messure1 == 2){
+                                poi222 = centerPointLoc;
+                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }else {
+                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }
+                            parseAndrawMessure(messure_pts1, canvas);
+
+                        }
+                        if (isMessure & showMode == NOCENTERMODE){
+                            parseAndrawMessure(messure_pts, canvas);
+                        }
 
                         /*if (isOpenWhiteBlank){
                         //白板功能监控
@@ -1570,7 +1656,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public boolean onTap(MotionEvent e) {
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
                         PointF pt1 = getGeoLocFromPixL(pt);
-                        if (isDrawType == POI_DRAW_TYPE && isQuery == false){
+                        if (isDrawType == POI_DRAW_TYPE & !isQuery){
                             List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
                             poi.setName("POI" + String.valueOf(POIs.size() + 1));
@@ -1588,7 +1674,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             c_zoom = pdfView.getZoom();
                             pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
                         }
-                        if (isMessure == true){
+                        if (isMessure & showMode == NOCENTERMODE){
                             locError("messure_pts" + messure_pts);
                             poinum_messure++;
                             if (poinum_messure == 1){
@@ -1606,6 +1692,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                             }else {
                                 messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }
+
+                        }
+                        if (isMessure & showMode == CENTERMODE){
+                            locError("messure_pts" + messure_pts);
+                            poinum_messure++;
+                            if (poinum_messure == 1){
+                                poi111 = centerPointLoc;
+                                messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                    toolbar.setTitle("正在测量(轨迹记录中)");
+                                }else toolbar.setTitle("正在测量");
+                            }else if (poinum_messure == 2){
+                                poi222 = centerPointLoc;
+                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                            }else {
+                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
                                 //setTitle("正在测量");
                                 pdfView.zoomWithAnimation(c_zoom);
                                 //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
@@ -2437,20 +2547,21 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //
 
         if (showMode == CENTERMODE) {
-            float centerLat = (cs_bottom + cs_top) / 2;
-            float centerLong = (cs_left + cs_right) / 2;
+            centerPointLoc = new PointF((cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2);
             DecimalFormat df = new DecimalFormat("0.0000");
             if (isCoordinateType == COORDINATE_DEFAULT_TYPE) {
-                textView.setText(df.format(centerLat) + ";" + df.format(centerLong));
+                textView.setText(df.format(centerPointLoc.x) + ";" + df.format(centerPointLoc.y));
             } else if (isCoordinateType == COORDINATE_BLH_TYPE) {
-                textView.setText(Integer.toString((int) centerLat) + "°" + Integer.toString((int) ((centerLat - (int) centerLat) * 60)) + "′" + Integer.toString((int) (((centerLat - (int) centerLat) * 60 - (int) ((centerLat - (int) centerLat) * 60)) * 60)) + "″;" + Integer.toString((int) centerLong) + "°" + Integer.toString((int) ((centerLong - (int) centerLong) * 60)) + "′" + Integer.toString((int) (((centerLong - (int) centerLong) * 60 - (int) ((centerLong - (int) centerLong) * 60)) * 60)) + "″");
+                textView.setText(Integer.toString((int) centerPointLoc.x) + "°" + Integer.toString((int) ((centerPointLoc.x - (int) centerPointLoc.x) * 60)) + "′" + Integer.toString((int) (((centerPointLoc.x - (int) centerPointLoc.x) * 60 - (int) ((centerPointLoc.x - (int) centerPointLoc.x) * 60)) * 60)) + "″;" + Integer.toString((int) centerPointLoc.y) + "°" + Integer.toString((int) ((centerPointLoc.y - (int) centerPointLoc.y) * 60)) + "′" + Integer.toString((int) (((centerPointLoc.y - (int) centerPointLoc.y) * 60 - (int) ((centerPointLoc.y - (int) centerPointLoc.y) * 60)) * 60)) + "″");
             } else {
-                textView.setText(df.format(centerLat) + ";" + df.format(centerLong));
+                textView.setText(df.format(centerPointLoc.x) + ";" + df.format(centerPointLoc.y));
             }
         }
         //
         //cs_top = pdfView.getCurrentYOffset()
     }
+    //声明中心点的位置坐标
+    PointF centerPointLoc;
 
     //屏幕坐标位置到经纬度转化
     private PointF getGeoLocFromPixL(PointF pt){
@@ -2761,11 +2872,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private boolean isCreateBitmap = false;
 
 
+    //选择框声明
     CheckBox poiLayerBt;
     CheckBox trailLayerBt;
     CheckBox whiteBlankLayerBt;
+    //显示模式声明
     CheckBox centerPointModeBt;
+    //中心点声明
     ImageView centerPoint;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -2880,10 +2995,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         backpt_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
-                messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
-                poinum_messure --;
-                pdfView.zoomWithAnimation(c_zoom);
+                if (poinum_messure > 1) {
+                    messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                    messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                    poinum_messure--;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }else {
+                    messure_pts = "";
+                    poinum_messure = 0;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
             }
         });
         //初始化白板要素List
@@ -3232,6 +3353,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (isCreateBitmap) {
                     isWhiteBlank = true;
                     poiLayerBt.setChecked(true);
+                    trailLayerBt.setChecked(true);
+                    whiteBlankLayerBt.setChecked(true);
                     showPOI = true;
                     showTrail = true;
                     pdfView.resetZoomWithAnimation();
