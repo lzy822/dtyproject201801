@@ -47,10 +47,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -163,6 +167,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //是否绘制POI 以及 trail
     private boolean showAll = false;
+    //是否绘制POI 以及 trail
+    private boolean showPOI = false;
+    private boolean showTrail = false;
 
     //记录当前绘图类型
     private int isDrawType = NONE_DRAW_TYPE;
@@ -296,6 +303,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录比例尺格式
     DecimalFormat scale_df;
+
+    //记录当前显示模式
+    private int showMode = CENTERMODE;
+    private static final int CENTERMODE = -1;
+    private static final int NOCENTERMODE = -2;
 
 
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
@@ -906,7 +918,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             viewer_height = pdfView.getHeight();
                             viewer_width = pdfView.getWidth();
                         //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
-                        if (pdfView.getPositionOffset() != verx & isPos == true){
+                        if (pdfView.getPositionOffset() != verx & isPos){
                             locHere_fab.setImageResource(R.drawable.ic_location_searching);
                             isPos = false;
                         }
@@ -947,7 +959,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
                             //canvas.drawArc(pt.x - 100, pt.y + 100, pt.x + 100, pt.y - 100, degree - 15, 30, false, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
-                        if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
+                        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
                             List<Trail> trails = DataSupport.findAll(Trail.class);
                             for (Trail trail : trails){
                                 String str1 = trail.getPath();
@@ -964,7 +976,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                             }
                         }
-                        if(isDrawType == POI_DRAW_TYPE || showAll){
+                        if(isDrawType == POI_DRAW_TYPE || showPOI){
                             //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
@@ -1237,9 +1249,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             isQuery = false;
                         }*/
                         //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
-                        if (pdfView.getPositionOffset() != verx & isPos == true){
+                        if (pdfView.getPositionOffset() != verx & isPos){
                             locHere_fab.setImageResource(R.drawable.ic_location_searching);
                             isPos = false;
+                            locError("lzy");
                         }
                         locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()) + "verx : " + Float.toString(verx));
                         //locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
@@ -1297,7 +1310,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }*/
                             canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
-                        if (isLocateEnd && !m_cTrail.isEmpty() || showAll){
+                        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
                             List<Trail> trails = DataSupport.findAll(Trail.class);
                             for (Trail trail : trails){
                                 String str1 = trail.getPath();
@@ -1319,7 +1332,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
                         }
 
-                        if(isDrawType == POI_DRAW_TYPE || showAll){
+                        if(isDrawType == POI_DRAW_TYPE || showPOI){
                             //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
@@ -1599,7 +1612,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
 
                         }
-                        if (isQuery && isDrawType == NONE_DRAW_TYPE){
+                        if (isQuery & isDrawType == NONE_DRAW_TYPE){
+                            Log.w(TAG, "onTap: " );
                             List<mPOIobj> pois =  new ArrayList<>();
                             Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
                             if (cursor.moveToFirst()){
@@ -1782,7 +1796,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 mphoto.setTime(simpleDateFormat.format(date));
                                 mphoto.save();
                                 getBitmap();
-                                showAll = true;
+                                poiLayerBt.setChecked(true);
+                                showPOI = true;
+
                                 pdfView.resetZoomWithAnimation();
                             }
                         });
@@ -1808,7 +1824,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 mphoto.setTime(simpleDateFormat.format(date));
                                 mphoto.save();
                                 getBitmap();
-                                showAll = true;
+                                poiLayerBt.setChecked(true);
+                                showPOI = true;
                                 pdfView.resetZoomWithAnimation();
                             }
                         });
@@ -1833,7 +1850,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         mphoto.setTime(simpleDateFormat.format(date));
                         mphoto.save();
                         getBitmap();
-                        showAll = true;
+                        poiLayerBt.setChecked(true);
+                        showPOI = true;
                         pdfView.resetZoomWithAnimation();
                     }
             }catch (IOException e){
@@ -1877,7 +1895,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         mtape.setPOIC(POIs.get(theNum).getPOIC());
                         mtape.setTime(simpleDateFormat.format(date));
                         mtape.save();
-                        showAll = true;
+                        poiLayerBt.setChecked(true);
+                        showPOI = true;
                         pdfView.resetZoomWithAnimation();
                     }
                 });
@@ -1904,7 +1923,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         mtape.setPOIC(POIC);
                         mtape.setTime(simpleDateFormat.format(date));
                         mtape.save();
-                        showAll = true;
+                        poiLayerBt.setChecked(true);
+                        showPOI = true;
                         pdfView.resetZoomWithAnimation();
                     }
                 });
@@ -1930,7 +1950,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 mtape.setPOIC(POIC);
                 mtape.setTime(simpleDateFormat.format(date));
                 mtape.save();
-                showAll = true;
+                poiLayerBt.setChecked(true);
+                showPOI = true;
                 pdfView.resetZoomWithAnimation();
             }
         }
@@ -1981,7 +2002,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             mphoto.setTime(simpleDateFormat.format(date));
                             mphoto.save();
                             getBitmap();
-                            showAll = true;
+                            poiLayerBt.setChecked(true);
+                            showPOI = true;
                             pdfView.resetZoomWithAnimation();
                         }
                     });
@@ -2012,7 +2034,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             mphoto.setTime(simpleDateFormat.format(date));
                             mphoto.save();
                             getBitmap();
-                            showAll = true;
+                            poiLayerBt.setChecked(true);
+                            showPOI = true;
                             pdfView.resetZoomWithAnimation();
                         }
                     });
@@ -2043,7 +2066,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     mphoto.setTime(simpleDateFormat.format(date));
                     mphoto.save();
                     getBitmap();
-                    showAll = true;
+                    poiLayerBt.setChecked(true);
+                    showPOI = true;
                     pdfView.resetZoomWithAnimation();
                 }
             }catch (IOException e){
@@ -2138,7 +2162,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 isDrawType = NONE_DRAW_TYPE;
                 isLocate = 0;
                 isLocateEnd = true;
-                showAll = false;
+                poiLayerBt.setChecked(false);
+                showPOI = false;
                 isMessure = true;
                 isMessureType = MESSURE_DISTANCE_TYPE;
                 poinum_messure = 0;
@@ -2160,7 +2185,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 isDrawType = NONE_DRAW_TYPE;
                 isLocate = 0;
                 isLocateEnd = true;
-                showAll = false;
+                poiLayerBt.setChecked(false);
+                showPOI = false;
                 isMessure = true;
                 isMessureType = MESSURE_AREA_TYPE;
                 poinum_messure = 0;
@@ -2408,6 +2434,21 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             cs_right = (float)(( viewer_width - pdfView.getCurrentXOffset()) / current_pagewidth * w + min_long);
         }
         locError(Float.toString(cs_top) + "%" + Float.toString(cs_bottom) + "%" + Float.toString(cs_left) + "%" + Float.toString(cs_right));
+        //
+
+        if (showMode == CENTERMODE) {
+            float centerLat = (cs_bottom + cs_top) / 2;
+            float centerLong = (cs_left + cs_right) / 2;
+            DecimalFormat df = new DecimalFormat("0.0000");
+            if (isCoordinateType == COORDINATE_DEFAULT_TYPE) {
+                textView.setText(df.format(centerLat) + ";" + df.format(centerLong));
+            } else if (isCoordinateType == COORDINATE_BLH_TYPE) {
+                textView.setText(Integer.toString((int) centerLat) + "°" + Integer.toString((int) ((centerLat - (int) centerLat) * 60)) + "′" + Integer.toString((int) (((centerLat - (int) centerLat) * 60 - (int) ((centerLat - (int) centerLat) * 60)) * 60)) + "″;" + Integer.toString((int) centerLong) + "°" + Integer.toString((int) ((centerLong - (int) centerLong) * 60)) + "′" + Integer.toString((int) (((centerLong - (int) centerLong) * 60 - (int) ((centerLong - (int) centerLong) * 60)) * 60)) + "″");
+            } else {
+                textView.setText(df.format(centerLat) + ";" + df.format(centerLong));
+            }
+        }
+        //
         //cs_top = pdfView.getCurrentYOffset()
     }
 
@@ -2719,10 +2760,92 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //记录是否可以看缩略图
     private boolean isCreateBitmap = false;
 
+
+    CheckBox poiLayerBt;
+    CheckBox trailLayerBt;
+    CheckBox whiteBlankLayerBt;
+    CheckBox centerPointModeBt;
+    ImageView centerPoint;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        //中心点图标初始化
+        centerPoint = (ImageView) findViewById(R.id.centerPoint);
+        centerPoint.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int visibility) {
+                if (visibility == View.VISIBLE) {
+                    isQuery = true;
+                    query_poi_imgbt.setVisibility(View.VISIBLE);
+                }
+                else {
+                    isQuery = false;
+                    query_poi_imgbt.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
+        centerPointModeBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    showMode = CENTERMODE;
+                    centerPoint.setVisibility(View.VISIBLE);
+                    isQuery = true;
+                    isDrawType = NONE_DRAW_TYPE;
+                    locError("中心点模式");
+                    isMessureType = MESSURE_NONE_TYPE;
+                    query_poi_imgbt.setVisibility(View.INVISIBLE);
+                }else {
+                    locError("不是中心点模式");
+                    showMode = NOCENTERMODE;
+                    centerPoint.setVisibility(View.INVISIBLE);
+                    isQuery = false;
+                    query_poi_imgbt.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        //图层控制按钮初始化
+        poiLayerBt = (CheckBox) findViewById(R.id.poiLayer);
+        poiLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    showPOI = true;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }else {
+                    showPOI = false;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        trailLayerBt = (CheckBox) findViewById(R.id.trailLayer);
+        trailLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    showTrail = true;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }else {
+                    showTrail = false;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer) ;
+        whiteBlankLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    isWhiteBlank = true;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }else {
+                    isWhiteBlank = false;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
         //初始化测量相关按钮
         cancel_messure_fab = (FloatingActionButton) findViewById(R.id.cancel_messure);
         cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
@@ -2976,7 +3099,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         addPoi_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAll = true;
+                poiLayerBt.setChecked(true);
+                showPOI = true;
                 //pdfView.resetZoomWithAnimation();
                 pdfView.zoomWithAnimation(c_zoom);
                 if (isDrawType == POI_DRAW_TYPE){
@@ -2998,7 +3122,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         query_poi_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAll = true;
+                poiLayerBt.setChecked(true);
+                showPOI = true;
                 pdfView.zoomWithAnimation(c_zoom);
                 if (!isQuery){
                     if (isDrawTrail == TRAIL_DRAW_TYPE){
@@ -3044,6 +3169,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         });
         locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        //params.addRule(RelativeLayout., whiteBlank_fab.getId());
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+        locHere_fab.setLayoutParams(params);
         locHere_fab.setImageResource(R.drawable.ic_location_searching);
         locHere_fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -3101,7 +3231,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //重置按钮具体功能如下:
                 if (isCreateBitmap) {
                     isWhiteBlank = true;
-                    showAll = true;
+                    poiLayerBt.setChecked(true);
+                    showPOI = true;
+                    showTrail = true;
                     pdfView.resetZoomWithAnimation();
                     isMessure = false;
                     if (isDrawTrail == TRAIL_DRAW_TYPE) {
@@ -3201,8 +3333,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         if (isDrawTrail == TRAIL_DRAW_TYPE){
             toolbar.setTitle("正在记录轨迹");
         }else toolbar.setTitle(pdfFileName);
-        isQuery = false;
-        isDrawType = NONE_DRAW_TYPE;
+        if (showMode == CENTERMODE){
+            centerPoint.setVisibility(View.VISIBLE);
+            isQuery = true;
+            isDrawType = NONE_DRAW_TYPE;
+            locError("中心点模式");
+            isMessureType = MESSURE_NONE_TYPE;
+            query_poi_imgbt.setVisibility(View.INVISIBLE);
+        }else {
+            locError("不是中心点模式");
+            centerPoint.setVisibility(View.INVISIBLE);
+            isQuery = false;
+            query_poi_imgbt.setVisibility(View.VISIBLE);
+        }
         ////////////////////////缓存Bitmap//////////////////////////////
         getBitmap();
         /*bts = new ArrayList<bt>();
