@@ -825,7 +825,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             Date date = new Date(System.currentTimeMillis());
                             poi.setTime(simpleDateFormat.format(date));
                             poi.setPhotonum(0);
-                            poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
+                            poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
                             PointF pp = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -1047,7 +1047,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
                                         } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                     }else {
-                                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
+                                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
@@ -1060,8 +1060,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                 }
                                             }else {
                                                 POI poi1 = new POI();
-                                                poi1.setPhotonum(mphotos.size());
-                                                poi1.updateAll("poic = ?", poi.getPOIC());
+                                                if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
+                                                else poi1.setToDefault("photonum");
+                                                poi1.updateAll("POIC = ?", poi.getPoic());
                                             }
                                         }else {
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
@@ -1075,8 +1076,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                 }
                                             }else {
                                                 POI poi1 = new POI();
-                                                poi1.setPhotonum(mphotos.size());
-                                                poi1.updateAll("poic = ?", poi.getPOIC());
+                                                if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
+                                                else poi1.setToDefault("photonum");
+                                                poi1.updateAll("POIC = ?", poi.getPoic());
                                             }
                                         }
                                     }
@@ -1431,9 +1433,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     if (poi.getPhotonum() == 0){
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                        } else {
+                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                                        }
                                     }else {
-                                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPOIC()).find(MPHOTO.class);
+                                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
@@ -1446,9 +1450,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                     }
                                                 }
                                             }else {
-                                                POI poi1 = new POI();
-                                                poi1.setPhotonum(mphotos.size());
-                                                poi1.updateAll("poic = ?", poi.getPOIC());
+                                                POI poi2 = new POI();
+                                                if (mphotos.size() != 0) poi2.setPhotonum(mphotos.size());
+                                                else poi2.setToDefault("photonum");
+                                                poi2.updateAll("poic = ?", poi.getPoic());
                                             }
                                         }else {
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
@@ -1462,9 +1467,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                     }
                                                 }
                                             }else {
-                                                POI poi1 = new POI();
-                                                poi1.setPhotonum(mphotos.size());
-                                                poi1.updateAll("poic = ?", poi.getPOIC());
+                                                POI poi2 = new POI();
+                                                if (mphotos.size() != 0) poi2.setPhotonum(mphotos.size());
+                                                else poi2.setToDefault("photonum");
+                                                poi2.updateAll("poic = ?", poi.getPoic());
                                             }
                                         }
                                     }
@@ -1656,7 +1662,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public boolean onTap(MotionEvent e) {
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
                         PointF pt1 = getGeoLocFromPixL(pt);
-                        if (isDrawType == POI_DRAW_TYPE & !isQuery){
+                        if (isDrawType == POI_DRAW_TYPE & !isQuery & showMode == NOCENTERMODE){
                             List<POI> POIs = DataSupport.findAll(POI.class);
                             POI poi = new POI();
                             poi.setName("POI" + String.valueOf(POIs.size() + 1));
@@ -1667,7 +1673,25 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             Date date = new Date(System.currentTimeMillis());
                             poi.setTime(simpleDateFormat.format(date));
                             poi.setPhotonum(0);
-                            poi.setPOIC("POI" + String.valueOf(System.currentTimeMillis()));
+                            poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
+                            poi.save();
+                            locError(pt1.toString());
+                            PointF pp = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            c_zoom = pdfView.getZoom();
+                            pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
+                        }
+                        if (isDrawType == POI_DRAW_TYPE & !isQuery & showMode == CENTERMODE){
+                            List<POI> POIs = DataSupport.findAll(POI.class);
+                            POI poi = new POI();
+                            poi.setName("POI" + String.valueOf(POIs.size() + 1));
+                            poi.setIc(ic);
+                            poi.setX(centerPointLoc.x);
+                            poi.setY(centerPointLoc.y);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                            Date date = new Date(System.currentTimeMillis());
+                            poi.setTime(simpleDateFormat.format(date));
+                            poi.setPhotonum(0);
+                            poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
                             poi.save();
                             locError(pt1.toString());
                             PointF pp = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -1896,12 +1920,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             public void onClick(DialogInterface dialog, int which) {
                                 POI poi = new POI();
                                 poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
-                                poi.updateAll("poic = ?", POIs.get(theNum).getPOIC());
+                                locError("holly :" + poi.updateAll("poic = ?", POIs.get(theNum).getPoic()));
                                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
                                 Date date = new Date(System.currentTimeMillis());
                                 MPHOTO mphoto = new MPHOTO();
                                 mphoto.setPdfic(ic);
-                                mphoto.setPOIC(POIs.get(theNum).getPOIC());
+                                mphoto.setPoic(POIs.get(theNum).getPoic());
                                 mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
                                 mphoto.setTime(simpleDateFormat.format(date));
                                 mphoto.save();
@@ -1918,7 +1942,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 POI poi = new POI();
                                 poi.setIc(ic);
                                 long time = System.currentTimeMillis();
-                                poi.setPOIC("POI" + String.valueOf(time));
+                                poi.setPoic("POI" + String.valueOf(time));
                                 poi.setPhotonum(1);
                                 poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
                                 poi.setX(latandlong[0]);
@@ -1929,7 +1953,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 poi.save();
                                 MPHOTO mphoto = new MPHOTO();
                                 mphoto.setPdfic(ic);
-                                mphoto.setPOIC("POI" + String.valueOf(time));
+                                mphoto.setPoic("POI" + String.valueOf(time));
                                 mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
                                 mphoto.setTime(simpleDateFormat.format(date));
                                 mphoto.save();
@@ -1944,7 +1968,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         POI poi = new POI();
                         poi.setIc(ic);
                         long time = System.currentTimeMillis();
-                        poi.setPOIC("POI" + String.valueOf(time));
+                        poi.setPoic("POI" + String.valueOf(time));
                         poi.setPhotonum(1);
                         poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
                         poi.setX(latandlong[0]);
@@ -1955,7 +1979,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         poi.save();
                         MPHOTO mphoto = new MPHOTO();
                         mphoto.setPdfic(ic);
-                        mphoto.setPOIC("POI" + String.valueOf(time));
+                        mphoto.setPoic("POI" + String.valueOf(time));
                         mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                         mphoto.setTime(simpleDateFormat.format(date));
                         mphoto.save();
@@ -1996,13 +2020,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onClick(DialogInterface dialog, int which) {
                         POI poi = new POI();
                         poi.setTapenum(POIs.get(theNum).getTapenum() + 1);
-                        poi.updateAll("poic = ?", POIs.get(theNum).getPOIC());
+                        poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
                         Date date = new Date(time);
                         MTAPE mtape = new MTAPE();
                         mtape.setPath(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri));
                         mtape.setPdfic(ic);
-                        mtape.setPOIC(POIs.get(theNum).getPOIC());
+                        mtape.setPoic(POIs.get(theNum).getPoic());
                         mtape.setTime(simpleDateFormat.format(date));
                         mtape.save();
                         poiLayerBt.setChecked(true);
@@ -2018,7 +2042,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //List<POI> POIs = DataSupport.findAll(POI.class);
                         POI poi = new POI();
                         poi.setIc(ic);
-                        poi.setPOIC(POIC);
+                        poi.setPoic(POIC);
                         poi.setTapenum(1);
                         poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
                         poi.setX((float) m_lat);
@@ -2030,7 +2054,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         MTAPE mtape = new MTAPE();
                         mtape.setPath(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri));
                         mtape.setPdfic(ic);
-                        mtape.setPOIC(POIC);
+                        mtape.setPoic(POIC);
                         mtape.setTime(simpleDateFormat.format(date));
                         mtape.save();
                         poiLayerBt.setChecked(true);
@@ -2045,7 +2069,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //List<POI> POIs = DataSupport.findAll(POI.class);
                 POI poi = new POI();
                 poi.setIc(ic);
-                poi.setPOIC(POIC);
+                poi.setPoic(POIC);
                 poi.setTapenum(1);
                 poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
                 poi.setX((float) m_lat);
@@ -2057,7 +2081,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 MTAPE mtape = new MTAPE();
                 mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
                 mtape.setPdfic(ic);
-                mtape.setPOIC(POIC);
+                mtape.setPoic(POIC);
                 mtape.setTime(simpleDateFormat.format(date));
                 mtape.save();
                 poiLayerBt.setChecked(true);
@@ -2102,12 +2126,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         public void onClick(DialogInterface dialog, int which) {
                             POI poi = new POI();
                             poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
-                            poi.updateAll("poic = ?", POIs.get(theNum).getPOIC());
+                            poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
                             Date date = new Date(time);
                             MPHOTO mphoto = new MPHOTO();
                             mphoto.setPdfic(ic);
-                            mphoto.setPOIC(POIs.get(theNum).getPOIC());
+                            mphoto.setPoic(POIs.get(theNum).getPoic());
                             mphoto.setPath(imageuri);
                             mphoto.setTime(simpleDateFormat.format(date));
                             mphoto.save();
@@ -2123,7 +2147,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             POI poi = new POI();
                             poi.setIc(ic);
                             //long time = System.currentTimeMillis();
-                            poi.setPOIC("POI" + String.valueOf(time));
+                            poi.setPoic("POI" + String.valueOf(time));
                             poi.setPhotonum(1);
                             poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
                             if (latandlong[0] != 0 & latandlong[1] != 0) {
@@ -2139,7 +2163,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.save();
                             MPHOTO mphoto = new MPHOTO();
                             mphoto.setPdfic(ic);
-                            mphoto.setPOIC("POI" + String.valueOf(time));
+                            mphoto.setPoic("POI" + String.valueOf(time));
                             mphoto.setPath(imageuri);
                             mphoto.setTime(simpleDateFormat.format(date));
                             mphoto.save();
@@ -2155,7 +2179,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     POI poi = new POI();
                     poi.setIc(ic);
                     //long time = System.currentTimeMillis();
-                    poi.setPOIC("POI" + String.valueOf(time));
+                    poi.setPoic("POI" + String.valueOf(time));
                     poi.setPhotonum(1);
                     poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
                     if (latandlong[0] != 0 & latandlong[1] != 0) {
@@ -2171,7 +2195,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     poi.save();
                     MPHOTO mphoto = new MPHOTO();
                     mphoto.setPdfic(ic);
-                    mphoto.setPOIC("POI" + String.valueOf(time));
+                    mphoto.setPoic("POI" + String.valueOf(time));
                     mphoto.setPath(imageuri);
                     mphoto.setTime(simpleDateFormat.format(date));
                     mphoto.save();
@@ -2260,6 +2284,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bt_distance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                locHere_fab.setVisibility(View.GONE);
+                centerPointModeBt.setVisibility(View.GONE);
                 popupWindow.dismiss();
                 delete_messure_fab.setVisibility(View.VISIBLE);
                 backpt_messure_fab.setVisibility(View.VISIBLE);
@@ -2282,6 +2308,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bt_area.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                locHere_fab.setVisibility(View.GONE);
+                centerPointModeBt.setVisibility(View.GONE);
                 popupWindow.dismiss();
                 delete_messure_fab.setVisibility(View.VISIBLE);
                 backpt_messure_fab.setVisibility(View.VISIBLE);
@@ -2348,17 +2376,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                 int size = lines_whiteBlanks.size();
+                for (int kk = 0; kk < size; kk++){
+                    Log.w(TAG, "onClick: " + lines_whiteBlanks.get(kk).getMmid());
+                }
                 int size1 = geometry_whiteBlanks.size();
-                if (size == 0) {
+                if (size <= 0) {
                     whiteBlankPt = "";
+                    //DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
-                    //Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                    Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                }else {
                     whiteBlankPt = "";
-                    DataSupport.deleteAll(Lines_WhiteBlank.class , "id = ? and ic = ?", Integer.toString(size - 1), ic);
-                    geometry_whiteBlanks.remove(size1 - 1);
+                    Log.w(TAG, "onClick: " + DataSupport.deleteAll(Lines_WhiteBlank.class, "mmid = ? and ic = ?", Integer.toString(size - 1), ic));
+                    if (size1 != 0) geometry_whiteBlanks.remove(size1 - 1);
                     pdfView.zoomWithAnimation(c_zoom);
                     //Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
                 }
@@ -2404,13 +2435,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                 int size = lines_whiteBlanks.size();
-                if (size == 0) {
+                if (size <= 0) {
                     whiteBlankPt = "";
+                    //DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
                     Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                }else {
                     whiteBlankPt = "";
                     DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
@@ -2458,11 +2489,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(ic, whiteBlankPt, color_Whiteblank);
                         geometry_whiteBlanks.add(geometry_whiteBlank);
                         List<Lines_WhiteBlank> liness = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+                        Log.w(TAG, "onTouch: " + liness.size());
+                        int size = liness.size();
                         Lines_WhiteBlank lines = new Lines_WhiteBlank();
                         lines.setIc(ic);
                         lines.setColor(color_Whiteblank);
                         lines.setLines(whiteBlankPt);
-                        lines.setId(liness.size());
+                        lines.setMmid(size);
                         lines.save();
                         break;
                 }
@@ -2887,19 +2920,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         setContentView(R.layout.activity_main_interface);
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
-        centerPoint.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
-            @Override
-            public void onSystemUiVisibilityChange(int visibility) {
-                if (visibility == View.VISIBLE) {
-                    isQuery = true;
-                    query_poi_imgbt.setVisibility(View.VISIBLE);
-                }
-                else {
-                    isQuery = false;
-                    query_poi_imgbt.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
         centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
         centerPointModeBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -2966,6 +2986,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (showMode == CENTERMODE) isQuery = true;
+                else isQuery = false;
+                centerPointModeBt.setVisibility(View.VISIBLE);
                 isMessure = false;
                 poinum_messure = 0;
                 messure_pts = "";
@@ -3208,6 +3231,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     trail.save();*/
                     List<Trail> trails = DataSupport.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
+                    if (showMode == CENTERMODE) isQuery = true;
+                    else isQuery = false;
                 }else {
                     Toast.makeText(MainInterface.this, "没有打开位置记录功能", Toast.LENGTH_SHORT).show();
                 }
@@ -3229,6 +3254,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     if (isDrawTrail == TRAIL_DRAW_TYPE){
                         toolbar.setTitle("正在记录轨迹");
                     }else toolbar.setTitle(pdfFileName);
+                    if (showMode == CENTERMODE) isQuery = true;
+                    else isQuery = false;
                     pdfView.zoomWithAnimation(c_zoom);
                 }else {
                     isDrawType = POI_DRAW_TYPE;
@@ -3421,14 +3448,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
-                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPOIC()).find(MPHOTO.class);
+                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
                         //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));
                         //locError(poi.getPath());
                         if (poi.getPhotonum() != 0 & mphotos.size() != 0){
-                            locError("poic = " + poi.getPOIC());
+                            locError("poic = " + poi.getPoic());
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
                             if (mphotos.size() != 0) {
                                 bt btt = new bt(DataUtil.getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
@@ -3436,8 +3463,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }
                         }else {
                             POI poi1 = new POI();
-                            poi1.setPhotonum(mphotos.size());
-                            poi1.updateAll("poic = ?", poi.getPOIC());
+                            if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
+                            else poi1.setToDefault("photonum");
+                            poi1.updateAll("POIC = ?", poi.getPoic());
                         }
                     }
                 }
@@ -3446,6 +3474,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();
         //////////////////////////////////////////////////////////////////
+    }
+
+    private void updateDB(){
+        List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+        int size = pois.size();
+        for (int i = 0; i < size; i++){
+            String poic = pois.get(i).getPoic();
+            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poic).find(MPHOTO.class);
+            List<MTAPE> mtapes = DataSupport.where("POIC = ?", poic).find(MTAPE.class);
+            POI poi1 = new POI();
+            if (mtapes.size() != 0) poi1.setTapenum(mtapes.size());
+            else poi1.setToDefault("tapenum");
+            if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
+            else poi1.setToDefault("photonum");
+            poi1.updateAll("poic = ?", pois.get(0).getPoic());
+            Log.w(TAG, "updateDB: "  + poic);
+        }
+        Log.w(TAG, "updateDB: " );
     }
 
     @Override
@@ -3469,6 +3515,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             isQuery = false;
             query_poi_imgbt.setVisibility(View.VISIBLE);
         }
+
         ////////////////////////缓存Bitmap//////////////////////////////
         getBitmap();
         /*bts = new ArrayList<bt>();
@@ -3491,7 +3538,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
                             }
                         }else {
-                            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPOIC()).find(MPHOTO.class);
+                            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
                             bt btt = new bt(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
                             bts.add(btt);

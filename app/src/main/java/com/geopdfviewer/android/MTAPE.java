@@ -9,7 +9,7 @@ import org.litepal.crud.DataSupport;
 public class MTAPE extends DataSupport {
     private int id;
     private String pdfic;
-    private String POIC;
+    private String poic;
     private String path;
     private String time;
 
@@ -29,12 +29,12 @@ public class MTAPE extends DataSupport {
         this.pdfic = pdfic;
     }
 
-    public String getPOIC() {
-        return POIC;
+    public String getPoic() {
+        return poic;
     }
 
-    public void setPOIC(String POIC) {
-        this.POIC = POIC;
+    public void setPoic(String poic) {
+        this.poic = poic;
     }
 
     public String getPath() {

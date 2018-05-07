@@ -64,7 +64,7 @@ public class photoshow extends AppCompatActivity {
         mPhotobjList.clear();
         List<MPHOTO> mphotos = DataSupport.where("POIC = ?", POIC).find(MPHOTO.class);
         for (MPHOTO mphoto : mphotos){
-            mPhotobj mphotobj = new mPhotobj(mphoto.getPOIC(), mphoto.getPOIC(), mphoto.getTime(), mphoto.getPath());
+            mPhotobj mphotobj = new mPhotobj(mphoto.getPoic(), mphoto.getPoic(), mphoto.getTime(), mphoto.getPath());
             mPhotobjList.add(mphotobj);
         }
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_photo);
@@ -202,7 +202,7 @@ public class photoshow extends AppCompatActivity {
             poi.updateAll("POIC = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
             mphoto.setPdfic(POIs.get(0).getIc());
-            mphoto.setPOIC(POIC);
+            mphoto.setPoic(POIC);
             //Log.w(TAG, "onActivityResult: " + uri.getPath() );
             //mphoto.setPath(getRealPath(uri.getPath()));
             mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
@@ -220,7 +220,7 @@ public class photoshow extends AppCompatActivity {
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
             poi.updateAll("POIC = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
-            mphoto.setPOIC(POIC);
+            mphoto.setPoic(POIC);
             mphoto.setPath(imageuri);
             mphoto.setTime(simpleDateFormat.format(date));
             mphoto.save();
@@ -239,6 +239,7 @@ public class photoshow extends AppCompatActivity {
     }
 
     private void parseSelectedPath(){
+        List<POI> pois = DataSupport.where("POIC = ?", POIC).find(POI.class);
         if (deletePath.contains("wslzy")){
             String[] nums = deletePath.split("wslzy");
             Log.w(TAG, "parseSelectedPath: " + nums[0] );

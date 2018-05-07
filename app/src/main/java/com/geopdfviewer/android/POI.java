@@ -10,7 +10,7 @@ public class POI  extends DataSupport {
     private int id;
     private String ic;
     private String name;
-    private String POIC;
+    private String poic;
     private int photonum;
     private String description;
     private int tapenum;
@@ -18,12 +18,12 @@ public class POI  extends DataSupport {
     private float y;
     private String time;
 
-    public String getPOIC() {
-        return POIC;
+    public String getPoic() {
+        return poic;
     }
 
-    public void setPOIC(String POIC) {
-        this.POIC = POIC;
+    public void setPoic(String poic) {
+        this.poic = poic;
     }
 
     public String getIc() {

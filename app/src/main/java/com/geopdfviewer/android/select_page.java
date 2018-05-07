@@ -529,7 +529,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         /*
         List<POI> pois = DataSupport.where("ic = ?", m_ic).find(POI.class);
         for ( POI poi : pois){
-            String poic = poi.getPOIC();
+            String poic = poi.getPoic();
             DataSupport.deleteAll(MTAPE.class, "POIC = ?", poic);
             DataSupport.deleteAll(MPHOTO.class, "POIC = ?", poic);
         }
@@ -1100,7 +1100,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         POI poi = new POI();
                         poi.setId(id);
                         poi.setIc(ic);
-                        poi.setPOIC(poic);
+                        poi.setPoic(poic);
                         poi.setTime(time);
                         poi.setName(name);
                         poi.setX(x);
@@ -1170,7 +1170,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         MPHOTO mphoto = new MPHOTO();
                         mphoto.setId(id);
                         mphoto.setPdfic(ic);
-                        mphoto.setPOIC(poic);
+                        mphoto.setPoic(poic);
                         mphoto.setPath(path);
                         mphoto.setTime(time);
                         mphoto.save();
@@ -1200,7 +1200,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         MTAPE mtape = new MTAPE();
                         mtape.setId(id);
                         mtape.setPdfic(ic);
-                        mtape.setPOIC(poic);
+                        mtape.setPoic(poic);
                         mtape.setPath(path);
                         mtape.setTime(time);
                         mtape.save();
@@ -1290,7 +1290,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
                             sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
                             sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
-                            sb.append("<POIC>").append(pois.get(i).getPOIC()).append("</POIC>").append("\n");
+                            sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
                             sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
                             sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
                             sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
@@ -1317,7 +1317,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         for (int i = 0; i < size_mphoto; i++){
                             sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
                             sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
-                            sb.append("<POIC>").append(mphotos.get(i).getPOIC()).append("</POIC>").append("\n");
+                            sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
                             String path = mphotos.get(i).getPath();
                             sb.append("<path>").append(path).append("</path>").append("\n");
                             files.add(new File(path));
@@ -1330,7 +1330,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         for (int i = 0; i < size_mtape; i++){
                             sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
                             sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
-                            sb.append("<POIC>").append(mtapes.get(i).getPOIC()).append("</POIC>").append("\n");
+                            sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
                             String path = mtapes.get(i).getPath();
                             sb.append("<path>").append(path).append("</path>").append("\n");
                             files.add(new File(path));

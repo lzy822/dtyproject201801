@@ -68,13 +68,29 @@ public class singlepoi extends AppCompatActivity {
     }
 
     private void refresh(){
-        List<POI> pois = DataSupport.where("POIC = ?", POIC).find(POI.class);
-        List<MTAPE> tapes = DataSupport.where("POIC = ?", POIC).find(MTAPE.class);
-        List<MPHOTO> photos = DataSupport.where("POIC = ?", POIC).find(MPHOTO.class);
-        POI poi = pois.get(0);
+        List<POI> pois = DataSupport.where("poic = ?", POIC).find(POI.class);
+        List<MTAPE> tapes = DataSupport.where("poic = ?", POIC).find(MTAPE.class);
+        List<MPHOTO> photos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
+        Log.w(TAG, "pois: " + pois.size() + "\n");
+        Log.w(TAG, "tapes1: " + pois.get(0).getTapenum() + "\n");
+        Log.w(TAG, "photos1: " + pois.get(0).getPhotonum() + "\n");
+        Log.w(TAG, "tapes: " + tapes.size() + "\n");
+        Log.w(TAG, "photos: " + photos.size());
+        POI poi1 = new POI();
+        if (tapes.size() != 0) poi1.setTapenum(tapes.size());
+        else poi1.setToDefault("tapenum");
+        if (photos.size() != 0) poi1.setPhotonum(photos.size());
+        else poi1.setToDefault("photonum");
+        poi1.updateAll("poic = ?", POIC);
+        Log.w(TAG, "refresh: " + poi1.updateAll("poic = ?", POIC));
+        /*POI poi = new POI();
         poi.setPhotonum(photos.size());
         poi.setTapenum(tapes.size());
-        poi.updateAll("POIC = ?", POIC);
+        poi.updateAll("POIC = ?", POIC);*/
+        List<POI> pois1 = DataSupport.where("poic = ?", POIC).find(POI.class);
+        Log.w(TAG, "tapes2: " + pois1.get(0).getTapenum() + "\n");
+        Log.w(TAG, "photos2: " + pois1.get(0).getPhotonum() + "\n");
+        POI poi = pois.get(0);
         name = poi.getName();
         editText_name = (EditText) findViewById(R.id.edit_name);
         editText_name.setText(name);
@@ -84,9 +100,9 @@ public class singlepoi extends AppCompatActivity {
         }else editText_des.setText("");
         TextView textView_time = (TextView) findViewById(R.id.txt_timeshow);
         textView_time.setText(poi.getTime());
-        Log.w(TAG, Integer.toString(poi.getTapenum()));
+        Log.w(TAG, Integer.toString(tapes.size()));
         TextView textView_photonum = (TextView) findViewById(R.id.txt_photonumshow);
-        textView_photonum.setText(Integer.toString(poi.getPhotonum()));
+        textView_photonum.setText(Integer.toString(photos.size()));
         textView_photonum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,7 +113,7 @@ public class singlepoi extends AppCompatActivity {
             }
         });
         TextView textView_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
-        textView_tapenum.setText(Integer.toString(poi.getTapenum()));
+        textView_tapenum.setText(Integer.toString(tapes.size()));
         textView_tapenum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -225,7 +241,7 @@ public class singlepoi extends AppCompatActivity {
             poi.updateAll("POIC = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
             mphoto.setPdfic(POIs.get(0).getIc());
-            mphoto.setPOIC(POIC);
+            mphoto.setPoic(POIC);
             //mphoto.setPath(getRealPath(uri.getPath()));
             mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
             mphoto.setTime(simpleDateFormat.format(date));
@@ -243,7 +259,7 @@ public class singlepoi extends AppCompatActivity {
             MTAPE mtape = new MTAPE();
             mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
             mtape.setPdfic(POIs.get(0).getIc());
-            mtape.setPOIC(POIC);
+            mtape.setPoic(POIC);
             mtape.setTime(simpleDateFormat.format(date));
             mtape.save();
         }
@@ -257,7 +273,7 @@ public class singlepoi extends AppCompatActivity {
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
             poi.updateAll("POIC = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
-            mphoto.setPOIC(POIC);
+            mphoto.setPoic(POIC);
             mphoto.setPath(imageuri);
             mphoto.setTime(simpleDateFormat.format(date));
             mphoto.save();

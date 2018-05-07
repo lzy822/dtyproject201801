@@ -6,7 +6,7 @@ public class Lines_WhiteBlank extends DataSupport {
     private String ic;
     private String lines;
     private int color;
-    private int id;
+    private int mmid;
 
     public String getIc() {
         return ic;
@@ -32,11 +32,11 @@ public class Lines_WhiteBlank extends DataSupport {
         this.color = color;
     }
 
-    public int getId() {
-        return id;
+    public int getMmid() {
+        return mmid;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setMmid(int mmid) {
+        this.mmid = mmid;
     }
 }

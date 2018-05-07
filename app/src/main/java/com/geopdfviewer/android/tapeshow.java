@@ -44,7 +44,7 @@ public class tapeshow extends AppCompatActivity {
         mTapeobjList.clear();
         List<MTAPE> mtapes = DataSupport.where("POIC = ?", POIC).find(MTAPE.class);
         for (MTAPE mtape : mtapes){
-            mTapeobj mtapeobj = new mTapeobj(mtape.getPOIC(), mtape.getPOIC(), mtape.getTime(), mtape.getPath());
+            mTapeobj mtapeobj = new mTapeobj(mtape.getPoic(), mtape.getPoic(), mtape.getTime(), mtape.getPath());
             mTapeobjList.add(mtapeobj);
         }
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_tape);
@@ -188,13 +188,14 @@ public class tapeshow extends AppCompatActivity {
             MTAPE mtape = new MTAPE();
             mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
             mtape.setPdfic(POIs.get(0).getIc());
-            mtape.setPOIC(POIC);
+            mtape.setPoic(POIC);
             mtape.setTime(simpleDateFormat.format(date));
             mtape.save();
         }
     }
 
     private void parseSelectedPath(){
+        List<POI> pois = DataSupport.where("POIC = ?", POIC).find(POI.class);
         if (deletePath.contains("wslzy")){
             String[] nums = deletePath.split("wslzy");
             for (int i = 0; i < nums.length; i++){
