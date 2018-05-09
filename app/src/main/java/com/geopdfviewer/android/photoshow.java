@@ -62,10 +62,12 @@ public class photoshow extends AppCompatActivity {
     private int isLongClick = 1;
     Toolbar toolbar;
     Uri imageUri;
+    private List<bt> bts;
+    boolean isCreateBitmap = false;
 
     private void refreshCard(){
         mPhotobjList.clear();
-        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", POIC).find(MPHOTO.class);
+        List<MPHOTO> mphotos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
         for (MPHOTO mphoto : mphotos){
             mPhotobj mphotobj = new mPhotobj(mphoto.getPoic(), mphoto.getPoic(), mphoto.getTime(), mphoto.getPath());
             mPhotobjList.add(mphotobj);
@@ -106,7 +108,7 @@ public class photoshow extends AppCompatActivity {
                     }
                 }else {
                     //Log.w(TAG, "onItemClick: " + path );
-                    showPopueWindowForPhoto(path);
+                    if (isCreateBitmap) showPopueWindowForPhoto(path);
                 }
             }
         });
@@ -137,12 +139,36 @@ public class photoshow extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photoshow);
+        bts = new ArrayList<bt>();
+        /////////////////////////
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar4);
         setSupportActionBar(toolbar);
         setTitle("相片列表");
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                bts.clear();
+                List<MPHOTO> mphotos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
+                int size = mphotos.size();
+                for (int i = 0; i < size; i++) {
+                    String path = mphotos.get(i).getPath();
+                    Bitmap bitmap = DataUtil.getImageThumbnail(path, 2048, 2048);
+                    int degree = DataUtil.getPicRotate(path);
+                    if (degree != 0) {
+                        Matrix m = new Matrix();
+                        m.setRotate(degree); // 旋转angle度
+                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                    }
+                    bt btt = new bt(bitmap, mphotos.get(i).getPath());
+                    bts.add(btt);
+                }
+                isCreateBitmap = true;
+            }
+        }).start();
     }
 
     @Override
@@ -196,13 +222,13 @@ public class photoshow extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
-            List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+            List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
             POI poi = new POI();
             long time = System.currentTimeMillis();
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
-            poi.updateAll("POIC = ?", POIC);
+            poi.updateAll("poic = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
             mphoto.setPdfic(POIs.get(0).getIc());
             mphoto.setPoic(POIC);
@@ -225,11 +251,11 @@ public class photoshow extends AppCompatActivity {
                 }
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
                 Date date = new Date(System.currentTimeMillis());
-                List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+                List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
                 POI poi = new POI();
                 long time = System.currentTimeMillis();
                 poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-                poi.updateAll("POIC = ?", POIC);
+                poi.updateAll("poic = ?", POIC);
                 MPHOTO mphoto = new MPHOTO();
                 mphoto.setPoic(POIC);
                 mphoto.setPath(imageuri);
@@ -254,15 +280,15 @@ public class photoshow extends AppCompatActivity {
     }
 
     private void parseSelectedPath(){
-        List<POI> pois = DataSupport.where("POIC = ?", POIC).find(POI.class);
+        List<POI> pois = DataSupport.where("poic = ?", POIC).find(POI.class);
         if (deletePath.contains("wslzy")){
             String[] nums = deletePath.split("wslzy");
             Log.w(TAG, "parseSelectedPath: " + nums[0] );
             for (int i = 0; i < nums.length; i++){
-                DataSupport.deleteAll(MPHOTO.class, "POIC = ? and path = ?", POIC, nums[i]);
+                DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
             }
         }else {
-            DataSupport.deleteAll(MPHOTO.class, "POIC = ? and path = ?", POIC, deletePath);
+            DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, deletePath);
         }
     }
 
@@ -352,14 +378,12 @@ public class photoshow extends AppCompatActivity {
         final ImageView imageView1 = (ImageView) popView.findViewById(R.id.photoshow_all1);
         Log.w(TAG, "showPopueWindowForPhoto: " + path);
         //File outputImage = new File(path);
-        int degree = DataUtil.getPicRotate(path);
-        if (degree != 0) {
-            Matrix m = new Matrix();
-            m.setRotate(degree); // 旋转angle度
-            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-            Bitmap bitmap = DataUtil.getImageThumbnail(path, 2048, 2048 );
-            imageView1.setImageBitmap(Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true));
-        }else imageView1.setImageBitmap(getImageThumbnail(path, 2048, 2048 ));
+        //
+        int size = bts.size();
+        for (int i = 0; i < size; i++){
+            if (path.equals(bts.get(i).getM_path())) imageView1.setImageBitmap(bts.get(i).getM_bm());
+        }
+
         //获取屏幕宽高
         int weight = getResources().getDisplayMetrics().widthPixels;
         int height = getResources().getDisplayMetrics().heightPixels * 2 / 3;

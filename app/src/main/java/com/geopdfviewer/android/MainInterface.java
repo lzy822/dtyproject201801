@@ -1050,7 +1050,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
                                         } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                     }else {
-                                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
+                                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
                                         if (poi.getTapenum() == 0){
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
@@ -1065,7 +1065,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                 POI poi1 = new POI();
                                                 if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
                                                 else poi1.setToDefault("photonum");
-                                                poi1.updateAll("POIC = ?", poi.getPoic());
+                                                poi1.updateAll("poic = ?", poi.getPoic());
                                             }
                                         }else {
                                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
@@ -1081,7 +1081,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                                 POI poi1 = new POI();
                                                 if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
                                                 else poi1.setToDefault("photonum");
-                                                poi1.updateAll("POIC = ?", poi.getPoic());
+                                                poi1.updateAll("poic = ?", poi.getPoic());
                                             }
                                         }
                                     }
@@ -3465,7 +3465,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
-                        List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
+                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
                         //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
@@ -3491,7 +3491,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             POI poi1 = new POI();
                             if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
                             else poi1.setToDefault("photonum");
-                            poi1.updateAll("POIC = ?", poi.getPoic());
+                            poi1.updateAll("poic = ?", poi.getPoic());
                         }
                     }
                 }
@@ -3507,8 +3507,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         int size = pois.size();
         for (int i = 0; i < size; i++){
             String poic = pois.get(i).getPoic();
-            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poic).find(MPHOTO.class);
-            List<MTAPE> mtapes = DataSupport.where("POIC = ?", poic).find(MTAPE.class);
+            List<MPHOTO> mphotos = DataSupport.where("poic = ?", poic).find(MPHOTO.class);
+            List<MTAPE> mtapes = DataSupport.where("poic = ?", poic).find(MTAPE.class);
             POI poi1 = new POI();
             if (mtapes.size() != 0) poi1.setTapenum(mtapes.size());
             else poi1.setToDefault("tapenum");

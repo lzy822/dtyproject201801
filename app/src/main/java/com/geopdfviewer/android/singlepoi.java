@@ -234,13 +234,13 @@ public class singlepoi extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
-            List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+            List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
             POI poi = new POI();
             long time = System.currentTimeMillis();
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
-            poi.updateAll("POIC = ?", POIC);
+            poi.updateAll("poic = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
             mphoto.setPdfic(POIs.get(0).getIc());
             mphoto.setPoic(POIC);
@@ -252,12 +252,12 @@ public class singlepoi extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
             Uri uri = data.getData();
             //long time = System.currentTimeMillis();
-            List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+            List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
             POI poi = new POI();
             poi.setTapenum(POIs.get(0).getTapenum() + 1);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
             Date date = new Date(System.currentTimeMillis());
-            poi.updateAll("POIC = ?", POIC);
+            poi.updateAll("poic = ?", POIC);
             MTAPE mtape = new MTAPE();
             mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
             mtape.setPdfic(POIs.get(0).getIc());
@@ -277,11 +277,11 @@ public class singlepoi extends AppCompatActivity {
                 }
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
                 Date date = new Date(System.currentTimeMillis());
-                List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+                List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
                 POI poi = new POI();
                 long time = System.currentTimeMillis();
                 poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-                poi.updateAll("POIC = ?", POIC);
+                poi.updateAll("poic = ?", POIC);
                 MPHOTO mphoto = new MPHOTO();
                 mphoto.setPoic(POIC);
                 mphoto.setPath(imageuri);
@@ -322,13 +322,13 @@ public class singlepoi extends AppCompatActivity {
                 POI poi = new POI();
                 poi.setName(editText_name.getText().toString());
                 poi.setDescription(editText_des.getText().toString());
-                poi.updateAll("POIC = ?", POIC);
+                poi.updateAll("poic = ?", POIC);
                 this.finish();
                 break;
             case R.id.deletepoi:
-                DataSupport.deleteAll(POI.class, "POIC = ?", POIC);
-                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC);
-                DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC);
+                DataSupport.deleteAll(POI.class, "poic = ?", POIC);
+                DataSupport.deleteAll(MPHOTO.class, "poic = ?", POIC);
+                DataSupport.deleteAll(MTAPE.class, "poic = ?", POIC);
                 this.finish();
                 break;
             default:
