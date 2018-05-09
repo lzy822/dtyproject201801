@@ -1,6 +1,8 @@
 package com.geopdfviewer.android;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -204,12 +206,12 @@ public class singlepoi extends AppCompatActivity {
     }
 
     private void takePhoto(){
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto");
-        if (!file.exists() && !file.isDirectory()){
-            file.mkdirs();
+        File file2 = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi");
+        if (!file2.exists() && !file2.isDirectory()){
+            file2.mkdirs();
         }
         long timenow = System.currentTimeMillis();
-        File outputImage = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto", Long.toString(timenow) + ".jpg");
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi", Long.toString(timenow) + ".jpg");
         try {
             if (outputImage.exists()){
                 outputImage.delete();
@@ -265,18 +267,30 @@ public class singlepoi extends AppCompatActivity {
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
             String imageuri = DataUtil.getRealPath(imageUri.toString());
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-            Date date = new Date(System.currentTimeMillis());
-            List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
-            POI poi = new POI();
-            long time = System.currentTimeMillis();
-            poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-            poi.updateAll("POIC = ?", POIC);
-            MPHOTO mphoto = new MPHOTO();
-            mphoto.setPoic(POIC);
-            mphoto.setPath(imageuri);
-            mphoto.setTime(simpleDateFormat.format(date));
-            mphoto.save();
+            File file = new File(imageuri);
+            if (file.length() != 0) {
+                try {
+                    MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
+                    // 最后通知图库更新
+                    singlepoi.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
+                }catch (IOException e){
+                }
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                Date date = new Date(System.currentTimeMillis());
+                List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+                POI poi = new POI();
+                long time = System.currentTimeMillis();
+                poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
+                poi.updateAll("POIC = ?", POIC);
+                MPHOTO mphoto = new MPHOTO();
+                mphoto.setPoic(POIC);
+                mphoto.setPath(imageuri);
+                mphoto.setTime(simpleDateFormat.format(date));
+                mphoto.save();
+            }else {
+                file.delete();
+                Toast.makeText(singlepoi.this, "拍照失败, 请再次拍摄", Toast.LENGTH_LONG).show();
+            }
         }
     }
 

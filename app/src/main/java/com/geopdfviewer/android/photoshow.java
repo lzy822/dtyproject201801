@@ -1,6 +1,8 @@
 package com.geopdfviewer.android;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,6 +10,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -212,19 +215,31 @@ public class photoshow extends AppCompatActivity {
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
             String imageuri = DataUtil.getRealPath(imageUri.toString());
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-            Date date = new Date(System.currentTimeMillis());
-            List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
-            POI poi = new POI();
-            long time = System.currentTimeMillis();
-            poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-            poi.updateAll("POIC = ?", POIC);
-            MPHOTO mphoto = new MPHOTO();
-            mphoto.setPoic(POIC);
-            mphoto.setPath(imageuri);
-            mphoto.setTime(simpleDateFormat.format(date));
-            mphoto.save();
-            refreshCard();
+            File file = new File(imageuri);
+            if (file.length() != 0) {
+                try {
+                    MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
+                    // 最后通知图库更新
+                    photoshow.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
+                }catch (IOException e){
+                }
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                Date date = new Date(System.currentTimeMillis());
+                List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+                POI poi = new POI();
+                long time = System.currentTimeMillis();
+                poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
+                poi.updateAll("POIC = ?", POIC);
+                MPHOTO mphoto = new MPHOTO();
+                mphoto.setPoic(POIC);
+                mphoto.setPath(imageuri);
+                mphoto.setTime(simpleDateFormat.format(date));
+                mphoto.save();
+                refreshCard();
+            }else {
+                file.delete();
+                Toast.makeText(photoshow.this, "拍照失败, 请再次拍摄", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -307,12 +322,12 @@ public class photoshow extends AppCompatActivity {
     }
 
     private void takePhoto(){
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto");
-        if (!file.exists() && !file.isDirectory()){
-            file.mkdirs();
+        File file2 = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi");
+        if (!file2.exists() && !file2.isDirectory()){
+            file2.mkdirs();
         }
         long timenow = System.currentTimeMillis();
-        File outputImage = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/maphoto", Long.toString(timenow) + ".jpg");
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi", Long.toString(timenow) + ".jpg");
         try {
             if (outputImage.exists()){
                 outputImage.delete();
@@ -337,16 +352,14 @@ public class photoshow extends AppCompatActivity {
         final ImageView imageView1 = (ImageView) popView.findViewById(R.id.photoshow_all1);
         Log.w(TAG, "showPopueWindowForPhoto: " + path);
         //File outputImage = new File(path);
-        if (Build.VERSION.SDK_INT >= 24){
-            //Uri output = FileProvider.getUriForFile(MyApplication.getContext(), "com.geopdfviewer.android.fileprovider", outputImage);
-            //imageView.setImageURI(Uri.parse("/storage/emulated/0/DCIM/Camera/IMG_20180320_182344_1.jpg"));
-            //imageView1.setImageURI(output);
-            imageView1.setImageBitmap(getImageThumbnail(path, 2048, 2048 ));
-        }else {
-            //Uri output = Uri.fromFile(outputImage);
-            //imageView1.setImageURI(output);
-            imageView1.setImageBitmap(getImageThumbnail(path, 2048, 2048 ));
-        }
+        int degree = DataUtil.getPicRotate(path);
+        if (degree != 0) {
+            Matrix m = new Matrix();
+            m.setRotate(degree); // 旋转angle度
+            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+            Bitmap bitmap = DataUtil.getImageThumbnail(path, 2048, 2048 );
+            imageView1.setImageBitmap(Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true));
+        }else imageView1.setImageBitmap(getImageThumbnail(path, 2048, 2048 ));
         //获取屏幕宽高
         int weight = getResources().getDisplayMetrics().widthPixels;
         int height = getResources().getDisplayMetrics().heightPixels * 2 / 3;

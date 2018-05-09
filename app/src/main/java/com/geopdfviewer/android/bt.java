@@ -5,6 +5,21 @@ import android.graphics.Bitmap;
 public class bt {
     private Bitmap m_bm;
     private String m_path;
+    private int rotate;
+
+    public bt(Bitmap m_bm, String m_path, int rotate) {
+        this.m_bm = m_bm;
+        this.m_path = m_path;
+        this.rotate = rotate;
+    }
+
+    public int getRotate() {
+        return rotate;
+    }
+
+    public void setRotate(int rotate) {
+        this.rotate = rotate;
+    }
 
     public bt(Bitmap m_bm, String m_path) {
         this.m_bm = m_bm;

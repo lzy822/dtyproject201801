@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -99,7 +100,16 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
         /*if (Build.VERSION.SDK_INT >= 24){
             holder.PhotoImage.setImageBitmap(getImageThumbnail(mphoto.getM_path(), 100, 120));
         }else {*/
-        holder.PhotoImage.setImageBitmap(getImageThumbnail(mphoto.getM_path(), 100, 120));
+        String path = mphoto.getM_path();
+        Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 120);
+        int degree = DataUtil.getPicRotate(path);
+        if (degree != 0) {
+            Matrix m = new Matrix();
+            m.setRotate(degree); // 旋转angle度
+            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+        }
+        holder.PhotoImage.setImageBitmap(bitmap);
         //}
         String data;
         data = "图片名称: " + mphoto.getM_name() + "\n" + "时间: " + mphoto.getM_time();
