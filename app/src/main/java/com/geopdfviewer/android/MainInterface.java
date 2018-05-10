@@ -1048,6 +1048,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if (isMessure & showMode == NOCENTERMODE){
                             parseAndrawMessure(messure_pts, canvas);
                         }
+                        managePatchsData();
+                        if (showMode == CENTERMODE) drawDemoArea(canvas);
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -1462,62 +1464,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             parseAndrawLinesforWhiteBlank(canvas);
                             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
                         }
-                        int sizzze = patchsForLatLng.size();
-                        Log.w(TAG, "onCreatesize: " + patchsForPix.size());
-                        for (int b = 0; b < sizzze; b++) {
-                            Log.w(TAG, "onCreatesize1: " + patchsForPix.size());
-                            if (b == 0) {
-                                int size222 = patchsForLatLng.get(b).size();
-                                for (int i = 0; i < size222; i++) {
-                                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    if (latLngs1_1.size() < size222)
-                                        latLngs1_1.add(new LatLng(pt.x, pt.y));
-                                    else {
-                                        latLngs1_1.get(i).setLatitude(pt.x);
-                                        latLngs1_1.get(i).setLongitude(pt.y);
-                                    }
-                                }
-                                if (patchsForPix.size() < patchsForLatLng.size())
-                                    patchsForPix.add(latLngs1_1);
-                                else {
-                                    patchsForPix.set(b, latLngs1_1);
-                                }
-                            }else if (b == 1) {
-                                int size222 = patchsForLatLng.get(b).size();
-                                for (int i = 0; i < size222; i++) {
-                                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    if (latLngs1_2.size() < size222)
-                                        latLngs1_2.add(new LatLng(pt.x, pt.y));
-                                    else {
-                                        latLngs1_2.get(i).setLatitude(pt.x);
-                                        latLngs1_2.get(i).setLongitude(pt.y);
-                                    }
-                                }
-                                if (patchsForPix.size() < patchsForLatLng.size())
-                                    patchsForPix.add(latLngs1_2);
-                                else {
-                                    patchsForPix.set(b, latLngs1_2);
-                                }
-                            }
-                            if (b == 2) {
-                                int size222 = patchsForLatLng.get(b).size();
-                                for (int i = 0; i < size222; i++) {
-                                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    if (latLngs1_3.size() < size222)
-                                        latLngs1_3.add(new LatLng(pt.x, pt.y));
-                                    else {
-                                        latLngs1_3.get(i).setLatitude(pt.x);
-                                        latLngs1_3.get(i).setLongitude(pt.y);
-                                    }
-                                }
-                                if (patchsForPix.size() < patchsForLatLng.size())
-                                    patchsForPix.add(latLngs1_3);
-                                else {
-                                    patchsForPix.set(b, latLngs1_3);
-                                }
-                            }
-                        }
-                        drawDemoArea(canvas);
+                        managePatchsData();
+                        if (showMode == CENTERMODE) drawDemoArea(canvas);
                         if(isDrawType == POI_DRAW_TYPE || showPOI){
                             //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
@@ -1913,6 +1861,64 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         };
         Timer timer = new Timer();
         timer.schedule(task, 2500);
+    }
+
+    private void managePatchsData(){
+        int sizzze = patchsForLatLng.size();
+        Log.w(TAG, "onCreatesize: " + patchsForPix.size());
+        for (int b = 0; b < sizzze; b++) {
+            Log.w(TAG, "onCreatesize1: " + patchsForPix.size());
+            if (b == 0) {
+                int size222 = patchsForLatLng.get(b).size();
+                for (int i = 0; i < size222; i++) {
+                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    if (latLngs1_1.size() < size222)
+                        latLngs1_1.add(new LatLng(pt.x, pt.y));
+                    else {
+                        latLngs1_1.get(i).setLatitude(pt.x);
+                        latLngs1_1.get(i).setLongitude(pt.y);
+                    }
+                }
+                if (patchsForPix.size() < patchsForLatLng.size())
+                    patchsForPix.add(latLngs1_1);
+                else {
+                    patchsForPix.set(b, latLngs1_1);
+                }
+            }else if (b == 1) {
+                int size222 = patchsForLatLng.get(b).size();
+                for (int i = 0; i < size222; i++) {
+                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    if (latLngs1_2.size() < size222)
+                        latLngs1_2.add(new LatLng(pt.x, pt.y));
+                    else {
+                        latLngs1_2.get(i).setLatitude(pt.x);
+                        latLngs1_2.get(i).setLongitude(pt.y);
+                    }
+                }
+                if (patchsForPix.size() < patchsForLatLng.size())
+                    patchsForPix.add(latLngs1_2);
+                else {
+                    patchsForPix.set(b, latLngs1_2);
+                }
+            }
+            if (b == 2) {
+                int size222 = patchsForLatLng.get(b).size();
+                for (int i = 0; i < size222; i++) {
+                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    if (latLngs1_3.size() < size222)
+                        latLngs1_3.add(new LatLng(pt.x, pt.y));
+                    else {
+                        latLngs1_3.get(i).setLatitude(pt.x);
+                        latLngs1_3.get(i).setLongitude(pt.y);
+                    }
+                }
+                if (patchsForPix.size() < patchsForLatLng.size())
+                    patchsForPix.add(latLngs1_3);
+                else {
+                    patchsForPix.set(b, latLngs1_3);
+                }
+            }
+        }
     }
 
     private boolean verifyAreaForAutoTrans(double mmax_lat, double mmin_lat, double mmax_long, double mmin_long){
