@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -546,6 +547,27 @@ public class DataUtil {
             e.printStackTrace();
         }
         return degree;
+    }
+
+    public static boolean PtInPolygon(LatLng point, List<LatLng> APoints) {
+        int nCross = 0;
+        for (int i = 0; i < APoints.size(); i++)   {
+            LatLng p1 = APoints.get(i);
+            LatLng p2 = APoints.get((i + 1) % APoints.size());
+            // 求解 y=p.y 与 p1p2 的交点
+            if ( p1.getLongitude() == p2.getLongitude())      // p1p2 与 y=p0.y平行
+                continue;
+            if ( point.getLongitude() <  Math.min(p1.getLongitude(), p2.getLongitude()))   // 交点在p1p2延长线上
+                continue;
+            if ( point.getLongitude() >= Math.max(p1.getLongitude(), p2.getLongitude()))   // 交点在p1p2延长线上
+                continue;
+            // 求交点的 X 坐标 --------------------------------------------------------------
+            double x = (double)(point.getLongitude() - p1.getLongitude()) * (double)(p2.getLatitude() - p1.getLatitude()) / (double)(p2.getLongitude() - p1.getLongitude()) + p1.getLatitude();
+            if ( x > point.getLatitude() )
+                nCross++; // 只统计单边交点
+        }
+        // 单边交点为偶数，点在多边形之外 ---
+        return (nCross % 2 == 1);
     }
 
 

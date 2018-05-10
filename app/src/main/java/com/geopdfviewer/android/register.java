@@ -191,7 +191,7 @@ public class register extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.info).setVisible(false);
         menu.findItem(R.id.queryPOI).setVisible(false);
-        menu.findItem(R.id.query).setVisible(false);
+        menu.findItem(R.id.queryLatLng).setVisible(false);
         menu.findItem(R.id.back).setVisible(false);
         return true;
 

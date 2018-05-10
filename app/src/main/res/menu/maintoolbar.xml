@@ -7,7 +7,7 @@
         android:title="back"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/query"
+        android:id="@+id/queryLatLng"
         android:icon="@drawable/ic_search"
         android:title="query"
         app:showAsAction="always"/>
@@ -21,5 +21,10 @@
         android:icon="@drawable/ic_info_black"
         android:title="查看所有兴趣点信息"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_search"
+        android:title="@string/action_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="always" />
 
 </menu>

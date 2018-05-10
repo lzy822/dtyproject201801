@@ -1,5 +1,6 @@
 package com.geopdfviewer.android;
 
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -40,6 +41,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -186,6 +188,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public static final int ZOOM_OUT = 1;
     public static final int ZOOM_IN = 2;
 
+    //点面判断 测试面数据
+    private List<LatLng> latLngs_1;
+    private List<LatLng> latLngs_2;
+    private List<LatLng> latLngs_3;
+    private List<LatLng> latLngs1_1;
+    private List<LatLng> latLngs1_2;
+    private List<LatLng> latLngs1_3;
+    private List<List<LatLng>> patchsForLatLng;
+    private List<List<LatLng>> patchsForPix;
+
     //当前记录的坐标点个数
     private int isLocate = 0;
 
@@ -249,7 +261,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private boolean isPos = false;
 
     //声明Paint
-    Paint paint, paint1, paint2, paint3, paint4, paint5, paint6, paint8;
+    Paint paint, paint1, paint2, paint3, paint4, paint5, paint6, paint8, paint9, paint10;
 
     //记录测量坐标串
     private String messure_pts = "";
@@ -274,6 +286,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录是否开始绘制轨迹
     private int isDrawTrail = NONE_DRAW_TYPE;
+    private final static int SEARCH_DEMO = -3;
 
     //记录点选的坐标位置
     private float locLatForTap, locLongForTap;
@@ -796,6 +809,33 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //pdfView的ontouchlistener功能监控
     private void onTouchListenerForView(){
+    }
+
+    private void drawDemoArea(Canvas canvas){
+        Log.w(TAG, "drawDemoArea: ");
+        String[] str = textView.getText().toString().split(";");
+        float[] ptss = new float[2];
+        for (int i = 0; i < str.length; i++){
+            ptss[i] = Float.valueOf(str[i]);
+        }
+        LatLng lt = new LatLng(ptss[0], ptss[1]);
+        int sizzzze = patchsForPix.size();
+        for (int b = 0; b < sizzzze; b++) {
+            int size = patchsForPix.get(b).size();
+            for (int i = 0; i < size; i++) {
+                if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(b))) {
+                    if (i < size - 1)
+                        canvas.drawLine(patchsForPix.get(b).get(i).getLatitude(), patchsForPix.get(b).get(i).getLongitude(), patchsForPix.get(b).get(i + 1).getLatitude(), patchsForPix.get(b).get(i + 1).getLongitude(), paint10);
+                    else
+                        canvas.drawLine(patchsForPix.get(b).get(i).getLatitude(), patchsForPix.get(b).get(i).getLongitude(), patchsForPix.get(b).get(0).getLatitude(), patchsForPix.get(b).get(0).getLongitude(), paint10);
+                } else {
+                    if (i < size - 1)
+                        canvas.drawLine(patchsForPix.get(b).get(i).getLatitude(), patchsForPix.get(b).get(i).getLongitude(), patchsForPix.get(b).get(i + 1).getLatitude(), patchsForPix.get(b).get(i + 1).getLongitude(), paint9);
+                    else
+                        canvas.drawLine(patchsForPix.get(b).get(i).getLatitude(), patchsForPix.get(b).get(i).getLongitude(), patchsForPix.get(b).get(0).getLatitude(), patchsForPix.get(b).get(0).getLongitude(), paint9);
+                }
+            }
+        }
     }
 
     //显示GeoPDF
@@ -1422,7 +1462,62 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             parseAndrawLinesforWhiteBlank(canvas);
                             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
                         }
-
+                        int sizzze = patchsForLatLng.size();
+                        Log.w(TAG, "onCreatesize: " + patchsForPix.size());
+                        for (int b = 0; b < sizzze; b++) {
+                            Log.w(TAG, "onCreatesize1: " + patchsForPix.size());
+                            if (b == 0) {
+                                int size222 = patchsForLatLng.get(b).size();
+                                for (int i = 0; i < size222; i++) {
+                                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    if (latLngs1_1.size() < size222)
+                                        latLngs1_1.add(new LatLng(pt.x, pt.y));
+                                    else {
+                                        latLngs1_1.get(i).setLatitude(pt.x);
+                                        latLngs1_1.get(i).setLongitude(pt.y);
+                                    }
+                                }
+                                if (patchsForPix.size() < patchsForLatLng.size())
+                                    patchsForPix.add(latLngs1_1);
+                                else {
+                                    patchsForPix.set(b, latLngs1_1);
+                                }
+                            }else if (b == 1) {
+                                int size222 = patchsForLatLng.get(b).size();
+                                for (int i = 0; i < size222; i++) {
+                                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    if (latLngs1_2.size() < size222)
+                                        latLngs1_2.add(new LatLng(pt.x, pt.y));
+                                    else {
+                                        latLngs1_2.get(i).setLatitude(pt.x);
+                                        latLngs1_2.get(i).setLongitude(pt.y);
+                                    }
+                                }
+                                if (patchsForPix.size() < patchsForLatLng.size())
+                                    patchsForPix.add(latLngs1_2);
+                                else {
+                                    patchsForPix.set(b, latLngs1_2);
+                                }
+                            }
+                            if (b == 2) {
+                                int size222 = patchsForLatLng.get(b).size();
+                                for (int i = 0; i < size222; i++) {
+                                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    if (latLngs1_3.size() < size222)
+                                        latLngs1_3.add(new LatLng(pt.x, pt.y));
+                                    else {
+                                        latLngs1_3.get(i).setLatitude(pt.x);
+                                        latLngs1_3.get(i).setLongitude(pt.y);
+                                    }
+                                }
+                                if (patchsForPix.size() < patchsForLatLng.size())
+                                    patchsForPix.add(latLngs1_3);
+                                else {
+                                    patchsForPix.set(b, latLngs1_3);
+                                }
+                            }
+                        }
+                        drawDemoArea(canvas);
                         if(isDrawType == POI_DRAW_TYPE || showPOI){
                             //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
@@ -2878,14 +2973,57 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
                 menu.findItem(R.id.back).setVisible(false);
                 menu.findItem(R.id.queryPOI).setVisible(true);
-                menu.findItem(R.id.query).setVisible(false);
+                menu.findItem(R.id.action_search).setVisible(false);
+                //menu.findItem(R.id.queryLatLng).setVisible(false);
                 break;
             case NONE_DRAW_TYPE:
                 toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
                 menu.findItem(R.id.back).setVisible(true);
                 menu.findItem(R.id.queryPOI).setVisible(true);
-                menu.findItem(R.id.query).setVisible(false);
+                menu.findItem(R.id.action_search).setVisible(false);
+                menu.findItem(R.id.queryLatLng).setVisible(true);
                 break;
+            case SEARCH_DEMO:
+                toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                menu.findItem(R.id.back).setVisible(true);
+                menu.findItem(R.id.queryPOI).setVisible(false);
+                menu.findItem(R.id.queryLatLng).setVisible(false);
+                menu.findItem(R.id.action_search).setVisible(true);
+                SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+                final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+                // Assumes current activity is the searchable activity
+                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+                searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+                searchView.setSubmitButtonEnabled(true);
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        String[] str = query.split(";");
+                        float[] ptss = new float[2];
+                        for (int i = 0; i < str.length; i++){
+                            ptss[i] = Float.valueOf(str[i]);
+                        }
+                        LatLng lt = new LatLng(ptss[0], ptss[1]);
+                        int sizee = patchsForLatLng.size();
+                        boolean In = false;
+                        for (int a = 0; a < sizee; a++) {
+                            if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                In = true;
+                                break;
+                            }
+                        }
+                        if (In)
+                            Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        return true;
+                    }
+                });
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -2932,6 +3070,33 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        patchsForLatLng = new ArrayList<>();
+        patchsForPix = new ArrayList<>();
+        latLngs_1 = new ArrayList<>();
+        latLngs_2 = new ArrayList<>();
+        latLngs_3 = new ArrayList<>();
+        latLngs_1.add(new LatLng((float) 25.0609, (float) 102.7469));
+        latLngs_1.add(new LatLng((float) 25.0358, (float) 102.7469));
+        latLngs_1.add(new LatLng((float) 25.0131, (float) 102.7273));
+        latLngs_1.add(new LatLng((float) 25.0364, (float) 102.7122));
+        latLngs_1.add(new LatLng((float) 25.0605, (float) 102.6986));
+        patchsForLatLng.add(latLngs_1);
+        latLngs_2.add(new LatLng((float) 25.0721, (float) 102.7222));
+        latLngs_2.add(new LatLng((float) 25.0793, (float) 102.7181));
+        latLngs_2.add(new LatLng((float) 25.0885, (float) 102.7189));
+        latLngs_2.add(new LatLng((float) 25.1072, (float) 102.7418));
+        latLngs_2.add(new LatLng((float) 25.0968, (float) 102.7558));
+        patchsForLatLng.add(latLngs_2);
+        latLngs_3.add(new LatLng((float) 25.0460, (float) 102.6662));
+        latLngs_3.add(new LatLng((float) 25.0519, (float) 102.6591));
+        latLngs_3.add(new LatLng((float) 25.0667, (float) 102.6549));
+        latLngs_3.add(new LatLng((float) 25.0756, (float) 102.6627));
+        latLngs_3.add(new LatLng((float) 25.0676, (float) 102.6858));
+        patchsForLatLng.add(latLngs_3);
+        Log.w(TAG, "onCreatesize: " + patchsForLatLng.size());
+        latLngs1_1 = new ArrayList<>();
+        latLngs1_2 = new ArrayList<>();
+        latLngs1_3 = new ArrayList<>();
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
         centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
@@ -3153,6 +3318,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         paint8.setStrokeWidth(10);
         paint8.setStyle(Paint.Style.STROKE);
         paint8.setColor(Color.BLUE);
+        paint9 = new Paint();
+        paint9.setStrokeWidth(10);
+        paint9.setStyle(Paint.Style.STROKE);
+        paint9.setColor(Color.RED);
+        paint10 = new Paint();
+        paint10.setStrokeWidth(10);
+        paint10.setStyle(Paint.Style.STROKE);
+        paint10.setColor(Color.GREEN);
         color_Whiteblank = Color.RED;
         setSupportActionBar(toolbar);
         final Intent intent = getIntent();
@@ -3656,8 +3829,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.queryPOI).setVisible(true);
-        menu.findItem(R.id.query).setVisible(false);
+        menu.findItem(R.id.queryLatLng).setVisible(true);
         menu.findItem(R.id.info).setVisible(false);
+        menu.findItem(R.id.action_search).setVisible(false);
         return true;
     }
 
@@ -3690,16 +3864,21 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.back:
-                this.finish();
+                if (isDrawTrail != SEARCH_DEMO) this.finish();
+                else {
+                    isDrawTrail = NONE_DRAW_TYPE;
+                    invalidateOptionsMenu();
+                }
                 break;
             case R.id.info:
                 /*Intent intent = new Intent(MainInterface.this, info_page.class);
                 intent.putExtra("extra_data", WKT);
                 startActivity(intent);*/
                 break;
-            case R.id.query:
-                linearLayout = (LinearLayout) findViewById(R.id.search);
-                linearLayout.setVisibility(View.VISIBLE);
+            case R.id.queryLatLng:
+                isDrawTrail = SEARCH_DEMO;
+                invalidateOptionsMenu();
+                break;
             case R.id.queryPOI:
                 Intent intent2 = new Intent(MainInterface.this, pois.class);
                 intent2.putExtra("ic", ic);

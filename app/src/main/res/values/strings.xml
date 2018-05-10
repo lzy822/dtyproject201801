@@ -7,4 +7,5 @@
     <string name="stop">stop</string>
     <string name="querytip">query</string>
     <string name="toast_pick_file_error">Unable to pick file. Check status of file manager.</string>
+    <string name="action_search">请输入经纬度</string>
 </resources>
