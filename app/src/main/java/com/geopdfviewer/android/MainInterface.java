@@ -3108,7 +3108,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //退出提醒弹窗
     public void popBackWindow(String str)
     {
-        if (str == "Destroy"){
+        if (str.equals("Destroy")){
             AlertDialog.Builder backAlert = new AlertDialog.Builder(this);
             backAlert.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
@@ -3151,7 +3151,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     stopService(stop_mService);
                     List<Trail> trails = DataSupport.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
-                    System.exit(0);
+                    MainInterface.this.finish();
                 }
             });
             backAlert.setNegativeButton("取消", new DialogInterface.OnClickListener() {
