@@ -2742,10 +2742,25 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         String sql = "select * from POI where";
         String[] strings = query.split(" ");
         for (int i = 0; i < strings.length; i++){
-            if (i == 0) sql = sql + " name LIKE '%" + strings[i] + "%'";
-            else sql = sql + " AND name LIKE '%" + strings[i] + "%'";
+            if (strings.length == 1) sql = sql + " name LIKE '%" + strings[i] + "%'";
+            else {
+                if (i == 0) sql = sql + " (name LIKE '%" + strings[i] + "%'";
+                else if (i != strings.length - 1) sql = sql + " AND description LIKE '%" + strings[i] + "%'";
+                else sql = sql + " AND name LIKE '%" + strings[i] + "%')";
+            }
         }
-        sql = sql + " AND x >= ? AND x <= ? AND y >= ? AND y <= ?";
+        for (int i = 0; i < strings.length; i++){
+            if (strings.length == 1) sql = sql + " OR description LIKE '%" + strings[i] + "%'";
+            else {
+                if (i == 0)
+                    sql = sql + " OR (description LIKE '%" + strings[i] + "%'";
+                else if (i != strings.length - 1)
+                    sql = sql + " AND description LIKE '%" + strings[i] + "%'";
+                else sql = sql + " AND description LIKE '%" + strings[i] + "%')";
+            }
+        }
+        sql = sql + " AND (x >= ? AND x <= ? AND y >= ? AND y <= ?)";
+        Log.w(TAG, "showListPopupWindow: " + sql);
         final List<mPOIobj> pois = new ArrayList<>();
         Cursor cursor = DataSupport.findBySQL(sql, String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
         if (cursor.moveToFirst()) {
