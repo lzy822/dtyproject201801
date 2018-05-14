@@ -12,6 +12,11 @@
         android:title="deletePOI"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/query_poi_map"
+        android:icon="@drawable/ic_search"
+        android:title="deletePOI"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/back_pois"
         android:icon="@drawable/ic_arrow_back"
         android:title="返回"

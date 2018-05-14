@@ -181,6 +181,7 @@ public class photoshow extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.poiinfotoolbar, menu);
         menu.findItem(R.id.back_andupdate).setVisible(false);
+        menu.findItem(R.id.query_poi_map).setVisible(false);
         return true;
     }
 

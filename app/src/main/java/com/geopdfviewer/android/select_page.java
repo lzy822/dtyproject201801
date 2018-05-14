@@ -218,7 +218,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     //showInfo(selectedNum);
                     //resetView();
                 //}else
-                Toast.makeText(this, "当前版本: 1.1" + "\n" + "云南省地图院数据分院制" + "\n" + "联系电话: 64166359", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "当前版本: 1.1" + "\n" + "云南省地图院数据分院制" + "\n" + "联系电话: 13108714475" + "\n" + "邮箱: 345131571@qq.com", Toast.LENGTH_LONG).show();
                 break;
         }
         return true;

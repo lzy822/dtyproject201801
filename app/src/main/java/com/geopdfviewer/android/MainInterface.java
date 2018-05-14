@@ -1714,6 +1714,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                             }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
                         }
+                        if (hasQueriedPoi) {
+                            PointF ptf = RenderUtil.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            Paint ptSpecial = new Paint();
+                            ptSpecial.setColor(Color.rgb(255, 0, 255));
+                            ptSpecial.setStyle(Paint.Style.FILL);
+                            canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
+                        }
                     }
                 })
                 .onRender(new OnRenderListener() {
@@ -2737,26 +2744,26 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     public void showListPopupWindow(View view, String query) {
-        ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
         query = query.trim();
         String sql = "select * from POI where";
         String[] strings = query.split(" ");
         for (int i = 0; i < strings.length; i++){
-            if (strings.length == 1) sql = sql + " name LIKE '%" + strings[i] + "%'";
+            if (strings.length == 1) sql = sql + " (name LIKE '%" + strings[i] + "%'";
             else {
-                if (i == 0) sql = sql + " (name LIKE '%" + strings[i] + "%'";
+                if (i == 0) sql = sql + " ((name LIKE '%" + strings[i] + "%'";
                 else if (i != strings.length - 1) sql = sql + " AND description LIKE '%" + strings[i] + "%'";
                 else sql = sql + " AND name LIKE '%" + strings[i] + "%')";
             }
         }
         for (int i = 0; i < strings.length; i++){
-            if (strings.length == 1) sql = sql + " OR description LIKE '%" + strings[i] + "%'";
+            if (strings.length == 1) sql = sql + " OR description LIKE '%" + strings[i] + "%')";
             else {
                 if (i == 0)
                     sql = sql + " OR (description LIKE '%" + strings[i] + "%'";
                 else if (i != strings.length - 1)
                     sql = sql + " AND description LIKE '%" + strings[i] + "%'";
-                else sql = sql + " AND description LIKE '%" + strings[i] + "%')";
+                else sql = sql + " AND description LIKE '%" + strings[i] + "%'))";
             }
         }
         sql = sql + " AND (x >= ? AND x <= ? AND y >= ? AND y <= ?)";
@@ -2792,6 +2799,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 Intent intent = new Intent(MainInterface.this, singlepoi.class);
                 intent.putExtra("POIC", pois.get(position).getM_POIC());
                 MainInterface.this.startActivity(intent);
+                listPopupWindow.dismiss();
+                isDrawTrail = NONE_DRAW_TYPE;
+                invalidateOptionsMenu();
             }
         });
 
@@ -3857,12 +3867,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
+    private boolean hasBitmap = false;
     public void getBitmap(){
         ////////////////////////缓存Bitmap//////////////////////////////
         bts = new ArrayList<bt>();
         new Thread(new Runnable() {
             @Override
             public void run() {
+                hasBitmap = false;
                 bts.clear();
                 List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
@@ -3899,8 +3911,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 locError("需要显示的缩略图数量2 : " + Integer.toString(bts.size()));
                 isCreateBitmap = true;
+                hasBitmap = true;
             }
         }).start();
+        if (hasBitmap) pdfView.zoomWithAnimation(c_zoom);
         //////////////////////////////////////////////////////////////////
     }
 
@@ -3922,9 +3936,35 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Log.w(TAG, "updateDB: " );
     }
 
+    private boolean hasQueriedPoi = false;
+    mPOIobj queriedPoi;
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences pref = getSharedPreferences("query_attr_to_map", MODE_PRIVATE);
+        String poic = pref.getString("poic", "");
+        SharedPreferences.Editor editor = getSharedPreferences("query_attr_to_map", MODE_PRIVATE).edit();
+        editor.putString("poic", "");
+        editor.apply();
+        Log.w(TAG, "onResume: " + poic);
+        if (!poic.isEmpty()) {
+            hasQueriedPoi = true;
+            Cursor cursor = DataSupport.findBySQL("select * from POI where poic = ?", poic);
+            if (cursor.moveToFirst()) {
+                do {
+                    String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                    String time = cursor.getString(cursor.getColumnIndex("time"));
+                    String name = cursor.getString(cursor.getColumnIndex("name"));
+                    String description = cursor.getString(cursor.getColumnIndex("description"));
+                    int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                    int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                    float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                    float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                    queriedPoi = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
         String currentProvider = LocationManager.NETWORK_PROVIDER;
         getScreen();
         if (isDrawTrail == TRAIL_DRAW_TYPE){

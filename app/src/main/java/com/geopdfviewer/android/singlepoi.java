@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -316,6 +317,12 @@ public class singlepoi extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.query_poi_map:
+                SharedPreferences.Editor editor = getSharedPreferences("query_attr_to_map", MODE_PRIVATE).edit();
+                editor.putString("poic", POIC);
+                editor.apply();
+                this.finish();
+                break;
             case R.id.back_andupdate:
                 editText_des = (EditText) findViewById(R.id.edit_des);
                 editText_name = (EditText) findViewById(R.id.edit_name);

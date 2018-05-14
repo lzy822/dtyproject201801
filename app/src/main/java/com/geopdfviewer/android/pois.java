@@ -1,6 +1,7 @@
 package com.geopdfviewer.android;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -50,6 +51,10 @@ public class pois extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        SharedPreferences pref = getSharedPreferences("query_attr_to_map", MODE_PRIVATE);
+        String poic = pref.getString("poic", "");
+        if (!poic.isEmpty()) this.finish();
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
@@ -125,6 +130,7 @@ public class pois extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.poiinfotoolbar, menu);
         menu.findItem(R.id.back_andupdate).setVisible(false);
         menu.findItem(R.id.add_pois).setVisible(false);
+        menu.findItem(R.id.query_poi_map).setVisible(false);
         return true;
     }
 
