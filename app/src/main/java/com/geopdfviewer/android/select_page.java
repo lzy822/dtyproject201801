@@ -218,7 +218,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     //showInfo(selectedNum);
                     //resetView();
                 //}else
-                Toast.makeText(this, "当前版本: 1.0", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "云南省地图院数据分院制" + "\n" + "当前版本: 1.1", Toast.LENGTH_LONG).show();
                 break;
         }
         return true;

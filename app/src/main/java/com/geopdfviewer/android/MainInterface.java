@@ -41,6 +41,9 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -51,6 +54,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -856,51 +860,62 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
                         PointF pt1;
                         pt1 = getGeoLocFromPixL(pt);
-                        //textView.setText();
-                        if (isDrawType == POI_DRAW_TYPE & !isQuery){
-                            List<POI> POIs = DataSupport.findAll(POI.class);
-                            POI poi = new POI();
-                            poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                            poi.setIc(ic);
-                            poi.setX(pt1.x);
-                            poi.setY(pt1.y);
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                            Date date = new Date(System.currentTimeMillis());
-                            poi.setTime(simpleDateFormat.format(date));
-                            poi.setPhotonum(0);
-                            poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
-                            poi.save();
-                            locError(pt1.toString());
-                            PointF pp = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            c_zoom = pdfView.getZoom();
-                            pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
-
-                            //locError("ScaleX : " + String.valueOf(pdfView.getScaleX()) + "ScaleY : " + String.valueOf(pdfView.getScaleY()) + "Scale : " + String.valueOf(pdfView.getScaleX() * pdfView.getScaleY()));
-                        }
-                        if (isMessure & showMode == NOCENTERMODE){
-                            locError("messure_pts" + messure_pts);
-                            poinum_messure++;
-                            if (poinum_messure == 1){
-                                poi111 = pt1;
-                                messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                //setTitle("正在测量");
-                                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                    toolbar.setTitle("正在测量(轨迹记录中)");
-                                }else toolbar.setTitle("正在测量");
-                            }else if (poinum_messure == 2){
-                                poi222 = pt1;
-                                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }else {
-                                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                //setTitle("正在测量");
+                        showLocationText(pt1);
+                        if (pt1.x != 0) {
+                            if (isDrawType == POI_DRAW_TYPE & !isQuery){
+                                List<POI> POIs = DataSupport.findAll(POI.class);
+                                POI poi = new POI();
+                                poi.setName("POI" + String.valueOf(POIs.size() + 1));
+                                poi.setIc(ic);
+                                if (showMode == NOCENTERMODE) {
+                                    poi.setX(pt1.x);
+                                    poi.setY(pt1.y);
+                                }else {
+                                    poi.setX(centerPointLoc.x);
+                                    poi.setY(centerPointLoc.y);
+                                }
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                Date date = new Date(System.currentTimeMillis());
+                                poi.setTime(simpleDateFormat.format(date));
+                                poi.setPhotonum(0);
+                                poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
+                                poi.save();
+                                locError(pt1.toString());
                                 pdfView.zoomWithAnimation(c_zoom);
                             }
-                        }
-                        if (isMessure & showMode == CENTERMODE){
+                            if (isMessure) {
+                                locError("messure_pts" + messure_pts);
+                                poinum_messure++;
+                                if (poinum_messure == 1) {
+                                    poi111 = pt1;
+                                    if (showMode == NOCENTERMODE)
+                                        messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    else
+                                        messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    //setTitle("正在测量");
+                                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                                        toolbar.setTitle("正在测量(轨迹记录中)");
+                                    } else toolbar.setTitle("正在测量");
+                                } else if (poinum_messure == 2) {
+                                    poi222 = pt1;
+                                    if (showMode == NOCENTERMODE)
+                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    else
+                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    //setTitle("正在测量");
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                    //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                    //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                                } else {
+                                    if (showMode == NOCENTERMODE)
+                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    else
+                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    //setTitle("正在测量");
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                }
+                            }
+                        /*if (isMessure & showMode == CENTERMODE){
                             locError("messure_pts" + messure_pts);
                             poinum_messure++;
                             if (poinum_messure == 1){
@@ -923,59 +938,60 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                             }
 
-                        }
-                        if (isQuery && isDrawType == NONE_DRAW_TYPE){
-                            List<mPOIobj> pois =  new ArrayList<>();
-                            Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
-                            if (cursor.moveToFirst()){
-                                do {
-                                    String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                                    String time = cursor.getString(cursor.getColumnIndex("time"));
-                                    String name = cursor.getString(cursor.getColumnIndex("name"));
-                                    String description = cursor.getString(cursor.getColumnIndex("description"));
-                                    int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
-                                    int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
-                                    float x = cursor.getFloat(cursor.getColumnIndex("x"));
-                                    float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                                    mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
-                                    pois.add(mPOIobj);
-                                }while (cursor.moveToNext());
-                            }
-                            cursor.close();
-                            locError("size : " + Integer.toString(pois.size()));
-                            int n = 0;
-                            int num = 0;
-                            if (pois.size() > 0){
-                                mPOIobj poii = pois.get(0);
-                                PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
-                                pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                pointF = new PointF(pointF.x, pointF.y - 70);
-                                //pointF = getGeoLocFromPixL(pointF);
-                                pt1 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                locError("pt1 : " + pt1.toString());
-                                float delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
-                                for (mPOIobj poi : pois){
-                                    PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
-                                    mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
-                                    if (Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < delta && Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < 35){
-                                        locError("mpointF : " + mpointF.toString());
-                                        delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
-                                        num = n;
-                                    }
-                                    locError("n : " + Integer.toString(n));
-                                    n++;
+                        }*/
+                            if (isQuery && isDrawType == NONE_DRAW_TYPE) {
+                                List<mPOIobj> pois = new ArrayList<>();
+                                Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+                                if (cursor.moveToFirst()) {
+                                    do {
+                                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                                        String time = cursor.getString(cursor.getColumnIndex("time"));
+                                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                                        String description = cursor.getString(cursor.getColumnIndex("description"));
+                                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                                        mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                                        pois.add(mPOIobj);
+                                    } while (cursor.moveToNext());
                                 }
-                                locError("num : " + Integer.toString(num));
-                                locError("delta : " + Float.toString(delta));
-                                if (delta < 35 || num != 0){
-                                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                    intent.putExtra("POIC", pois.get(num).getM_POIC());
-                                    startActivity(intent);
-                                    //locError(Integer.toString(pois.get(num).getPhotonum()));
-                                }else locError("没有正常查询");
-                            }
+                                cursor.close();
+                                locError("size : " + Integer.toString(pois.size()));
+                                int n = 0;
+                                int num = 0;
+                                if (pois.size() > 0) {
+                                    mPOIobj poii = pois.get(0);
+                                    PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
+                                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    pointF = new PointF(pointF.x, pointF.y - 70);
+                                    //pointF = getGeoLocFromPixL(pointF);
+                                    pt1 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    locError("pt1 : " + pt1.toString());
+                                    float delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
+                                    for (mPOIobj poi : pois) {
+                                        PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
+                                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                                        if (Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < delta && Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < 35) {
+                                            locError("mpointF : " + mpointF.toString());
+                                            delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
+                                            num = n;
+                                        }
+                                        locError("n : " + Integer.toString(n));
+                                        n++;
+                                    }
+                                    locError("num : " + Integer.toString(num));
+                                    locError("delta : " + Float.toString(delta));
+                                    if (delta < 35 || num != 0) {
+                                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                        intent.putExtra("POIC", pois.get(num).getM_POIC());
+                                        startActivity(intent);
+                                        //locError(Integer.toString(pois.get(num).getPhotonum()));
+                                    } else locError("没有正常查询");
+                                }
 
+                            }
                         }
                         return true;
                     }
@@ -1708,143 +1724,114 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public boolean onTap(MotionEvent e) {
                         PointF pt = new PointF(e.getRawX(), e.getRawY());
                         PointF pt1 = getGeoLocFromPixL(pt);
-                        if (isDrawType == POI_DRAW_TYPE & !isQuery & showMode == NOCENTERMODE){
-                            List<POI> POIs = DataSupport.findAll(POI.class);
-                            POI poi = new POI();
-                            poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                            poi.setIc(ic);
-                            poi.setX(pt1.x);
-                            poi.setY(pt1.y);
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                            Date date = new Date(System.currentTimeMillis());
-                            poi.setTime(simpleDateFormat.format(date));
-                            poi.setPhotonum(0);
-                            poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
-                            poi.save();
-                            locError(pt1.toString());
-                            PointF pp = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            c_zoom = pdfView.getZoom();
-                            pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
-                        }
-                        if (isDrawType == POI_DRAW_TYPE & !isQuery & showMode == CENTERMODE){
-                            List<POI> POIs = DataSupport.findAll(POI.class);
-                            POI poi = new POI();
-                            poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                            poi.setIc(ic);
-                            poi.setX(centerPointLoc.x);
-                            poi.setY(centerPointLoc.y);
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-                            Date date = new Date(System.currentTimeMillis());
-                            poi.setTime(simpleDateFormat.format(date));
-                            poi.setPhotonum(0);
-                            poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
-                            poi.save();
-                            locError(pt1.toString());
-                            PointF pp = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            c_zoom = pdfView.getZoom();
-                            pdfView.zoomWithAnimation(pp.x, pp.y, c_zoom);
-                        }
-                        if (isMessure & showMode == NOCENTERMODE){
-                            locError("messure_pts" + messure_pts);
-                            poinum_messure++;
-                            if (poinum_messure == 1){
-                                poi111 = pt1;
-                                messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                    toolbar.setTitle("正在测量(轨迹记录中)");
-                                }else toolbar.setTitle("正在测量");
-                            }else if (poinum_messure == 2){
-                                poi222 = pt1;
-                                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }else {
-                                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }
-
-                        }
-                        if (isMessure & showMode == CENTERMODE){
-                            locError("messure_pts" + messure_pts);
-                            poinum_messure++;
-                            if (poinum_messure == 1){
-                                poi111 = centerPointLoc;
-                                messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                    toolbar.setTitle("正在测量(轨迹记录中)");
-                                }else toolbar.setTitle("正在测量");
-                            }else if (poinum_messure == 2){
-                                poi222 = centerPointLoc;
-                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }else {
-                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }
-
-                        }
-                        if (isQuery & isDrawType == NONE_DRAW_TYPE){
-                            Log.w(TAG, "onTap: " );
-                            List<mPOIobj> pois =  new ArrayList<>();
-                            Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
-                            if (cursor.moveToFirst()){
-                                do {
-                                    String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                                    String time = cursor.getString(cursor.getColumnIndex("time"));
-                                    String name = cursor.getString(cursor.getColumnIndex("name"));
-                                    String description = cursor.getString(cursor.getColumnIndex("description"));
-                                    int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
-                                    int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
-                                    float x = cursor.getFloat(cursor.getColumnIndex("x"));
-                                    float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                                    mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
-                                    pois.add(mPOIobj);
-                                }while (cursor.moveToNext());
-                            }
-                            cursor.close();
-                            locError("size : " + Integer.toString(pois.size()));
-                            int n = 0;
-                            int num = 0;
-                            if (pois.size() > 0){
-                                mPOIobj poii = pois.get(0);
-                                PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
-                                pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                pointF = new PointF(pointF.x, pointF.y - 70);
-                                //pointF = getGeoLocFromPixL(pointF);
-                                pt1 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                locError("pt1 : " + pt1.toString());
-                                float delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
-                                for (mPOIobj poi : pois){
-                                    PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
-                                    mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
-                                    if (Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < delta && Math.abs( mpointF.x - pt1.x) + Math.abs( mpointF.y - pt1.y) < 35){
-                                        locError("mpointF : " + mpointF.toString());
-                                        delta = Math.abs( pointF.x - pt1.x) + Math.abs( pointF.y - pt1.y);
-                                        num = n;
-                                    }
-                                    locError("n : " + Integer.toString(n));
-                                    n++;
+                        showLocationText(pt1);
+                        if (pt1.x != 0) {
+                            if (isDrawType == POI_DRAW_TYPE & !isQuery) {
+                                List<POI> POIs = DataSupport.findAll(POI.class);
+                                POI poi = new POI();
+                                poi.setName("POI" + String.valueOf(POIs.size() + 1));
+                                poi.setIc(ic);
+                                if (showMode == NOCENTERMODE) {
+                                    poi.setX(pt1.x);
+                                    poi.setY(pt1.y);
+                                } else {
+                                    poi.setX(centerPointLoc.x);
+                                    poi.setY(centerPointLoc.y);
                                 }
-                                locError("num : " + Integer.toString(num));
-                                locError("delta : " + Float.toString(delta));
-                                if (delta < 35 || num != 0){
-                                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                    intent.putExtra("POIC", pois.get(num).getM_POIC());
-                                    startActivity(intent);
-                                    //locError(Integer.toString(pois.get(num).getPhotonum()));
-                                }else locError("没有正常查询");
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                Date date = new Date(System.currentTimeMillis());
+                                poi.setTime(simpleDateFormat.format(date));
+                                poi.setPhotonum(0);
+                                poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
+                                poi.save();
+                                locError(pt1.toString());
+                                pdfView.zoomWithAnimation(c_zoom);
                             }
-
+                            if (isMessure) {
+                                locError("messure_pts" + messure_pts);
+                                poinum_messure++;
+                                if (poinum_messure == 1) {
+                                    poi111 = pt1;
+                                    if (showMode == NOCENTERMODE)
+                                        messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    else
+                                        messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    //setTitle("正在测量");
+                                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                                        toolbar.setTitle("正在测量(轨迹记录中)");
+                                    } else toolbar.setTitle("正在测量");
+                                } else if (poinum_messure == 2) {
+                                    poi222 = pt1;
+                                    if (showMode == NOCENTERMODE)
+                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    else
+                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    //setTitle("正在测量");
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                    //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                                    //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                                } else {
+                                    if (showMode == NOCENTERMODE)
+                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    else
+                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    //setTitle("正在测量");
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                }
+                            }
+                            if (isQuery & isDrawType == NONE_DRAW_TYPE) {
+                                Log.w(TAG, "onTap: ");
+                                List<mPOIobj> pois = new ArrayList<>();
+                                Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+                                if (cursor.moveToFirst()) {
+                                    do {
+                                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                                        String time = cursor.getString(cursor.getColumnIndex("time"));
+                                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                                        String description = cursor.getString(cursor.getColumnIndex("description"));
+                                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                                        mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                                        pois.add(mPOIobj);
+                                    } while (cursor.moveToNext());
+                                }
+                                cursor.close();
+                                locError("size : " + Integer.toString(pois.size()));
+                                int n = 0;
+                                int num = 0;
+                                if (pois.size() > 0) {
+                                    mPOIobj poii = pois.get(0);
+                                    PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
+                                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    pointF = new PointF(pointF.x, pointF.y - 70);
+                                    //pointF = getGeoLocFromPixL(pointF);
+                                    pt1 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    locError("pt1 : " + pt1.toString());
+                                    float delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
+                                    for (mPOIobj poi : pois) {
+                                        PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
+                                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                                        if (Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < delta && Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < 35) {
+                                            locError("mpointF : " + mpointF.toString());
+                                            delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
+                                            num = n;
+                                        }
+                                        locError("n : " + Integer.toString(n));
+                                        n++;
+                                    }
+                                    locError("num : " + Integer.toString(num));
+                                    locError("delta : " + Float.toString(delta));
+                                    if (delta < 35 || num != 0) {
+                                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                        intent.putExtra("POIC", pois.get(num).getM_POIC());
+                                        startActivity(intent);
+                                        //locError(Integer.toString(pois.get(num).getPhotonum()));
+                                    } else locError("没有正常查询");
+                                }
+                            }
                         }
                         return true;
                     }
@@ -2038,7 +2025,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 getBitmap();
                                 poiLayerBt.setChecked(true);
                                 showPOI = true;
-
                                 pdfView.resetZoomWithAnimation();
                             }
                         });
@@ -2747,6 +2733,75 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         });
     }
 
+    private void showPopueWindowForQueryPoi(String query){
+        final View popView = View.inflate(this, R.layout.popupwindow_querypoi,null);
+        //获取屏幕宽高
+        final int weight = getResources().getDisplayMetrics().widthPixels;
+        final int height = getResources().getDisplayMetrics().heightPixels / 2;
+
+        final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
+        query = query.trim();
+        String sql = "select * from POI where";
+        String[] strings = query.split(" ");
+        for (int i = 0; i < strings.length; i++){
+            if (i == 0) sql = sql + " name LIKE '%" + strings[i] + "%'";
+            else sql = sql + " AND name LIKE '%" + strings[i] + "%'";
+        }
+        final List<mPOIobj> pois = new ArrayList<>();
+        Cursor cursor = DataSupport.findBySQL(sql);
+        if (cursor.moveToFirst()) {
+            do {
+                String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                String time = cursor.getString(cursor.getColumnIndex("time"));
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                String description = cursor.getString(cursor.getColumnIndex("description"));
+                int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                pois.add(mPOIobj);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        for (int i = 0; i < pois.size(); i++){
+            Log.w(TAG, "showPopueWindowForQueryPoi: " + pois.get(i).getM_name());
+        }
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view_query_poi);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(popView.getContext());
+        recyclerView.setLayoutManager(layoutManager);
+        mPOIobjAdapter adapter = new mPOIobjAdapter(pois);
+        adapter.setOnItemClickListener(new mPOIobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String map_num, int position) {
+                mPOIobjAdapter.ViewHolder holder = new mPOIobjAdapter.ViewHolder(view);
+                mPOIobj poi = pois.get(position);
+                Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                intent.putExtra("POIC", poi.getM_POIC());
+                MainInterface.this.startActivity(intent);
+            }
+        });
+        recyclerView.setAdapter(adapter);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(false);
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 0.5f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.TOP,0,80);
+    }
+
     //获取当前屏幕所视区域的经纬度与像素范围
     private void getCurrentScreenLoc(){
         if (pdfView.getCurrentYOffset() > 0 || pdfView.getCurrentXOffset() > 0) {
@@ -2793,7 +2848,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     PointF centerPointLoc;
 
     //屏幕坐标位置到经纬度转化
-    private PointF getGeoLocFromPixL(PointF pt){
+    private PointF getGeoLocFromPixL0(PointF pt){
         //textView = (TextView) findViewById(R.id.txt);
         DecimalFormat df = new DecimalFormat("0.0000");
         //精确定位算法
@@ -2831,6 +2886,54 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         return pt;
         //
+    }
+
+    static final int SHOW_LOCATION = 1;
+    static final int SHOW_NO_LOCATION = -1;
+    //屏幕坐标位置到经纬度转化
+    private PointF getGeoLocFromPixL(final PointF pt){
+        //textView = (TextView) findViewById(R.id.txt);
+        //精确定位算法
+        float xxxx, yyyy;
+        if (current_pageheight < viewer_height || current_pagewidth < viewer_width) {
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
+                pt.x = (float) (max_lat - (yyyy) / current_pageheight * (max_lat - min_lat));
+                pt.y = (float) ((xxxx) / current_pagewidth * (max_long - min_long) + min_long);
+                locLatForTap = pt.x;
+                locLongForTap = pt.y;
+                } else {
+                    pt.x = 0;
+                    pt.y = 0;
+                }
+        } else {
+            xxxx = pt.x - (screen_width - viewer_width);
+            yyyy = pt.y - (screen_height - viewer_height);
+            pt.x = (float)(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat));
+            pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
+            locLatForTap = pt.x;
+            locLongForTap = pt.y;
+        }
+        return pt;
+        //
+    }
+
+    private boolean showLocationText(PointF pt){
+        if (pt.x != 0) {
+            DecimalFormat df = new DecimalFormat("0.0000");
+            if (isCoordinateType == COORDINATE_DEFAULT_TYPE) {
+                textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
+            } else if (isCoordinateType == COORDINATE_BLH_TYPE) {
+                textView.setText(Integer.toString((int) locLatForTap) + "°" + Integer.toString((int) ((locLatForTap - (int) locLatForTap) * 60)) + "′" + Integer.toString((int) (((locLatForTap - (int) locLatForTap) * 60 - (int) ((locLatForTap - (int) locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int) locLongForTap) + "°" + Integer.toString((int) ((locLongForTap - (int) locLongForTap) * 60)) + "′" + Integer.toString((int) (((locLongForTap - (int) locLongForTap) * 60 - (int) ((locLongForTap - (int) locLongForTap) * 60)) * 60)) + "″");
+            } else {
+                textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
+            }
+            return true;
+        }else {
+            textView.setText("点击位置在区域之外");
+            return false;
+        }
     }
 
     //判断该像素点位置是否在地图区域内
@@ -3053,6 +3156,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             backAlert.show();
         }
     }
+
+    private int queryMode = 0;
+    static final int RED_LINE_QUERY = 1;
+    static final int POI_QUERY = -1;
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         switch (isDrawTrail){
@@ -3076,6 +3183,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 menu.findItem(R.id.queryPOI).setVisible(false);
                 menu.findItem(R.id.queryLatLng).setVisible(false);
                 menu.findItem(R.id.action_search).setVisible(true);
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                dialog.setTitle("提示");
+                dialog.setMessage("需要进行什么查询?");
+                dialog.setCancelable(false);
+                dialog.setPositiveButton("生态保护红线查询", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        queryMode = RED_LINE_QUERY;
+                    }
+                });
+                dialog.setNegativeButton("兴趣点查询", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        queryMode = POI_QUERY;
+                    }
+                });
+                dialog.show();
                 SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                 final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
                 // Assumes current activity is the searchable activity
@@ -3085,25 +3209,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextSubmit(String query) {
-                        String[] str = query.split(";");
-                        float[] ptss = new float[2];
-                        for (int i = 0; i < str.length; i++){
-                            ptss[i] = Float.valueOf(str[i]);
-                        }
-                        LatLng lt = new LatLng(ptss[0], ptss[1]);
-                        int sizee = patchsForLatLng.size();
-                        boolean In = false;
-                        for (int a = 0; a < sizee; a++) {
-                            if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
-                                In = true;
-                                break;
+                        if (queryMode == RED_LINE_QUERY) {
+                            String[] str = query.split(";");
+                            float[] ptss = new float[2];
+                            for (int i = 0; i < str.length; i++) {
+                                ptss[i] = Float.valueOf(str[i]);
                             }
+                            LatLng lt = new LatLng(ptss[0], ptss[1]);
+                            int sizee = patchsForLatLng.size();
+                            boolean In = false;
+                            for (int a = 0; a < sizee; a++) {
+                                if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                    In = true;
+                                    break;
+                                }
+                            }
+                            if (In)
+                                Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
+                            return true;
+                        }else {
+                            showPopueWindowForQueryPoi(query);
+                            //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
+                            return true;
                         }
-                        if (In)
-                            Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
-                        else
-                            Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
-                        return true;
                     }
 
                     @Override
@@ -3472,7 +3602,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 toolbar.setTitle("正在记录轨迹");
                 isDrawType = TRAIL_DRAW_TYPE;
                 isDrawTrail = TRAIL_DRAW_TYPE;
-                isQuery = false;
+                //isQuery = false;
                 m_cTrail = "";
                 isLocateEnd = false;
                 isLocate = 0;
