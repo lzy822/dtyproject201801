@@ -43,6 +43,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -55,6 +56,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -2733,13 +2736,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         });
     }
 
-    private void showPopueWindowForQueryPoi(String query){
-        final View popView = View.inflate(this, R.layout.popupwindow_querypoi,null);
-        //获取屏幕宽高
-        final int weight = getResources().getDisplayMetrics().widthPixels;
-        final int height = getResources().getDisplayMetrics().heightPixels / 2;
-
-        final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
+    public void showListPopupWindow(View view, String query) {
+        ListPopupWindow listPopupWindow = new ListPopupWindow(this);
         query = query.trim();
         String sql = "select * from POI where";
         String[] strings = query.split(" ");
@@ -2747,8 +2745,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (i == 0) sql = sql + " name LIKE '%" + strings[i] + "%'";
             else sql = sql + " AND name LIKE '%" + strings[i] + "%'";
         }
+        sql = sql + " AND x >= ? AND x <= ? AND y >= ? AND y <= ?";
         final List<mPOIobj> pois = new ArrayList<>();
-        Cursor cursor = DataSupport.findBySQL(sql);
+        Cursor cursor = DataSupport.findBySQL(sql, String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
         if (cursor.moveToFirst()) {
             do {
                 String POIC = cursor.getString(cursor.getColumnIndex("poic"));
@@ -2764,42 +2763,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } while (cursor.moveToNext());
         }
         cursor.close();
+        String[] items = new String[pois.size()];
         for (int i = 0; i < pois.size(); i++){
-            Log.w(TAG, "showPopueWindowForQueryPoi: " + pois.get(i).getM_name());
+            items[i] = pois.get(i).getM_name();
         }
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view_query_poi);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(popView.getContext());
-        recyclerView.setLayoutManager(layoutManager);
-        mPOIobjAdapter adapter = new mPOIobjAdapter(pois);
-        adapter.setOnItemClickListener(new mPOIobjAdapter.OnRecyclerItemClickListener() {
+        // ListView适配器
+        listPopupWindow.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items));
+
+        // 选择item的监听事件
+        listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(View view, String map_num, int position) {
-                mPOIobjAdapter.ViewHolder holder = new mPOIobjAdapter.ViewHolder(view);
-                mPOIobj poi = pois.get(position);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                intent.putExtra("POIC", poi.getM_POIC());
+                intent.putExtra("POIC", pois.get(position).getM_POIC());
                 MainInterface.this.startActivity(intent);
             }
         });
-        recyclerView.setAdapter(adapter);
-        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
-        popupWindow.setFocusable(true);
-        //点击外部popueWindow消失
-        popupWindow.setOutsideTouchable(false);
-        //popupWindow消失屏幕变为不透明
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                WindowManager.LayoutParams lp = getWindow().getAttributes();
-                lp.alpha = 1.0f;
-                getWindow().setAttributes(lp);
-            }
-        });
-        //popupWindow出现屏幕变为半透明
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.alpha = 0.5f;
-        getWindow().setAttributes(lp);
-        popupWindow.showAtLocation(popView, Gravity.TOP,0,80);
+
+        // 对话框的宽高
+        listPopupWindow.setWidth(600);
+        listPopupWindow.setHeight(600);
+
+        // ListPopupWindow的锚,弹出框的位置是相对当前View的位置
+        listPopupWindow.setAnchorView(view);
+
+        // ListPopupWindow 距锚view的距离
+        listPopupWindow.setHorizontalOffset(50);
+        listPopupWindow.setVerticalOffset(100);
+
+        listPopupWindow.setModal(false);
+
+        listPopupWindow.show();
     }
 
     //获取当前屏幕所视区域的经纬度与像素范围
@@ -3160,6 +3154,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private int queryMode = 0;
     static final int RED_LINE_QUERY = 1;
     static final int POI_QUERY = -1;
+
+    SearchView searchView;
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         switch (isDrawTrail){
@@ -3201,7 +3198,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 });
                 dialog.show();
                 SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-                final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+                searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
                 // Assumes current activity is the searchable activity
                 searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
                 searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
@@ -3230,7 +3227,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
                             return true;
                         }else {
-                            showPopueWindowForQueryPoi(query);
+                            showListPopupWindow(searchView, query);
                             //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
                             return true;
                         }
