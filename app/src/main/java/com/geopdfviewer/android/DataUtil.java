@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -570,5 +571,21 @@ public class DataUtil {
         return (nCross % 2 == 1);
     }
 
+    public static boolean isNumeric(String str) {
+        // 该正则表达式可以匹配所有的数字 包括负数
+        Pattern pattern = Pattern.compile("-?[0-9]+(\\\\.[0-9]+)?");
+        String bigStr;
+        try {
+            bigStr = new BigDecimal(str).toString();
+        } catch (Exception e) {
+            return false;//异常 说明包含非数字。
+        }
+
+        Matcher isNum = pattern.matcher(bigStr); // matcher是全匹配
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
 
 }

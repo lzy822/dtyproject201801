@@ -814,18 +814,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
-    //pdfView的ontouchlistener功能监控
-    private void onTouchListenerForView(){
+    private double getDFromDFM(String string){
+        Log.w(TAG, "getDFromDFM: " + string);
+        Log.w(TAG, "getDFromDFM: " + string.substring(0, string.indexOf("°")));
+        Log.w(TAG, "getDFromDFM: " + string.substring(string.indexOf("°") + 1, string.indexOf("′")));
+        Log.w(TAG, "getDFromDFM: " + string.substring(string.indexOf("′") + 1, string.indexOf("″")));
+        int d = Integer.valueOf(string.substring(0, string.indexOf("°")));
+        int f = Integer.valueOf(string.substring(string.indexOf("°") + 1, string.indexOf("′")));
+        double f1 = f / 60;
+        int m = Integer.valueOf(string.substring(string.indexOf("′") + 1, string.indexOf("″")));
+        double m1 = m / 3600;
+        Log.w(TAG, "getDFromDFM: " + Double.toString(d + f1 + m1));
+        return d + f1 + m1;
     }
 
     private void drawDemoArea(Canvas canvas){
         Log.w(TAG, "drawDemoArea: ");
-        String[] str = textView.getText().toString().split(";");
-        float[] ptss = new float[2];
-        for (int i = 0; i < str.length; i++){
-            ptss[i] = Float.valueOf(str[i]);
-        }
-        LatLng lt = new LatLng(ptss[0], ptss[1]);
+        LatLng lt = new LatLng(centerPointLoc.x, centerPointLoc.y);
         int sizzzze = patchsForPix.size();
         for (int b = 0; b < sizzzze; b++) {
             int size = patchsForPix.get(b).size();
@@ -2851,6 +2856,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         if (showMode == CENTERMODE) {
             centerPointLoc = new PointF((cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2);
+            locLatForTap = centerPointLoc.x;
+            locLongForTap = centerPointLoc.y;
             DecimalFormat df = new DecimalFormat("0.0000");
             if (isCoordinateType == COORDINATE_DEFAULT_TYPE) {
                 textView.setText(df.format(centerPointLoc.x) + ";" + df.format(centerPointLoc.y));
@@ -3232,25 +3239,56 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     @Override
                     public boolean onQueryTextSubmit(String query) {
                         if (queryMode == RED_LINE_QUERY) {
-                            String[] str = query.split(";");
-                            float[] ptss = new float[2];
-                            for (int i = 0; i < str.length; i++) {
-                                ptss[i] = Float.valueOf(str[i]);
-                            }
-                            LatLng lt = new LatLng(ptss[0], ptss[1]);
-                            int sizee = patchsForLatLng.size();
-                            boolean In = false;
-                            for (int a = 0; a < sizee; a++) {
-                                if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
-                                    In = true;
-                                    break;
+                            if (query.contains(";")) {
+                                try {
+                                    String[] str = query.split(";");
+                                    if (!str[0].contains("°")) {
+                                        float[] ptss = new float[2];
+                                        for (int i = 0; i < str.length; i++) {
+                                            ptss[i] = Float.valueOf(str[i]);
+                                        }
+                                        LatLng lt = new LatLng(ptss[0], ptss[1]);
+                                        int sizee = patchsForLatLng.size();
+                                        boolean In = false;
+                                        for (int a = 0; a < sizee; a++) {
+                                            if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                                In = true;
+                                                break;
+                                            }
+                                        }
+                                        if (In)
+                                            Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
+                                        else
+                                            Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
+                                        return true;
+                                    }else {
+                                        float[] ptss = new float[2];
+                                        for (int i = 0; i < str.length; i++) {
+                                            ptss[i] = (float) getDFromDFM(str[i]);
+                                        }
+                                        LatLng lt = new LatLng(ptss[0], ptss[1]);
+                                        int sizee = patchsForLatLng.size();
+                                        boolean In = false;
+                                        for (int a = 0; a < sizee; a++) {
+                                            if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                                In = true;
+                                                break;
+                                            }
+                                        }
+                                        if (In)
+                                            Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
+                                        else
+                                            Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
+                                        return true;
+                                    }
+                                }catch (Exception e){
+                                    Toast.makeText(MainInterface.this, "请输入正确格式的经纬度", Toast.LENGTH_LONG).show();
+                                    return true;
                                 }
+                            }else {
+                                Toast.makeText(MainInterface.this, "请以 ; 分隔经纬度", Toast.LENGTH_LONG).show();
+                                return true;
                             }
-                            if (In)
-                                Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
-                            else
-                                Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
-                            return true;
                         }else {
                             showListPopupWindow(searchView, query);
                             //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
@@ -3497,7 +3535,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 DecimalFormat df = new DecimalFormat("0.0000");
-                String str = (String) textView.getText();
+                String str = textView.getText().toString();
+                Log.w(TAG, "onClick: " + str);
                 if (!str.equals("点击位置在区域之外") & !str.equals("在这里显示坐标值")){
                 if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
                     //String[] strs = str.split(";");
