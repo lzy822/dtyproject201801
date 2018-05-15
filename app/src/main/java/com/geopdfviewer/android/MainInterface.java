@@ -3941,9 +3941,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences pref = getSharedPreferences("query_attr_to_map", MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE);
         String poic = pref.getString("poic", "");
-        SharedPreferences.Editor editor = getSharedPreferences("query_attr_to_map", MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
         editor.putString("poic", "");
         editor.apply();
         Log.w(TAG, "onResume: " + poic);

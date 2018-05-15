@@ -318,7 +318,7 @@ public class singlepoi extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.query_poi_map:
-                SharedPreferences.Editor editor = getSharedPreferences("query_attr_to_map", MODE_PRIVATE).edit();
+                SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
                 editor.putString("poic", POIC);
                 editor.apply();
                 this.finish();

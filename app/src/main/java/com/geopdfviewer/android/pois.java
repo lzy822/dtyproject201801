@@ -52,7 +52,7 @@ public class pois extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        SharedPreferences pref = getSharedPreferences("query_attr_to_map", MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE);
         String poic = pref.getString("poic", "");
         if (!poic.isEmpty()) this.finish();
         //声明ToolBar
