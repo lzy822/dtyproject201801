@@ -228,6 +228,21 @@ public class register extends AppCompatActivity {
                 editor.putString("startDate", startTime);
                 editor.putString("endDate", DataUtil.datePlus(startTime, 366));
                 isOKforGo = true;
+            }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("g")) {
+                editor.putBoolean("type", true);
+                editor.putString("startDate", startTime);
+                editor.putString("endDate", DataUtil.datePlus(startTime, 30));
+                isOKforGo = true;
+            }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("G")) {
+                editor.putBoolean("type", true);
+                editor.putString("startDate", startTime);
+                editor.putString("endDate", DataUtil.datePlus(startTime, 90));
+                isOKforGo = true;
+            }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("j")) {
+                editor.putBoolean("type", true);
+                editor.putString("startDate", startTime);
+                editor.putString("endDate", DataUtil.datePlus(startTime, 3660));
+                isOKforGo = true;
             }
             if (isOKforGo){
                 editor.apply();

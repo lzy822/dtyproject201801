@@ -600,6 +600,11 @@ public class DataUtil {
         int READ_TYPE;
         final int POI_TYPE = 0;
         final int NONE_TYPE = -1;
+        int readingTable = 0, readingTd = 0;
+        String coordinate = "";
+        boolean readingTr = false;
+        String title = "";
+        String value = "";
         try {
             List<KeyAndValue> keyAndValues = new ArrayList<>();
             String line;
@@ -607,11 +612,6 @@ public class DataUtil {
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             READ_TYPE = NONE_TYPE;
-            int readingTable = 0, readingTd = 0;
-            String coordinate = "";
-            boolean readingTr = false;
-            String title = "";
-            String value = "";
             while((line = bufferedReader.readLine()) != null) {
                 if (line.contains("<table")) readingTable++;
                 if (line.contains("</table")) readingTable--;
@@ -632,13 +632,32 @@ public class DataUtil {
                             kmltest kmltest = new kmltest();
                             int size = keyAndValues.size();
                             for (int i = 0; i < size; i++){
-                                if (keyAndValues.get(i).getKey().equals("FID")) kmltest.setFid(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("标识码")) kmltest.setIc(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("图上名称")) kmltest.setName(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("类别代码")) kmltest.setClasstype(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("使用时间")) kmltest.setUsetime(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("序号")) kmltest.setXh(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("地名标准名称")) kmltest.setDmbzmc(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("地名所在行政区_代码_")) kmltest.setDmszxzqdm(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("读音")) kmltest.setDy(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("地名标志标准名称")) kmltest.setDmbzbzmc(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("所在行政区")) kmltest.setSzxzq(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("设置单位")) kmltest.setSzdw(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("生产厂家")) kmltest.setSccj(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("规格")) kmltest.setGg(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("照片文件名")) {
+                                    kmltest.setZp(keyAndValues.get(i).getValue());
+                                }
                             }
                             //kmltest.setLatLng(latLng);
+                            plqyp plqyp1 = new plqyp();
+                            plqyp1.setXh(kmltest.getXh());
+                            if (!kmltest.getDy().isEmpty()) plqyp1.setYp(Environment.getExternalStorageDirectory() + "/地名标志录音/" + kmltest.getDy());
+                            plqyp1.save();
+                            String[] zps = new String[2];
+                            zps[0] = kmltest.getZp().substring(0, (int)Math.floor(Float.valueOf(kmltest.getZp().length() / 2)));
+                            zps[1] = kmltest.getZp().substring((int)Math.ceil(Float.valueOf(kmltest.getZp().length() / 2)) + 1, kmltest.getZp().length());
+                            plqzp plqzp1 = new plqzp();
+                            plqzp1.setXh(kmltest.getXh());
+                            plqzp1.setZp1(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[0]);
+                            plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[1]);
+                            plqzp1.save();
                             kmltest.setLat(Float.valueOf(coordinates[1]));
                             kmltest.setLongi(Float.valueOf(coordinates[0]));
                             kmltest.save();
@@ -652,14 +671,16 @@ public class DataUtil {
                         if (line.contains("<td>")){
                             if (readingTd == 0){
                                 title = line.substring(4, line.indexOf("</td>"));
+                                Log.w(TAG, "title : " + title);
                             }else if (readingTd == 1){
                                 value = line.substring(4, line.indexOf("</td>"));
+                                Log.w(TAG, "value : " + value);
                                 KeyAndValue keyAndValue = new KeyAndValue(title, value);
                                 keyAndValues.add(keyAndValue);
                             }
                             readingTd++;
                         }
-                        if (line.contains("</td>")){
+                        if (line.contains("</tr>")){
                             readingTr = false;
                             readingTd = 0;
                         }

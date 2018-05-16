@@ -3,14 +3,18 @@ package com.geopdfviewer.android;
 import org.litepal.crud.DataSupport;
 
 public class kmltest extends DataSupport{
-    private String fid;
-    private String ic;
-    private String name;
-    private String classtype;
-    private String usetime;
-    private LatLng latLng;
+    private String xh;
+    private String dmbzmc;
+    private String dmszxzqdm;
+    private String dy;
     private float lat;
     private float longi;
+    private String dmbzbzmc;
+    private String szxzq;
+    private String szdw;
+    private String sccj;
+    private String gg;
+    private String zp;
 
     public float getLat() {
         return lat;
@@ -28,51 +32,83 @@ public class kmltest extends DataSupport{
         this.longi = longi;
     }
 
-    public String getFid() {
-        return fid;
+    public String getXh() {
+        return xh;
     }
 
-    public void setFid(String fid) {
-        this.fid = fid;
+    public void setXh(String xh) {
+        this.xh = xh;
     }
 
-    public String getIc() {
-        return ic;
+    public String getDmbzmc() {
+        return dmbzmc;
     }
 
-    public void setIc(String ic) {
-        this.ic = ic;
+    public void setDmbzmc(String dmbzmc) {
+        this.dmbzmc = dmbzmc;
     }
 
-    public String getName() {
-        return name;
+    public String getDmszxzqdm() {
+        return dmszxzqdm;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDmszxzqdm(String dmszxzqdm) {
+        this.dmszxzqdm = dmszxzqdm;
     }
 
-    public String getClasstype() {
-        return classtype;
+    public String getDy() {
+        return dy;
     }
 
-    public void setClasstype(String classtype) {
-        this.classtype = classtype;
+    public void setDy(String dy) {
+        this.dy = dy;
     }
 
-    public String getUsetime() {
-        return usetime;
+    public String getDmbzbzmc() {
+        return dmbzbzmc;
     }
 
-    public void setUsetime(String usetime) {
-        this.usetime = usetime;
+    public void setDmbzbzmc(String dmbzbzmc) {
+        this.dmbzbzmc = dmbzbzmc;
     }
 
-    public LatLng getLatLng() {
-        return latLng;
+    public String getSzxzq() {
+        return szxzq;
     }
 
-    public void setLatLng(LatLng latLng) {
-        this.latLng = latLng;
+    public void setSzxzq(String szxzq) {
+        this.szxzq = szxzq;
+    }
+
+    public String getSzdw() {
+        return szdw;
+    }
+
+    public void setSzdw(String szdw) {
+        this.szdw = szdw;
+    }
+
+    public String getSccj() {
+        return sccj;
+    }
+
+    public void setSccj(String sccj) {
+        this.sccj = sccj;
+    }
+
+    public String getGg() {
+        return gg;
+    }
+
+    public void setGg(String gg) {
+        this.gg = gg;
+    }
+
+    public String getZp() {
+        return zp;
+    }
+
+    public void setZp(String zp) {
+        this.zp = zp;
     }
 }

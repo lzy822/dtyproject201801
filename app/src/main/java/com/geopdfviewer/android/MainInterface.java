@@ -122,6 +122,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //声明bts容器
     List<bt> bts;
+    //声明bts1容器
+    List<bt> bts1;
 
 
 
@@ -851,15 +853,41 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void drawPLQData(Canvas canvas){
-        List<kmltest> kmltests = DataSupport.findAll(kmltest.class);
+        List<PointF> showpts = new ArrayList<>();
         int size = kmltests.size();
         for (int i = 0; i < size; i++){
             //LatLng latLng = kmltests.get(i).getLatLng();
-            if (kmltests.get(i).getLat() != 0) {
+            if (kmltests.get(i).getLat() != 0){
                 Log.w(TAG, "drawPLQData: ");
                 PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                if (c_zoom != 10) {
+                    if (showpts.size() == 0) {
+                        showpts.add(pt2);
+                        canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                        canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                        if (hasBitmap1 & i <= bts1.size() - 1) canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                    } else {
+                        float deltaDistance = 0;
+                        for (int j = 0; j < showpts.size(); j++) {
+                            if (j == 0)
+                                deltaDistance = Math.abs(pt2.x - showpts.get(j).x) + Math.abs(pt2.y - showpts.get(j).y);
+                            else {
+                                float deltaDistance1 = Math.abs(pt2.x - showpts.get(j).x) + Math.abs(pt2.y - showpts.get(j).y);
+                                if (deltaDistance1 < deltaDistance) deltaDistance = deltaDistance1;
+                            }
+                        }
+                        if (deltaDistance > 200) {
+                            showpts.add(pt2);
+                            canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                            if (hasBitmap1 & i <= bts1.size() - 1) canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                        }
+                    }
+                }else {
+                    canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                    canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                    if (hasBitmap1 & i <= bts1.size() - 1) canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                }
             }
         }
     }
@@ -1809,6 +1837,42 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     pdfView.zoomWithAnimation(c_zoom);
                                 }
                             }
+                            if (isQuery){
+                                Log.w(TAG, "onTapspecial : ");
+                                int n = 0;
+                                int num = 0;
+                                if (kmltests.size() > 0) {
+                                    kmltest poii = kmltests.get(0);
+                                    PointF pointF = new PointF(poii.getLat(), poii.getLongi());
+                                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    pointF = new PointF(pointF.x, pointF.y - 70);
+                                    //pointF = getGeoLocFromPixL(pointF);
+                                    PointF pt8 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    locError("pt1special : " + pt8.toString());
+                                    float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                                    for (kmltest poi : kmltests) {
+                                        PointF mpointF = new PointF(poi.getLat(), poi.getLongi());
+                                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                                        if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                                            locError("mpointFspecial : " + mpointF.toString());
+                                            delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                                            num = n;
+                                        }
+                                        locError("n : " + Integer.toString(n));
+                                        n++;
+                                    }
+                                    locError("numspecial : " + Integer.toString(num));
+                                    locError("deltaspecial : " + Float.toString(delta));
+                                    if (delta < 35 || num != 0) {
+                                        //Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                        //intent.putExtra("POIC", kmltests.get(num).getIc());
+                                        //startActivity(intent);
+                                        Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
+                                        //locError(Integer.toString(kmltests.get(num).getPhotonum()));
+                                    } else locError("没有正常查询");
+                                }
+                            }
                             if (isQuery & isDrawType == NONE_DRAW_TYPE) {
                                 Log.w(TAG, "onTap: ");
                                 List<mPOIobj> pois = new ArrayList<>();
@@ -1833,20 +1897,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 int num = 0;
                                 if (pois.size() > 0) {
                                     mPOIobj poii = pois.get(0);
-                                    PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
-                                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    pointF = new PointF(pointF.x, pointF.y - 70);
+                                    PointF pointF1 = new PointF(poii.getM_X(), poii.getM_Y());
+                                    pointF1 = RenderUtil.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    pointF1 = new PointF(pointF1.x, pointF1.y - 70);
                                     //pointF = getGeoLocFromPixL(pointF);
-                                    pt1 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    locError("pt1 : " + pt1.toString());
-                                    float delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
+                                    PointF pt9 = RenderUtil.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                    locError("pt1 : " + pt9.toString());
+                                    float delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
                                     for (mPOIobj poi : pois) {
-                                        PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
-                                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
-                                        if (Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < delta && Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < 35) {
-                                            locError("mpointF : " + mpointF.toString());
-                                            delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
+                                        PointF mpointF1 = new PointF(poi.getM_X(), poi.getM_Y());
+                                        mpointF1 = RenderUtil.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                        mpointF1 = new PointF(mpointF1.x, mpointF1.y - 70);
+                                        if (Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < delta && Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < 35) {
+                                            locError("mpointF : " + mpointF1.toString());
+                                            delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
                                             num = n;
                                         }
                                         locError("n : " + Integer.toString(n));
@@ -1855,6 +1919,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     locError("num : " + Integer.toString(num));
                                     locError("delta : " + Float.toString(delta));
                                     if (delta < 35 || num != 0) {
+                                        locError("起飞 : " + Float.toString(delta));
                                         Intent intent = new Intent(MainInterface.this, singlepoi.class);
                                         intent.putExtra("POIC", pois.get(num).getM_POIC());
                                         startActivity(intent);
@@ -3357,13 +3422,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     CheckBox centerPointModeBt;
     //中心点声明
     ImageView centerPoint;
-
+    List<kmltest> kmltests;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        //DataSupport.deleteAll(plqzp.class);
+        //DataSupport.deleteAll(plqyp.class);
         //DataSupport.deleteAll(kmltest.class);
-        //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));;
+        //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));
+        kmltests = DataSupport.findAll(kmltest.class);
         patchsForLatLng = new ArrayList<>();
         patchsForPix = new ArrayList<>();
         latLngs_1 = new ArrayList<>();
@@ -3924,6 +3992,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private boolean hasBitmap = false;
+    private boolean hasBitmap1 = false;
+    private boolean isCreateBitmap1 = false;
     public void getBitmap(){
         ////////////////////////缓存Bitmap//////////////////////////////
         bts = new ArrayList<bt>();
@@ -3971,6 +4041,49 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();
         if (hasBitmap) pdfView.zoomWithAnimation(c_zoom);
+        //////////////////////////////////////////////////////////////////
+    }
+    public void getBitmap1(){
+        ////////////////////////缓存Bitmap//////////////////////////////
+        bts1 = new ArrayList<bt>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                hasBitmap1 = false;
+                bts1.clear();
+                if (kmltests.size() > 0){
+                    for (int ii = 0; ii < 20; ii++){
+                        List<plqzp> mphotos = DataSupport.where("xh = ?", kmltests.get(ii).getXh()).find(plqzp.class);
+                        List<plqyp> mphotos1 = DataSupport.where("xh = ?", kmltests.get(ii).getXh()).find(plqyp.class);
+                        //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                        //locError(Boolean.toString(poi.getPath().isEmpty()));
+                        //locError(Integer.toString(poi.getPath().length()));
+                        //locError(poi.getPath());
+                            String path = mphotos.get(0).getZp1();
+                        Log.w(TAG, "zpath: " + path);
+                        Log.w(TAG, "ypath: " + mphotos1.get(0).getYp());
+                            Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
+                            if (mphotos.size() != 0) {
+                                int degree = DataUtil.getPicRotate(path);
+                                if (degree != 0) {
+                                    Matrix m = new Matrix();
+                                    m.setRotate(degree); // 旋转angle度
+                                    Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                                }
+                                bt btt = new bt(bitmap, mphotos.get(0).getZp1());
+                                bts1.add(btt);
+                            }
+
+                    }
+                }
+                locError("需要显示的缩略图数量2 : " + Integer.toString(bts1.size()));
+                isCreateBitmap1 = true;
+                hasBitmap1 = true;
+            }
+        }).start();
+        if (hasBitmap1) pdfView.zoomWithAnimation(c_zoom);
         //////////////////////////////////////////////////////////////////
     }
 
@@ -4042,6 +4155,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         ////////////////////////缓存Bitmap//////////////////////////////
         getBitmap();
+        getBitmap1();
         /*bts = new ArrayList<bt>();
         new Thread(new Runnable() {
             @Override
