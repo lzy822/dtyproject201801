@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
+import android.icu.text.RelativeDateTimeFormatter;
 import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -18,15 +19,20 @@ import android.widget.Toast;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -588,4 +594,82 @@ public class DataUtil {
         return true;
     }
 
+    public static boolean getKML(String filePath){
+        File file = new File(filePath);
+        InputStream in = null;
+        int READ_TYPE;
+        final int POI_TYPE = 0;
+        final int NONE_TYPE = -1;
+        try {
+            List<KeyAndValue> keyAndValues = new ArrayList<>();
+            String line;
+            in = new FileInputStream(file);
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            READ_TYPE = NONE_TYPE;
+            int readingTable = 0, readingTd = 0;
+            String coordinate = "";
+            boolean readingTr = false;
+            String title = "";
+            String value = "";
+            while((line = bufferedReader.readLine()) != null) {
+                if (line.contains("<table")) readingTable++;
+                if (line.contains("</table")) readingTable--;
+                if (readingTable == 0){
+                    if (line.contains("<Point>")){
+                        READ_TYPE = POI_TYPE;
+                    }
+                    /*if (line.contains("</Point>")){
+                        READ_TYPE = NONE_TYPE;
+                    }*/
+                    if (READ_TYPE == POI_TYPE){
+                        if (line.contains("<coordinates>")){
+                            coordinate = line.substring(line.indexOf("<coordinates>") + 13, line.indexOf("</coordinates>"));
+                            coordinate = coordinate.trim();
+                            String[] coordinates = coordinate.split(",");
+                            LatLng latLng = new LatLng(Float.valueOf(coordinates[0]), Float.valueOf(coordinates[1]));
+                            READ_TYPE = NONE_TYPE;
+                            kmltest kmltest = new kmltest();
+                            int size = keyAndValues.size();
+                            for (int i = 0; i < size; i++){
+                                if (keyAndValues.get(i).getKey().equals("FID")) kmltest.setFid(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("标识码")) kmltest.setIc(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("图上名称")) kmltest.setName(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("类别代码")) kmltest.setClasstype(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("使用时间")) kmltest.setUsetime(keyAndValues.get(i).getValue());
+                            }
+                            //kmltest.setLatLng(latLng);
+                            kmltest.setLat(Float.valueOf(coordinates[1]));
+                            kmltest.setLongi(Float.valueOf(coordinates[0]));
+                            kmltest.save();
+                        }
+                    }
+                }else if (readingTable == 2){
+                    if (line.contains("<tr")){
+                        readingTr = true;
+                    }
+                    if (readingTr){
+                        if (line.contains("<td>")){
+                            if (readingTd == 0){
+                                title = line.substring(4, line.indexOf("</td>"));
+                            }else if (readingTd == 1){
+                                value = line.substring(4, line.indexOf("</td>"));
+                                KeyAndValue keyAndValue = new KeyAndValue(title, value);
+                                keyAndValues.add(keyAndValue);
+                            }
+                            readingTd++;
+                        }
+                        if (line.contains("</td>")){
+                            readingTr = false;
+                            readingTd = 0;
+                        }
+                    }
+                }
+            }
+            return true;
+        }catch (Exception e){
+            Log.w(TAG, "getKML: " + e.getLocalizedMessage());
+            return false;
+        }
+    }
 }

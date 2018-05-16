@@ -850,6 +850,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
+    private void drawPLQData(Canvas canvas){
+        List<kmltest> kmltests = DataSupport.findAll(kmltest.class);
+        int size = kmltests.size();
+        for (int i = 0; i < size; i++){
+            //LatLng latLng = kmltests.get(i).getLatLng();
+            if (kmltests.get(i).getLat() != 0) {
+                Log.w(TAG, "drawPLQData: ");
+                PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+            }
+        }
+    }
+
     //显示GeoPDF
     private void displayFromAsset(String assetFileName) {
         pdfFileName = assetFileName;
@@ -1491,6 +1505,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         managePatchsData();
                         if (showMode == CENTERMODE) drawDemoArea(canvas);
                         if(isDrawType == POI_DRAW_TYPE || showPOI){
+                            drawPLQData(canvas);
                             //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
@@ -3347,6 +3362,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        //DataSupport.deleteAll(kmltest.class);
+        //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));;
         patchsForLatLng = new ArrayList<>();
         patchsForPix = new ArrayList<>();
         latLngs_1 = new ArrayList<>();
