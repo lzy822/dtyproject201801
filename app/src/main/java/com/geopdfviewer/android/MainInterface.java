@@ -1878,21 +1878,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                                         Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
                                         intent.putExtra("xh", kmltests.get(num).getXh());
-                                        intent.putExtra("dmbzbzmc", kmltests.get(num).getDmbzbzmc());
-                                        intent.putExtra("dmbzmc", kmltests.get(num).getDmbzmc());
-                                        intent.putExtra("xzqdm", kmltests.get(num).getDmszxzqdm());
-                                        intent.putExtra("gg", kmltests.get(num).getGg());
-                                        intent.putExtra("lat", kmltests.get(num).getLat());
-                                        intent.putExtra("longi", kmltests.get(num).getLongi());
-                                        intent.putExtra("sccj", kmltests.get(num).getSccj());
-                                        intent.putExtra("szdw", kmltests.get(num).getSzdw());
-                                        intent.putExtra("xzq", kmltests.get(num).getSzxzq());
-                                        List<plqzp> plqzps = DataSupport.where("xh = ?", kmltests.get(num).getXh()).find(plqzp.class);
-                                        List<plqyp> plqyps = DataSupport.where("xh = ?", kmltests.get(num).getXh()).find(plqyp.class);
-                                        intent.putExtra("zp", plqzps.get(0).getZp1());
-                                        intent.putExtra("yp", plqyps.get(0).getYp());
                                         startActivity(intent);
-                                        Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
+                                        //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
                                         //locError(Integer.toString(kmltests.get(num).getPhotonum()));
                                     } else locError("没有正常查询");
                                 }
@@ -2894,6 +2881,22 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } while (cursor.moveToNext());
         }
         cursor.close();
+        String sql1 = "select * from kmltest where";
+        String[] strings1 = query.split(" ");
+        for (int i = 0; i < strings1.length; i++){
+                if (i == 0) sql1 = sql1 + " dmbzmc LIKE '%" + strings1[i] + "%'";
+                else sql1 = sql1 + " AND dmbzmc LIKE '%" + strings1[i] + "%'";
+        }
+        Cursor cursor1 = DataSupport.findBySQL(sql1);
+        if (cursor1.moveToFirst()) {
+            do {
+                String xh = cursor1.getString(cursor1.getColumnIndex("xh"));
+                String dmbzmc = cursor1.getString(cursor1.getColumnIndex("dmbzmc"));
+                mPOIobj mPOIobj = new mPOIobj(xh, dmbzmc);
+                pois.add(mPOIobj);
+            } while (cursor1.moveToNext());
+        }
+        cursor1.close();
         String[] items = new String[pois.size()];
         for (int i = 0; i < pois.size(); i++){
             items[i] = pois.get(i).getM_name();
@@ -2905,9 +2908,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                intent.putExtra("POIC", pois.get(position).getM_POIC());
-                MainInterface.this.startActivity(intent);
+                if (pois.get(position).getM_POIC().contains("POI")) {
+                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                    intent.putExtra("POIC", pois.get(position).getM_POIC());
+                    MainInterface.this.startActivity(intent);
+                }else {
+                    Intent intent = new Intent(MainInterface.this, plqpoishow.class);
+                    intent.putExtra("xh", pois.get(position).getM_POIC());
+                    MainInterface.this.startActivity(intent);
+                }
                 listPopupWindow.dismiss();
                 isDrawTrail = NONE_DRAW_TYPE;
                 invalidateOptionsMenu();

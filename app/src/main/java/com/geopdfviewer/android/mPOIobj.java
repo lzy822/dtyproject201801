@@ -14,6 +14,11 @@ public class mPOIobj {
     private String m_name;
     private String m_description;
 
+    public mPOIobj(String m_POIC, String m_name) {
+        this.m_POIC = m_POIC;
+        this.m_name = m_name;
+    }
+
     public mPOIobj(String m_POIC, float m_X, float m_Y, String m_time, int m_tapenum, int m_photonum, String m_name, String m_description) {
         this.m_POIC = m_POIC;
         this.m_X = m_X;

@@ -52,17 +52,20 @@ public class plqpoishow extends AppCompatActivity {
         setTitle("地名标志信息");
         Intent intent = getIntent();
         xh = intent.getStringExtra("xh");
-        dmbzbzmc = intent.getStringExtra("dmbzbzmc");
-        dmbzmc = intent.getStringExtra("dmbzmc");
-        xzqdm = intent.getStringExtra("xzqdm");
-        gg = intent.getStringExtra("gg");
-        lat = intent.getFloatExtra("lat", 0);
-        longi = intent.getFloatExtra("longi", 0);
-        sccj = intent.getStringExtra("sccj");
-        szdw = intent.getStringExtra("szdw");
-        xzq = intent.getStringExtra("xzq");
-        zp = intent.getStringExtra("zp");
-        yp = intent.getStringExtra("yp");
+        List<kmltest> kmltests = DataSupport.where("xh = ?", xh).find(kmltest.class);
+        List<plqzp> plqzps = DataSupport.where("xh = ?", xh).find(plqzp.class);
+        List<plqyp> plqyps = DataSupport.where("xh = ?", xh).find(plqyp.class);
+        dmbzbzmc = kmltests.get(0).getDmbzbzmc();
+        dmbzmc = kmltests.get(0).getDmbzmc();
+        xzqdm = kmltests.get(0).getDmszxzqdm();
+        gg = kmltests.get(0).getGg();
+        lat = kmltests.get(0).getLat();
+        longi = kmltests.get(0).getLongi();
+        sccj = kmltests.get(0).getSccj();
+        szdw = kmltests.get(0).getSzdw();
+        xzq = kmltests.get(0).getSzxzq();
+        zp = plqzps.get(0).getZp1();
+        yp = plqyps.get(0).getYp();
         Log.w(TAG, "xhhh : " + xh);
         refresh();
     }
@@ -113,10 +116,12 @@ public class plqpoishow extends AppCompatActivity {
         zp_show.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!yp.isEmpty()) {
+                try {
                     MediaPlayer mediaPlayer = MediaPlayer.create(plqpoishow.this, Uri.parse(yp));
                     mediaPlayer.start();
-                }else Toast.makeText(plqpoishow.this, "该地没有录制音频", Toast.LENGTH_LONG).show();
+                }catch (NullPointerException e){
+                    Toast.makeText(plqpoishow.this, "该地没有录制音频", Toast.LENGTH_LONG).show();
+                }
             }
         });
 

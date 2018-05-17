@@ -13,6 +13,15 @@ public class kmltest extends DataSupport{
     private String szxzq;
     private String szdw;
     private String sccj;
+
+    public kmltest(String xh, String dmbzmc) {
+        this.xh = xh;
+        this.dmbzmc = dmbzmc;
+    }
+
+    public kmltest() {
+    }
+
     private String gg;
     private String zp;
 
