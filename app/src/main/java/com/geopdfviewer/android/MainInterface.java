@@ -1124,8 +1124,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if (isMessure & showMode == NOCENTERMODE){
                             parseAndrawMessure(messure_pts, canvas);
                         }
-                        managePatchsData();
-                        if (showMode == CENTERMODE) drawDemoArea(canvas);
+                        if (showMode == CENTERMODE & esterEgg_redline) {
+                            managePatchsData();
+                            drawDemoArea(canvas);
+                        }
                         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
                         if (isGPSEnabled()){
                             PointF pt = new PointF((float)m_lat, (float)m_long);
@@ -1540,10 +1542,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             parseAndrawLinesforWhiteBlank(canvas);
                             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
                         }
-                        managePatchsData();
-                        if (showMode == CENTERMODE) drawDemoArea(canvas);
+                        if (showMode == CENTERMODE & esterEgg_redline) {
+                            managePatchsData();
+                            drawDemoArea(canvas);
+                        }
                         if(isDrawType == POI_DRAW_TYPE || showPOI){
-                            drawPLQData(canvas);
+                            if (esterEgg_plq) drawPLQData(canvas);
                             //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
                             List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                             if (pois.size() > 0){
@@ -1847,7 +1851,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     pdfView.zoomWithAnimation(c_zoom);
                                 }
                             }
-                            if (isQuery){
+
+                            if (isQuery & esterEgg_plq){
                                 Log.w(TAG, "onTapspecial : ");
                                 int n = 0;
                                 int num = 0;
@@ -1884,6 +1889,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     } else locError("没有正常查询");
                                 }
                             }
+
                             if (isQuery & isDrawType == NONE_DRAW_TYPE) {
                                 Log.w(TAG, "onTap: ");
                                 List<mPOIobj> pois = new ArrayList<>();
@@ -2842,6 +2848,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public void showListPopupWindow(View view, String query) {
         final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
         query = query.trim();
+        if (query.equals("kqbz")){
+            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+            editor.putBoolean("open_plq", true);
+            editor.apply();
+            esterEgg_plq = true;
+            getEsterEgg_plq();
+            pdfView.zoomWithAnimation(c_zoom);
+            Toast.makeText(MainInterface.this, "你已经开启盘龙区地名标志显示功能", Toast.LENGTH_LONG).show();
+        }else if (query.equals("gbbz")){
+            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+            editor.putBoolean("open_plq", false);
+            editor.apply();
+            esterEgg_plq = false;
+            pdfView.zoomWithAnimation(c_zoom);
+            Toast.makeText(MainInterface.this, "关闭成功", Toast.LENGTH_LONG).show();
+        }else if (query.equals("kqhx")){
+            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+            editor.putBoolean("open_redline", true);
+            editor.apply();
+            esterEgg_redline = true;
+            getEsterEgg_redline();
+            pdfView.zoomWithAnimation(c_zoom);
+            Toast.makeText(MainInterface.this, "你已经开启生态保护红线功能", Toast.LENGTH_LONG).show();
+        }else if (query.equals("gbhx")){
+            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+            editor.putBoolean("open_redline", false);
+            editor.apply();
+            esterEgg_redline = false;
+            pdfView.zoomWithAnimation(c_zoom);
+            Toast.makeText(MainInterface.this, "关闭成功", Toast.LENGTH_LONG).show();
+        }
         String sql = "select * from POI where";
         String[] strings = query.split(" ");
         for (int i = 0; i < strings.length; i++){
@@ -2881,26 +2918,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } while (cursor.moveToNext());
         }
         cursor.close();
-        String sql1 = "select * from kmltest where";
-        String[] strings1 = query.split(" ");
-        for (int i = 0; i < strings1.length; i++){
+        if (esterEgg_plq) {
+            String sql1 = "select * from kmltest where";
+            String[] strings1 = query.split(" ");
+            for (int i = 0; i < strings1.length; i++) {
                 if (i == 0) sql1 = sql1 + " dmbzmc LIKE '%" + strings1[i] + "%'";
                 else sql1 = sql1 + " AND dmbzmc LIKE '%" + strings1[i] + "%'";
+            }
+            Cursor cursor1 = DataSupport.findBySQL(sql1);
+            if (cursor1.moveToFirst()) {
+                do {
+                    String xh = cursor1.getString(cursor1.getColumnIndex("xh"));
+                    String dmbzmc = cursor1.getString(cursor1.getColumnIndex("dmbzmc"));
+                    mPOIobj mPOIobj = new mPOIobj(xh, dmbzmc);
+                    pois.add(mPOIobj);
+                } while (cursor1.moveToNext());
+            }
+            cursor1.close();
         }
-        Cursor cursor1 = DataSupport.findBySQL(sql1);
-        if (cursor1.moveToFirst()) {
-            do {
-                String xh = cursor1.getString(cursor1.getColumnIndex("xh"));
-                String dmbzmc = cursor1.getString(cursor1.getColumnIndex("dmbzmc"));
-                mPOIobj mPOIobj = new mPOIobj(xh, dmbzmc);
-                pois.add(mPOIobj);
-            } while (cursor1.moveToNext());
-        }
-        cursor1.close();
         String[] items = new String[pois.size()];
         for (int i = 0; i < pois.size(); i++){
             items[i] = pois.get(i).getM_name();
         }
+
         // ListView适配器
         listPopupWindow.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items));
 
@@ -3325,23 +3365,25 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 menu.findItem(R.id.queryPOI).setVisible(false);
                 menu.findItem(R.id.queryLatLng).setVisible(false);
                 menu.findItem(R.id.action_search).setVisible(true);
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
-                dialog.setTitle("提示");
-                dialog.setMessage("需要进行什么查询?");
-                dialog.setCancelable(false);
-                dialog.setPositiveButton("生态保护红线查询", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        queryMode = RED_LINE_QUERY;
-                    }
-                });
-                dialog.setNegativeButton("兴趣点查询", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        queryMode = POI_QUERY;
-                    }
-                });
-                dialog.show();
+                if (esterEgg_redline) {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                    dialog.setTitle("提示");
+                    dialog.setMessage("需要进行什么查询?");
+                    dialog.setCancelable(false);
+                    dialog.setPositiveButton("生态保护红线查询", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            queryMode = RED_LINE_QUERY;
+                        }
+                    });
+                    dialog.setNegativeButton("简单查询", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            queryMode = POI_QUERY;
+                        }
+                    });
+                    dialog.show();
+                }else queryMode = POI_QUERY;
                 SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                 searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
                 // Assumes current activity is the searchable activity
@@ -3456,43 +3498,96 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //中心点声明
     ImageView centerPoint;
     List<kmltest> kmltests;
+    //记录彩蛋1是否开启
+    private boolean esterEgg_plq = false;
+    //记录彩蛋2是否开启
+    private boolean esterEgg_redline = false;
+
+    private boolean getEsterEgg_plq(){
+        if (esterEgg_plq) {
+            kmltests = DataSupport.findAll(kmltest.class);
+            File file1 = new File(Environment.getExternalStorageDirectory() + "/doc.kml");
+            File file2 = new File(Environment.getExternalStorageDirectory() + "/地名标志录音");
+            File file3 = new File(Environment.getExternalStorageDirectory() + "/地名标志照片");
+            if (kmltests.size() == 0 & file1.exists() & file2.exists() & file3.exists() & file2.isDirectory() & file3.isDirectory()){
+                DataSupport.deleteAll(plqzp.class);
+                DataSupport.deleteAll(plqyp.class);
+                DataSupport.deleteAll(kmltest.class);
+                //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, "开启成功", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                }).start();
+                kmltests = DataSupport.findAll(kmltest.class);
+                return true;
+            }else if (kmltests.size() == 0){
+                Toast.makeText(MainInterface.this, "你缺失一些标准文件, 请确认后再开启该功能", Toast.LENGTH_LONG).show();
+                SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_plq", false);
+                editor.apply();
+                return false;
+            }else if(kmltests.size() != 0 & file1.exists() & file2.exists() & file3.exists() & file2.isDirectory() & file3.isDirectory()){
+                getBitmap1();
+                return true;
+            }
+            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+            editor.putBoolean("open_plq", false);
+            editor.apply();
+            return false;
+        }
+        return false;
+    }
+
+    private boolean getEsterEgg_redline(){
+        if (esterEgg_redline) {patchsForLatLng = new ArrayList<>();
+            patchsForPix = new ArrayList<>();
+            latLngs_1 = new ArrayList<>();
+            latLngs_2 = new ArrayList<>();
+            latLngs_3 = new ArrayList<>();
+            latLngs_1.add(new LatLng((float) 25.0609, (float) 102.7469));
+            latLngs_1.add(new LatLng((float) 25.0358, (float) 102.7469));
+            latLngs_1.add(new LatLng((float) 25.0131, (float) 102.7273));
+            latLngs_1.add(new LatLng((float) 25.0364, (float) 102.7122));
+            latLngs_1.add(new LatLng((float) 25.0605, (float) 102.6986));
+            patchsForLatLng.add(latLngs_1);
+            latLngs_2.add(new LatLng((float) 25.0721, (float) 102.7222));
+            latLngs_2.add(new LatLng((float) 25.0793, (float) 102.7181));
+            latLngs_2.add(new LatLng((float) 25.0885, (float) 102.7189));
+            latLngs_2.add(new LatLng((float) 25.1072, (float) 102.7418));
+            latLngs_2.add(new LatLng((float) 25.0968, (float) 102.7558));
+            patchsForLatLng.add(latLngs_2);
+            latLngs_3.add(new LatLng((float) 25.0460, (float) 102.6662));
+            latLngs_3.add(new LatLng((float) 25.0519, (float) 102.6591));
+            latLngs_3.add(new LatLng((float) 25.0667, (float) 102.6549));
+            latLngs_3.add(new LatLng((float) 25.0756, (float) 102.6627));
+            latLngs_3.add(new LatLng((float) 25.0676, (float) 102.6858));
+            patchsForLatLng.add(latLngs_3);
+            Log.w(TAG, "onCreatesize: " + patchsForLatLng.size());
+            latLngs1_1 = new ArrayList<>();
+            latLngs1_2 = new ArrayList<>();
+            latLngs1_3 = new ArrayList<>();
+            return true;
+        }
+        return false;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
-        //DataSupport.deleteAll(plqzp.class);
-        //DataSupport.deleteAll(plqyp.class);
-        //DataSupport.deleteAll(kmltest.class);
-        //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));
-        kmltests = DataSupport.findAll(kmltest.class);
-        getBitmap1();
-        patchsForLatLng = new ArrayList<>();
-        patchsForPix = new ArrayList<>();
-        latLngs_1 = new ArrayList<>();
-        latLngs_2 = new ArrayList<>();
-        latLngs_3 = new ArrayList<>();
-        latLngs_1.add(new LatLng((float) 25.0609, (float) 102.7469));
-        latLngs_1.add(new LatLng((float) 25.0358, (float) 102.7469));
-        latLngs_1.add(new LatLng((float) 25.0131, (float) 102.7273));
-        latLngs_1.add(new LatLng((float) 25.0364, (float) 102.7122));
-        latLngs_1.add(new LatLng((float) 25.0605, (float) 102.6986));
-        patchsForLatLng.add(latLngs_1);
-        latLngs_2.add(new LatLng((float) 25.0721, (float) 102.7222));
-        latLngs_2.add(new LatLng((float) 25.0793, (float) 102.7181));
-        latLngs_2.add(new LatLng((float) 25.0885, (float) 102.7189));
-        latLngs_2.add(new LatLng((float) 25.1072, (float) 102.7418));
-        latLngs_2.add(new LatLng((float) 25.0968, (float) 102.7558));
-        patchsForLatLng.add(latLngs_2);
-        latLngs_3.add(new LatLng((float) 25.0460, (float) 102.6662));
-        latLngs_3.add(new LatLng((float) 25.0519, (float) 102.6591));
-        latLngs_3.add(new LatLng((float) 25.0667, (float) 102.6549));
-        latLngs_3.add(new LatLng((float) 25.0756, (float) 102.6627));
-        latLngs_3.add(new LatLng((float) 25.0676, (float) 102.6858));
-        patchsForLatLng.add(latLngs_3);
-        Log.w(TAG, "onCreatesize: " + patchsForLatLng.size());
-        latLngs1_1 = new ArrayList<>();
-        latLngs1_2 = new ArrayList<>();
-        latLngs1_3 = new ArrayList<>();
+        SharedPreferences pref = getSharedPreferences("easter_egg", MODE_PRIVATE);
+        esterEgg_plq = pref.getBoolean("open_plq", false);
+        SharedPreferences pref1 = getSharedPreferences("easter_egg", MODE_PRIVATE);
+        esterEgg_redline = pref1.getBoolean("open_redline", false);
+        getEsterEgg_plq();
+        getEsterEgg_redline();
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
         centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);

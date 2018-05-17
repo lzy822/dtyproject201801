@@ -9,7 +9,7 @@
     <item
         android:id="@+id/queryLatLng"
         android:icon="@drawable/ic_search"
-        android:title="查询点是否在面内"
+        android:title="简单查询"
         app:showAsAction="never"/>
     <item
         android:id="@+id/info"
