@@ -857,36 +857,46 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         int size = kmltests.size();
         for (int i = 0; i < size; i++){
             //LatLng latLng = kmltests.get(i).getLatLng();
-            if (kmltests.get(i).getLat() != 0){
+            if (kmltests.get(i).getLat() != 0) {
                 Log.w(TAG, "drawPLQData: ");
-                PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                if (c_zoom != 10) {
-                    if (showpts.size() == 0) {
-                        showpts.add(pt2);
-                        canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                        canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                        if (hasBitmap1 & i <= bts1.size() - 1) canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
-                    } else {
-                        float deltaDistance = 0;
-                        for (int j = 0; j < showpts.size(); j++) {
-                            if (j == 0)
-                                deltaDistance = Math.abs(pt2.x - showpts.get(j).x) + Math.abs(pt2.y - showpts.get(j).y);
-                            else {
-                                float deltaDistance1 = Math.abs(pt2.x - showpts.get(j).x) + Math.abs(pt2.y - showpts.get(j).y);
-                                if (deltaDistance1 < deltaDistance) deltaDistance = deltaDistance1;
-                            }
-                        }
-                        if (deltaDistance > 200) {
+                if ((kmltests.get(i).getLongi() < cs_right & kmltests.get(i).getLongi() > cs_left & kmltests.get(i).getLat() < cs_top & kmltests.get(i).getLat() > cs_bottom)) {
+                    /*for (int k = 0; k < size; k++){
+                        if (!bts1.get(k).getM_bm().toString().isEmpty()) Log.w(TAG, "drawPLQDatabitmap: " + k + bts1.get(k).getM_bm().isRecycled());
+                        else Log.w(TAG, "drawPLQDatabitmap: " + k);
+                    }*/
+                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    if (c_zoom != 10) {
+                        if (showpts.size() == 0) {
                             showpts.add(pt2);
                             canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                            if (hasBitmap1 & i <= bts1.size() - 1) canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                            if (hasBitmap1 & i <= bts1.size() - 1)
+                                canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                        } else {
+                            float deltaDistance = 0;
+                            for (int j = 0; j < showpts.size(); j++) {
+                                if (j == 0)
+                                    deltaDistance = Math.abs(pt2.x - showpts.get(j).x) + Math.abs(pt2.y - showpts.get(j).y);
+                                else {
+                                    float deltaDistance1 = Math.abs(pt2.x - showpts.get(j).x) + Math.abs(pt2.y - showpts.get(j).y);
+                                    if (deltaDistance1 < deltaDistance)
+                                        deltaDistance = deltaDistance1;
+                                }
+                            }
+                            if (deltaDistance > 200) {
+                                showpts.add(pt2);
+                                canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                                canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                                if (hasBitmap1 & i <= bts1.size() - 1)
+                                    canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                            }
                         }
+                    } else {
+                        canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                        canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                        if (hasBitmap1 & i <= bts1.size() - 1)
+                            canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                     }
-                }else {
-                    canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                    canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                    if (hasBitmap1 & i <= bts1.size() - 1) canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                 }
             }
         }
@@ -1865,9 +1875,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     locError("numspecial : " + Integer.toString(num));
                                     locError("deltaspecial : " + Float.toString(delta));
                                     if (delta < 35 || num != 0) {
-                                        //Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                        //intent.putExtra("POIC", kmltests.get(num).getIc());
-                                        //startActivity(intent);
+                                        Intent intent = new Intent(MainInterface.this, plqpoishow.class);
+                                        Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
+                                        intent.putExtra("xh", kmltests.get(num).getXh());
+                                        intent.putExtra("dmbzbzmc", kmltests.get(num).getDmbzbzmc());
+                                        intent.putExtra("dmbzmc", kmltests.get(num).getDmbzmc());
+                                        intent.putExtra("xzqdm", kmltests.get(num).getDmszxzqdm());
+                                        intent.putExtra("gg", kmltests.get(num).getGg());
+                                        intent.putExtra("lat", kmltests.get(num).getLat());
+                                        intent.putExtra("longi", kmltests.get(num).getLongi());
+                                        intent.putExtra("sccj", kmltests.get(num).getSccj());
+                                        intent.putExtra("szdw", kmltests.get(num).getSzdw());
+                                        intent.putExtra("xzq", kmltests.get(num).getSzxzq());
+                                        List<plqzp> plqzps = DataSupport.where("xh = ?", kmltests.get(num).getXh()).find(plqzp.class);
+                                        List<plqyp> plqyps = DataSupport.where("xh = ?", kmltests.get(num).getXh()).find(plqyp.class);
+                                        intent.putExtra("zp", plqzps.get(0).getZp1());
+                                        intent.putExtra("yp", plqyps.get(0).getYp());
+                                        startActivity(intent);
                                         Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
                                         //locError(Integer.toString(kmltests.get(num).getPhotonum()));
                                     } else locError("没有正常查询");
@@ -3432,6 +3456,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //DataSupport.deleteAll(kmltest.class);
         //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));
         kmltests = DataSupport.findAll(kmltest.class);
+        getBitmap1();
         patchsForLatLng = new ArrayList<>();
         patchsForPix = new ArrayList<>();
         latLngs_1 = new ArrayList<>();
@@ -4052,17 +4077,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 hasBitmap1 = false;
                 bts1.clear();
                 if (kmltests.size() > 0){
-                    for (int ii = 0; ii < 20; ii++){
+                    for (int ii = 0; ii < kmltests.size(); ii++){
                         List<plqzp> mphotos = DataSupport.where("xh = ?", kmltests.get(ii).getXh()).find(plqzp.class);
-                        List<plqyp> mphotos1 = DataSupport.where("xh = ?", kmltests.get(ii).getXh()).find(plqyp.class);
                         //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));
                         //locError(poi.getPath());
                             String path = mphotos.get(0).getZp1();
-                        Log.w(TAG, "zpath: " + path);
-                        Log.w(TAG, "ypath: " + mphotos1.get(0).getYp());
                             Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
                             if (mphotos.size() != 0) {
                                 int degree = DataUtil.getPicRotate(path);
@@ -4078,7 +4100,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
                     }
                 }
-                locError("需要显示的缩略图数量2 : " + Integer.toString(bts1.size()));
+                locError("需要显示的缩略图数量22 : " + Integer.toString(bts1.size()));
                 isCreateBitmap1 = true;
                 hasBitmap1 = true;
             }
@@ -4117,22 +4139,28 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         editor.apply();
         Log.w(TAG, "onResume: " + poic);
         if (!poic.isEmpty()) {
-            hasQueriedPoi = true;
-            Cursor cursor = DataSupport.findBySQL("select * from POI where poic = ?", poic);
-            if (cursor.moveToFirst()) {
-                do {
-                    String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                    String time = cursor.getString(cursor.getColumnIndex("time"));
-                    String name = cursor.getString(cursor.getColumnIndex("name"));
-                    String description = cursor.getString(cursor.getColumnIndex("description"));
-                    int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
-                    int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
-                    float x = cursor.getFloat(cursor.getColumnIndex("x"));
-                    float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                    queriedPoi = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
-                } while (cursor.moveToNext());
+            if (poic.contains("POI")) {
+                hasQueriedPoi = true;
+                Cursor cursor = DataSupport.findBySQL("select * from POI where poic = ?", poic);
+                if (cursor.moveToFirst()) {
+                    do {
+                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                        String time = cursor.getString(cursor.getColumnIndex("time"));
+                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                        String description = cursor.getString(cursor.getColumnIndex("description"));
+                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                        queriedPoi = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
+            }else {
+                hasQueriedPoi = true;
+                List<kmltest> kmltests = DataSupport.where("xh = ?", poic).find(kmltest.class);
+                queriedPoi = new mPOIobj(poic, kmltests.get(0).getLat(), kmltests.get(0).getLongi(), "", 0, 0, "", "");
             }
-            cursor.close();
         }
         String currentProvider = LocationManager.NETWORK_PROVIDER;
         getScreen();
@@ -4155,7 +4183,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         ////////////////////////缓存Bitmap//////////////////////////////
         getBitmap();
-        getBitmap1();
         /*bts = new ArrayList<bt>();
         new Thread(new Runnable() {
             @Override

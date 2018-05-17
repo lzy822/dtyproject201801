@@ -26,8 +26,7 @@
         <activity
             android:name=".select_page"
             android:label="图志"
-            android:launchMode="singleTask">
-        </activity>
+            android:launchMode="singleTask" />
         <activity
             android:name=".info_page"
             android:label="地理信息显示页面" />
@@ -62,6 +61,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".plqpoishow"></activity>
     </application>
 
 </manifest>

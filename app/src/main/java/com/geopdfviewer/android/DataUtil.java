@@ -650,13 +650,66 @@ public class DataUtil {
                             plqyp1.setXh(kmltest.getXh());
                             if (!kmltest.getDy().isEmpty()) plqyp1.setYp(Environment.getExternalStorageDirectory() + "/地名标志录音/" + kmltest.getDy());
                             plqyp1.save();
-                            String[] zps = new String[2];
-                            zps[0] = kmltest.getZp().substring(0, (int)Math.floor(Float.valueOf(kmltest.getZp().length() / 2)));
-                            zps[1] = kmltest.getZp().substring((int)Math.ceil(Float.valueOf(kmltest.getZp().length() / 2)) + 1, kmltest.getZp().length());
+                            String[] zps = new String[5];
+                            String zpath = kmltest.getZp().replace("JPG", "jpg");
+                            int jpgTime = appearNumber(zpath, ".jpg");
+                            if (jpgTime == 2) {
+                                zps[0] = kmltest.getZp().substring(0, (int) Math.floor(Float.valueOf(zpath.length() / 2)));
+                                zps[1] = kmltest.getZp().substring((int) Math.ceil(Float.valueOf(zpath.length() / 2)) + 1, zpath.length());
+                            }else if (jpgTime == 1) {
+                                String str = kmltest.getZp();
+                                zps[0] = str.substring(0, str.indexOf(".jpg") + 4);
+                            }else if (jpgTime == 3) {
+                                String str = kmltest.getZp();
+                                zps[0] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[1] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[2] = str.substring(0, str.indexOf(".jpg") + 4);
+                            }else if (jpgTime == 4) {
+                                String str = kmltest.getZp();
+                                zps[0] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[1] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[2] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[3] = str.substring(0, str.indexOf(".jpg") + 4);
+                            }else{
+                                String str = kmltest.getZp();
+                                zps[0] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[1] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[2] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[3] = str.substring(0, str.indexOf(".jpg") + 4);
+                                str = str.substring(0, str.indexOf(".jpg") + 5);
+                                zps[4] = str.substring(0, str.indexOf(".jpg") + 4);
+                            }
                             plqzp plqzp1 = new plqzp();
                             plqzp1.setXh(kmltest.getXh());
-                            plqzp1.setZp1(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[0]);
-                            plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[1]);
+                            if (jpgTime == 2) {
+                                plqzp1.setZp1(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[0]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[1]);
+                            }else if (jpgTime == 1) {
+                                plqzp1.setZp1(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[0]);
+                            }else if (jpgTime == 3){
+                                plqzp1.setZp1(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[0]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[1]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[2]);
+                            }else if (jpgTime == 4){
+                                plqzp1.setZp1(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[0]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[1]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[2]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[3]);
+                            }else {
+                                plqzp1.setZp1(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[0]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[1]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[2]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[3]);
+                                plqzp1.setZp2(Environment.getExternalStorageDirectory() + "/地名标志照片/" + zps[4]);
+                            }
                             plqzp1.save();
                             kmltest.setLat(Float.valueOf(coordinates[1]));
                             kmltest.setLongi(Float.valueOf(coordinates[0]));
