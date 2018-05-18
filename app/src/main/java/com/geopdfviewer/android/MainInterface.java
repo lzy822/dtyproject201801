@@ -2638,6 +2638,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 WindowManager.LayoutParams lp = getWindow().getAttributes();
                 lp.alpha = 1.0f;
                 getWindow().setAttributes(lp);
+                locHere_fab.setVisibility(View.GONE);
             }
         });
         //popupWindow出现屏幕变为半透明
@@ -2763,6 +2764,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 WindowManager.LayoutParams lp = getWindow().getAttributes();
                 lp.alpha = 1.0f;
                 getWindow().setAttributes(lp);
+                locHere_fab.setVisibility(View.VISIBLE);
             }
         });
         //popupWindow OnTouchListener
@@ -3715,6 +3717,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         toolbar.setTitle("正在进行白板绘图(轨迹记录中)");
                     }else toolbar.setTitle("正在进行白板绘图");
                     showPopueWindowForWhiteblank();
+                    locHere_fab.setVisibility(View.GONE);
                     whiteBlank_fab.setVisibility(View.INVISIBLE);
                     isWhiteBlank = true;
                     whiteBlankLayerBt.setChecked(true);
