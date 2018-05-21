@@ -54,7 +54,7 @@ public class tapeshow extends AppCompatActivity {
         adapter.setOnItemLongClickListener(new mTapeobjAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, String path) {
-                setTitle("正在进行长按操作");
+                setTitle(tapeshow.this.getResources().getText(R.string.IsLongClicking));
                 deletePath = path;
                 isLongClick = 0;
                 invalidateOptionsMenu();
@@ -90,7 +90,7 @@ public class tapeshow extends AppCompatActivity {
 
     private void resetView(){
         isLongClick = 1;
-        setTitle("录音列表");
+        setTitle(tapeshow.this.getResources().getText(R.string.TapeList));
         refreshCard();
         invalidateOptionsMenu();
     }
@@ -102,7 +102,7 @@ public class tapeshow extends AppCompatActivity {
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar5);
         setSupportActionBar(toolbar);
-        setTitle("录音列表");
+        setTitle(tapeshow.this.getResources().getText(R.string.TapeList));
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
     }
@@ -157,7 +157,7 @@ public class tapeshow extends AppCompatActivity {
                 //DataSupport.deleteAll(MTAPE.class, "path = ?", deletePath);
                 //DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC);
                 parseSelectedPath();
-                setTitle("录音列表");
+                setTitle(tapeshow.this.getResources().getText(R.string.TapeList));
                 refreshCard();
                 break;
             case R.id.add_pois:
@@ -183,7 +183,7 @@ public class tapeshow extends AppCompatActivity {
             List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
             POI poi = new POI();
             poi.setTapenum(POIs.get(0).getTapenum() + 1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(tapeshow.this.getResources().getText(R.string.DateAndTime).toString());
             Date date = new Date(time);
             poi.updateAll("POIC = ?", POIC);
             MTAPE mtape = new MTAPE();

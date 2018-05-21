@@ -4,26 +4,26 @@
     <item
         android:id="@+id/back"
         android:icon="@drawable/ic_arrow_back"
-        android:title="back"
+        android:title="@string/BackBt"
         app:showAsAction="always"/>
     <item
         android:id="@+id/queryLatLng"
         android:icon="@drawable/ic_search"
-        android:title="简单查询"
+        android:title="@string/SimpleQueryBt"
         app:showAsAction="never"/>
     <item
         android:id="@+id/info"
         android:icon="@drawable/ic_info_black"
-        android:title="info"
+        android:title="@string/InfoBt"
         app:showAsAction="always"/>
     <item
         android:id="@+id/queryPOI"
         android:icon="@drawable/ic_info_black"
-        android:title="查询所有兴趣点"
+        android:title="@string/QueryAllPOIBt"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_search"
-        android:title="@string/action_search"
+        android:title="@string/RedLineTip"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="always" />
 

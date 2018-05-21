@@ -39,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_playlist_add"
-                fab:fab_label="添加地图"
+                fab:fab_label="@string/AddMap"
                 fab:fab_size="mini" />
 
             <com.github.clans.fab.FloatingActionButton
@@ -47,14 +47,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_output_black_24dp"
-                fab:fab_label="导出数据"
+                fab:fab_label="@string/OutputData"
                 fab:fab_size="mini" />
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/inputData_selectpage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_vertical_align_bottom_black_24dp"
-                fab:fab_label="导入数据"
+                fab:fab_label="@string/InputData"
                 fab:fab_size="mini" />
         </com.github.clans.fab.FloatingActionMenu>
 

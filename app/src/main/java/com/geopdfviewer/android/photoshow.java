@@ -79,7 +79,7 @@ public class photoshow extends AppCompatActivity {
         adapter.setOnItemLongClickListener(new mPhotobjAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, String path) {
-                setTitle("正在进行长按操作");
+                setTitle(photoshow.this.getResources().getText(R.string.IsLongClicking));
                 deletePath = path;
                 isLongClick = 0;
                 invalidateOptionsMenu();
@@ -144,7 +144,7 @@ public class photoshow extends AppCompatActivity {
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar4);
         setSupportActionBar(toolbar);
-        setTitle("相片列表");
+        setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
         new Thread(new Runnable() {
@@ -187,7 +187,7 @@ public class photoshow extends AppCompatActivity {
 
     private void resetView(){
         isLongClick = 1;
-        setTitle("相片列表");
+        setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
         refreshCard();
         invalidateOptionsMenu();
     }
@@ -204,7 +204,7 @@ public class photoshow extends AppCompatActivity {
                 break;
             case R.id.deletepoi:
                 isLongClick = 1;
-                setTitle("相片列表");
+                setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
                 invalidateOptionsMenu();
                 //DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
                 parseSelectedPath();
@@ -227,7 +227,7 @@ public class photoshow extends AppCompatActivity {
             POI poi = new POI();
             long time = System.currentTimeMillis();
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(photoshow.this.getResources().getText(R.string.DateAndTime).toString());
             Date date = new Date(System.currentTimeMillis());
             poi.updateAll("poic = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
@@ -250,7 +250,7 @@ public class photoshow extends AppCompatActivity {
                     photoshow.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
                 }catch (IOException e){
                 }
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(photoshow.this.getResources().getText(R.string.DateAndTime).toString());
                 Date date = new Date(System.currentTimeMillis());
                 List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
                 POI poi = new POI();

@@ -4,16 +4,16 @@
     <item
         android:id="@+id/delete"
         android:icon="@drawable/ic_delete"
-        android:title="delete"
+        android:title="@string/DeleteBt"
         app:showAsAction="always"/>
     <item
         android:id="@+id/mmcancel"
         android:icon="@drawable/ic_arrow_back"
-        android:title="cancel"
+        android:title="@string/CancelBt"
         app:showAsAction="always"/>
     <item
         android:id="@+id/showinfo"
         android:icon="@drawable/ic_info_black"
-        android:title="info"
+        android:title="@string/ShowInfoBt"
         app:showAsAction="always"/>
 </menu>

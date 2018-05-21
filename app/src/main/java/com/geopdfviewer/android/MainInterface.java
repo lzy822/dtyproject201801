@@ -116,7 +116,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public String content;
     String pdfFileName;
     PDFView pdfView;
-    LinearLayout linearLayout;
     TextView textView;
     TextView scaleShow;
 
@@ -934,7 +933,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     poi.setX(centerPointLoc.x);
                                     poi.setY(centerPointLoc.y);
                                 }
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                                 Date date = new Date(System.currentTimeMillis());
                                 poi.setTime(simpleDateFormat.format(date));
                                 poi.setPhotonum(0);
@@ -1810,7 +1809,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     poi.setX(centerPointLoc.x);
                                     poi.setY(centerPointLoc.y);
                                 }
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                                 Date date = new Date(System.currentTimeMillis());
                                 poi.setTime(simpleDateFormat.format(date));
                                 poi.setPhotonum(0);
@@ -2126,7 +2125,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 POI poi = new POI();
                                 poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
                                 locError("holly :" + poi.updateAll("poic = ?", POIs.get(theNum).getPoic()));
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                                 Date date = new Date(System.currentTimeMillis());
                                 MPHOTO mphoto = new MPHOTO();
                                 mphoto.setPdfic(ic);
@@ -2151,7 +2150,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
                                 poi.setX(latandlong[0]);
                                 poi.setY(latandlong[1]);
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                                 Date date = new Date(System.currentTimeMillis());
                                 poi.setTime(simpleDateFormat.format(date));
                                 poi.save();
@@ -2177,7 +2176,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
                         poi.setX(latandlong[0]);
                         poi.setY(latandlong[1]);
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                         Date date = new Date(System.currentTimeMillis());
                         poi.setTime(simpleDateFormat.format(date));
                         poi.save();
@@ -2201,7 +2200,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
                     poi.setX(latandlong[0]);
                     poi.setY(latandlong[1]);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                     Date date = new Date(System.currentTimeMillis());
                     poi.setTime(simpleDateFormat.format(date));
                     poi.save();
@@ -2250,7 +2249,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             POI poi = new POI();
                             poi.setTapenum(POIs.get(theNum).getTapenum() + 1);
                             poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                             Date date = new Date(time);
                             MTAPE mtape = new MTAPE();
                             mtape.setPath(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri));
@@ -2276,7 +2275,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
                             poi.setX((float) m_lat);
                             poi.setY((float) m_long);
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                             Date date = new Date(System.currentTimeMillis());
                             poi.setTime(simpleDateFormat.format(date));
                             poi.save();
@@ -2303,7 +2302,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
                     poi.setX((float) m_lat);
                     poi.setY((float) m_long);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                     Date date = new Date(System.currentTimeMillis());
                     poi.setTime(simpleDateFormat.format(date));
                     poi.save();
@@ -2328,7 +2327,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
                 poi.setX((float) m_lat);
                 poi.setY((float) m_long);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                 Date date = new Date(System.currentTimeMillis());
                 poi.setTime(simpleDateFormat.format(date));
                 poi.save();
@@ -2385,7 +2384,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     POI poi = new POI();
                                     poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
                                     poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
-                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                                     Date date = new Date(time);
                                     MPHOTO mphoto = new MPHOTO();
                                     mphoto.setPdfic(ic);
@@ -2415,7 +2414,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         poi.setX((float) m_lat);
                                         poi.setY((float) m_long);
                                     }
-                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                                     Date date = new Date(System.currentTimeMillis());
                                     poi.setTime(simpleDateFormat.format(date));
                                     poi.save();
@@ -2447,7 +2446,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 poi.setX((float) m_lat);
                                 poi.setY((float) m_long);
                             }
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                             Date date = new Date(System.currentTimeMillis());
                             poi.setTime(simpleDateFormat.format(date));
                             poi.save();
@@ -2476,7 +2475,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poi.setX((float) m_lat);
                             poi.setY((float) m_long);
                         }
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                         Date date = new Date(System.currentTimeMillis());
                         poi.setTime(simpleDateFormat.format(date));
                         poi.save();
@@ -2680,7 +2679,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
-                    Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
                 }else {
                     whiteBlankPt = "";
                     Log.w(TAG, "onClick: " + DataSupport.deleteAll(Lines_WhiteBlank.class, "mmid = ? and ic = ?", Integer.toString(size - 1), ic));
@@ -2735,13 +2734,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
-                    Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
                 }else {
                     whiteBlankPt = "";
                     DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
-                    Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -2857,14 +2856,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             esterEgg_plq = true;
             getEsterEgg_plq();
             pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, "你已经开启盘龙区地名标志显示功能", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
         }else if (query.equals("gbbz")){
             SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
             editor.putBoolean("open_plq", false);
             editor.apply();
             esterEgg_plq = false;
             pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, "关闭成功", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
         }else if (query.equals("kqhx")){
             SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
             editor.putBoolean("open_redline", true);
@@ -2872,14 +2871,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             esterEgg_redline = true;
             getEsterEgg_redline();
             pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, "你已经开启生态保护红线功能", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
         }else if (query.equals("gbhx")){
             SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
             editor.putBoolean("open_redline", false);
             editor.apply();
             esterEgg_redline = false;
             pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, "关闭成功", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
         }
         String sql = "select * from POI where";
         String[] strings = query.split(" ");
@@ -3396,7 +3395,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     @Override
                     public boolean onQueryTextSubmit(String query) {
                         if (queryMode == RED_LINE_QUERY) {
-                            if (query.contains(";")) {
                                 try {
                                     String[] str = query.split(";");
                                     if (!str[0].contains("°")) {
@@ -3414,9 +3412,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             }
                                         }
                                         if (In)
-                                            Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.InRedLine), Toast.LENGTH_LONG).show();
                                         else
-                                            Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.NoInRedLine), Toast.LENGTH_LONG).show();
                                         return true;
                                     }else {
                                         float[] ptss = new float[2];
@@ -3433,19 +3431,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                             }
                                         }
                                         if (In)
-                                            Toast.makeText(MainInterface.this, "在生态保护红线内", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.InRedLine), Toast.LENGTH_LONG).show();
                                         else
-                                            Toast.makeText(MainInterface.this, "不在生态保护红线内", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.NoInRedLine), Toast.LENGTH_LONG).show();
                                         return true;
                                     }
                                 }catch (Exception e){
-                                    Toast.makeText(MainInterface.this, "请输入正确格式的经纬度", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.RedLineError), Toast.LENGTH_LONG).show();
                                     return true;
                                 }
-                            }else {
-                                Toast.makeText(MainInterface.this, "请以 ; 分隔经纬度", Toast.LENGTH_LONG).show();
-                                return true;
-                            }
                         }else {
                             showListPopupWindow(searchView, query);
                             //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
@@ -3460,19 +3454,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 });
         }
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    private void reDrawCache() {
-        if (FILE_TYPE == NONE_FILE_TYPE) {
-            Toast.makeText(this, "PDF文件读取出现问题", Toast.LENGTH_LONG).show();
-        } else if (FILE_TYPE == FILE_FILE_TYPE) {
-            displayFromFile(uri);
-            Toast.makeText(this, "这是硬盘上的文件", Toast.LENGTH_LONG).show();
-        } else if (FILE_TYPE == ASSET_FILE_TYPE) {
-            displayFromAsset("Demo");
-            Toast.makeText(this, "这是Demo", Toast.LENGTH_LONG).show();
-        }
-
     }
 
     @Override
@@ -3523,7 +3504,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(MainInterface.this, "开启成功", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
                             }
                         });
                     }
@@ -3531,7 +3512,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 kmltests = DataSupport.findAll(kmltest.class);
                 return true;
             }else if (kmltests.size() == 0){
-                Toast.makeText(MainInterface.this, "你缺失一些标准文件, 请确认后再开启该功能", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggErrorInfo), Toast.LENGTH_LONG).show();
                 SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
                 editor.putBoolean("open_plq", false);
                 editor.apply();
@@ -3828,7 +3809,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getInfo(m_num);
         manageInfo();
         num_map1 = m_num;
-        linearLayout = (LinearLayout) findViewById(R.id.search);
         if (uri != "") {
             FILE_TYPE = FILE_FILE_TYPE;
             displayFromFile(uri);
@@ -3971,22 +3951,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         toolbar.setTitle("正在记录轨迹");
                     }else toolbar.setTitle(pdfFileName);
                 }
-            }
-        });
-        Button bt1 = (Button) findViewById(R.id.send);
-        bt1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                linearLayout.setVisibility(View.GONE);
-            }
-        });
-        Button bt2 = (Button) findViewById(R.id.cancel);
-        bt2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                linearLayout.setVisibility(View.GONE);
             }
         });
         addPhoto_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addPhoto);

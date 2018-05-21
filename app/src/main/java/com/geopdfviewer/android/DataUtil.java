@@ -73,7 +73,7 @@ public class DataUtil {
 
     //核对日期
     public static boolean verifyDate(String endDate){
-        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+        SimpleDateFormat df = new SimpleDateFormat(MyApplication.getContext().getResources().getText(R.string.Date).toString());
         Date nowDate = new Date(System.currentTimeMillis());
         Date endTimeDate = null;
         try {
@@ -81,7 +81,7 @@ public class DataUtil {
                 endTimeDate = df.parse(endDate);
             }
         }catch (ParseException e){
-            Toast.makeText(mContext, "发生错误, 请联系我们!", Toast.LENGTH_LONG).show();
+            Toast.makeText(MyApplication.getContext(), "发生错误, 请联系我们!", Toast.LENGTH_LONG).show();
         }
         if (nowDate.getTime() > endTimeDate.getTime()){
             return false;
@@ -90,7 +90,7 @@ public class DataUtil {
 
     //日期加法
     public static String datePlus(String day, int days) {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日");
+        SimpleDateFormat df = new SimpleDateFormat(MyApplication.getContext().getResources().getText(R.string.Date).toString());
         Date base = null;
         try {
             base = df.parse(day);

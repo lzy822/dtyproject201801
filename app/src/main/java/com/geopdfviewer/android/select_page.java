@@ -176,7 +176,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private void resetView(){
-        setTitle("地图列表");
+        setTitle(select_page.this.getResources().getText(R.string.MapList));
         selectedNum = 0;
         isLongClick = 1;
         invalidateOptionsMenu();
@@ -204,21 +204,21 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     //deleteData(selectedNum);
                     parseSelectedpos();
                     resetView();
-                }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
+                }else Toast.makeText(this, this.getResources().getText(R.string.NoLongClickError).toString(), Toast.LENGTH_LONG).show();
                 break;
             case  R.id.mmcancel:
                 if (selectedNum != 0){
                     //isLongClick = 1;
                     refreshRecycler();
                     resetView();
-                }else Toast.makeText(this, "请长按某个子项后, 再选择菜单栏操作", Toast.LENGTH_LONG).show();
+                }else Toast.makeText(this, this.getResources().getText(R.string.NoLongClickError).toString(), Toast.LENGTH_LONG).show();
                 break;
             case  R.id.showinfo:
                 //if (selectedNum != 0){
                     //showInfo(selectedNum);
                     //resetView();
                 //}else
-                Toast.makeText(this, "当前版本: 1.1" + "\n" + "云南省地图院数据分院制" + "\n" + "联系电话: 13108714475" + "\n" + "邮箱: 345131571@qq.com", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, this.getResources().getText(R.string.version_info_0).toString() + this.getResources().getText(R.string.version_info).toString() + "\n" + this.getResources().getText(R.string.version_info_1).toString() + "\n" + this.getResources().getText(R.string.version_info_2).toString() + "\n" + this.getResources().getText(R.string.version_info_3).toString(), Toast.LENGTH_LONG).show();
                 break;
         }
         return true;
@@ -319,7 +319,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void onItemLongClick(View view, int map_num, int position) {
                 //Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
-                setTitle("正在进行长按操作");
+                setTitle(select_page.this.getResources().getText(R.string.IsLongClicking));
                 floatingActionsMenu.setVisibility(View.INVISIBLE);
                 locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
                 selectedNum = map_num;
@@ -619,7 +619,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     // 在这里进行UI操作
                     refreshRecycler();
                     if (add_current == add_max){
-                    toolbar.setTitle("地图列表");
+                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
                     }
                     Log.w(TAG, "handleMessage: " );
             }
@@ -923,7 +923,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            toolbar.setTitle("地图列表");
+                                            toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
                                             Toast.makeText(MyApplication.getContext(), "数据导入完成", Toast.LENGTH_LONG).show();
                                         }
                                     });
@@ -993,7 +993,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            toolbar.setTitle("地图列表");
+                                            toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
                                             Toast.makeText(MyApplication.getContext(), "数据导入完成", Toast.LENGTH_LONG).show();
                                         }
                                     });
@@ -1231,7 +1231,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 @Override
                 public void run() {
                     Toast.makeText(select_page.this, "入库成功", Toast.LENGTH_LONG).show();
-                    toolbar.setTitle("地图列表");
+                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
                 }
             });
         }catch (IOException e){
@@ -1245,7 +1245,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         setContentView(R.layout.activity_select_test_page);
         floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
         floatingActionsMenu.setClosedOnTouchOutside(true);
-        setTitle("地图列表");
+        setTitle(select_page.this.getResources().getText(R.string.MapList));
         //获取定位信息
         getLocation();
         //locError("deviceId : " + getIMEI());
@@ -1393,7 +1393,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 @Override
                                 public void run() {
                                     Toast.makeText(select_page.this, "打包成功!", Toast.LENGTH_LONG).show();
-                                    toolbar.setTitle("地图列表");
+                                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
                                 }
                             });
                         }catch (IOException e){

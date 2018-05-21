@@ -38,7 +38,7 @@ public class pois extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pois);
-        setTitle("兴趣点列表");
+        setTitle(pois.this.getResources().getText(R.string.POIList));
         Intent intent = getIntent();
         ic = intent.getStringExtra("ic");
         min_lat = intent.getDoubleExtra("min_lat", 0);
@@ -86,7 +86,7 @@ public class pois extends AppCompatActivity {
         adapter.setOnItemLongClickListener(new mPOIobjAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, String POIC) {
-                setTitle("正在进行长按操作");
+                setTitle(pois.this.getResources().getText(R.string.IsLongClicking));
                 selectedPOIC = POIC;
                 isLongClick = 0;
                 invalidateOptionsMenu();
@@ -155,7 +155,7 @@ public class pois extends AppCompatActivity {
 
     private void resetView(){
         isLongClick = 1;
-        setTitle("兴趣点列表");
+        setTitle(pois.this.getResources().getText(R.string.POIList));
         refreshCard();
         invalidateOptionsMenu();
     }

@@ -239,7 +239,7 @@ public class singlepoi extends AppCompatActivity {
             POI poi = new POI();
             long time = System.currentTimeMillis();
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
             Date date = new Date(System.currentTimeMillis());
             poi.updateAll("poic = ?", POIC);
             MPHOTO mphoto = new MPHOTO();
@@ -256,7 +256,7 @@ public class singlepoi extends AppCompatActivity {
             List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
             POI poi = new POI();
             poi.setTapenum(POIs.get(0).getTapenum() + 1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
             Date date = new Date(System.currentTimeMillis());
             poi.updateAll("poic = ?", POIC);
             MTAPE mtape = new MTAPE();
@@ -276,7 +276,7 @@ public class singlepoi extends AppCompatActivity {
                     singlepoi.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
                 }catch (IOException e){
                 }
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
                 Date date = new Date(System.currentTimeMillis());
                 List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
                 POI poi = new POI();

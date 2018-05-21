@@ -207,7 +207,7 @@ public class register extends AppCompatActivity {
 
     //处理输入信息
     private void manageInputLisence(String edittxt){
-        SimpleDateFormat df2 = new SimpleDateFormat("yyyy年MM月dd日");
+        SimpleDateFormat df2 = new SimpleDateFormat(register.this.getResources().getText(R.string.Date).toString());
         Date date = new Date(System.currentTimeMillis());
         String startTime = df2.format(date);
         if (verifyInputLisence(edittxt)){
