@@ -110,7 +110,7 @@ public class register extends AppCompatActivity {
                 if (grantResults.length > 0) {
                     for (int result : grantResults) {
                         if (result != PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(this, "必须通过所有权限才能使用本程序", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, register.this.getResources().getText(R.string.PermissionError), Toast.LENGTH_LONG).show();
                             finish();
                             return;
                         }else {
@@ -167,7 +167,7 @@ public class register extends AppCompatActivity {
                     myClip = ClipData.newPlainText("设备码", imei);
                     manager.setPrimaryClip(myClip);
                     Log.w(TAG, "onLongClick: " + imei);
-                    Toast.makeText(MyApplication.getContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.FinishCopy), Toast.LENGTH_SHORT).show();
                     return true;
                 }
             });
@@ -249,9 +249,9 @@ public class register extends AppCompatActivity {
                 Intent intent = new Intent(register.this, select_page.class);
                 startActivity(intent);
                 register.this.finish();
-            }else Toast.makeText(MyApplication.getContext(), "请联系我们获取授权码", Toast.LENGTH_LONG).show();
+            }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(MyApplication.getContext(), "请联系我们获取授权码", Toast.LENGTH_LONG).show();
+            Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
         }
 
     }

@@ -384,7 +384,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
         if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
-            Toast.makeText(this, "请打开网络或GPS定位功能!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, this.getResources().getText(R.string.LocError), Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivityForResult(intent, 0);
             return;
@@ -542,7 +542,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (file.exists() && file.isFile()){
             if (file.delete()){
                 //Toast.makeText(this, "删除文件成功", Toast.LENGTH_SHORT).show();
-            }else Toast.makeText(this, "删除文件失败", Toast.LENGTH_SHORT).show();
+            }else Toast.makeText(this, this.getResources().getText(R.string.DeleteError), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -575,7 +575,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         pref.clear().commit();
         SharedPreferences.Editor pref1 = getSharedPreferences("data", MODE_PRIVATE).edit();
         pref1.clear().commit();
-        Toast.makeText(this, "清除操作完成", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "清除操作完成", Toast.LENGTH_LONG).show();
         initPage();
         refreshRecycler();
         /*Intent intent = getIntent();
@@ -673,7 +673,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     } catch (UnsupportedEncodingException e) {
 
                     }
-                } else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(this, this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
                 if (isOKForAddMap) {
                     AlertDialog.Builder dialog = new AlertDialog.Builder(select_page.this);
                     dialog.setTitle("请选择解析类型");
@@ -692,7 +692,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                                 @Override
                                                 public void run() {
                                                     toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                    Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
                                                 }
                                             });
                                             locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
@@ -729,7 +729,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             @Override
                                             public void run() {
                                                 toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
                                             }
                                         });
                                         try {
@@ -753,7 +753,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                 }).start();
 
-                            } else Toast.makeText(select_page.this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
                         }
                     });
                     dialog.setNegativeButton("类型二", new DialogInterface.OnClickListener() {
@@ -770,7 +770,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                                 @Override
                                                 public void run() {
                                                     toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                    Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
                                                 }
                                             });
                                             locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
@@ -807,7 +807,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             @Override
                                             public void run() {
                                                 toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                Toast.makeText(MyApplication.getContext(), "正在提取地理信息, 请稍后", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
                                             }
                                         });
                                         try {
@@ -831,11 +831,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                 }).start();
 
-                            } else Toast.makeText(select_page.this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
                         }
                     });
                     dialog.show();
-                } else Toast.makeText(this, "已经添加过该地图!", Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(this, select_page.this.getResources().getText(R.string.AddedMapTip), Toast.LENGTH_SHORT).show();
 
             /*locError(getRealPath(uri.toString()));
             locError(uri.toString());
@@ -859,7 +859,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             @Override
                                             public void run() {
                                                 toolbar.setTitle("正在解析数据");
-                                                Toast.makeText(MyApplication.getContext(), "正在解析数据, 请稍后", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetInputData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
                                             }
                                         });
                                         locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
@@ -924,7 +924,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         @Override
                                         public void run() {
                                             toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
-                                            Toast.makeText(MyApplication.getContext(), "数据导入完成", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.DataInputOk), Toast.LENGTH_LONG).show();
                                         }
                                     });
                                 }
@@ -937,7 +937,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         @Override
                                         public void run() {
                                             toolbar.setTitle("正在解析数据");
-                                            Toast.makeText(MyApplication.getContext(), "正在解析数据, 请稍后", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetInputData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
                                         }
                                     });
                                     try {
@@ -994,14 +994,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         @Override
                                         public void run() {
                                             toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
-                                            Toast.makeText(MyApplication.getContext(), "数据导入完成", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.DataInputOk), Toast.LENGTH_LONG).show();
                                         }
                                     });
 
                                 }
                             }).start();
 
-                        } else Toast.makeText(this, "无法打开该文件", Toast.LENGTH_SHORT).show();
+                        } else Toast.makeText(this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
 
                         break;
 
@@ -1014,7 +1014,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(select_page.this, "数据入库中!", Toast.LENGTH_LONG).show();
+                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.InputingData), Toast.LENGTH_LONG).show();
                 toolbar.setTitle("数据入库中");
             }
         });
@@ -1230,7 +1230,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(select_page.this, "入库成功", Toast.LENGTH_LONG).show();
+                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.DataInputOk), Toast.LENGTH_LONG).show();
                     toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
                 }
             });
@@ -1364,7 +1364,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(select_page.this, "正在打包数据, 请稍后!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
                                     toolbar.setTitle("数据打包中");
                                 }
                             });
@@ -1392,7 +1392,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(select_page.this, "打包成功!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
                                     toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
                                 }
                             });
@@ -1453,7 +1453,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 handler.sendMessage(message);
             }
         }).start();
-        Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "第一次进入", Toast.LENGTH_LONG).show();
     }
 
     public void locError(){
@@ -1610,7 +1610,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 public void run() {
                     add_current ++;
                     toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                    Toast.makeText(MyApplication.getContext(), "获取完毕!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfoOk), Toast.LENGTH_LONG).show();
                 }
             });
             in.close();
@@ -1622,7 +1622,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MyApplication.getContext(), "地理信息获取失败, 请联系程序员", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfoError).toString() + R.string.QLXWM, Toast.LENGTH_LONG).show();
                 }
             });
 

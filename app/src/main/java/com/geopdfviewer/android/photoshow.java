@@ -265,7 +265,7 @@ public class photoshow extends AppCompatActivity {
                 refreshCard();
             }else {
                 file.delete();
-                Toast.makeText(photoshow.this, "拍照失败, 请再次拍摄", Toast.LENGTH_LONG).show();
+                Toast.makeText(photoshow.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
             }
         }
     }

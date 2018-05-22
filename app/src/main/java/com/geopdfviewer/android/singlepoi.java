@@ -144,7 +144,7 @@ public class singlepoi extends AppCompatActivity {
                     Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
                     startActivityForResult(intent, REQUEST_CODE_TAPE);
                 }catch (ActivityNotFoundException e){
-                    Toast.makeText(MyApplication.getContext(), "无法打开录音功能", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -290,7 +290,7 @@ public class singlepoi extends AppCompatActivity {
                 mphoto.save();
             }else {
                 file.delete();
-                Toast.makeText(singlepoi.this, "拍照失败, 请再次拍摄", Toast.LENGTH_LONG).show();
+                Toast.makeText(singlepoi.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
             }
         }
     }

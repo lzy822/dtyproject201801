@@ -120,7 +120,7 @@ public class plqpoishow extends AppCompatActivity {
                     MediaPlayer mediaPlayer = MediaPlayer.create(plqpoishow.this, Uri.parse(yp));
                     mediaPlayer.start();
                 }catch (NullPointerException e){
-                    Toast.makeText(plqpoishow.this, "该地没有录制音频", Toast.LENGTH_LONG).show();
+                    Toast.makeText(plqpoishow.this, R.string.NoTapeTip, Toast.LENGTH_LONG).show();
                 }
             }
         });

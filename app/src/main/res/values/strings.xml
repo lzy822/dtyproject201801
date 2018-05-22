@@ -11,7 +11,7 @@
     <string name="NoInRedLine">不在生态保护红线内</string>
     <string name="RedLineError">请输入标准经纬度格式</string>
     <string name="NoLongClickError">请长按某个子项后, 再选择菜单栏操作</string>
-    <string name="version_info">1.3.1</string>
+    <string name="version_info">1.3.2</string>
     <string name="version_info_0">当前版本: </string>
     <string name="version_info_1">云南省地图院数据分院制</string>
     <string name="version_info_2">联系电话: 13108714475</string>
@@ -53,5 +53,32 @@
     <string name="PhotoList">录音列表</string>
     <string name="DateAndTime">yyyy年MM月dd日 HH:mm:ss</string>
     <string name="Date">yyyy年MM月dd日</string>
+    <string name="InputLicenseError">请联系我们获取授权码</string>
+    <string name="FinishCopy">已复制到剪贴板</string>
+    <string name="PermissionError">必须通过所有权限才能使用本程序</string>
+    <string name="LocError">请打开定位功能!</string>
+    <string name="DeleteError">删除文件失败</string>
+    <string name="OpenFileError">无法打开该文件</string>
+    <string name="GetGeoInfo">正在提取地理信息</string>
+    <string name="GetGeoInfoOk">获取完毕!</string>
+    <string name="GetGeoInfoError">地理信息获取失败</string>
+    <string name="QLXWM">, 请联系我们</string>
+    <string name="GetInputData">正在解析数据</string>
+    <string name="AddedMapTip">已经添加过该地图!</string>
+    <string name="DataInputOk">数据导入完成</string>
+    <string name="InputingData">数据入库中!</string>
+    <string name="PackingData">正在打包数据</string>
+    <string name="QSH">, 请稍后!</string>
+    <string name="PackingOk">打包成功!</string>
+    <string name="AutoTransError">自动切换地图功能故障</string>
+    <string name="TakePhotoError">拍照失败, 请再次拍摄</string>
+    <string name="TrailError">所在位置不在当前地图中, 不可记录轨迹</string>
+    <string name="OpenTrailError">请先打开轨迹记录功能</string>
+    <string name="LocError_1">当前不在该地图中</string>
+    <string name="SpecialError">发生错误</string>
+    <string name="ResetError">重置失败!</string>
+    <string name="TakeTapeError">无法打开录音功能</string>
+    <string name="NoTapeTip">该地没有录制音频</string>
+    <string name="CannotGetThumbnail">无法获取缩略图!</string>
 
 </resources>

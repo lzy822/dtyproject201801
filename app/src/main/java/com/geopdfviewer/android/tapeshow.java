@@ -166,7 +166,7 @@ public class tapeshow extends AppCompatActivity {
                     startActivityForResult(intent, REQUEST_CODE_TAPE);
                     refreshCard();
                 }catch (ActivityNotFoundException e){
-                    Toast.makeText(MyApplication.getContext(), "无法打开录音功能", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
                 }
                 break;
             default:

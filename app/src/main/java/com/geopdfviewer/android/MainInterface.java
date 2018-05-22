@@ -1295,7 +1295,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
-                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
                         }else if (c_zoom <= 1.5 & isAutoTrans & isZoom == ZOOM_OUT){
                             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
                             int size = pref1.getInt("num", 0);
@@ -1376,7 +1376,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
-                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -1693,7 +1693,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
-                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
                         }else if (c_zoom <= 1.5 & isAutoTrans & isZoom == ZOOM_OUT){
                             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
                             int size = pref1.getInt("num", 0);
@@ -1773,7 +1773,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                                     getWhiteBlankData();
                                 }
-                            }else Toast.makeText(MainInterface.this, "自动切换地图功能出现故障", Toast.LENGTH_SHORT).show();
+                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
                         }
                         if (hasQueriedPoi) {
                             PointF ptf = RenderUtil.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -2495,7 +2495,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }else {
                 file.delete();
-                Toast.makeText(MainInterface.this, "拍照失败, 请再次拍摄", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainInterface.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
             }
             locError(imageUri.toString());
             //String imageuri = getRealPathFromUriForPhoto(this, imageUri);
@@ -3165,7 +3165,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
-            Toast.makeText(this, "请打开网络或GPS定位功能!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.LocError, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivityForResult(intent, 0);
             return;
@@ -3758,7 +3758,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public boolean onLongClick(View v) {
                 ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 manager.setText(textView.getText());
-                Toast.makeText(MainInterface.this, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainInterface.this, R.string.FinishCopy, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -3851,7 +3851,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     startTrail_imgbt.setVisibility(View.VISIBLE);
                     endTrail_imgbt.setVisibility(View.VISIBLE);
                     trail_imgbt.setVisibility(View.INVISIBLE);
-                }else Toast.makeText(MainInterface.this, "所在位置不在当前地图中, 不可记录轨迹", Toast.LENGTH_SHORT).show();
+                }else Toast.makeText(MainInterface.this, R.string.TrailError, Toast.LENGTH_SHORT).show();
             }
         });
         startTrail_imgbt.setOnClickListener(new View.OnClickListener() {
@@ -3899,7 +3899,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     if (showMode == CENTERMODE) isQuery = true;
                     else isQuery = false;
                 }else {
-                    Toast.makeText(MainInterface.this, "没有打开位置记录功能", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainInterface.this, R.string.OpenTrailError, Toast.LENGTH_SHORT).show();
                 }
                 startTrail_imgbt.setVisibility(View.INVISIBLE);
                 endTrail_imgbt.setVisibility(View.INVISIBLE);
@@ -4015,8 +4015,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     isPos = true;
                     floatingActionsMenu.close(false);
                 }
-                }else Toast.makeText(MyApplication.getContext(), "当前不在该地图中", Toast.LENGTH_LONG).show();
-                }else Toast.makeText(MyApplication.getContext(), "无法完成定位操作, 请开启网络或GPS设备", Toast.LENGTH_LONG).show();
+                }else Toast.makeText(MyApplication.getContext(), R.string.LocError_1, Toast.LENGTH_LONG).show();
+                }else Toast.makeText(MyApplication.getContext(), R.string.LocError, Toast.LENGTH_LONG).show();
             }
         });
         restoreZoom_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.restoreZoom);
@@ -4043,9 +4043,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if (location != null) {
                             updateView(location);
                         } else
-                            Toast.makeText(MainInterface.this, "重置失败", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainInterface.this, R.string.ResetError, Toast.LENGTH_SHORT).show();
                     }
-                }else Toast.makeText(MainInterface.this, "奇怪的错误!", Toast.LENGTH_SHORT).show();
+                }else Toast.makeText(MainInterface.this, R.string.SpecialError + R.string.QLXWM, Toast.LENGTH_SHORT).show();
             }
         });
         addTape_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape);
@@ -4059,7 +4059,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
                     startActivityForResult(intent, REQUEST_CODE_TAPE);
                 }catch (ActivityNotFoundException e){
-                    Toast.makeText(MyApplication.getContext(), "无法打开录音功能", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -4390,7 +4390,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             //Toast.makeText(this, "GPS已经开启", Toast.LENGTH_LONG).show();
             return true;
         }else{
-            Toast.makeText(this, "GPS没有开启, 请打开GPS功能", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.LocError, Toast.LENGTH_SHORT).show();
             //textView.setText("GPS没有开启");
             return false;
         }

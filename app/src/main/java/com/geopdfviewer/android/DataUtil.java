@@ -81,7 +81,7 @@ public class DataUtil {
                 endTimeDate = df.parse(endDate);
             }
         }catch (ParseException e){
-            Toast.makeText(MyApplication.getContext(), "发生错误, 请联系我们!", Toast.LENGTH_LONG).show();
+            Toast.makeText(MyApplication.getContext(), R.string.SpecialError + R.string.QLXWM, Toast.LENGTH_LONG).show();
         }
         if (nowDate.getTime() > endTimeDate.getTime()){
             return false;
@@ -491,7 +491,7 @@ public class DataUtil {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MyApplication.getContext(), "无法获取缩略图!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MyApplication.getContext(), R.string.CannotGetThumbnail, Toast.LENGTH_SHORT).show();
                 }
             });
         }
