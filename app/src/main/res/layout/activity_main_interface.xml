@@ -107,7 +107,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/ic_linear_scale_black_24dp"/>
+            android:background="@drawable/myscale"/>
     <TextView
         android:id="@+id/scale"
         android:layout_width="wrap_content"

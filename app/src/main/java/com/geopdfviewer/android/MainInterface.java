@@ -1080,7 +1080,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         getCurrentScreenLoc();
                         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
                         double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
-                        scale_distance = scale_distance * 2.53;
+                        scale_distance = scale_distance * 2.92727;
                         scaleShow.setText(scale_df.format(scale_distance) + "米");
                         float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
                         k_w = k[0];
