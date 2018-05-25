@@ -1134,7 +1134,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y, 23, paint);
                             canvas.drawCircle(pt.x, pt.y, 20, paint5);
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
-                            canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
+                            int version = android.os.Build.VERSION.SDK_INT;
+                            if (version >= 21) {
+                                canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
+                            }
                             //canvas.drawArc(pt.x - 100, pt.y + 100, pt.x + 100, pt.y - 100, degree - 15, 30, false, paint3);
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
@@ -1518,7 +1521,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 locError(Float.toString(predegree));
                                 canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(360 - predegree)), (float)(pt.y - 50 * Math.cos(360 - predegree)), paint6);
                             }*/
-                            canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
+                            int version = android.os.Build.VERSION.SDK_INT;
+                            if (version >= 21) {
+                                canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
+                            }
                         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
                         if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
                             List<Trail> trails = DataSupport.findAll(Trail.class);

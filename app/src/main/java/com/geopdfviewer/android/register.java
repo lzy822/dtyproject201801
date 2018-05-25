@@ -193,6 +193,7 @@ public class register extends AppCompatActivity {
         menu.findItem(R.id.queryPOI).setVisible(false);
         menu.findItem(R.id.queryLatLng).setVisible(false);
         menu.findItem(R.id.back).setVisible(false);
+        menu.findItem(R.id.action_search).setVisible(false);
         return true;
 
     }

@@ -38,3 +38,9 @@
 -keep class * implements android.os.Parcelable {
   public static final android.os.Parcelable$Creator *;
 }
+-keep class org.litepal.** { *; }
+-keep class * extends org.litepal.crud.DataSupport { *; }
+-keep class com.github.** { *; }
+-keep class com.shockwave.** { *; }
+-keep class android.support.v7.** { *; }
+
