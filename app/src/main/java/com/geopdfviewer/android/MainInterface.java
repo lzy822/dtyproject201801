@@ -1441,7 +1441,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 else {
                                     String string = scale_df.format(distanceLatLng.getDistance()) + "米";
-                                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
+                                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 1) * 27 + 55, point.y + 20, paint01);
                                     canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
                                 }
                             }else {
