@@ -1,17 +1,15 @@
 package com.geopdfviewer.android;
 
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -24,7 +22,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -333,10 +330,25 @@ public class singlepoi extends AppCompatActivity {
                 this.finish();
                 break;
             case R.id.deletepoi:
-                DataSupport.deleteAll(POI.class, "poic = ?", POIC);
-                DataSupport.deleteAll(MPHOTO.class, "poic = ?", POIC);
-                DataSupport.deleteAll(MTAPE.class, "poic = ?", POIC);
-                this.finish();
+                AlertDialog.Builder dialog = new AlertDialog.Builder(singlepoi.this);
+                dialog.setTitle("提示");
+                dialog.setMessage("确认删除兴趣点吗?");
+                dialog.setCancelable(false);
+                dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DataSupport.deleteAll(POI.class, "poic = ?", POIC);
+                        DataSupport.deleteAll(MPHOTO.class, "poic = ?", POIC);
+                        DataSupport.deleteAll(MTAPE.class, "poic = ?", POIC);
+                        singlepoi.this.finish();
+                    }
+                });
+                dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                dialog.show();
                 break;
             default:
         }

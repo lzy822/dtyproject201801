@@ -1080,8 +1080,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         getCurrentScreenLoc();
                         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
                         double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
-                        scale_distance = scale_distance * 2.92727;
-                        scaleShow.setText(scale_df.format(scale_distance) + "米");
+                        Log.w(TAG, "scale_distance: " + scale_distance);
+                        scale_distance = scale_distance * getMetric();
+                        if (scale_distance > 1000) {
+                            scale_distance = scale_distance / 1000;
+                            scaleShow.setText(scale_df.format(scale_distance) + "千米");
+                        }
+                        else scaleShow.setText(scale_df.format(scale_distance) + "米");
                         float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
                         k_w = k[0];
                         k_h = k[1];
@@ -1134,7 +1139,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y, 23, paint);
                             canvas.drawCircle(pt.x, pt.y, 20, paint5);
                             canvas.drawCircle(pt.x, pt.y, 10, paint3);
-                            int version = android.os.Build.VERSION.SDK_INT;
+                            int version = Build.VERSION.SDK_INT;
                             if (version >= 21) {
                                 canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
                             }
@@ -1455,8 +1460,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         getCurrentScreenLoc();
                         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
                         double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
-                        scale_distance = scale_distance * 2.53;
-                        scaleShow.setText(scale_df.format(scale_distance) + "米");
+                        Log.w(TAG, "scale_distance: " + scale_distance);
+                        Log.w(TAG, "getMetric: " + getMetric());
+                        scale_distance = scale_distance * getMetric();
+                        if (scale_distance > 1000) {
+                            scale_distance = scale_distance / 1000;
+                            scaleShow.setText(scale_df.format(scale_distance) + "千米");
+                        }
+                        else scaleShow.setText(scale_df.format(scale_distance) + "米");
 
                         if (isMessure & showMode == CENTERMODE){
                             String messure_pts1 = messure_pts;
@@ -1521,7 +1532,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 locError(Float.toString(predegree));
                                 canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(360 - predegree)), (float)(pt.y - 50 * Math.cos(360 - predegree)), paint6);
                             }*/
-                            int version = android.os.Build.VERSION.SDK_INT;
+                            int version = Build.VERSION.SDK_INT;
                             if (version >= 21) {
                                 canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
                             }
@@ -4434,6 +4445,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             default:
         }
         return true;
+    }
+
+    public double getMetric() {
+        DisplayMetrics metric = getResources().getDisplayMetrics();
+        return metric.density;
     }
 }
 
