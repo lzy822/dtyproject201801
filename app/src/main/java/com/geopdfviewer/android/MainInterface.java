@@ -333,6 +333,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private static final int CENTERMODE = -1;
     private static final int NOCENTERMODE = -2;
 
+    //记录分段距离值
+    private List<DistanceLatLng>  distanceLatLngs =  new ArrayList<>();
+
 
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
 
@@ -586,7 +589,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (isMessureType == MESSURE_DISTANCE_TYPE){
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米(轨迹记录中)");
-                }else toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米");
+                }else {
+                    toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米");
+                }
                 //setTitle(df1.format(distanceSum) + "米");
             }else if (isMessureType == MESSURE_AREA_TYPE){
                 double area = 0;
@@ -973,6 +978,32 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     //setTitle("正在测量");
                                     pdfView.zoomWithAnimation(c_zoom);
                                 }
+                                if (showMode == NOCENTERMODE)
+                                {
+                                    int size = distanceLatLngs.size();
+                                    if (size > 0){
+                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }else {
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                }
+                                else
+                                {
+                                    int size = distanceLatLngs.size();
+                                    if (size > 0){
+                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }else {
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                }
                             }
                         /*if (isMessure & showMode == CENTERMODE){
                             locError("messure_pts" + messure_pts);
@@ -1084,7 +1115,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         scale_distance = scale_distance * getMetric();
                         if (scale_distance > 1000) {
                             scale_distance = scale_distance / 1000;
-                            scaleShow.setText(scale_df.format(scale_distance) + "千米");
+                            scaleShow.setText(scale_df.format(scale_distance) + "公里");
                         }
                         else scaleShow.setText(scale_df.format(scale_distance) + "米");
                         float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
@@ -1386,7 +1417,40 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                             }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
                         }
-
+                        for (int i = 0; i < distanceLatLngs.size(); i++){
+                            Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs.size());
+                            DistanceLatLng distanceLatLng = distanceLatLngs.get(i);
+                            PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            Paint paint0 = new Paint();
+                            paint0.setColor(Color.RED);  //设置画笔颜色
+                            paint0.setStrokeWidth (5);//设置画笔宽度
+                            paint0.setTextSize(55);
+                            paint0.setStyle(Paint.Style.FILL);
+                            Paint paint01 = new Paint();
+                            paint01.setColor(Color.WHITE);  //设置画笔颜色
+                            paint01.setAlpha(180);
+                            paint01.setStyle(Paint.Style.FILL);
+                            Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
+                            //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                            //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                            //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                            if (distanceLatLng.getDistance() < 1000) {
+                                if (distanceLatLng.getDistance() == 0) {
+                                    canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
+                                    canvas.drawText("起点", point.x, point.y, paint0);
+                                }
+                                else {
+                                    String string = scale_df.format(distanceLatLng.getDistance()) + "米";
+                                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
+                                    canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
+                                }
+                            }else {
+                                String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
+                                canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
+                                canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
+                            }
+                            canvas.drawCircle(point.x, point.y, 10, paint3);
+                        }
                     }
                 })
                 .pageFitPolicy(FitPolicy.BOTH)
@@ -1421,6 +1485,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         current_pagewidth = pageWidth;
                         viewer_height = pdfView.getHeight();
                         viewer_width = pdfView.getWidth();
+
                         /*if (isQuery & num_map == 4 & c_zoom > 5 & ( ( cs_bottom > 24.6 & cs_top < 25.3) & ( cs_left > 102.48 & cs_right < 102.97))){
                             getInfo(3);
                             displayFromFile(uri);
@@ -1465,7 +1530,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         scale_distance = scale_distance * getMetric();
                         if (scale_distance > 1000) {
                             scale_distance = scale_distance / 1000;
-                            scaleShow.setText(scale_df.format(scale_distance) + "千米");
+                            scaleShow.setText(scale_df.format(scale_distance) + "公里");
                         }
                         else scaleShow.setText(scale_df.format(scale_distance) + "米");
 
@@ -1799,6 +1864,40 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             ptSpecial.setStyle(Paint.Style.FILL);
                             canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
                         }
+                        for (int i = 0; i < distanceLatLngs.size(); i++){
+                            Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs.size());
+                            DistanceLatLng distanceLatLng = distanceLatLngs.get(i);
+                            PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            Paint paint0 = new Paint();
+                            paint0.setColor(Color.RED);  //设置画笔颜色
+                            paint0.setStrokeWidth (5);//设置画笔宽度
+                            paint0.setTextSize(55);
+                            paint0.setStyle(Paint.Style.FILL);
+                            Paint paint01 = new Paint();
+                            paint01.setColor(Color.WHITE);  //设置画笔颜色
+                            paint01.setAlpha(180);
+                            paint01.setStyle(Paint.Style.FILL);
+                            Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
+                            //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                            //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                            //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                            if (distanceLatLng.getDistance() < 1000) {
+                                if (distanceLatLng.getDistance() == 0) {
+                                    canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
+                                    canvas.drawText("起点", point.x, point.y, paint0);
+                                }
+                                else {
+                                    String string = scale_df.format(distanceLatLng.getDistance()) + "米";
+                                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
+                                    canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
+                                }
+                            }else {
+                                String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
+                                canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
+                                canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
+                            }
+                            canvas.drawCircle(point.x, point.y, 10, paint3);
+                        }
                     }
                 })
                 .onRender(new OnRenderListener() {
@@ -1841,9 +1940,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 if (poinum_messure == 1) {
                                     poi111 = pt1;
                                     if (showMode == NOCENTERMODE)
+                                    {
                                         messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    }
                                     else
+                                    {
                                         messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    }
                                     //setTitle("正在测量");
                                     if (isDrawTrail == TRAIL_DRAW_TYPE) {
                                         toolbar.setTitle("正在测量(轨迹记录中)");
@@ -1851,21 +1954,58 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 } else if (poinum_messure == 2) {
                                     poi222 = pt1;
                                     if (showMode == NOCENTERMODE)
+                                    {
                                         messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    }
                                     else
+                                    {
                                         messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    }
                                     //setTitle("正在测量");
                                     pdfView.zoomWithAnimation(c_zoom);
                                     //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
                                     //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                                 } else {
                                     if (showMode == NOCENTERMODE)
+                                    {
                                         messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                                    }
                                     else
+                                    {
                                         messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                    }
                                     //setTitle("正在测量");
                                     pdfView.zoomWithAnimation(c_zoom);
                                 }
+                                if (showMode == NOCENTERMODE)
+                                {
+                                    int size = distanceLatLngs.size();
+                                    if (size > 0){
+                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }else {
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                }
+                                else
+                                {
+                                    int size = distanceLatLngs.size();
+                                    if (size > 0){
+                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }else {
+                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                        distanceLatLngs.add(distanceLatLng);
+                                    }
+                                    pdfView.zoomWithAnimation(c_zoom);
+                                }
+                                //PointF mpt = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                //DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, (float) distanceSum);
+                                //distanceLatLngs.add(distanceLatLng);
                             }
 
                             if (isQuery & esterEgg_plq){
@@ -3656,6 +3796,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                distanceSum = 0;
+                distanceLatLngs.clear();
                 if (showMode == CENTERMODE) isQuery = true;
                 else isQuery = false;
                 centerPointModeBt.setVisibility(View.VISIBLE);
@@ -3676,6 +3818,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         delete_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                distanceSum = 0;
+                distanceLatLngs.clear();
                 messure_pts = "";
                 poinum_messure = 0;
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
@@ -3689,11 +3833,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 if (poinum_messure > 1) {
+                    distanceLatLngs.remove(distanceLatLngs.size() - 1);
                     messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
                     messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
                     poinum_messure--;
                     pdfView.zoomWithAnimation(c_zoom);
                 }else {
+                    distanceLatLngs.clear();
+                    distanceSum = 0;
                     messure_pts = "";
                     poinum_messure = 0;
                     pdfView.zoomWithAnimation(c_zoom);
@@ -3806,6 +3953,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         paint6 = new Paint();
         paint6.setStrokeWidth(10);
         paint6.setStyle(Paint.Style.STROKE);
+        paint6.setAlpha(127);
         paint6.setColor(Color.YELLOW);
         paint8 = new Paint();
         paint8.setStrokeWidth(10);
