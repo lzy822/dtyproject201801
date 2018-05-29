@@ -335,6 +335,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //记录分段距离值
     private List<DistanceLatLng>  distanceLatLngs =  new ArrayList<>();
+    private List<DistanceLatLng>  distanceLatLngs1 =  new ArrayList<>();
+    private List<DistanceLatLng>  distanceLatLngs2 =  new ArrayList<>();
+    private List<List<DistanceLatLng>> distancesLatLngs = new ArrayList<>();
 
 
     /*private RecordTrail.RecordTrailBinder recordTrailBinder;
@@ -980,30 +983,87 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 if (showMode == NOCENTERMODE)
                                 {
-                                    int size = distanceLatLngs.size();
-                                    if (size > 0){
-                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                        distanceLatLngs.add(distanceLatLng);
-                                    }else {
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                        distanceLatLngs.add(distanceLatLng);
+                                    switch (distancesLatLngs.size()){
+                                        case 0:
+                                            int size = distanceLatLngs.size();
+                                            if (size > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 1:
+                                            int size1 = distanceLatLngs1.size();
+                                            if (size1 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 2:
+                                            int size2 = distanceLatLngs2.size();
+                                            if (size2 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }
+                                            break;
+                                        default:
+                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                                            break;
                                     }
-                                    pdfView.zoomWithAnimation(c_zoom);
                                 }
                                 else
                                 {
-                                    int size = distanceLatLngs.size();
-                                    if (size > 0){
-                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                        distanceLatLngs.add(distanceLatLng);
-                                    }else {
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                        distanceLatLngs.add(distanceLatLng);
+                                    switch (distancesLatLngs.size()){
+                                        case 0:
+                                            int size = distanceLatLngs.size();
+                                            if (size > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 1:
+                                            int size1 = distanceLatLngs1.size();
+                                            if (size1 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 2:
+                                            int size2 = distanceLatLngs2.size();
+                                            if (size2 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }
+                                            break;
+                                        default:
+                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                                            break;
                                     }
-                                    pdfView.zoomWithAnimation(c_zoom);
                                 }
+                                pdfView.zoomWithAnimation(c_zoom);
                             }
                         /*if (isMessure & showMode == CENTERMODE){
                             locError("messure_pts" + messure_pts);
@@ -1417,40 +1477,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                             }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
                         }
-                        for (int i = 0; i < distanceLatLngs.size(); i++){
-                            Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs.size());
-                            DistanceLatLng distanceLatLng = distanceLatLngs.get(i);
-                            PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            Paint paint0 = new Paint();
-                            paint0.setColor(Color.RED);  //设置画笔颜色
-                            paint0.setStrokeWidth (5);//设置画笔宽度
-                            paint0.setTextSize(55);
-                            paint0.setStyle(Paint.Style.FILL);
-                            Paint paint01 = new Paint();
-                            paint01.setColor(Color.WHITE);  //设置画笔颜色
-                            paint01.setAlpha(180);
-                            paint01.setStyle(Paint.Style.FILL);
-                            Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
-                            //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
-                            //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
-                            //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
-                            if (distanceLatLng.getDistance() < 1000) {
-                                if (distanceLatLng.getDistance() == 0) {
-                                    canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
-                                    canvas.drawText("起点", point.x, point.y, paint0);
-                                }
-                                else {
-                                    String string = scale_df.format(distanceLatLng.getDistance()) + "米";
-                                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 1) * 27 + 55, point.y + 20, paint01);
-                                    canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
-                                }
-                            }else {
-                                String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
-                                canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
-                                canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
-                            }
-                            canvas.drawCircle(point.x, point.y, 10, paint3);
-                        }
+                        if (isMessure) drawMessureLine(canvas);
                     }
                 })
                 .pageFitPolicy(FitPolicy.BOTH)
@@ -1464,6 +1491,174 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         };
         Timer timer = new Timer();
         timer.schedule(task, 2500);
+    }
+
+    private void drawMessureLine(Canvas canvas){
+        int DistanceSize = distancesLatLngs.size();
+        if (DistanceSize > 0) {
+            for (int j = 0; j < DistanceSize; j++) {
+                List<DistanceLatLng> distanceLatLngList = distancesLatLngs.get(j);
+                for (int i = 0; i < distanceLatLngList.size(); i++) {
+                    Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngList.size());
+                    DistanceLatLng distanceLatLng = distanceLatLngList.get(i);
+                    PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    Paint paint0 = new Paint();
+                    paint0.setColor(Color.RED);  //设置画笔颜色
+                    paint0.setStrokeWidth(5);//设置画笔宽度
+                    paint0.setTextSize(55);
+                    paint0.setStyle(Paint.Style.FILL);
+                    Paint paint01 = new Paint();
+                    paint01.setColor(Color.WHITE);  //设置画笔颜色
+                    paint01.setAlpha(180);
+                    paint01.setStyle(Paint.Style.FILL);
+                    Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
+                    //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                    //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                    //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                    if (i < distanceLatLngList.size() - 1) {
+                        DistanceLatLng distanceLatLng1 = distanceLatLngList.get(i + 1);
+                        PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
+                    }
+                    if (distanceLatLng.getDistance() < 1000) {
+                        if (distanceLatLng.getDistance() == 0) {
+                            canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
+                            canvas.drawText("起点", point.x, point.y, paint0);
+                        } else {
+                            String string = scale_df.format(distanceLatLng.getDistance()) + "米";
+                            canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
+                            canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
+                        }
+                    } else {
+                        String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
+                        canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
+                        canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
+                    }
+                    canvas.drawCircle(point.x, point.y, 10, paint3);
+                }
+            }
+        }
+        if (DistanceSize == 0){
+            for (int i = 0; i < distanceLatLngs.size(); i++){
+                Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs.size());
+                DistanceLatLng distanceLatLng = distanceLatLngs.get(i);
+                PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                Paint paint0 = new Paint();
+                paint0.setColor(Color.RED);  //设置画笔颜色
+                paint0.setStrokeWidth (5);//设置画笔宽度
+                paint0.setTextSize(55);
+                paint0.setStyle(Paint.Style.FILL);
+                Paint paint01 = new Paint();
+                paint01.setColor(Color.WHITE);  //设置画笔颜色
+                paint01.setAlpha(180);
+                paint01.setStyle(Paint.Style.FILL);
+                Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
+                //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                if (i < distanceLatLngs.size() - 1) {
+                    DistanceLatLng distanceLatLng1 = distanceLatLngs.get(i + 1);
+                    PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
+                }
+                if (distanceLatLng.getDistance() < 1000) {
+                    if (distanceLatLng.getDistance() == 0) {
+                        canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
+                        canvas.drawText("起点", point.x, point.y, paint0);
+                    }
+                    else {
+                        String string = scale_df.format(distanceLatLng.getDistance()) + "米";
+                        canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
+                        canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
+                    }
+                }else {
+                    String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
+                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
+                    canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
+                }
+                canvas.drawCircle(point.x, point.y, 10, paint3);
+            }
+        }else if (DistanceSize == 1){
+            for (int i = 0; i < distanceLatLngs1.size(); i++){
+                Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs1.size());
+                DistanceLatLng distanceLatLng = distanceLatLngs1.get(i);
+                PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                Paint paint0 = new Paint();
+                paint0.setColor(Color.RED);  //设置画笔颜色
+                paint0.setStrokeWidth (5);//设置画笔宽度
+                paint0.setTextSize(55);
+                paint0.setStyle(Paint.Style.FILL);
+                Paint paint01 = new Paint();
+                paint01.setColor(Color.WHITE);  //设置画笔颜色
+                paint01.setAlpha(180);
+                paint01.setStyle(Paint.Style.FILL);
+                Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
+                //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                if (i < distanceLatLngs1.size() - 1) {
+                    DistanceLatLng distanceLatLng1 = distanceLatLngs1.get(i + 1);
+                    PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
+                }
+                if (distanceLatLng.getDistance() < 1000) {
+                    if (distanceLatLng.getDistance() == 0) {
+                        canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
+                        canvas.drawText("起点", point.x, point.y, paint0);
+                    }
+                    else {
+                        String string = scale_df.format(distanceLatLng.getDistance()) + "米";
+                        canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
+                        canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
+                    }
+                }else {
+                    String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
+                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
+                    canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
+                }
+                canvas.drawCircle(point.x, point.y, 10, paint3);
+            }
+        }else if (DistanceSize == 2){
+            for (int i = 0; i < distanceLatLngs2.size(); i++){
+                Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs2.size());
+                DistanceLatLng distanceLatLng = distanceLatLngs2.get(i);
+                PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                Paint paint0 = new Paint();
+                paint0.setColor(Color.RED);  //设置画笔颜色
+                paint0.setStrokeWidth (5);//设置画笔宽度
+                paint0.setTextSize(55);
+                paint0.setStyle(Paint.Style.FILL);
+                Paint paint01 = new Paint();
+                paint01.setColor(Color.WHITE);  //设置画笔颜色
+                paint01.setAlpha(180);
+                paint01.setStyle(Paint.Style.FILL);
+                Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
+                //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
+                if (i < distanceLatLngs2.size() - 1) {
+                    DistanceLatLng distanceLatLng1 = distanceLatLngs2.get(i + 1);
+                    PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
+                }
+                if (distanceLatLng.getDistance() < 1000) {
+                    if (distanceLatLng.getDistance() == 0) {
+                        canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
+                        canvas.drawText("起点", point.x, point.y, paint0);
+                    }
+                    else {
+                        String string = scale_df.format(distanceLatLng.getDistance()) + "米";
+                        canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
+                        canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
+                    }
+                }else {
+                    String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
+                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
+                    canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
+                }
+                canvas.drawCircle(point.x, point.y, 10, paint3);
+            }
+        }
     }
 
     float c_zoom1 = 1;
@@ -1864,40 +2059,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             ptSpecial.setStyle(Paint.Style.FILL);
                             canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
                         }
-                        for (int i = 0; i < distanceLatLngs.size(); i++){
-                            Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs.size());
-                            DistanceLatLng distanceLatLng = distanceLatLngs.get(i);
-                            PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            Paint paint0 = new Paint();
-                            paint0.setColor(Color.RED);  //设置画笔颜色
-                            paint0.setStrokeWidth (5);//设置画笔宽度
-                            paint0.setTextSize(55);
-                            paint0.setStyle(Paint.Style.FILL);
-                            Paint paint01 = new Paint();
-                            paint01.setColor(Color.WHITE);  //设置画笔颜色
-                            paint01.setAlpha(180);
-                            paint01.setStyle(Paint.Style.FILL);
-                            Log.w(TAG, "parseAndrawMessure: " + distanceLatLng.getDistance());
-                            //canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
-                            //if (distanceLatLng.getDistance() < 1000) canvas.drawText(String.valueOf(distanceLatLng.getDistance()) + "米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
-                            //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
-                            if (distanceLatLng.getDistance() < 1000) {
-                                if (distanceLatLng.getDistance() == 0) {
-                                    canvas.drawRect(point.x, point.y - 55, point.x + 110, point.y + 20, paint01);
-                                    canvas.drawText("起点", point.x, point.y, paint0);
-                                }
-                                else {
-                                    String string = scale_df.format(distanceLatLng.getDistance()) + "米";
-                                    canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 55, point.y + 20, paint01);
-                                    canvas.drawText(scale_df.format(distanceLatLng.getDistance()) + "米", point.x, point.y, paint0);
-                                }
-                            }else {
-                                String string = scale_df.format(distanceLatLng.getDistance() / 1000) + "公里";
-                                canvas.drawRect(point.x, point.y - 55, point.x + (string.length() - 2) * 27 + 110, point.y + 20, paint01);
-                                canvas.drawText(scale_df.format(distanceLatLng.getDistance() / 1000) + "公里", point.x, point.y, paint0);
-                            }
-                            canvas.drawCircle(point.x, point.y, 10, paint3);
-                        }
+                        if (isMessure) drawMessureLine(canvas);
                     }
                 })
                 .onRender(new OnRenderListener() {
@@ -1979,30 +2141,87 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 if (showMode == NOCENTERMODE)
                                 {
-                                    int size = distanceLatLngs.size();
-                                    if (size > 0){
-                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                        distanceLatLngs.add(distanceLatLng);
-                                    }else {
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                        distanceLatLngs.add(distanceLatLng);
+                                    switch (distancesLatLngs.size()){
+                                        case 0:
+                                            int size = distanceLatLngs.size();
+                                            if (size > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 1:
+                                            int size1 = distanceLatLngs1.size();
+                                            if (size1 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 2:
+                                            int size2 = distanceLatLngs2.size();
+                                            if (size2 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }
+                                            break;
+                                        default:
+                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                                            break;
                                     }
-                                    pdfView.zoomWithAnimation(c_zoom);
                                 }
                                 else
                                 {
-                                    int size = distanceLatLngs.size();
-                                    if (size > 0){
-                                        double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                        distanceLatLngs.add(distanceLatLng);
-                                    }else {
-                                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                        distanceLatLngs.add(distanceLatLng);
+                                    switch (distancesLatLngs.size()){
+                                        case 0:
+                                            int size = distanceLatLngs.size();
+                                            if (size > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                                distanceLatLngs.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 1:
+                                            int size1 = distanceLatLngs1.size();
+                                            if (size1 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                                distanceLatLngs1.add(distanceLatLng);
+                                            }
+                                            break;
+                                        case 2:
+                                            int size2 = distanceLatLngs2.size();
+                                            if (size2 > 0){
+                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }else {
+                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                                distanceLatLngs2.add(distanceLatLng);
+                                            }
+                                            break;
+                                        default:
+                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                                            break;
                                     }
-                                    pdfView.zoomWithAnimation(c_zoom);
                                 }
+                                pdfView.zoomWithAnimation(c_zoom);
                                 //PointF mpt = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                                 //DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, (float) distanceSum);
                                 //distanceLatLngs.add(distanceLatLng);
@@ -2719,7 +2938,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private void showPopueWindowForMessure(){
         View popView = View.inflate(this,R.layout.popupwindow_messure,null);
         Button bt_distance = (Button) popView.findViewById(R.id.btn_pop_distance);
-        Button bt_area = (Button) popView.findViewById(R.id.btn_pop_area);
+        final Button bt_area = (Button) popView.findViewById(R.id.btn_pop_area);
         Button bt_cancle = (Button) popView.findViewById(R.id.btn_pop_cancel);
         //获取屏幕宽高
         int weight = getResources().getDisplayMetrics().widthPixels;
@@ -3793,11 +4012,43 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         });
         //初始化测量相关按钮
         cancel_messure_fab = (FloatingActionButton) findViewById(R.id.cancel_messure);
+        cancel_messure_fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                toolbar.setTitle("");
+                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                    toolbar.setTitle("0.00米 , " + "0.00米(轨迹记录中)");
+                }else {
+                    toolbar.setTitle("0.00米 , " + "0.00米");
+                }
+                distanceSum = 0;
+                poinum_messure = 0;
+                messure_pts = "";
+                switch (distancesLatLngs.size()){
+                    case 0:
+                        distancesLatLngs.add(distanceLatLngs);
+                        break;
+                    case 1:
+                        distancesLatLngs.add(distanceLatLngs1);
+                        break;
+                    case 2:
+                        distancesLatLngs.add(distanceLatLngs2);
+                        break;
+                    default:
+                        Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return true;
+            }
+        });
         cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 distanceSum = 0;
+                distancesLatLngs.clear();
                 distanceLatLngs.clear();
+                distanceLatLngs1.clear();
+                distanceLatLngs2.clear();
                 if (showMode == CENTERMODE) isQuery = true;
                 else isQuery = false;
                 centerPointModeBt.setVisibility(View.VISIBLE);
@@ -3819,7 +4070,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 distanceSum = 0;
-                distanceLatLngs.clear();
+                switch (distancesLatLngs.size()){
+                    case 0:
+                        distanceLatLngs.clear();
+                        break;
+                    case 1:
+                        distanceLatLngs1.clear();
+                        distancesLatLngs.remove(0);
+                        break;
+                    case 2:
+                        distanceLatLngs2.clear();
+                        distancesLatLngs.remove(1);
+                        break;
+                    default:
+                        distanceLatLngs2.clear();
+                        distancesLatLngs.remove(2);
+                        break;
+                }
                 messure_pts = "";
                 poinum_messure = 0;
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
@@ -3833,13 +4100,42 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 if (poinum_messure > 1) {
-                    distanceLatLngs.remove(distanceLatLngs.size() - 1);
+                //if (distancesLatLngs.get(distancesLatLngs.size() - 1).size() > 1) {
+                    switch (distancesLatLngs.size()){
+                        case 0:
+                            distanceLatLngs.remove(distanceLatLngs.size() - 1);
+                            break;
+                        case 1:
+                            distanceLatLngs1.remove(distanceLatLngs1.size() - 1);
+                            break;
+                        case 2:
+                            distanceLatLngs2.remove(distanceLatLngs2.size() - 1);
+                            break;
+                        default:
+                            break;
+                    }
                     messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
                     messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
                     poinum_messure--;
                     pdfView.zoomWithAnimation(c_zoom);
                 }else {
-                    distanceLatLngs.clear();
+                    switch (distancesLatLngs.size()){
+                        case 0:
+                            distanceLatLngs.clear();
+                            break;
+                        case 1:
+                            distanceLatLngs1.clear();
+                            distancesLatLngs.remove(0);
+                            break;
+                        case 2:
+                            distanceLatLngs2.clear();
+                            distancesLatLngs.remove(1);
+                            break;
+                        default:
+                            distanceLatLngs2.clear();
+                            distancesLatLngs.remove(2);
+                            break;
+                    }
                     distanceSum = 0;
                     messure_pts = "";
                     poinum_messure = 0;
