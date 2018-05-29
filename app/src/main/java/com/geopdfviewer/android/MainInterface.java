@@ -945,10 +945,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 Date date = new Date(System.currentTimeMillis());
                                 poi.setTime(simpleDateFormat.format(date));
                                 poi.setPhotonum(0);
-                                poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
+                                String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
+                                poi.setPoic(mpoic);
                                 poi.save();
                                 locError(pt1.toString());
                                 pdfView.zoomWithAnimation(c_zoom);
+                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                intent.putExtra("POIC", mpoic);
+                                startActivity(intent);
                             }
                             if (isMessure) {
                                 locError("messure_pts" + messure_pts);
@@ -2091,10 +2095,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 Date date = new Date(System.currentTimeMillis());
                                 poi.setTime(simpleDateFormat.format(date));
                                 poi.setPhotonum(0);
-                                poi.setPoic("POI" + String.valueOf(System.currentTimeMillis()));
+                                String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
+                                poi.setPoic(mpoic);
                                 poi.save();
                                 locError(pt1.toString());
                                 pdfView.zoomWithAnimation(c_zoom);
+                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                intent.putExtra("POIC", mpoic);
+                                startActivity(intent);
                             }
                             if (isMessure) {
                                 locError("messure_pts" + messure_pts);
@@ -2513,6 +2521,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 poiLayerBt.setChecked(true);
                                 showPOI = true;
                                 pdfView.resetZoomWithAnimation();
+                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                intent.putExtra("POIC", POIs.get(theNum).getPoic());
+                                startActivity(intent);
                             }
                         });
                         dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
@@ -2540,6 +2551,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 poiLayerBt.setChecked(true);
                                 showPOI = true;
                                 pdfView.resetZoomWithAnimation();
+                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                intent.putExtra("POIC", "POI" + String.valueOf(time));
+                                startActivity(intent);
                             }
                         });
                         dialog.show();
@@ -2566,6 +2580,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         poiLayerBt.setChecked(true);
                         showPOI = true;
                         pdfView.resetZoomWithAnimation();
+                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                        intent.putExtra("POIC", "POI" + String.valueOf(time));
+                        startActivity(intent);
                     }
                 }else {
                     POI poi = new POI();
@@ -2590,6 +2607,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     poiLayerBt.setChecked(true);
                     showPOI = true;
                     pdfView.resetZoomWithAnimation();
+                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                    intent.putExtra("POIC", "POI" + String.valueOf(time));
+                    startActivity(intent);
                 }
             }catch (IOException e){
                 e.printStackTrace();
@@ -2636,6 +2656,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poiLayerBt.setChecked(true);
                             showPOI = true;
                             pdfView.resetZoomWithAnimation();
+                            Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                            intent.putExtra("POIC", POIs.get(theNum).getPoic());
+                            startActivity(intent);
                         }
                     });
                     dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
@@ -2664,6 +2687,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poiLayerBt.setChecked(true);
                             showPOI = true;
                             pdfView.resetZoomWithAnimation();
+                            Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                            intent.putExtra("POIC", POIC);
+                            startActivity(intent);
                         }
                     });
                     dialog.show();
@@ -2691,6 +2717,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     poiLayerBt.setChecked(true);
                     showPOI = true;
                     pdfView.resetZoomWithAnimation();
+                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                    intent.putExtra("POIC", POIC);
+                    startActivity(intent);
                 }
             }else {
                 String POIC = "POI" + String.valueOf(time);
@@ -2716,6 +2745,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 poiLayerBt.setChecked(true);
                 showPOI = true;
                 pdfView.resetZoomWithAnimation();
+                Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                intent.putExtra("POIC", POIC);
+                startActivity(intent);
             }
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
@@ -2772,6 +2804,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     poiLayerBt.setChecked(true);
                                     showPOI = true;
                                     pdfView.resetZoomWithAnimation();
+                                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                    intent.putExtra("POIC", POIs.get(theNum).getPoic());
+                                    startActivity(intent);
                                 }
                             });
                             dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
@@ -2804,6 +2839,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     poiLayerBt.setChecked(true);
                                     showPOI = true;
                                     pdfView.resetZoomWithAnimation();
+                                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                                    intent.putExtra("POIC", "POI" + String.valueOf(time));
+                                    startActivity(intent);
                                 }
                             });
                             dialog.show();
@@ -2836,6 +2874,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             poiLayerBt.setChecked(true);
                             showPOI = true;
                             pdfView.resetZoomWithAnimation();
+                            Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                            intent.putExtra("POIC", "POI" + String.valueOf(time));
+                            startActivity(intent);
                         }
                     }else {
                         POI poi = new POI();
@@ -2865,6 +2906,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         poiLayerBt.setChecked(true);
                         showPOI = true;
                         pdfView.resetZoomWithAnimation();
+                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                        intent.putExtra("POIC", "POI" + String.valueOf(time));
+                        startActivity(intent);
                     }
                 }catch (IOException e){
                     e.printStackTrace();
