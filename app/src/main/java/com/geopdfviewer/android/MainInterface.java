@@ -135,7 +135,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private   String CropBox = "";
 
     //坐标信息
-    double m_lat,m_long;
+    double m_lat = 0,m_long = 0;
     //获取pdf 的坐标信息
     double min_lat, max_lat, min_long, max_long;
     //坐标精度
@@ -1053,6 +1053,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             ptSpecial.setColor(Color.rgb(255, 0, 255));
             ptSpecial.setStyle(Paint.Style.FILL);
             canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
+            canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
         }
         if (isMessure) drawMessureLine(canvas);
     }
@@ -1909,6 +1910,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //获取文件管理器的返回信息
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
+        final Date date = new Date(System.currentTimeMillis());
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             theNum = 0;
             final Uri uri = data.getData();
@@ -1943,107 +1946,38 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 POI poi = new POI();
                                 poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
                                 locError("holly :" + poi.updateAll("poic = ?", POIs.get(theNum).getPoic()));
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                                Date date = new Date(System.currentTimeMillis());
-                                MPHOTO mphoto = new MPHOTO();
-                                mphoto.setPdfic(ic);
-                                mphoto.setPoic(POIs.get(theNum).getPoic());
-                                mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
-                                mphoto.setTime(simpleDateFormat.format(date));
-                                mphoto.save();
+                                DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
                                 getBitmap();
-                                poiLayerBt.setChecked(true);
-                                showPOI = true;
-                                pdfView.resetZoomWithAnimation();
-                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                intent.putExtra("POIC", POIs.get(theNum).getPoic());
-                                startActivity(intent);
+                                updateMapPage(POIs.get(theNum).getPoic());
                             }
                         });
                         dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                POI poi = new POI();
-                                poi.setIc(ic);
                                 long time = System.currentTimeMillis();
-                                poi.setPoic("POI" + String.valueOf(time));
-                                poi.setPhotonum(1);
-                                poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
-                                poi.setX(latandlong[0]);
-                                poi.setY(latandlong[1]);
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                                Date date = new Date(System.currentTimeMillis());
-                                poi.setTime(simpleDateFormat.format(date));
-                                poi.save();
-                                MPHOTO mphoto = new MPHOTO();
-                                mphoto.setPdfic(ic);
-                                mphoto.setPoic("POI" + String.valueOf(time));
-                                mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
-                                mphoto.setTime(simpleDateFormat.format(date));
-                                mphoto.save();
+                                String poic = "POI" + String.valueOf(time);
+                                DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                                DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
                                 getBitmap();
-                                poiLayerBt.setChecked(true);
-                                showPOI = true;
-                                pdfView.resetZoomWithAnimation();
-                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                intent.putExtra("POIC", "POI" + String.valueOf(time));
-                                startActivity(intent);
+                                updateMapPage(poic);
                             }
                         });
                         dialog.show();
                     } else {
-                        POI poi = new POI();
-                        poi.setIc(ic);
                         long time = System.currentTimeMillis();
-                        poi.setPoic("POI" + String.valueOf(time));
-                        poi.setPhotonum(1);
-                        poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
-                        poi.setX(latandlong[0]);
-                        poi.setY(latandlong[1]);
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                        Date date = new Date(System.currentTimeMillis());
-                        poi.setTime(simpleDateFormat.format(date));
-                        poi.save();
-                        MPHOTO mphoto = new MPHOTO();
-                        mphoto.setPdfic(ic);
-                        mphoto.setPoic("POI" + String.valueOf(time));
-                        mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                        mphoto.setTime(simpleDateFormat.format(date));
-                        mphoto.save();
+                        String poic = "POI" + String.valueOf(time);
+                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                        DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(this, uri), ic, poic, simpleDateFormat.format(date));
                         getBitmap();
-                        poiLayerBt.setChecked(true);
-                        showPOI = true;
-                        pdfView.resetZoomWithAnimation();
-                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                        intent.putExtra("POIC", "POI" + String.valueOf(time));
-                        startActivity(intent);
+                        updateMapPage(poic);
                     }
                 }else {
-                    POI poi = new POI();
-                    poi.setIc(ic);
                     long time = System.currentTimeMillis();
-                    poi.setPoic("POI" + String.valueOf(time));
-                    poi.setPhotonum(1);
-                    poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
-                    poi.setX(latandlong[0]);
-                    poi.setY(latandlong[1]);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                    Date date = new Date(System.currentTimeMillis());
-                    poi.setTime(simpleDateFormat.format(date));
-                    poi.save();
-                    MPHOTO mphoto = new MPHOTO();
-                    mphoto.setPdfic(ic);
-                    mphoto.setPoic("POI" + String.valueOf(time));
-                    mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                    mphoto.setTime(simpleDateFormat.format(date));
-                    mphoto.save();
+                    String poic = "POI" + String.valueOf(time);
+                    DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                    DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(this, uri), ic, poic, simpleDateFormat.format(date));
                     getBitmap();
-                    poiLayerBt.setChecked(true);
-                    showPOI = true;
-                    pdfView.resetZoomWithAnimation();
-                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                    intent.putExtra("POIC", "POI" + String.valueOf(time));
-                    startActivity(intent);
+                    updateMapPage(poic);
                 }
             }catch (IOException e){
                 e.printStackTrace();
@@ -2079,20 +2013,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             POI poi = new POI();
                             poi.setTapenum(POIs.get(theNum).getTapenum() + 1);
                             poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                            Date date = new Date(time);
-                            MTAPE mtape = new MTAPE();
-                            mtape.setPath(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri));
-                            mtape.setPdfic(ic);
-                            mtape.setPoic(POIs.get(theNum).getPoic());
-                            mtape.setTime(simpleDateFormat.format(date));
-                            mtape.save();
-                            poiLayerBt.setChecked(true);
-                            showPOI = true;
-                            pdfView.resetZoomWithAnimation();
-                            Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                            intent.putExtra("POIC", POIs.get(theNum).getPoic());
-                            startActivity(intent);
+                            DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
+                            updateMapPage(POIs.get(theNum).getPoic());
                         }
                     });
                     dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
@@ -2101,29 +2023,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             String POIC = "POI" + String.valueOf(time);
                             //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
                             //List<POI> POIs = DataSupport.findAll(POI.class);
-                            POI poi = new POI();
-                            poi.setIc(ic);
-                            poi.setPoic(POIC);
-                            poi.setTapenum(1);
-                            poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
-                            poi.setX((float) m_lat);
-                            poi.setY((float) m_long);
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                            Date date = new Date(System.currentTimeMillis());
-                            poi.setTime(simpleDateFormat.format(date));
-                            poi.save();
-                            MTAPE mtape = new MTAPE();
-                            mtape.setPath(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri));
-                            mtape.setPdfic(ic);
-                            mtape.setPoic(POIC);
-                            mtape.setTime(simpleDateFormat.format(date));
-                            mtape.save();
-                            poiLayerBt.setChecked(true);
-                            showPOI = true;
-                            pdfView.resetZoomWithAnimation();
-                            Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                            intent.putExtra("POIC", POIC);
-                            startActivity(intent);
+                            DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                            DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
+                            updateMapPage(POIC);
                         }
                     });
                     dialog.show();
@@ -2131,57 +2033,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     String POIC = "POI" + String.valueOf(time);
                     //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
                     //List<POI> POIs = DataSupport.findAll(POI.class);
-                    POI poi = new POI();
-                    poi.setIc(ic);
-                    poi.setPoic(POIC);
-                    poi.setTapenum(1);
-                    poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
-                    poi.setX((float) m_lat);
-                    poi.setY((float) m_long);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                    Date date = new Date(System.currentTimeMillis());
-                    poi.setTime(simpleDateFormat.format(date));
-                    poi.save();
-                    MTAPE mtape = new MTAPE();
-                    mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
-                    mtape.setPdfic(ic);
-                    mtape.setPoic(POIC);
-                    mtape.setTime(simpleDateFormat.format(date));
-                    mtape.save();
-                    poiLayerBt.setChecked(true);
-                    showPOI = true;
-                    pdfView.resetZoomWithAnimation();
-                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                    intent.putExtra("POIC", POIC);
-                    startActivity(intent);
+                    DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                    DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(this, uri), ic, POIC, simpleDateFormat.format(date));
+                    updateMapPage(POIC);
                 }
             }else {
                 String POIC = "POI" + String.valueOf(time);
                 //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
                 //List<POI> POIs = DataSupport.findAll(POI.class);
-                POI poi = new POI();
-                poi.setIc(ic);
-                poi.setPoic(POIC);
-                poi.setTapenum(1);
-                poi.setName("录音POI" + String.valueOf(POIs.size() + 1));
-                poi.setX((float) m_lat);
-                poi.setY((float) m_long);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                Date date = new Date(System.currentTimeMillis());
-                poi.setTime(simpleDateFormat.format(date));
-                poi.save();
-                MTAPE mtape = new MTAPE();
-                mtape.setPath(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri));
-                mtape.setPdfic(ic);
-                mtape.setPoic(POIC);
-                mtape.setTime(simpleDateFormat.format(date));
-                mtape.save();
-                poiLayerBt.setChecked(true);
-                showPOI = true;
-                pdfView.resetZoomWithAnimation();
-                Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                intent.putExtra("POIC", POIC);
-                startActivity(intent);
+                DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
+                updateMapPage(POIC);
             }
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
@@ -2226,123 +2088,51 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     POI poi = new POI();
                                     poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
                                     poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
-                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
                                     Date date = new Date(time);
-                                    MPHOTO mphoto = new MPHOTO();
-                                    mphoto.setPdfic(ic);
-                                    mphoto.setPoic(POIs.get(theNum).getPoic());
-                                    mphoto.setPath(imageuri);
-                                    mphoto.setTime(simpleDateFormat.format(date));
-                                    mphoto.save();
+                                    DataUtil.addPhotoToDB(imageuri, ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
                                     getBitmap();
-                                    poiLayerBt.setChecked(true);
-                                    showPOI = true;
-                                    pdfView.resetZoomWithAnimation();
-                                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                    intent.putExtra("POIC", POIs.get(theNum).getPoic());
-                                    startActivity(intent);
+                                    updateMapPage(POIs.get(theNum).getPoic());
                                 }
                             });
                             dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    POI poi = new POI();
-                                    poi.setIc(ic);
                                     //long time = System.currentTimeMillis();
-                                    poi.setPoic("POI" + String.valueOf(time));
-                                    poi.setPhotonum(1);
-                                    poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
+                                    String poic = "POI" + String.valueOf(time);
                                     if (latandlong[0] != 0 & latandlong[1] != 0) {
-                                        poi.setX(latandlong[0]);
-                                        poi.setY(latandlong[1]);
+                                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
                                     } else {
-                                        poi.setX((float) m_lat);
-                                        poi.setY((float) m_long);
+                                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
                                     }
-                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                                    Date date = new Date(System.currentTimeMillis());
-                                    poi.setTime(simpleDateFormat.format(date));
-                                    poi.save();
-                                    MPHOTO mphoto = new MPHOTO();
-                                    mphoto.setPdfic(ic);
-                                    mphoto.setPoic("POI" + String.valueOf(time));
-                                    mphoto.setPath(imageuri);
-                                    mphoto.setTime(simpleDateFormat.format(date));
-                                    mphoto.save();
+                                    DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
                                     getBitmap();
-                                    poiLayerBt.setChecked(true);
-                                    showPOI = true;
-                                    pdfView.resetZoomWithAnimation();
-                                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                    intent.putExtra("POIC", "POI" + String.valueOf(time));
-                                    startActivity(intent);
+                                    updateMapPage(poic);
                                 }
                             });
                             dialog.show();
                         } else {
                             //List<POI> POIs = DataSupport.findAll(POI.class);
-                            POI poi = new POI();
-                            poi.setIc(ic);
                             //long time = System.currentTimeMillis();
-                            poi.setPoic("POI" + String.valueOf(time));
-                            poi.setPhotonum(1);
-                            poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
+                            String poic = "POI" + String.valueOf(time);
                             if (latandlong[0] != 0 & latandlong[1] != 0) {
-                                poi.setX(latandlong[0]);
-                                poi.setY(latandlong[1]);
+                                DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
                             } else {
-                                poi.setX((float) m_lat);
-                                poi.setY((float) m_long);
+                                DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
                             }
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                            Date date = new Date(System.currentTimeMillis());
-                            poi.setTime(simpleDateFormat.format(date));
-                            poi.save();
-                            MPHOTO mphoto = new MPHOTO();
-                            mphoto.setPdfic(ic);
-                            mphoto.setPoic("POI" + String.valueOf(time));
-                            mphoto.setPath(imageuri);
-                            mphoto.setTime(simpleDateFormat.format(date));
-                            mphoto.save();
+                            DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
                             getBitmap();
-                            poiLayerBt.setChecked(true);
-                            showPOI = true;
-                            pdfView.resetZoomWithAnimation();
-                            Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                            intent.putExtra("POIC", "POI" + String.valueOf(time));
-                            startActivity(intent);
+                            updateMapPage(poic);
                         }
                     }else {
-                        POI poi = new POI();
-                        poi.setIc(ic);
-                        //long time = System.currentTimeMillis();
-                        poi.setPoic("POI" + String.valueOf(time));
-                        poi.setPhotonum(1);
-                        poi.setName("图片POI" + String.valueOf(POIs.size() + 1));
+                        String poic = "POI" + String.valueOf(time);
                         if (latandlong[0] != 0 & latandlong[1] != 0) {
-                            poi.setX(latandlong[0]);
-                            poi.setY(latandlong[1]);
+                            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
                         } else {
-                            poi.setX((float) m_lat);
-                            poi.setY((float) m_long);
+                            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
                         }
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                        Date date = new Date(System.currentTimeMillis());
-                        poi.setTime(simpleDateFormat.format(date));
-                        poi.save();
-                        MPHOTO mphoto = new MPHOTO();
-                        mphoto.setPdfic(ic);
-                        mphoto.setPoic("POI" + String.valueOf(time));
-                        mphoto.setPath(imageuri);
-                        mphoto.setTime(simpleDateFormat.format(date));
-                        mphoto.save();
+                        DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
                         getBitmap();
-                        poiLayerBt.setChecked(true);
-                        showPOI = true;
-                        pdfView.resetZoomWithAnimation();
-                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                        intent.putExtra("POIC", "POI" + String.valueOf(time));
-                        startActivity(intent);
+                        updateMapPage(poic);
                     }
                 }catch (IOException e){
                     e.printStackTrace();
@@ -2356,6 +2146,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
         }
+    }
+
+    private void updateMapPage(String poic){
+        poiLayerBt.setChecked(true);
+        showPOI = true;
+        pdfView.resetZoomWithAnimation();
+        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+        intent.putExtra("POIC", poic);
+        startActivity(intent);
     }
 
     private void showPopueWindowForPhoto(){

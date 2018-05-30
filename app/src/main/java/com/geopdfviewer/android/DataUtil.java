@@ -746,4 +746,35 @@ public class DataUtil {
             return false;
         }
     }
+
+    public static void addPhotoToDB(String path, String ic, String poic, String time){
+        MPHOTO mphoto = new MPHOTO();
+        mphoto.setPdfic(ic);
+        mphoto.setPoic(poic);
+        mphoto.setPath(path);
+        mphoto.setTime(time);
+        mphoto.save();
+    }
+
+    public static void addTapeToDB(String path, String ic, String poic, String time){
+        MTAPE mtape = new MTAPE();
+        mtape.setPath(path);
+        mtape.setPdfic(ic);
+        mtape.setPoic(poic);
+        mtape.setTime(time);
+        mtape.save();
+    }
+
+    public static void addPOI(String ic, String poic, String name, float x, float y, String time){
+        POI poi = new POI();
+        poi.setIc(ic);
+        if (name.contains("图片")) poi.setPhotonum(1);
+        else if (name.contains("录音")) poi.setTapenum(1);
+        poi.setPoic(poic);
+        poi.setName(name);
+        poi.setX(x);
+        poi.setY(y);
+        poi.setTime(time);
+        poi.save();
+    }
 }
