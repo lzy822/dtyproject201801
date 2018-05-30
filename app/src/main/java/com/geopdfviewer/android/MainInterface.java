@@ -2301,8 +2301,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     }
 
-    //记录当前记录的点数
-    int num_drawpt;
     //记录白板绘图坐标点对数量
     int num_whiteBlankPt;
     //记录是否处于白板画图状态
