@@ -99,7 +99,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MainInterface extends AppCompatActivity  implements OnPageChangeListener, OnLoadCompleteListener,
-        OnPageErrorListener, OnDrawListener {
+        OnPageErrorListener, OnDrawListener, OnTapListener {
     private static final String TAG = "MainInterface";
     public static final String SAMPLE_FILE = "dt/cangyuan.dt";
     private final static int REQUEST_CODE_PHOTO = 42;
@@ -354,6 +354,264 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }*/
 
+    @Override
+    public boolean onTap(MotionEvent e) {
+        PointF pt = new PointF(e.getRawX(), e.getRawY());
+        PointF pt1 = getGeoLocFromPixL(pt);
+        showLocationText(pt1);
+        if (pt1.x != 0) {
+            if (isDrawType == POI_DRAW_TYPE & !isQuery) {
+                List<POI> POIs = DataSupport.findAll(POI.class);
+                POI poi = new POI();
+                poi.setName("POI" + String.valueOf(POIs.size() + 1));
+                poi.setIc(ic);
+                if (showMode == NOCENTERMODE) {
+                    poi.setX(pt1.x);
+                    poi.setY(pt1.y);
+                } else {
+                    poi.setX(centerPointLoc.x);
+                    poi.setY(centerPointLoc.y);
+                }
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
+                Date date = new Date(System.currentTimeMillis());
+                poi.setTime(simpleDateFormat.format(date));
+                poi.setPhotonum(0);
+                String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
+                poi.setPoic(mpoic);
+                poi.save();
+                locError(pt1.toString());
+                pdfView.zoomWithAnimation(c_zoom);
+                Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                intent.putExtra("POIC", mpoic);
+                startActivity(intent);
+            }
+            if (isMessure) {
+                locError("messure_pts" + messure_pts);
+                poinum_messure++;
+                if (poinum_messure == 1) {
+                    poi111 = pt1;
+                    if (showMode == NOCENTERMODE)
+                    {
+                        messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                    }
+                    else
+                    {
+                        messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                    }
+                    //setTitle("正在测量");
+                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在测量(轨迹记录中)");
+                    } else toolbar.setTitle("正在测量");
+                } else if (poinum_messure == 2) {
+                    poi222 = pt1;
+                    if (showMode == NOCENTERMODE)
+                    {
+                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                    }
+                    else
+                    {
+                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                    }
+                    //setTitle("正在测量");
+                    pdfView.zoomWithAnimation(c_zoom);
+                    //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                    //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                } else {
+                    if (showMode == NOCENTERMODE)
+                    {
+                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+                    }
+                    else
+                    {
+                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                    }
+                    //setTitle("正在测量");
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+                if (showMode == NOCENTERMODE)
+                {
+                    switch (distancesLatLngs.size()){
+                        case 0:
+                            int size = distanceLatLngs.size();
+                            if (size > 0){
+                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                distanceLatLngs.add(distanceLatLng);
+                            }else {
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                distanceLatLngs.add(distanceLatLng);
+                            }
+                            break;
+                        case 1:
+                            int size1 = distanceLatLngs1.size();
+                            if (size1 > 0){
+                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                                distanceLatLngs1.add(distanceLatLng);
+                            }else {
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                distanceLatLngs1.add(distanceLatLng);
+                            }
+                            break;
+                        case 2:
+                            int size2 = distanceLatLngs2.size();
+                            if (size2 > 0){
+                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                                distanceLatLngs2.add(distanceLatLng);
+                            }else {
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                                distanceLatLngs2.add(distanceLatLng);
+                            }
+                            break;
+                        default:
+                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (distancesLatLngs.size()){
+                        case 0:
+                            int size = distanceLatLngs.size();
+                            if (size > 0){
+                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                                distanceLatLngs.add(distanceLatLng);
+                            }else {
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                distanceLatLngs.add(distanceLatLng);
+                            }
+                            break;
+                        case 1:
+                            int size1 = distanceLatLngs1.size();
+                            if (size1 > 0){
+                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                                distanceLatLngs1.add(distanceLatLng);
+                            }else {
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                distanceLatLngs1.add(distanceLatLng);
+                            }
+                            break;
+                        case 2:
+                            int size2 = distanceLatLngs2.size();
+                            if (size2 > 0){
+                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                                distanceLatLngs2.add(distanceLatLng);
+                            }else {
+                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                                distanceLatLngs2.add(distanceLatLng);
+                            }
+                            break;
+                        default:
+                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }
+                pdfView.zoomWithAnimation(c_zoom);
+                //PointF mpt = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                //DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, (float) distanceSum);
+                //distanceLatLngs.add(distanceLatLng);
+            }
+
+            if (isQuery & esterEgg_plq){
+                Log.w(TAG, "onTapspecial : ");
+                int n = 0;
+                int num = 0;
+                if (kmltests.size() > 0) {
+                    kmltest poii = kmltests.get(0);
+                    PointF pointF = new PointF(poii.getLat(), poii.getLongi());
+                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    pointF = new PointF(pointF.x, pointF.y - 70);
+                    //pointF = getGeoLocFromPixL(pointF);
+                    PointF pt8 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    locError("pt1special : " + pt8.toString());
+                    float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                    for (kmltest poi : kmltests) {
+                        PointF mpointF = new PointF(poi.getLat(), poi.getLongi());
+                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                        if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                            locError("mpointFspecial : " + mpointF.toString());
+                            delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                            num = n;
+                        }
+                        locError("n : " + Integer.toString(n));
+                        n++;
+                    }
+                    locError("numspecial : " + Integer.toString(num));
+                    locError("deltaspecial : " + Float.toString(delta));
+                    if (delta < 35 || num != 0) {
+                        Intent intent = new Intent(MainInterface.this, plqpoishow.class);
+                        Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
+                        intent.putExtra("xh", kmltests.get(num).getXh());
+                        startActivity(intent);
+                        //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
+                        //locError(Integer.toString(kmltests.get(num).getPhotonum()));
+                    } else locError("没有正常查询");
+                }
+            }
+
+            if (isQuery & isDrawType == NONE_DRAW_TYPE) {
+                Log.w(TAG, "onTap: ");
+                List<mPOIobj> pois = new ArrayList<>();
+                Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+                if (cursor.moveToFirst()) {
+                    do {
+                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                        String time = cursor.getString(cursor.getColumnIndex("time"));
+                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                        String description = cursor.getString(cursor.getColumnIndex("description"));
+                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                        mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                        pois.add(mPOIobj);
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
+                locError("size : " + Integer.toString(pois.size()));
+                int n = 0;
+                int num = 0;
+                if (pois.size() > 0) {
+                    mPOIobj poii = pois.get(0);
+                    PointF pointF1 = new PointF(poii.getM_X(), poii.getM_Y());
+                    pointF1 = RenderUtil.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    pointF1 = new PointF(pointF1.x, pointF1.y - 70);
+                    //pointF = getGeoLocFromPixL(pointF);
+                    PointF pt9 = RenderUtil.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    locError("pt1 : " + pt9.toString());
+                    float delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
+                    for (mPOIobj poi : pois) {
+                        PointF mpointF1 = new PointF(poi.getM_X(), poi.getM_Y());
+                        mpointF1 = RenderUtil.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        mpointF1 = new PointF(mpointF1.x, mpointF1.y - 70);
+                        if (Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < delta && Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < 35) {
+                            locError("mpointF : " + mpointF1.toString());
+                            delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
+                            num = n;
+                        }
+                        locError("n : " + Integer.toString(n));
+                        n++;
+                    }
+                    locError("num : " + Integer.toString(num));
+                    locError("delta : " + Float.toString(delta));
+                    if (delta < 35 || num != 0) {
+                        locError("起飞 : " + Float.toString(delta));
+                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                        intent.putExtra("POIC", pois.get(num).getM_POIC());
+                        startActivity(intent);
+                        //locError(Integer.toString(pois.get(num).getPhotonum()));
+                    } else locError("没有正常查询");
+                }
+            }
+        }
+        return true;
+    }
+
     private void recordTrail(Location location){
         isLocate++;
         if (location != null) {
@@ -413,7 +671,390 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+        current_pageheight = pageHeight;
+        current_pagewidth = pageWidth;
+        viewer_height = pdfView.getHeight();
+        viewer_width = pdfView.getWidth();
 
+                        /*if (isQuery & num_map == 4 & c_zoom > 5 & ( ( cs_bottom > 24.6 & cs_top < 25.3) & ( cs_left > 102.48 & cs_right < 102.97))){
+                            getInfo(3);
+                            displayFromFile(uri);
+                            getScreen();
+                            setTitle(pdfFileName);
+                            isQuery = false;
+                        }
+                        if (isQuery & num_map == 3 & c_zoom < 1.2 & ( ( cs_bottom < 24.92 & cs_top > 25.157) & ( cs_left < 102.63 & cs_right > 102.75))){
+                            locError("bottom: 我的天哪");
+                            getInfo(4);
+                            displayFromFile(uri);
+                            getScreen();
+                            setTitle(pdfFileName);
+                            isQuery = false;
+                        }*/
+        //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+        if (pdfView.getPositionOffset() != verx & isPos){
+            locHere_fab.setImageResource(R.drawable.ic_location_searching);
+            isPos = false;
+            locError("lzy");
+        }
+        locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()) + "verx : " + Float.toString(verx));
+        //locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
+        if (c_zoom != pdfView.getZoom()){
+            c_zoom1 = c_zoom;
+            c_zoom = pdfView.getZoom();
+            if ((c_zoom - c_zoom1) > 0) {
+                locError("zoom: " + Float.toString(c_zoom - c_zoom1));
+                isZoom = ZOOM_IN;
+            }
+            else if ((c_zoom - c_zoom1) < 0) {
+                locError("zoom: " + Float.toString(c_zoom - c_zoom1));
+                isZoom = ZOOM_OUT;
+            }
+        }else isZoom = ZOOM_NONE;
+        locError("zoom: " + Float.toString(c_zoom));
+        getCurrentScreenLoc();
+        double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
+        double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
+        Log.w(TAG, "scale_distance: " + scale_distance);
+        Log.w(TAG, "getMetric: " + getMetric());
+        scale_distance = scale_distance * getMetric();
+        if (scale_distance > 1000) {
+            scale_distance = scale_distance / 1000;
+            scaleShow.setText(scale_df.format(scale_distance) + "公里");
+        }
+        else scaleShow.setText(scale_df.format(scale_distance) + "米");
+
+        if (isMessure & showMode == CENTERMODE){
+            String messure_pts1 = messure_pts;
+            locError("messure_pts1" + messure_pts1);
+            int poinum_messure1 = poinum_messure + 1;
+            //poinum_messure++;
+            if (poinum_messure1 == 1){
+                poi111 = centerPointLoc;
+                messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                    toolbar.setTitle("正在测量(轨迹记录中)");
+                }else toolbar.setTitle("正在测量");
+            }else if (poinum_messure1 == 2){
+                poi222 = centerPointLoc;
+                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                //setTitle("正在测量");
+                pdfView.zoomWithAnimation(c_zoom);
+                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+            }else {
+                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                //setTitle("正在测量");
+                pdfView.zoomWithAnimation(c_zoom);
+                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+            }
+            parseAndrawMessure(messure_pts1, canvas);
+
+        }
+        if (isMessure & showMode == NOCENTERMODE){
+            parseAndrawMessure(messure_pts, canvas);
+        }
+
+                        /*if (isOpenWhiteBlank){
+                        //白板功能监控
+                        onTouchListenerForView();
+                        }*/
+        //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
+        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
+        k_w = k[0];
+        k_h = k[1];
+        //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
+        if (isGPSEnabled()){
+            PointF pt = new PointF((float)m_lat, (float)m_long);
+            pt = RenderUtil.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            canvas.drawCircle(pt.x, pt.y, 23, paint);
+            canvas.drawCircle(pt.x, pt.y, 20, paint5);
+            canvas.drawCircle(pt.x, pt.y, 10, paint3);
+                            /*if (predegree >= 0 & predegree < 90){
+                                locError("您当前处于第一象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(predegree)), (float)(pt.y - 50 * Math.cos(predegree)), paint6);
+                            }else if (predegree >= 90 & predegree < 180){
+                                locError("您当前处于第二象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(180 - predegree)), (float)(pt.y + 50 * Math.cos(180 - predegree)), paint6);
+                            }else if (predegree >= 180 & predegree < 270){
+                                locError("您当前处于第三象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(predegree - 180)), (float)(pt.y + 50 * Math.cos(predegree - 180)), paint6);
+                            }else {
+                                locError("您当前处于第四象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(360 - predegree)), (float)(pt.y - 50 * Math.cos(360 - predegree)), paint6);
+                            }*/
+            int version = Build.VERSION.SDK_INT;
+            if (version >= 21) {
+                canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
+            }
+        }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
+        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
+            List<Trail> trails = DataSupport.findAll(Trail.class);
+            for (Trail trail : trails){
+                String str1 = trail.getPath();
+                String[] TrailString = str1.split(" ");
+                float[] Trails = new float[TrailString.length];
+                for (int i = 0; i < TrailString.length; i++){
+                    Trails[i] = Float.valueOf(TrailString[i]);
+                }
+                for (int j = 0; j < Trails.length - 2; j = j + 2){
+                    PointF pt11, pt12;
+                    pt11 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    pt12 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
+                }
+            }
+        }
+        if (isWhiteBlank){
+            parseAndrawLinesforWhiteBlank(canvas);
+            parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
+        }
+        if (showMode == CENTERMODE & esterEgg_redline) {
+            managePatchsData();
+            drawDemoArea(canvas);
+        }
+        if(isDrawType == POI_DRAW_TYPE || showPOI){
+            if (esterEgg_plq) drawPLQData(canvas);
+            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+            if (pois.size() > 0){
+                for (POI poi : pois){
+                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                    //locError(Boolean.toString(poi.getPath().isEmpty()));
+                    //locError(Integer.toString(poi.getPath().length()));
+                    //locError(poi.getPath());
+                    if (poi.getPhotonum() == 0){
+                        if (poi.getTapenum() == 0){
+                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
+                        } else {
+                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                        }
+                    }else {
+                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
+                        if (poi.getTapenum() == 0){
+                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
+                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                            int size = bts.size();
+                            if (mphotos.size() != 0) {
+                                for (int i = 0; i < size; i++) {
+                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
+                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                        locError("lzy");
+                                    }
+                                }
+                            }else {
+                                POI poi2 = new POI();
+                                if (mphotos.size() != 0) poi2.setPhotonum(mphotos.size());
+                                else poi2.setToDefault("photonum");
+                                poi2.updateAll("poic = ?", poi.getPoic());
+                            }
+                        }else {
+                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
+                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
+                            int size = bts.size();
+                            if (mphotos.size() != 0) {
+                                for (int i = 0; i < size; i++) {
+                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
+                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
+                                        locError("lzy");
+                                    }
+                                }
+                            }else {
+                                POI poi2 = new POI();
+                                if (mphotos.size() != 0) poi2.setPhotonum(mphotos.size());
+                                else poi2.setToDefault("photonum");
+                                poi2.updateAll("poic = ?", poi.getPoic());
+                            }
+                        }
+                    }
+                }}
+        }
+        if (isAutoTrans & (isZoom == ZOOM_IN || c_zoom == 10)){
+            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+            int size = pref1.getInt("num", 0);
+            if (size != 0){
+                float thedelta = 0;
+                int thenum = 0;
+                for (int j = 1; j <= size; j ++){
+                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                    String str = "n_" + j + "_";
+                    String Muri = pref2.getString(str + "uri", "");
+                    String MGPTS = pref2.getString(str + "GPTS", "");
+                    String[] GPTString = MGPTS.split(" ");
+                    float[] GPTSs = new float[GPTString.length];
+                    for (int i = 0; i < GPTString.length; i++) {
+                        GPTSs[i] = Float.valueOf(GPTString[i]);
+                    }
+                    float lat_axis, long_axis;
+                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                    for (int i = 0; i < GPTSs.length; i = i + 2){
+                        if (GPTSs[i] < lat_axis) {
+                            if (GPTSs[i + 1] < long_axis){
+                                pt_lb.x = GPTSs[i];
+                                pt_lb.y = GPTSs[i + 1];
+                            } else {
+                                pt_rb.x = GPTSs[i];
+                                pt_rb.y = GPTSs[i + 1];
+                            }
+                        } else {
+                            if (GPTSs[i + 1] < long_axis){
+                                pt_lt.x = GPTSs[i];
+                                pt_lt.y = GPTSs[i + 1];
+                            } else {
+                                pt_rt.x = GPTSs[i];
+                                pt_rt.y = GPTSs[i + 1];
+                            }
+                        }
+                    }
+                    locError("see here");
+                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                    locError("see here");
+                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                    if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)){
+                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                        locError("find delta1: " + Float.toString(thedelta1));
+                        locError("find delta: " + Float.toString(thedelta));
+                        locError("find num: " + Integer.toString(j));
+                        if (j != num_map){
+                            if (thedelta == 0) {
+                                thedelta = thedelta1;
+                                thenum = j;
+                            }
+                            if (thedelta1 < thedelta) {
+                                locError("change!!!");
+                                thedelta = thedelta1;
+                                thenum = j;
+                            }}
+                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+                                        /*num_map1 = num_map;
+                                        getInfo(j);
+                                        toolbar.setTitle(pdfFileName);
+                                        getBitmap();
+                                        displayFromFile(uri);
+                                        isAutoTrans = false;
+                                        autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
+                    }
+                }
+                double deltaK_trans;
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_IN);
+                locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
+                    geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
+                    num_map1 = num_map;
+                    getInfo(thenum);
+                    manageInfo();
+                    toolbar.setTitle(pdfFileName);
+                    getBitmap();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();
+                }
+            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+        }else if (c_zoom <= 1.5 & isAutoTrans & isZoom == ZOOM_OUT){
+            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+            int size = pref1.getInt("num", 0);
+            if (size != 0){
+                float thedelta = 0;
+                int thenum = 0;
+                for (int j = 1; j <= size; j ++){
+                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                    String str = "n_" + j + "_";
+                    String Muri = pref2.getString(str + "uri", "");
+                    String MGPTS = pref2.getString(str + "GPTS", "");
+                    String[] GPTString = MGPTS.split(" ");
+                    float[] GPTSs = new float[GPTString.length];
+                    for (int i = 0; i < GPTString.length; i++) {
+                        GPTSs[i] = Float.valueOf(GPTString[i]);
+                    }
+                    float lat_axis, long_axis;
+                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                    for (int i = 0; i < GPTSs.length; i = i + 2){
+                        if (GPTSs[i] < lat_axis) {
+                            if (GPTSs[i + 1] < long_axis){
+                                pt_lb.x = GPTSs[i];
+                                pt_lb.y = GPTSs[i + 1];
+                            } else {
+                                pt_rb.x = GPTSs[i];
+                                pt_rb.y = GPTSs[i + 1];
+                            }
+                        } else {
+                            if (GPTSs[i + 1] < long_axis){
+                                pt_lt.x = GPTSs[i];
+                                pt_lt.y = GPTSs[i + 1];
+                            } else {
+                                pt_rt.x = GPTSs[i];
+                                pt_rt.y = GPTSs[i + 1];
+                            }
+                        }
+                    }
+                    locError("see here");
+                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                    locError("see here");
+                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                    if (mmax_lat > max_lat & mmin_lat < min_lat & mmax_long > max_long & mmin_long < min_long){
+                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                        if (thedelta == 0) {
+                            thedelta = thedelta1;
+                            thenum = j;
+                        }else if (thedelta1 < thedelta) {
+                            thedelta = thedelta1;
+                            thenum = j;
+                        }
+                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+
+                    }
+                }
+                double deltaK_trans;
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_OUT);
+                locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
+                    geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
+                    num_map1 = num_map;
+                    getInfo(thenum);
+                    manageInfo();
+                    toolbar.setTitle(pdfFileName);
+                    getBitmap();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();
+                }
+            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+        }
+        if (hasQueriedPoi) {
+            PointF ptf = RenderUtil.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            Paint ptSpecial = new Paint();
+            ptSpecial.setColor(Color.rgb(255, 0, 255));
+            ptSpecial.setStyle(Paint.Style.FILL);
+            canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
+        }
+        if (isMessure) drawMessureLine(canvas);
     }
 
     @Override
@@ -921,569 +1562,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // in dp
                 .onPageError(this)
-                .onTap(new OnTapListener() {
-                    @Override
-                    public boolean onTap(MotionEvent e) {
-                        PointF pt = new PointF(e.getRawX(), e.getRawY());
-                        PointF pt1;
-                        pt1 = getGeoLocFromPixL(pt);
-                        showLocationText(pt1);
-                        if (pt1.x != 0) {
-                            if (isDrawType == POI_DRAW_TYPE & !isQuery){
-                                List<POI> POIs = DataSupport.findAll(POI.class);
-                                POI poi = new POI();
-                                poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                                poi.setIc(ic);
-                                if (showMode == NOCENTERMODE) {
-                                    poi.setX(pt1.x);
-                                    poi.setY(pt1.y);
-                                }else {
-                                    poi.setX(centerPointLoc.x);
-                                    poi.setY(centerPointLoc.y);
-                                }
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                                Date date = new Date(System.currentTimeMillis());
-                                poi.setTime(simpleDateFormat.format(date));
-                                poi.setPhotonum(0);
-                                String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
-                                poi.setPoic(mpoic);
-                                poi.save();
-                                locError(pt1.toString());
-                                pdfView.zoomWithAnimation(c_zoom);
-                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                intent.putExtra("POIC", mpoic);
-                                startActivity(intent);
-                            }
-                            if (isMessure) {
-                                locError("messure_pts" + messure_pts);
-                                poinum_messure++;
-                                if (poinum_messure == 1) {
-                                    poi111 = pt1;
-                                    if (showMode == NOCENTERMODE)
-                                        messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                    else
-                                        messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                    //setTitle("正在测量");
-                                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
-                                        toolbar.setTitle("正在测量(轨迹记录中)");
-                                    } else toolbar.setTitle("正在测量");
-                                } else if (poinum_messure == 2) {
-                                    poi222 = pt1;
-                                    if (showMode == NOCENTERMODE)
-                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                    else
-                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                    //setTitle("正在测量");
-                                    pdfView.zoomWithAnimation(c_zoom);
-                                    //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                    //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                                } else {
-                                    if (showMode == NOCENTERMODE)
-                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                    else
-                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                    //setTitle("正在测量");
-                                    pdfView.zoomWithAnimation(c_zoom);
-                                }
-                                if (showMode == NOCENTERMODE)
-                                {
-                                    switch (distancesLatLngs.size()){
-                                        case 0:
-                                            int size = distanceLatLngs.size();
-                                            if (size > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 1:
-                                            int size1 = distanceLatLngs1.size();
-                                            if (size1 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 2:
-                                            int size2 = distanceLatLngs2.size();
-                                            if (size2 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }
-                                            break;
-                                        default:
-                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    switch (distancesLatLngs.size()){
-                                        case 0:
-                                            int size = distanceLatLngs.size();
-                                            if (size > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 1:
-                                            int size1 = distanceLatLngs1.size();
-                                            if (size1 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 2:
-                                            int size2 = distanceLatLngs2.size();
-                                            if (size2 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }
-                                            break;
-                                        default:
-                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
-                                            break;
-                                    }
-                                }
-                                pdfView.zoomWithAnimation(c_zoom);
-                            }
-                        /*if (isMessure & showMode == CENTERMODE){
-                            locError("messure_pts" + messure_pts);
-                            poinum_messure++;
-                            if (poinum_messure == 1){
-                                poi111 = centerPointLoc;
-                                messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                    toolbar.setTitle("正在测量(轨迹记录中)");
-                                }else toolbar.setTitle("正在测量");
-                            }else if (poinum_messure == 2){
-                                poi222 = centerPointLoc;
-                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }else {
-                                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }
-
-                        }*/
-                            if (isQuery && isDrawType == NONE_DRAW_TYPE) {
-                                List<mPOIobj> pois = new ArrayList<>();
-                                Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
-                                if (cursor.moveToFirst()) {
-                                    do {
-                                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                                        String time = cursor.getString(cursor.getColumnIndex("time"));
-                                        String name = cursor.getString(cursor.getColumnIndex("name"));
-                                        String description = cursor.getString(cursor.getColumnIndex("description"));
-                                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
-                                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
-                                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
-                                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                                        mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
-                                        pois.add(mPOIobj);
-                                    } while (cursor.moveToNext());
-                                }
-                                cursor.close();
-                                locError("size : " + Integer.toString(pois.size()));
-                                int n = 0;
-                                int num = 0;
-                                if (pois.size() > 0) {
-                                    mPOIobj poii = pois.get(0);
-                                    PointF pointF = new PointF(poii.getM_X(), poii.getM_Y());
-                                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    pointF = new PointF(pointF.x, pointF.y - 70);
-                                    //pointF = getGeoLocFromPixL(pointF);
-                                    pt1 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    locError("pt1 : " + pt1.toString());
-                                    float delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
-                                    for (mPOIobj poi : pois) {
-                                        PointF mpointF = new PointF(poi.getM_X(), poi.getM_Y());
-                                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
-                                        if (Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < delta && Math.abs(mpointF.x - pt1.x) + Math.abs(mpointF.y - pt1.y) < 35) {
-                                            locError("mpointF : " + mpointF.toString());
-                                            delta = Math.abs(pointF.x - pt1.x) + Math.abs(pointF.y - pt1.y);
-                                            num = n;
-                                        }
-                                        locError("n : " + Integer.toString(n));
-                                        n++;
-                                    }
-                                    locError("num : " + Integer.toString(num));
-                                    locError("delta : " + Float.toString(delta));
-                                    if (delta < 35 || num != 0) {
-                                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                        intent.putExtra("POIC", pois.get(num).getM_POIC());
-                                        startActivity(intent);
-                                        //locError(Integer.toString(pois.get(num).getPhotonum()));
-                                    } else locError("没有正常查询");
-                                }
-
-                            }
-                        }
-                        return true;
-                    }
-                })
-                .onDraw(new OnDrawListener() {
-                    @Override
-                    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-                        current_pageheight = pageHeight;
-                        current_pagewidth = pageWidth;
-                            viewer_height = pdfView.getHeight();
-                            viewer_width = pdfView.getWidth();
-                        //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
-                        if (pdfView.getPositionOffset() != verx & isPos){
-                            locHere_fab.setImageResource(R.drawable.ic_location_searching);
-                            isPos = false;
-                        }
-                        locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()));
-                        //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
-                        //float c_zoom1 = 1;
-                        if (c_zoom != pdfView.getZoom()){
-                            c_zoom1 = c_zoom;
-                            c_zoom = pdfView.getZoom();
-                            if ((c_zoom - c_zoom1) > 0) isZoom = ZOOM_IN;
-                            else if ((c_zoom - c_zoom1) < 0) isZoom = ZOOM_OUT;
-                        }else isZoom = ZOOM_NONE;
-                        locError("zoom: " + Float.toString(c_zoom));
-                        getCurrentScreenLoc();
-                        double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
-                        double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
-                        Log.w(TAG, "scale_distance: " + scale_distance);
-                        scale_distance = scale_distance * getMetric();
-                        if (scale_distance > 1000) {
-                            scale_distance = scale_distance / 1000;
-                            scaleShow.setText(scale_df.format(scale_distance) + "公里");
-                        }
-                        else scaleShow.setText(scale_df.format(scale_distance) + "米");
-                        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
-                        k_w = k[0];
-                        k_h = k[1];
-                        /*if (isOpenWhiteBlank){
-                            //白板功能监控
-                            onTouchListenerForView();
-                        }*/
-                        if (isWhiteBlank){
-                            parseAndrawLinesforWhiteBlank(canvas);
-                            parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
-                        }
-                        if (isMessure & showMode == CENTERMODE){
-                            String messure_pts1 = messure_pts;
-                            locError("messure_pts1" + messure_pts1);
-                            int poinum_messure1 = poinum_messure + 1;
-                            //poinum_messure++;
-                            if (poinum_messure1 == 1){
-                                poi111 = centerPointLoc;
-                                messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                    toolbar.setTitle("正在测量(轨迹记录中)");
-                                }else toolbar.setTitle("正在测量");
-                            }else if (poinum_messure1 == 2){
-                                poi222 = centerPointLoc;
-                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }else {
-                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }
-                            parseAndrawMessure(messure_pts1, canvas);
-
-                        }
-                        if (isMessure & showMode == NOCENTERMODE){
-                            parseAndrawMessure(messure_pts, canvas);
-                        }
-                        if (showMode == CENTERMODE & esterEgg_redline) {
-                            managePatchsData();
-                            drawDemoArea(canvas);
-                        }
-                        //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
-                        if (isGPSEnabled()){
-                            PointF pt = new PointF((float)m_lat, (float)m_long);
-                            pt = RenderUtil.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            canvas.drawCircle(pt.x, pt.y, 23, paint);
-                            canvas.drawCircle(pt.x, pt.y, 20, paint5);
-                            canvas.drawCircle(pt.x, pt.y, 10, paint3);
-                            int version = Build.VERSION.SDK_INT;
-                            if (version >= 21) {
-                                canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
-                            }
-                            //canvas.drawArc(pt.x - 100, pt.y + 100, pt.x + 100, pt.y - 100, degree - 15, 30, false, paint3);
-                        }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
-                        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
-                            List<Trail> trails = DataSupport.findAll(Trail.class);
-                            for (Trail trail : trails){
-                                String str1 = trail.getPath();
-                                String[] TrailString = str1.split(" ");
-                                float[] Trails = new float[TrailString.length];
-                                for (int i = 0; i < TrailString.length; i++){
-                                    Trails[i] = Float.valueOf(TrailString[i]);
-                                }
-                                for (int j = 0; j < Trails.length - 2; j = j + 2){
-                                    PointF pt11, pt12;
-                                    pt11 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    pt12 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
-                                }
-                            }
-                        }
-                        if(isDrawType == POI_DRAW_TYPE || showPOI){
-                            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
-                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-                            if (pois.size() > 0){
-                                for (POI poi : pois){
-                                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                                    //locError(Boolean.toString(poi.getPath().isEmpty()));
-                                    //locError(Integer.toString(poi.getPath().length()));
-                                    //locError(poi.getPath());
-                                    if (poi.getPhotonum() == 0){
-                                        if (poi.getTapenum() == 0){
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                                        } else canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
-                                    }else {
-                                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
-                                        if (poi.getTapenum() == 0){
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
-                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
-                                            int size = bts.size();
-                                            if (mphotos.size() != 0) {
-                                                for (int i = 0; i < size; i++) {
-                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
-                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
-                                                    }
-                                                }
-                                            }else {
-                                                POI poi1 = new POI();
-                                                if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
-                                                else poi1.setToDefault("photonum");
-                                                poi1.updateAll("poic = ?", poi.getPoic());
-                                            }
-                                        }else {
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
-                                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
-                                            int size = bts.size();
-                                            if (mphotos.size() != 0) {
-                                                for (int i = 0; i < size; i++) {
-                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
-                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
-                                                    }
-                                                }
-                                            }else {
-                                                POI poi1 = new POI();
-                                                if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
-                                                else poi1.setToDefault("photonum");
-                                                poi1.updateAll("poic = ?", poi.getPoic());
-                                            }
-                                        }
-                                    }
-                                }}
-                        }
-                        if (isAutoTrans & (isZoom == ZOOM_IN || c_zoom == 10)){
-                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
-                            int size = pref1.getInt("num", 0);
-                            if (size != 0){
-                                float thedelta = 0;
-                                int thenum = 0;
-                                for (int j = 1; j <= size; j ++){
-                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
-                                    String str = "n_" + j + "_";
-                                    String Muri = pref2.getString(str + "uri", "");
-                                    String MGPTS = pref2.getString(str + "GPTS", "");
-                                    String[] GPTString = MGPTS.split(" ");
-                                    float[] GPTSs = new float[GPTString.length];
-                                    for (int i = 0; i < GPTString.length; i++) {
-                                        GPTSs[i] = Float.valueOf(GPTString[i]);
-                                    }
-                                    float lat_axis, long_axis;
-                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                                    for (int i = 0; i < GPTSs.length; i = i + 2){
-                                        if (GPTSs[i] < lat_axis) {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lb.x = GPTSs[i];
-                                                pt_lb.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rb.x = GPTSs[i];
-                                                pt_rb.y = GPTSs[i + 1];
-                                            }
-                                        } else {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lt.x = GPTSs[i];
-                                                pt_lt.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rt.x = GPTSs[i];
-                                                pt_rt.y = GPTSs[i + 1];
-                                            }
-                                        }
-                                    }
-                                    locError("see here");
-                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-                                    locError("see here");
-                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                                    if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)){
-                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                                        if (j != num_map){
-                                        if (thedelta == 0) {
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }
-                                        if (thedelta1 < thedelta) {
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }
-                                        }
-                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
-                                        /*num_map1 = num_map;
-                                        getInfo(j);
-                                        toolbar.setTitle(pdfFileName);
-                                        getBitmap();
-                                        displayFromFile(uri);
-                                        isAutoTrans = false;
-                                        autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
-                                    }
-                                }
-                                double deltaK_trans;
-                                //deltaK = (max_lat - min_lat) * 0.02;
-                                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_IN);
-                                locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
-                                    geometry_whiteBlanks.clear();
-                                    num_whiteBlankPt = 0;
-                                    isWhiteBlank = false;
-                                    whiteBlankPt = "";
-                                    num_map1 = num_map;
-                                    getInfo(thenum);
-                                    manageInfo();
-                                    toolbar.setTitle(pdfFileName);
-                                    getBitmap();
-                                    pdfView.recycle();
-                                    displayFromFile(uri);
-                                    isAutoTrans = false;
-                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                                    getWhiteBlankData();
-                                }
-                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-                        }else if (c_zoom <= 1.5 & isAutoTrans & isZoom == ZOOM_OUT){
-                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
-                            int size = pref1.getInt("num", 0);
-                            if (size != 0){
-                                float thedelta = 0;
-                                int thenum = 0;
-                                for (int j = 1; j <= size; j ++){
-                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
-                                    String str = "n_" + j + "_";
-                                    String Muri = pref2.getString(str + "uri", "");
-                                    String MGPTS = pref2.getString(str + "GPTS", "");
-                                    String[] GPTString = MGPTS.split(" ");
-                                    float[] GPTSs = new float[GPTString.length];
-                                    for (int i = 0; i < GPTString.length; i++) {
-                                        GPTSs[i] = Float.valueOf(GPTString[i]);
-                                    }
-                                    float lat_axis, long_axis;
-                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                                    for (int i = 0; i < GPTSs.length; i = i + 2){
-                                        if (GPTSs[i] < lat_axis) {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lb.x = GPTSs[i];
-                                                pt_lb.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rb.x = GPTSs[i];
-                                                pt_rb.y = GPTSs[i + 1];
-                                            }
-                                        } else {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lt.x = GPTSs[i];
-                                                pt_lt.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rt.x = GPTSs[i];
-                                                pt_rt.y = GPTSs[i + 1];
-                                            }
-                                        }
-                                    }
-                                    locError("see here");
-                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-                                    locError("see here");
-                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                                    if (mmax_lat > max_lat & mmin_lat < min_lat & mmax_long > max_long & mmin_long < min_long){
-                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                                        if (thedelta == 0) {
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }
-                                        if (thedelta1 < thedelta) {
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }
-                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
-
-                                    }
-                                }
-                                double deltaK_trans;
-                                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_OUT);
-                                locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
-                                    geometry_whiteBlanks.clear();
-                                    num_whiteBlankPt = 0;
-                                    isWhiteBlank = false;
-                                    whiteBlankPt = "";
-                                    num_map1 = num_map;
-                                    getInfo(thenum);
-                                    manageInfo();
-                                    toolbar.setTitle(pdfFileName);
-                                    getBitmap();
-                                    pdfView.recycle();
-                                    displayFromFile(uri);
-                                    isAutoTrans = false;
-                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                                    getWhiteBlankData();
-                                }
-                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-                        }
-                        if (isMessure) drawMessureLine(canvas);
-                    }
-                })
+                .onTap(this)
+                .onDraw(this)
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
         toolbar.setTitle(pdfFileName);
@@ -1677,660 +1757,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 .defaultPage(pageNumber)
                 .enableAnnotationRendering(false)
                 .onLoad(this)
-                .onDraw(new OnDrawListener() {
-                    @Override
-                    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-                        current_pageheight = pageHeight;
-                        current_pagewidth = pageWidth;
-                        viewer_height = pdfView.getHeight();
-                        viewer_width = pdfView.getWidth();
-
-                        /*if (isQuery & num_map == 4 & c_zoom > 5 & ( ( cs_bottom > 24.6 & cs_top < 25.3) & ( cs_left > 102.48 & cs_right < 102.97))){
-                            getInfo(3);
-                            displayFromFile(uri);
-                            getScreen();
-                            setTitle(pdfFileName);
-                            isQuery = false;
-                        }
-                        if (isQuery & num_map == 3 & c_zoom < 1.2 & ( ( cs_bottom < 24.92 & cs_top > 25.157) & ( cs_left < 102.63 & cs_right > 102.75))){
-                            locError("bottom: 我的天哪");
-                            getInfo(4);
-                            displayFromFile(uri);
-                            getScreen();
-                            setTitle(pdfFileName);
-                            isQuery = false;
-                        }*/
-                        //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
-                        if (pdfView.getPositionOffset() != verx & isPos){
-                            locHere_fab.setImageResource(R.drawable.ic_location_searching);
-                            isPos = false;
-                            locError("lzy");
-                        }
-                        locError("PositionOffset : " + Float.toString(pdfView.getPositionOffset()) + "verx : " + Float.toString(verx));
-                        //locError("top: " + Float.toString(cs_top) + " bottom: " + Float.toString(cs_bottom) + " left: " + Float.toString(cs_left) + " right: " + Float.toString(cs_right) + " zoom: " + Float.toString(c_zoom));
-                        if (c_zoom != pdfView.getZoom()){
-                            c_zoom1 = c_zoom;
-                            c_zoom = pdfView.getZoom();
-                            if ((c_zoom - c_zoom1) > 0) {
-                                locError("zoom: " + Float.toString(c_zoom - c_zoom1));
-                                isZoom = ZOOM_IN;
-                            }
-                            else if ((c_zoom - c_zoom1) < 0) {
-                                locError("zoom: " + Float.toString(c_zoom - c_zoom1));
-                                isZoom = ZOOM_OUT;
-                            }
-                        }else isZoom = ZOOM_NONE;
-                        locError("zoom: " + Float.toString(c_zoom));
-                        getCurrentScreenLoc();
-                        double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
-                        double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
-                        Log.w(TAG, "scale_distance: " + scale_distance);
-                        Log.w(TAG, "getMetric: " + getMetric());
-                        scale_distance = scale_distance * getMetric();
-                        if (scale_distance > 1000) {
-                            scale_distance = scale_distance / 1000;
-                            scaleShow.setText(scale_df.format(scale_distance) + "公里");
-                        }
-                        else scaleShow.setText(scale_df.format(scale_distance) + "米");
-
-                        if (isMessure & showMode == CENTERMODE){
-                            String messure_pts1 = messure_pts;
-                            locError("messure_pts1" + messure_pts1);
-                            int poinum_messure1 = poinum_messure + 1;
-                            //poinum_messure++;
-                            if (poinum_messure1 == 1){
-                                poi111 = centerPointLoc;
-                                messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                    toolbar.setTitle("正在测量(轨迹记录中)");
-                                }else toolbar.setTitle("正在测量");
-                            }else if (poinum_messure1 == 2){
-                                poi222 = centerPointLoc;
-                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }else {
-                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                //setTitle("正在测量");
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            }
-                            parseAndrawMessure(messure_pts1, canvas);
-
-                        }
-                        if (isMessure & showMode == NOCENTERMODE){
-                            parseAndrawMessure(messure_pts, canvas);
-                        }
-
-                        /*if (isOpenWhiteBlank){
-                        //白板功能监控
-                        onTouchListenerForView();
-                        }*/
-                        //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
-                        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
-                        k_w = k[0];
-                        k_h = k[1];
-                        //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
-                        if (isGPSEnabled()){
-                            PointF pt = new PointF((float)m_lat, (float)m_long);
-                            pt = RenderUtil.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            canvas.drawCircle(pt.x, pt.y, 23, paint);
-                            canvas.drawCircle(pt.x, pt.y, 20, paint5);
-                            canvas.drawCircle(pt.x, pt.y, 10, paint3);
-                            /*if (predegree >= 0 & predegree < 90){
-                                locError("您当前处于第一象限");
-                                locError(Float.toString(predegree));
-                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(predegree)), (float)(pt.y - 50 * Math.cos(predegree)), paint6);
-                            }else if (predegree >= 90 & predegree < 180){
-                                locError("您当前处于第二象限");
-                                locError(Float.toString(predegree));
-                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(180 - predegree)), (float)(pt.y + 50 * Math.cos(180 - predegree)), paint6);
-                            }else if (predegree >= 180 & predegree < 270){
-                                locError("您当前处于第三象限");
-                                locError(Float.toString(predegree));
-                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(predegree - 180)), (float)(pt.y + 50 * Math.cos(predegree - 180)), paint6);
-                            }else {
-                                locError("您当前处于第四象限");
-                                locError(Float.toString(predegree));
-                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(360 - predegree)), (float)(pt.y - 50 * Math.cos(360 - predegree)), paint6);
-                            }*/
-                            int version = Build.VERSION.SDK_INT;
-                            if (version >= 21) {
-                                canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
-                            }
-                        }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
-                        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
-                            List<Trail> trails = DataSupport.findAll(Trail.class);
-                            for (Trail trail : trails){
-                                String str1 = trail.getPath();
-                                String[] TrailString = str1.split(" ");
-                                float[] Trails = new float[TrailString.length];
-                                for (int i = 0; i < TrailString.length; i++){
-                                    Trails[i] = Float.valueOf(TrailString[i]);
-                                }
-                                for (int j = 0; j < Trails.length - 2; j = j + 2){
-                                    PointF pt11, pt12;
-                                    pt11 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    pt12 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
-                                }
-                            }
-                        }
-                        if (isWhiteBlank){
-                            parseAndrawLinesforWhiteBlank(canvas);
-                            parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
-                        }
-                        if (showMode == CENTERMODE & esterEgg_redline) {
-                            managePatchsData();
-                            drawDemoArea(canvas);
-                        }
-                        if(isDrawType == POI_DRAW_TYPE || showPOI){
-                            if (esterEgg_plq) drawPLQData(canvas);
-                            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
-                            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-                            if (pois.size() > 0){
-                                for (POI poi : pois){
-                                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                                    //locError(Boolean.toString(poi.getPath().isEmpty()));
-                                    //locError(Integer.toString(poi.getPath().length()));
-                                    //locError(poi.getPath());
-                                    if (poi.getPhotonum() == 0){
-                                        if (poi.getTapenum() == 0){
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                                        } else {
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
-                                        }
-                                    }else {
-                                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
-                                        if (poi.getTapenum() == 0){
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
-                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
-                                            int size = bts.size();
-                                            if (mphotos.size() != 0) {
-                                                for (int i = 0; i < size; i++) {
-                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
-                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
-                                                        locError("lzy");
-                                                    }
-                                                }
-                                            }else {
-                                                POI poi2 = new POI();
-                                                if (mphotos.size() != 0) poi2.setPhotonum(mphotos.size());
-                                                else poi2.setToDefault("photonum");
-                                                poi2.updateAll("poic = ?", poi.getPoic());
-                                            }
-                                        }else {
-                                            canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint1);
-                                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt2.x, pt2.y - 70, paint4);
-                                            int size = bts.size();
-                                            if (mphotos.size() != 0) {
-                                                for (int i = 0; i < size; i++) {
-                                                    if (bts.get(i).getM_path().equals(mphotos.get(0).getPath())) {
-                                                        canvas.drawBitmap(bts.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
-                                                        locError("lzy");
-                                                    }
-                                                }
-                                            }else {
-                                                POI poi2 = new POI();
-                                                if (mphotos.size() != 0) poi2.setPhotonum(mphotos.size());
-                                                else poi2.setToDefault("photonum");
-                                                poi2.updateAll("poic = ?", poi.getPoic());
-                                            }
-                                        }
-                                    }
-                                }}
-                        }
-                        if (isAutoTrans & (isZoom == ZOOM_IN || c_zoom == 10)){
-                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
-                            int size = pref1.getInt("num", 0);
-                            if (size != 0){
-                                float thedelta = 0;
-                                int thenum = 0;
-                                for (int j = 1; j <= size; j ++){
-                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
-                                    String str = "n_" + j + "_";
-                                    String Muri = pref2.getString(str + "uri", "");
-                                    String MGPTS = pref2.getString(str + "GPTS", "");
-                                    String[] GPTString = MGPTS.split(" ");
-                                    float[] GPTSs = new float[GPTString.length];
-                                    for (int i = 0; i < GPTString.length; i++) {
-                                        GPTSs[i] = Float.valueOf(GPTString[i]);
-                                    }
-                                    float lat_axis, long_axis;
-                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                                    for (int i = 0; i < GPTSs.length; i = i + 2){
-                                        if (GPTSs[i] < lat_axis) {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lb.x = GPTSs[i];
-                                                pt_lb.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rb.x = GPTSs[i];
-                                                pt_rb.y = GPTSs[i + 1];
-                                            }
-                                        } else {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lt.x = GPTSs[i];
-                                                pt_lt.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rt.x = GPTSs[i];
-                                                pt_rt.y = GPTSs[i + 1];
-                                            }
-                                        }
-                                    }
-                                    locError("see here");
-                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-                                    locError("see here");
-                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                                    if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)){
-                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                                        locError("find delta1: " + Float.toString(thedelta1));
-                                        locError("find delta: " + Float.toString(thedelta));
-                                        locError("find num: " + Integer.toString(j));
-                                        if (j != num_map){
-                                        if (thedelta == 0) {
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }
-                                        if (thedelta1 < thedelta) {
-                                            locError("change!!!");
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }}
-                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
-                                        /*num_map1 = num_map;
-                                        getInfo(j);
-                                        toolbar.setTitle(pdfFileName);
-                                        getBitmap();
-                                        displayFromFile(uri);
-                                        isAutoTrans = false;
-                                        autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
-                                    }
-                                }
-                                double deltaK_trans;
-                                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_IN);
-                                locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
-                                    geometry_whiteBlanks.clear();
-                                    num_whiteBlankPt = 0;
-                                    isWhiteBlank = false;
-                                    whiteBlankPt = "";
-                                    num_map1 = num_map;
-                                    getInfo(thenum);
-                                    manageInfo();
-                                    toolbar.setTitle(pdfFileName);
-                                    getBitmap();
-                                    pdfView.recycle();
-                                    displayFromFile(uri);
-                                    isAutoTrans = false;
-                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                                    getWhiteBlankData();
-                                }
-                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-                        }else if (c_zoom <= 1.5 & isAutoTrans & isZoom == ZOOM_OUT){
-                            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
-                            int size = pref1.getInt("num", 0);
-                            if (size != 0){
-                                float thedelta = 0;
-                                int thenum = 0;
-                                for (int j = 1; j <= size; j ++){
-                                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
-                                    String str = "n_" + j + "_";
-                                    String Muri = pref2.getString(str + "uri", "");
-                                    String MGPTS = pref2.getString(str + "GPTS", "");
-                                    String[] GPTString = MGPTS.split(" ");
-                                    float[] GPTSs = new float[GPTString.length];
-                                    for (int i = 0; i < GPTString.length; i++) {
-                                        GPTSs[i] = Float.valueOf(GPTString[i]);
-                                    }
-                                    float lat_axis, long_axis;
-                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                                    for (int i = 0; i < GPTSs.length; i = i + 2){
-                                        if (GPTSs[i] < lat_axis) {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lb.x = GPTSs[i];
-                                                pt_lb.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rb.x = GPTSs[i];
-                                                pt_rb.y = GPTSs[i + 1];
-                                            }
-                                        } else {
-                                            if (GPTSs[i + 1] < long_axis){
-                                                pt_lt.x = GPTSs[i];
-                                                pt_lt.y = GPTSs[i + 1];
-                                            } else {
-                                                pt_rt.x = GPTSs[i];
-                                                pt_rt.y = GPTSs[i + 1];
-                                            }
-                                        }
-                                    }
-                                    locError("see here");
-                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-                                    locError("see here");
-                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                                    if (mmax_lat > max_lat & mmin_lat < min_lat & mmax_long > max_long & mmin_long < min_long){
-                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                                        if (thedelta == 0) {
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }else if (thedelta1 < thedelta) {
-                                            thedelta = thedelta1;
-                                            thenum = j;
-                                        }
-                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
-
-                                    }
-                                }
-                                double deltaK_trans;
-                                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_OUT);
-                                locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
-                                    geometry_whiteBlanks.clear();
-                                    num_whiteBlankPt = 0;
-                                    isWhiteBlank = false;
-                                    whiteBlankPt = "";
-                                    num_map1 = num_map;
-                                    getInfo(thenum);
-                                    manageInfo();
-                                    toolbar.setTitle(pdfFileName);
-                                    getBitmap();
-                                    pdfView.recycle();
-                                    displayFromFile(uri);
-                                    isAutoTrans = false;
-                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                                    getWhiteBlankData();
-                                }
-                            }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-                        }
-                        if (hasQueriedPoi) {
-                            PointF ptf = RenderUtil.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            Paint ptSpecial = new Paint();
-                            ptSpecial.setColor(Color.rgb(255, 0, 255));
-                            ptSpecial.setStyle(Paint.Style.FILL);
-                            canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
-                        }
-                        if (isMessure) drawMessureLine(canvas);
-                    }
-                })
+                .onDraw(this)
                 .onRender(new OnRenderListener() {
                     @Override
                     public void onInitiallyRendered(int nbPages) {
 
                     }
                 })
-                .onTap(new OnTapListener() {
-                    @Override
-                    public boolean onTap(MotionEvent e) {
-                        PointF pt = new PointF(e.getRawX(), e.getRawY());
-                        PointF pt1 = getGeoLocFromPixL(pt);
-                        showLocationText(pt1);
-                        if (pt1.x != 0) {
-                            if (isDrawType == POI_DRAW_TYPE & !isQuery) {
-                                List<POI> POIs = DataSupport.findAll(POI.class);
-                                POI poi = new POI();
-                                poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                                poi.setIc(ic);
-                                if (showMode == NOCENTERMODE) {
-                                    poi.setX(pt1.x);
-                                    poi.setY(pt1.y);
-                                } else {
-                                    poi.setX(centerPointLoc.x);
-                                    poi.setY(centerPointLoc.y);
-                                }
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                                Date date = new Date(System.currentTimeMillis());
-                                poi.setTime(simpleDateFormat.format(date));
-                                poi.setPhotonum(0);
-                                String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
-                                poi.setPoic(mpoic);
-                                poi.save();
-                                locError(pt1.toString());
-                                pdfView.zoomWithAnimation(c_zoom);
-                                Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                intent.putExtra("POIC", mpoic);
-                                startActivity(intent);
-                            }
-                            if (isMessure) {
-                                locError("messure_pts" + messure_pts);
-                                poinum_messure++;
-                                if (poinum_messure == 1) {
-                                    poi111 = pt1;
-                                    if (showMode == NOCENTERMODE)
-                                    {
-                                        messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                    }
-                                    else
-                                    {
-                                        messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                    }
-                                    //setTitle("正在测量");
-                                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
-                                        toolbar.setTitle("正在测量(轨迹记录中)");
-                                    } else toolbar.setTitle("正在测量");
-                                } else if (poinum_messure == 2) {
-                                    poi222 = pt1;
-                                    if (showMode == NOCENTERMODE)
-                                    {
-                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                    }
-                                    else
-                                    {
-                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                    }
-                                    //setTitle("正在测量");
-                                    pdfView.zoomWithAnimation(c_zoom);
-                                    //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                                    //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                                } else {
-                                    if (showMode == NOCENTERMODE)
-                                    {
-                                        messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
-                                    }
-                                    else
-                                    {
-                                        messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                                    }
-                                    //setTitle("正在测量");
-                                    pdfView.zoomWithAnimation(c_zoom);
-                                }
-                                if (showMode == NOCENTERMODE)
-                                {
-                                    switch (distancesLatLngs.size()){
-                                        case 0:
-                                            int size = distanceLatLngs.size();
-                                            if (size > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 1:
-                                            int size1 = distanceLatLngs1.size();
-                                            if (size1 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 2:
-                                            int size2 = distanceLatLngs2.size();
-                                            if (size2 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }
-                                            break;
-                                        default:
-                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    switch (distancesLatLngs.size()){
-                                        case 0:
-                                            int size = distanceLatLngs.size();
-                                            if (size > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                                distanceLatLngs.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 1:
-                                            int size1 = distanceLatLngs1.size();
-                                            if (size1 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                                distanceLatLngs1.add(distanceLatLng);
-                                            }
-                                            break;
-                                        case 2:
-                                            int size2 = distanceLatLngs2.size();
-                                            if (size2 > 0){
-                                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }else {
-                                                DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
-                                                distanceLatLngs2.add(distanceLatLng);
-                                            }
-                                            break;
-                                        default:
-                                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
-                                            break;
-                                    }
-                                }
-                                pdfView.zoomWithAnimation(c_zoom);
-                                //PointF mpt = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                //DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, (float) distanceSum);
-                                //distanceLatLngs.add(distanceLatLng);
-                            }
-
-                            if (isQuery & esterEgg_plq){
-                                Log.w(TAG, "onTapspecial : ");
-                                int n = 0;
-                                int num = 0;
-                                if (kmltests.size() > 0) {
-                                    kmltest poii = kmltests.get(0);
-                                    PointF pointF = new PointF(poii.getLat(), poii.getLongi());
-                                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    pointF = new PointF(pointF.x, pointF.y - 70);
-                                    //pointF = getGeoLocFromPixL(pointF);
-                                    PointF pt8 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    locError("pt1special : " + pt8.toString());
-                                    float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
-                                    for (kmltest poi : kmltests) {
-                                        PointF mpointF = new PointF(poi.getLat(), poi.getLongi());
-                                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
-                                        if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
-                                            locError("mpointFspecial : " + mpointF.toString());
-                                            delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
-                                            num = n;
-                                        }
-                                        locError("n : " + Integer.toString(n));
-                                        n++;
-                                    }
-                                    locError("numspecial : " + Integer.toString(num));
-                                    locError("deltaspecial : " + Float.toString(delta));
-                                    if (delta < 35 || num != 0) {
-                                        Intent intent = new Intent(MainInterface.this, plqpoishow.class);
-                                        Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
-                                        intent.putExtra("xh", kmltests.get(num).getXh());
-                                        startActivity(intent);
-                                        //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
-                                        //locError(Integer.toString(kmltests.get(num).getPhotonum()));
-                                    } else locError("没有正常查询");
-                                }
-                            }
-
-                            if (isQuery & isDrawType == NONE_DRAW_TYPE) {
-                                Log.w(TAG, "onTap: ");
-                                List<mPOIobj> pois = new ArrayList<>();
-                                Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
-                                if (cursor.moveToFirst()) {
-                                    do {
-                                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                                        String time = cursor.getString(cursor.getColumnIndex("time"));
-                                        String name = cursor.getString(cursor.getColumnIndex("name"));
-                                        String description = cursor.getString(cursor.getColumnIndex("description"));
-                                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
-                                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
-                                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
-                                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                                        mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
-                                        pois.add(mPOIobj);
-                                    } while (cursor.moveToNext());
-                                }
-                                cursor.close();
-                                locError("size : " + Integer.toString(pois.size()));
-                                int n = 0;
-                                int num = 0;
-                                if (pois.size() > 0) {
-                                    mPOIobj poii = pois.get(0);
-                                    PointF pointF1 = new PointF(poii.getM_X(), poii.getM_Y());
-                                    pointF1 = RenderUtil.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    pointF1 = new PointF(pointF1.x, pointF1.y - 70);
-                                    //pointF = getGeoLocFromPixL(pointF);
-                                    PointF pt9 = RenderUtil.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                    locError("pt1 : " + pt9.toString());
-                                    float delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
-                                    for (mPOIobj poi : pois) {
-                                        PointF mpointF1 = new PointF(poi.getM_X(), poi.getM_Y());
-                                        mpointF1 = RenderUtil.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                                        mpointF1 = new PointF(mpointF1.x, mpointF1.y - 70);
-                                        if (Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < delta && Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < 35) {
-                                            locError("mpointF : " + mpointF1.toString());
-                                            delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
-                                            num = n;
-                                        }
-                                        locError("n : " + Integer.toString(n));
-                                        n++;
-                                    }
-                                    locError("num : " + Integer.toString(num));
-                                    locError("delta : " + Float.toString(delta));
-                                    if (delta < 35 || num != 0) {
-                                        locError("起飞 : " + Float.toString(delta));
-                                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                                        intent.putExtra("POIC", pois.get(num).getM_POIC());
-                                        startActivity(intent);
-                                        //locError(Integer.toString(pois.get(num).getPhotonum()));
-                                    } else locError("没有正常查询");
-                                }
-                            }
-                        }
-                        return true;
-                    }
-                })
+                .onTap(this)
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // in dp
                 .onPageError(this)
@@ -4746,12 +4180,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         if (showMode == CENTERMODE){
             centerPoint.setVisibility(View.VISIBLE);
             isQuery = true;
-            isDrawType = NONE_DRAW_TYPE;
             locError("中心点模式");
-            isMessureType = MESSURE_NONE_TYPE;
+            resumePage();
             query_poi_imgbt.setVisibility(View.INVISIBLE);
         }else {
             locError("不是中心点模式");
+            resumePage();
             centerPoint.setVisibility(View.INVISIBLE);
             isQuery = false;
             query_poi_imgbt.setVisibility(View.VISIBLE);
@@ -4794,6 +4228,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //注册传感器监听器
         Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
         sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    private void resumePage(){
+        isDrawType = NONE_DRAW_TYPE;
+        isMessureType = MESSURE_NONE_TYPE;
     }
 
     @Override
