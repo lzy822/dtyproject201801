@@ -19,6 +19,8 @@ import android.widget.Toast;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
+import org.litepal.crud.DataSupport;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -777,4 +779,365 @@ public class DataUtil {
         poi.setTime(time);
         poi.save();
     }
+
+    public static void makeKML(){
+        List<File> files = new ArrayList<File>();
+        //POI
+        List<POI> pois = DataSupport.findAll(POI.class);
+        if (pois.size() > 0) files.add(makePOIKML(pois));
+        //MTAPE
+        List<MTAPE> mtapes = DataSupport.findAll(MTAPE.class);
+        if (mtapes.size() > 0) files.add(makeTapeKML(mtapes, files));
+        //MPHOTO
+        List<MPHOTO> mphotos = DataSupport.findAll(MPHOTO.class);
+        if (mphotos.size() > 0) files.add(makePhotoKML(mphotos, files));
+        //Trail
+        List<Trail> trails = DataSupport.findAll(Trail.class);
+        if (trails.size() > 0) files.add(makeTrailKML(trails));
+        //Lines_WhiteBlank
+        List<Lines_WhiteBlank> whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
+        if (whiteBlanks.size() > 0) files.add(makeWhiteBlankKML(whiteBlanks));
+    }
+
+    public static String plusID(int num){
+        String str = "";
+        if (num >= 0 & num < 10) str = "0000" + String.valueOf(num);
+        else if (num >= 10 & num < 100) str = "000" + String.valueOf(num);
+        else if (num >= 100 & num < 1000) str = "00" + String.valueOf(num);
+        else if (num >= 1000 & num < 10000) str = "0" + String.valueOf(num);
+        else str = String.valueOf(num);
+        return str;
+    }
+
+    public static StringBuffer makeKMLHead(StringBuffer sb, String str){
+        sb = sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("\n");
+        sb = sb.append("<kml xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"").append("\n");
+        sb = sb.append(" xsi:schemaLocation=\"http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd\">").append("\n");
+        sb = sb.append("<Document id=\"" + str + "\">").append("\n");
+        sb = sb.append("  ").append("<name>" + str + "</name>").append("\n");
+        sb = sb.append("  ").append("<Snippet></Snippet>").append("\n");
+        sb = sb.append("  ").append("<Folder id=\"FeatureLayer0\">").append("\n");
+        sb = sb.append("    ").append("<name>" + str + "</name>").append("\n");
+        sb = sb.append("    ").append("<Snippet></Snippet>").append("\n");
+        return sb;
+    }
+
+    public static StringBuffer makeCDATAHead(StringBuffer sb){
+        sb.append("      ").append("<description><![CDATA[<html xmlns:fo=\"http://www.w3.org/1999/XSL/Format\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\">").append("\n");
+        sb.append("\n");
+        sb.append("<head>").append("\n");
+        sb.append("\n");
+        sb.append("<META http-equiv=\"Content-Type\" content=\"text/html\">").append("\n");
+        sb.append("\n");
+        sb.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">").append("\n");
+        sb.append("\n");
+        sb.append("</head>").append("\n");
+        sb.append("\n");
+        sb.append("<body style=\"margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;\">").append("\n");
+        sb.append("\n");
+        sb.append("<table style=\"font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px\">").append("\n");
+        sb.append("\n");
+        sb.append("<tr style=\"text-align:center;font-weight:bold;background:#9CBCE2\">").append("\n");
+        sb.append("\n");
+        return sb;
+    }
+
+    public static StringBuffer makeCDATATail(StringBuffer sb){
+        sb.append("</table>").append("\n");
+        sb.append("\n");
+        sb.append("</td>").append("\n");
+        sb.append("\n");
+        sb.append("</tr>").append("\n");
+        sb.append("\n");
+        sb.append("</table>").append("\n");
+        sb.append("\n");
+        sb.append("</body>").append("\n");
+        sb.append("\n");
+        sb.append("</html>").append("\n");
+        sb.append("\n");
+        sb.append("]]></description>").append("\n");
+        return sb;
+    }
+
+    public static StringBuffer makeKMLTail(StringBuffer sb){
+        sb.append("  ").append("</Folder>").append("\n");
+        sb.append("  ").append("<Style id=\"IconStyle00\">").append("\n");
+        sb.append("    ").append("<IconStyle>").append("\n");
+        sb.append("      ").append("<Icon><href>Layer0_Symbol_2017ee40_0.png</href></Icon>").append("\n");
+        sb.append("      ").append("<scale>0.250000</scale>").append("\n");
+        sb.append("    ").append("</IconStyle>").append("\n");
+        sb.append("    ").append("<LabelStyle>").append("\n");
+        sb.append("      ").append("<color>00000000</color>").append("\n");
+        sb.append("      ").append("<scale>0.000000</scale>").append("\n");
+        sb.append("    ").append("</LabelStyle>").append("\n");
+        sb.append("    ").append("<PolyStyle>").append("\n");
+        sb.append("      ").append("<color>ff000000</color>").append("\n");
+        sb.append("      ").append("<outline>0</outline>").append("\n");
+        sb.append("    ").append("</PolyStyle>").append("\n");
+        sb.append("  ").append("</Style>").append("\n");
+        sb.append("</Document>").append("\n");
+        sb.append("</kml>").append("\n");
+        return sb;
+    }
+
+    public static File makePOIKML(final List<POI> pois){
+        StringBuffer sb = new StringBuffer();
+        int size_POI = pois.size();
+        makeKMLHead(sb, "POI");
+        for (int i = 0; i < size_POI; i++){
+            sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
+            sb.append("      ").append("<name>").append(pois.get(i).getPoic()).append("</name>").append("\n");
+            sb.append("      ").append("<Snippet></Snippet>").append("\n");
+            //属性表内容
+            sb = makeCDATAHead(sb);
+            sb.append("<td>").append(pois.get(i).getPoic()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("\n");
+            sb.append("\n");
+            sb.append("<table style=\"font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px\">").append("\n");
+            sb.append("\n");
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("id").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getId()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("name").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getName()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("ic").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getIc()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("POIC").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getPoic()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("photonum").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getPhotonum()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("description").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getDescription()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("tapenum").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getTapenum()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("time").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getTime()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("x").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getX()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append("y").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getY()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            sb = makeCDATATail(sb);
+            sb.append("      ").append("<styleUrl>#IconStyle00</styleUrl>").append("\n");
+            sb.append("      ").append("<Point>").append("\n");
+            sb.append("        ").append("<altitudeMode>clampToGround</altitudeMode>").append("\n");
+            sb.append("        ").append("<coordinates>").append(" ").append(pois.get(i).getY()).append(",").append(pois.get(i).getX()).append(",").append(0).append("</coordinates>").append("\n");
+            sb.append("      ").append("</Point>").append("\n");
+            sb.append("      ").append("</Placemark>").append("\n");
+            //
+        }
+        sb = makeKMLTail(sb);
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".kml");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        }catch (IOException e){
+            Log.w(TAG, e.toString());
+        }
+        return file1;
+    }
+
+    public static File makeTapeKML(final List<MTAPE> mtapes, List<File> files){
+        StringBuffer sb = new StringBuffer();
+        int size_mtape = mtapes.size();
+        makeKMLHead(sb, "MTAPE");
+        for (int i = 0; i < size_mtape; i++){
+            sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
+            sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
+            sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
+            String path = mtapes.get(i).getPath();
+            sb.append("<path>").append(path).append("</path>").append("\n");
+            files.add(new File(path));
+            sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
+        }
+        sb.append("</MTAPE>").append("\n");
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        }catch (IOException e){
+            Log.w(TAG, e.toString());
+        }
+        return file1;
+    }
+
+    public static File makePhotoKML(final List<MPHOTO> mphotos, List<File> files){
+        StringBuffer sb = new StringBuffer();
+        int size_mphoto = mphotos.size();
+        makeKMLHead(sb, "MPHOTO");
+        for (int i = 0; i < size_mphoto; i++){
+            sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
+            sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
+            sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
+            String path = mphotos.get(i).getPath();
+            sb.append("<path>").append(path).append("</path>").append("\n");
+            files.add(new File(path));
+            sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
+        }
+        sb.append("</MPHOTO>").append("\n");
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        }catch (IOException e){
+            Log.w(TAG, e.toString());
+        }
+        return file1;
+    }
+
+    public static File makeTrailKML(final List<Trail> trails){
+        StringBuffer sb = new StringBuffer();
+        int size_trail = trails.size();
+        makeKMLHead(sb, "Trail");
+        for (int i = 0; i < size_trail; i++){
+            sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
+            sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
+            sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
+            sb.append("<path>").append(trails.get(i).getPath()).append("</path>").append("\n");
+            sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
+            sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
+        }
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        }catch (IOException e){
+            Log.w(TAG, e.toString());
+        }
+        return file1;
+    }
+
+    public static File makeWhiteBlankKML(final List<Lines_WhiteBlank> whiteBlanks){
+        StringBuffer sb = new StringBuffer();
+        int size_whiteBlanks = whiteBlanks.size();
+        makeKMLHead(sb, "Lines_WhiteBlank");
+        for (int i = 0; i < size_whiteBlanks; i++){
+            sb.append("<m_ic>").append(whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
+            sb.append("<m_lines>").append(whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
+            sb.append("<m_color>").append(whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
+        }
+        sb.append("</Lines_WhiteBlank>").append("\n");
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        }catch (IOException e){
+            Log.w(TAG, e.toString());
+        }
+        return file1;
+    }
+
 }

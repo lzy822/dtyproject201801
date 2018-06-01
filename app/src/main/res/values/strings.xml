@@ -49,8 +49,8 @@
     <string name="DeletePOI">删除兴趣点</string>
     <string name="RestorePOI">恢复</string>
     <string name="POIList">兴趣点列表</string>
-    <string name="TapeList">相片列表</string>
-    <string name="PhotoList">录音列表</string>
+    <string name="TapeList">录音列表</string>
+    <string name="PhotoList">相片列表</string>
     <string name="DateAndTime">yyyy年MM月dd日 HH:mm:ss</string>
     <string name="Date">yyyy年MM月dd日</string>
     <string name="InputLicenseError">请联系我们获取授权码</string>
