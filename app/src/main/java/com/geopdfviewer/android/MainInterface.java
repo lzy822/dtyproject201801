@@ -3847,7 +3847,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             locError("poic = " + poi.getPoic());
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
                             String path = mphotos.get(0).getPath();
-                            Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
+                            File file = new File(path);
+                            if (file.exists()){
+                                Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
                             if (mphotos.size() != 0) {
                                 int degree = DataUtil.getPicRotate(path);
                                 if (degree != 0) {
@@ -3858,7 +3860,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 }
                                 bt btt = new bt(bitmap, mphotos.get(0).getPath());
                                 bts.add(btt);
-                        }
+                            }
+                            }else {
+                            }
                         }else {
                             POI poi1 = new POI();
                             if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
