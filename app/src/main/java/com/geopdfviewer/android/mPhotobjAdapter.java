@@ -2,12 +2,15 @@ package com.geopdfviewer.android;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -101,15 +104,25 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
             holder.PhotoImage.setImageBitmap(getImageThumbnail(mphoto.getM_path(), 100, 120));
         }else {*/
         String path = mphoto.getM_path();
-        Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 120);
-        int degree = DataUtil.getPicRotate(path);
-        if (degree != 0) {
-            Matrix m = new Matrix();
-            m.setRotate(degree); // 旋转angle度
-            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+        File file = new File(path);
+        if (file.exists()) {
+            Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 120);
+            int degree = DataUtil.getPicRotate(path);
+            if (degree != 0) {
+                Matrix m = new Matrix();
+                m.setRotate(degree); // 旋转angle度
+                Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                holder.PhotoImage.setImageBitmap(bitmap);
+            }
+        }else {
+            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+            BitmapDrawable bd = (BitmapDrawable) drawable;
+            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            holder.PhotoImage.setImageBitmap(bitmap);
         }
-        holder.PhotoImage.setImageBitmap(bitmap);
         //}
         String data;
         data = "图片名称: " + mphoto.getM_name() + "\n" + "时间: " + mphoto.getM_time();

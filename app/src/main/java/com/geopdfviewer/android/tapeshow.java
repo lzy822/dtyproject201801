@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -79,8 +80,13 @@ public class tapeshow extends AppCompatActivity {
                         }
                     }
                 }else {
-                    MediaPlayer mediaPlayer = MediaPlayer.create(tapeshow.this, Uri.parse(path));
-                    mediaPlayer.start();
+                    File file = new File(path);
+                    if (file.exists()) {
+                        MediaPlayer mediaPlayer = MediaPlayer.create(tapeshow.this, Uri.parse(path));
+                        mediaPlayer.start();
+                    }else {
+                        Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError1, Toast.LENGTH_LONG).show();
+                    }
                 }
                 Log.w(TAG, "onItemClick: " + deletePath );
             }

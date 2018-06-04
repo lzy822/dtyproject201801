@@ -1,24 +1,19 @@
 package com.geopdfviewer.android;
 
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,14 +24,11 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
@@ -155,16 +147,28 @@ public class photoshow extends AppCompatActivity {
                 int size = mphotos.size();
                 for (int i = 0; i < size; i++) {
                     String path = mphotos.get(i).getPath();
-                    Bitmap bitmap = DataUtil.getImageThumbnail(path, 2048, 2048);
-                    int degree = DataUtil.getPicRotate(path);
-                    if (degree != 0) {
-                        Matrix m = new Matrix();
-                        m.setRotate(degree); // 旋转angle度
-                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                    File file = new File(path);
+                    if (file.exists()) {
+                        Bitmap bitmap = DataUtil.getImageThumbnail(path, 2048, 2048);
+                        int degree = DataUtil.getPicRotate(path);
+                        if (degree != 0) {
+                            Matrix m = new Matrix();
+                            m.setRotate(degree); // 旋转angle度
+                            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                        }
+                        bt btt = new bt(bitmap, path);
+                        bts.add(btt);
+                    }else {
+                        /*Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                        BitmapDrawable bd = (BitmapDrawable) drawable;
+                        Bitmap bitmap = bd.getBitmap();
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
+                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                        bt btt = new bt(bitmap, path);
+                        bts.add(btt);*/
                     }
-                    bt btt = new bt(bitmap, mphotos.get(i).getPath());
-                    bts.add(btt);
                 }
                 isCreateBitmap = true;
             }

@@ -3,10 +3,14 @@ package com.geopdfviewer.android;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v7.widget.CardView;
@@ -20,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -134,9 +139,19 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         }else holder.MapName.setText(map.getM_name());
         /*holder.MapName.setText(map.getM_name() + "\n" + "距中心: " + df.format(algorithm(m_long, m_lat, the_long, the_lat) / 1000) + "公里"
                 + "\n" + "在地图上 ");*/
-        if (map.getM_imguri() != ""){
+        String ImgUri = map.getM_imguri();
+        if (ImgUri != ""){
             //Toast.makeText(mContext, map.getM_imguri(), Toast.LENGTH_SHORT).show();
-            holder.MapImage.setImageURI(Uri.parse(map.getM_imguri()));
+            File file = new File(ImgUri);
+            if (file.exists()) holder.MapImage.setImageURI(Uri.parse(ImgUri));
+            else {
+                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                BitmapDrawable bd = (BitmapDrawable) drawable;
+                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                holder.MapImage.setImageBitmap(bitmap);
+            }
         }else {
             //holder.MapImage.setImageResource(R.drawable.ic_android_black);
             try {

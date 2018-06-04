@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,6 +20,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -3858,10 +3861,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     Log.w(TAG, "showPopueWindowForPhoto: " + degree);
                                     bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                                 }
-                                bt btt = new bt(bitmap, mphotos.get(0).getPath());
+                                bt btt = new bt(bitmap, path);
                                 bts.add(btt);
                             }
                             }else {
+                                //Resources res = MyApplication.getContext().getResources();
+                                //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
+                                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                BitmapDrawable bd = (BitmapDrawable) drawable;
+                                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                bt btt = new bt(bitmap, path);
+                                bts.add(btt);
                             }
                         }else {
                             POI poi1 = new POI();
@@ -3896,6 +3908,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //locError(Integer.toString(poi.getPath().length()));
                         //locError(poi.getPath());
                             String path = mphotos.get(0).getZp1();
+                        File file = new File(path);
+                        if (file.exists()) {
                             Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
                             if (mphotos.size() != 0) {
                                 int degree = DataUtil.getPicRotate(path);
@@ -3905,9 +3919,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     Log.w(TAG, "showPopueWindowForPhoto: " + degree);
                                     bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                                 }
-                                bt btt = new bt(bitmap, mphotos.get(0).getZp1());
+                                bt btt = new bt(bitmap, path);
                                 bts1.add(btt);
                             }
+                        }else {
+                            //Resources res = MyApplication.getContext().getResources();
+                            //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
+                            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                            BitmapDrawable bd = (BitmapDrawable) drawable;
+                            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                            bt btt = new bt(bitmap, path);
+                            bts.add(btt);
+                        }
 
                     }
                 }
