@@ -1281,6 +1281,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        DataUtil.makeKML();
                         List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();
                         List<POI> pois = DataSupport.findAll(POI.class);
@@ -1369,17 +1370,20 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 }
                             });
                             File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
-                            InputStream inputStream = null;
+                            //InputStream inputStream = null;
                             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                             zipOut.setComment("test");
                             int size = files.size();
+                            Log.w(TAG, "run: " + size);
                             for (int i = 0; i < size; i++){
-                                inputStream = new FileInputStream(files.get(i));
+                                Log.w(TAG, "run: " + i);
+                                Log.w(TAG, "run: " + files.get(i).getPath());
+                                InputStream inputStream = new FileInputStream(files.get(i));
                                 zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
-                                /*int temp = 0;
-                                while ((temp = inputStream.read()) != -1){
-                                    zipOut.write(temp);
-                                }*/
+                                //int temp = 0;
+                                //while ((temp = inputStream.read()) != -1){
+                                //    zipOut.write(temp);
+                                //}
                                 byte buffer[] = new byte[4096];
                                 int realLength;
                                 while ((realLength = inputStream.read(buffer)) > 0){
@@ -1389,6 +1393,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             }
                             zipOut.close();
                             file1.delete();
+                            files.clear();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -1398,6 +1403,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             });
                         }catch (IOException e){
                             locError("出错!");
+                            Log.w(TAG, "run: " + e.toString());
                         }
                     }
                 }).start();

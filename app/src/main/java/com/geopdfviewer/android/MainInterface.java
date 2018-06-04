@@ -2137,8 +2137,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         getBitmap();
                         updateMapPage(poic);
                     }
-                }catch (IOException e){
-                    e.printStackTrace();
+                }catch (Exception e){
+                    Log.w(TAG, e.toString());
                 }
             }else {
                 file.delete();
@@ -3254,11 +3254,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
-                    showPOI = true;
-                    pdfView.zoomWithAnimation(c_zoom);
+                    try {
+                        showPOI = true;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }catch (Exception e){
+                        Log.w(TAG, e.toString());
+                    }
                 }else {
-                    showPOI = false;
-                    pdfView.zoomWithAnimation(c_zoom);
+                    try {
+                        showPOI = false;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }catch (Exception e){
+                        Log.w(TAG, e.toString());
+                    }
                 }
             }
         });
@@ -4095,6 +4103,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             e.printStackTrace();
         }
 
+        try {
             if (Build.VERSION.SDK_INT >= 24) {
                 //locError(Environment.getExternalStorageDirectory() + "/maphoto/" + Long.toString(timenow) + ".jpg");
                 imageUri = FileProvider.getUriForFile(MainInterface.this, "com.android.tuzhi.fileprovider", outputImage);
@@ -4103,6 +4112,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(intent, TAKE_PHOTO);
+        }catch (Exception e){
+            Log.w(TAG, e.toString());
+        }
+
     }
 
     //PDF页面变化监控

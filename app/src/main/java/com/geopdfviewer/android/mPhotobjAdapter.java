@@ -107,14 +107,14 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
         File file = new File(path);
         if (file.exists()) {
             Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 120);
-            int degree = DataUtil.getPicRotate(path);
+            /*int degree = DataUtil.getPicRotate(path);
             if (degree != 0) {
                 Matrix m = new Matrix();
                 m.setRotate(degree); // 旋转angle度
                 Log.w(TAG, "showPopueWindowForPhoto: " + degree);
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                holder.PhotoImage.setImageBitmap(bitmap);
-            }
+            }*/
+            holder.PhotoImage.setImageBitmap(bitmap);
         }else {
             Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
             BitmapDrawable bd = (BitmapDrawable) drawable;
@@ -123,6 +123,8 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
                     ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
             holder.PhotoImage.setImageBitmap(bitmap);
         }
+
+
         //}
         String data;
         data = "图片名称: " + mphoto.getM_name() + "\n" + "时间: " + mphoto.getM_time();

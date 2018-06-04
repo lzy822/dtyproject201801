@@ -361,15 +361,20 @@ public class DataUtil {
 
     //获取File可使用路径
     public static String getRealPath(String filePath) {
-        if (!filePath.contains("raw")) {
-            String str = "content://com.android.tuzhi.fileprovider/external_files";
-            String Dir = Environment.getExternalStorageDirectory().toString();
-            filePath = Dir + filePath.substring(str.length());
-        }else {
-            filePath = filePath.substring(5);
-            //locError("here");
-            //locError(filePath);
+        try {
+            if (!filePath.contains("raw")) {
+                String str = "content://com.android.tuzhi.fileprovider/external_files";
+                String Dir = Environment.getExternalStorageDirectory().toString();
+                filePath = Dir + filePath.substring(str.length());
+            }else {
+                filePath = filePath.substring(5);
+                //locError("here");
+                //locError(filePath);
+            }
+        }catch (Exception e){
+            Log.w(TAG, e.toString());
         }
+
         return filePath;
     }
 
@@ -785,18 +790,12 @@ public class DataUtil {
         //POI
         List<POI> pois = DataSupport.findAll(POI.class);
         if (pois.size() > 0) files.add(makePOIKML(pois));
-        //MTAPE
-        List<MTAPE> mtapes = DataSupport.findAll(MTAPE.class);
-        if (mtapes.size() > 0) files.add(makeTapeKML(mtapes, files));
-        //MPHOTO
-        List<MPHOTO> mphotos = DataSupport.findAll(MPHOTO.class);
-        if (mphotos.size() > 0) files.add(makePhotoKML(mphotos, files));
         //Trail
-        List<Trail> trails = DataSupport.findAll(Trail.class);
-        if (trails.size() > 0) files.add(makeTrailKML(trails));
+        //List<Trail> trails = DataSupport.findAll(Trail.class);
+        //if (trails.size() > 0) files.add(makeTrailKML(trails));
         //Lines_WhiteBlank
-        List<Lines_WhiteBlank> whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
-        if (whiteBlanks.size() > 0) files.add(makeWhiteBlankKML(whiteBlanks));
+        //List<Lines_WhiteBlank> whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
+        //if (whiteBlanks.size() > 0) files.add(makeWhiteBlankKML(whiteBlanks));
     }
 
     public static String plusID(int num){
@@ -911,7 +910,7 @@ public class DataUtil {
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
             sb.append("<td>").append("name").append("</td>").append("\n");
             sb.append("\n");
@@ -921,7 +920,7 @@ public class DataUtil {
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
             sb.append("<td>").append("ic").append("</td>").append("\n");
             sb.append("\n");
@@ -931,7 +930,7 @@ public class DataUtil {
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
             sb.append("<td>").append("POIC").append("</td>").append("\n");
             sb.append("\n");
@@ -941,17 +940,24 @@ public class DataUtil {
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
-            sb.append("<td>").append("photonum").append("</td>").append("\n");
+            sb.append("<td>").append("photoStr").append("</td>").append("\n");
             sb.append("\n");
-            sb.append("<td>").append(pois.get(i).getPhotonum()).append("</td>").append("\n");
+            List<MPHOTO> mphotos = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+            String photoStr = "";
+            for (int j = 0; j < mphotos.size(); j++){
+                if (j == 0){
+                    photoStr = mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/"), mphotos.get(j).getPath().length());
+                }else photoStr = photoStr + "|" + mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/") + 1, mphotos.get(j).getPath().length());
+            }
+            sb.append("<td>").append(photoStr).append("</td>").append("\n");
             sb.append("\n");
             sb.append("</tr>").append("\n");
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
             sb.append("<td>").append("description").append("</td>").append("\n");
             sb.append("\n");
@@ -961,17 +967,24 @@ public class DataUtil {
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
-            sb.append("<td>").append("tapenum").append("</td>").append("\n");
+            sb.append("<td>").append("tapeStr").append("</td>").append("\n");
             sb.append("\n");
-            sb.append("<td>").append(pois.get(i).getTapenum()).append("</td>").append("\n");
+            List<MTAPE> mtapes = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
+            String tapeStr = "";
+            for (int j = 0; j < mtapes.size(); j++){
+                if (j == 0){
+                    tapeStr = mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/"), mtapes.get(j).getPath().length());
+                }else tapeStr = tapeStr + "|" + mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
+            }
+            sb.append("<td>").append(tapeStr).append("</td>").append("\n");
             sb.append("\n");
             sb.append("</tr>").append("\n");
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
             sb.append("<td>").append("time").append("</td>").append("\n");
             sb.append("\n");
@@ -981,7 +994,7 @@ public class DataUtil {
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
             sb.append("<td>").append("x").append("</td>").append("\n");
             sb.append("\n");
@@ -991,7 +1004,7 @@ public class DataUtil {
             sb.append("\n");
             //
             //
-            sb.append("<tr>").append("\n");
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
             sb.append("<td>").append("y").append("</td>").append("\n");
             sb.append("\n");
@@ -1006,7 +1019,7 @@ public class DataUtil {
             sb.append("        ").append("<altitudeMode>clampToGround</altitudeMode>").append("\n");
             sb.append("        ").append("<coordinates>").append(" ").append(pois.get(i).getY()).append(",").append(pois.get(i).getX()).append(",").append(0).append("</coordinates>").append("\n");
             sb.append("      ").append("</Point>").append("\n");
-            sb.append("      ").append("</Placemark>").append("\n");
+            sb.append("    ").append("</Placemark>").append("\n");
             //
         }
         sb = makeKMLTail(sb);
