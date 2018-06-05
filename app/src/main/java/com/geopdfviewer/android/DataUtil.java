@@ -789,7 +789,9 @@ public class DataUtil {
         List<File> files = new ArrayList<File>();
         //POI
         List<POI> pois = DataSupport.findAll(POI.class);
-        if (pois.size() > 0) files.add(makePOIKML(pois));
+        if (pois.size() > 0) {
+            files.add(makePOIKML(pois));
+        }
         //Trail
         //List<Trail> trails = DataSupport.findAll(Trail.class);
         //if (trails.size() > 0) files.add(makeTrailKML(trails));
@@ -1151,6 +1153,67 @@ public class DataUtil {
             Log.w(TAG, e.toString());
         }
         return file1;
+    }
+
+    public static StringBuffer makeTxtHead(StringBuffer sb){
+        sb = sb.append("ic").append(";");
+        sb = sb.append("name").append(";");
+        sb = sb.append("poic").append(";");
+        sb = sb.append("photo").append(";");
+        sb = sb.append("tape").append(";");
+        sb = sb.append("description").append(";");
+        sb = sb.append("time").append(";");
+        sb = sb.append("x").append(";");
+        sb = sb.append("y").append("\n");
+        return sb;
+    }
+
+    public static void makeTxt(){
+        try {
+            final List<POI> pois = DataSupport.findAll(POI.class);
+            StringBuffer sb = new StringBuffer();
+            int size_POI = pois.size();
+            makeTxtHead(sb);
+            for (int i = 0; i < size_POI; i++) {
+                //属性表内容
+                sb.append(pois.get(i).getIc()).append(";").append(pois.get(i).getName()).append(";").append(pois.get(i).getPoic()).append(";");
+                List<MPHOTO> mphotos = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                String photoStr = "";
+                for (int j = 0; j < mphotos.size(); j++) {
+                    if (j == 0) {
+                        photoStr = mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/") + 1, mphotos.get(j).getPath().length());
+                    } else
+                        photoStr = photoStr + "|" + mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/") + 1, mphotos.get(j).getPath().length());
+                }
+                photoStr = URLDecoder.decode(photoStr, "utf-8");
+                sb.append(photoStr).append(";");
+                List<MTAPE> mtapes = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
+                String tapeStr = "";
+                for (int j = 0; j < mtapes.size(); j++) {
+                    if (j == 0) {
+                        tapeStr = mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
+                    } else
+                        tapeStr = tapeStr + "|" + mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
+                }
+                tapeStr = URLDecoder.decode(tapeStr, "utf-8");
+                sb.append(tapeStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
+            }
+            File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+            if (!file.exists() && !file.isDirectory()) {
+                file.mkdirs();
+            }
+            String outputPath = Long.toString(System.currentTimeMillis());
+            File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", outputPath + ".txt");
+            try {
+                FileOutputStream of = new FileOutputStream(file1);
+                of.write(sb.toString().getBytes());
+                of.close();
+            } catch (IOException e) {
+                Log.w(TAG, e.toString());
+            }
+        }catch (UnsupportedEncodingException e){
+            Log.w(TAG, e.toString());
+    }
     }
 
 }

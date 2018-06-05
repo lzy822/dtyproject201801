@@ -74,6 +74,8 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static com.geopdfviewer.android.DataUtil.makeTxt;
+
 public class select_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
 
@@ -1282,6 +1284,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     @Override
                     public void run() {
                         DataUtil.makeKML();
+                        makeTxt();
                         List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();
                         List<POI> pois = DataSupport.findAll(POI.class);
@@ -1351,7 +1354,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         if (!file.exists() && !file.isDirectory()){
                             file.mkdirs();
                         }
-                        String outputPath = Long.toString(System.currentTimeMillis());
+                        final String outputPath = Long.toString(System.currentTimeMillis());
                         File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
                         try {
                             FileOutputStream of = new FileOutputStream(file1);
@@ -1378,18 +1381,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             for (int i = 0; i < size; i++){
                                 Log.w(TAG, "run: " + i);
                                 Log.w(TAG, "run: " + files.get(i).getPath());
-                                InputStream inputStream = new FileInputStream(files.get(i));
-                                zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
-                                //int temp = 0;
-                                //while ((temp = inputStream.read()) != -1){
-                                //    zipOut.write(temp);
-                                //}
-                                byte buffer[] = new byte[4096];
-                                int realLength;
-                                while ((realLength = inputStream.read(buffer)) > 0){
-                                    zipOut.write(buffer, 0, realLength);
+                                boolean isOK = false;
+                                for (int k = 0; k < i; k++) {
+                                    if (files.get(i).getPath().equals(files.get(k).getPath())) break;
+                                    if (k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists()) isOK = true;
                                 }
-                                inputStream.close();
+                                if (isOK){
+                                    InputStream inputStream = new FileInputStream(files.get(i));
+                                    zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
+                                    //int temp = 0;
+                                    //while ((temp = inputStream.read()) != -1){
+                                    //    zipOut.write(temp);
+                                    //}
+                                    byte buffer[] = new byte[4096];
+                                    int realLength;
+                                    while ((realLength = inputStream.read(buffer)) > 0) {
+                                        zipOut.write(buffer, 0, realLength);
+                                    }
+                                    inputStream.close();
+                                }
                             }
                             zipOut.close();
                             file1.delete();
