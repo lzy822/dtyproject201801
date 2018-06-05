@@ -817,9 +817,11 @@ public class DataUtil {
         sb = sb.append("<Document id=\"" + str + "\">").append("\n");
         sb = sb.append("  ").append("<name>" + str + "</name>").append("\n");
         sb = sb.append("  ").append("<Snippet></Snippet>").append("\n");
+        if (str.equals("WhiteBlank")) sb.append("  ").append("<description><![CDATA[界线]]></description>");
         sb = sb.append("  ").append("<Folder id=\"FeatureLayer0\">").append("\n");
         sb = sb.append("    ").append("<name>" + str + "</name>").append("\n");
         sb = sb.append("    ").append("<Snippet></Snippet>").append("\n");
+        if (str.equals("WhiteBlank")) sb.append("    ").append("<description><![CDATA[界线]]></description>");
         return sb;
     }
 
@@ -875,6 +877,27 @@ public class DataUtil {
         sb.append("      ").append("<color>ff000000</color>").append("\n");
         sb.append("      ").append("<outline>0</outline>").append("\n");
         sb.append("    ").append("</PolyStyle>").append("\n");
+        sb.append("  ").append("</Style>").append("\n");
+        sb.append("</Document>").append("\n");
+        sb.append("</kml>").append("\n");
+        return sb;
+    }
+
+    public static StringBuffer makeKMLTailForLine(StringBuffer sb){
+        sb.append("  ").append("</Folder>").append("\n");
+        sb.append("  ").append("<Style id=\"LineStyle00\">").append("\n");
+        sb.append("    ").append("<LabelStyle>").append("\n");
+        sb.append("      ").append("<color>00000000</color>").append("\n");
+        sb.append("      ").append("<scale>0.000000</scale>").append("\n");
+        sb.append("    ").append("</LabelStyle>").append("\n");
+        sb.append("    ").append("<LabelStyle>").append("\n");
+        sb.append("      ").append("<color>00000000</color>").append("\n");
+        sb.append("      ").append("<scale>0.000000</scale>").append("\n");
+        sb.append("    ").append("</LabelStyle>").append("\n");
+        sb.append("    ").append("<LineStyle>").append("\n");
+        sb.append("      ").append("<color>ff005aad</color>").append("\n");
+        sb.append("      ").append("<width>1.000000</width>").append("\n");
+        sb.append("    ").append("</LineStyle>").append("\n");
         sb.append("  ").append("</Style>").append("\n");
         sb.append("</Document>").append("\n");
         sb.append("</kml>").append("\n");
@@ -1129,22 +1152,51 @@ public class DataUtil {
         return file1;
     }
 
-    public static File makeWhiteBlankKML(final List<Lines_WhiteBlank> whiteBlanks){
+    public static void makeWhiteBlankKML(){
+        final List<Lines_WhiteBlank> whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
         StringBuffer sb = new StringBuffer();
         int size_whiteBlanks = whiteBlanks.size();
-        makeKMLHead(sb, "Lines_WhiteBlank");
+        makeKMLHead(sb, "WhiteBlank");
         for (int i = 0; i < size_whiteBlanks; i++){
-            sb.append("<m_ic>").append(whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
-            sb.append("<m_lines>").append(whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
-            sb.append("<m_color>").append(whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
+            sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
+            sb.append("      ").append("<name>").append(whiteBlanks.get(i).getIc()).append("</name>").append("\n");
+            sb.append("      ").append("<Snippet></Snippet>").append("\n");
+            //属性表内容
+            sb = makeCDATAHead(sb);
+            sb = makeCDATATail(sb);
+            sb.append("      ").append("<styleUrl>#LineStyle00</styleUrl>").append("\n");
+            sb.append("      ").append("<MultiGeometry>").append("\n");
+            sb.append("        ").append("<LineString>").append("\n");
+            sb.append("          ").append("<extrude>0</extrude>").append("\n");
+            sb.append("          ").append("<tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode>").append("\n");
+            String[] lines_str = whiteBlanks.get(i).getLines().split(" ");
+            float[] lats = new float[lines_str.length / 2];
+            float[] lngs = new float[lines_str.length / 2];
+            for (int k = 0; k < lines_str.length; k++){
+                if (k == 0 || (k % 2 == 0)) {
+                    lats[k / 2] = Float.valueOf(lines_str[k]);
+                }
+                else {
+                    lngs[k / 2] = Float.valueOf(lines_str[k]);
+                }
+            }
+            StringBuffer str = new StringBuffer();
+            for (int k = 0; k < lngs.length; k++) {
+                str.append(" ").append(Float.toString(lngs[k])).append(",").append(Float.toString(lats[k])).append(",").append("0");
+            }
+            sb.append("          ").append("<coordinates>").append(str).append("</coordinates>").append("\n");
+            sb.append("        ").append("</LineString>").append("\n");
+            sb.append("      ").append("</MultiGeometry>").append("\n");
+            sb.append("    ").append("</Placemark>").append("\n");
+            //
         }
-        sb.append("</Lines_WhiteBlank>").append("\n");
+        sb = makeKMLTailForLine(sb);
         File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  "白板" + outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1152,7 +1204,6 @@ public class DataUtil {
         }catch (IOException e){
             Log.w(TAG, e.toString());
         }
-        return file1;
     }
 
     public static StringBuffer makeTxtHead(StringBuffer sb){

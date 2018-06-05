@@ -1285,6 +1285,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     public void run() {
                         DataUtil.makeKML();
                         makeTxt();
+                        DataUtil.makeWhiteBlankKML();
                         List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();
                         List<POI> pois = DataSupport.findAll(POI.class);
