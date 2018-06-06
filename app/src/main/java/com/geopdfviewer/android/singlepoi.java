@@ -4,6 +4,14 @@ import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -17,11 +25,13 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,9 +39,11 @@ import android.widget.Toast;
 import org.litepal.crud.DataSupport;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -66,11 +78,15 @@ public class singlepoi extends AppCompatActivity {
         super.onResume();
         refresh();
     }
+int showNum = 0;
+    List<Bitmap> bms;
+    PointF pt0 = new PointF();
 
     private void refresh(){
         List<POI> pois = DataSupport.where("poic = ?", POIC).find(POI.class);
         List<MTAPE> tapes = DataSupport.where("poic = ?", POIC).find(MTAPE.class);
-        List<MPHOTO> photos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
+        final List<MPHOTO> photos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
+        getBitmap(photos);
         Log.w(TAG, "pois: " + pois.size() + "\n");
         Log.w(TAG, "tapes1: " + pois.get(0).getTapenum() + "\n");
         Log.w(TAG, "photos1: " + pois.get(0).getPhotonum() + "\n");
@@ -79,7 +95,76 @@ public class singlepoi extends AppCompatActivity {
         POI poi1 = new POI();
         if (tapes.size() != 0) poi1.setTapenum(tapes.size());
         else poi1.setToDefault("tapenum");
-        if (photos.size() != 0) poi1.setPhotonum(photos.size());
+        if (photos.size() != 0) {
+            poi1.setPhotonum(photos.size());
+            final ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+            String path = photos.get(0).getPath();
+            File file = new File(path);
+            try {
+                if (file.exists()) {
+                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                    int degree = DataUtil.getPicRotate(path);
+                    if (degree != 0) {
+                        Matrix m = new Matrix();
+                        m.setRotate(degree); // 旋转angle度
+                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                    }
+                    imageView.setImageBitmap(bitmap);
+                }else {
+                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                    BitmapDrawable bd = (BitmapDrawable) drawable;
+                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                    imageView.setImageBitmap(bitmap);
+                }
+            }catch (IOException e){
+                Log.w(TAG, e.toString());
+            }
+            if (photos.size() > 1) {
+                imageView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        float distanceX = 0;
+                        float distanceY = 0;
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                pt0.set(event.getX(), event.getY());
+                                Log.w(TAG, "onTouchdown: " + event.getX());
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                Log.w(TAG, "onTouchup: " + event.getX());
+                                distanceX = event.getX() - pt0.x;
+                                distanceY = event.getY() - pt0.y;
+                                Log.w(TAG, "onTouch: " + distanceX);
+                                if (Math.abs(distanceX) > Math.abs(distanceY)) {
+                                    if (distanceX > 0){
+                                        Log.w(TAG, "bms.size : " + bms.size());
+                                        showNum++;
+                                        if (showNum > bms.size() - 1){
+                                            showNum = 0;
+                                            imageView.setImageBitmap(bms.get(0));
+                                        }else {
+                                            imageView.setImageBitmap(bms.get(showNum));
+                                        }
+                                    }else {
+                                        showNum--;
+                                        if (showNum < 0){
+                                            showNum = bms.size() - 1;
+                                            imageView.setImageBitmap(bms.get(showNum));
+                                        }else {
+                                            imageView.setImageBitmap(bms.get(showNum));
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                        return true;
+                    }
+                });
+            }
+        }
         else poi1.setToDefault("photonum");
         poi1.updateAll("poic = ?", POIC);
         Log.w(TAG, "refresh: " + poi1.updateAll("poic = ?", POIC));
@@ -146,6 +231,50 @@ public class singlepoi extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void getBitmap(final List<MPHOTO> photos){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.w(TAG, "run: photo.size" + photos.size());
+                bms = new ArrayList<>();
+                for (int i = 0; i < photos.size(); i++) {
+                    String path = photos.get(i).getPath();
+                    File file = new File(path);
+                        if (file.exists()) {
+                            try {
+                            Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                            int degree = DataUtil.getPicRotate(path);
+                            if (degree != 0) {
+                                Matrix m = new Matrix();
+                                m.setRotate(degree); // 旋转angle度
+                                Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                            }
+                                bms.add(bitmap);
+                            } catch (IOException e) {
+                                Log.w(TAG, e.toString());
+                                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                BitmapDrawable bd = (BitmapDrawable) drawable;
+                                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                bms.add(bitmap);
+                            }
+                        } else {
+                            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                            BitmapDrawable bd = (BitmapDrawable) drawable;
+                            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                            bms.add(bitmap);
+                        }
+                }
+
+                Log.w(TAG, "getBitmap: " + bms.size());
+            }
+        }).start();
     }
 
     private void showPopueWindowForPhoto(){

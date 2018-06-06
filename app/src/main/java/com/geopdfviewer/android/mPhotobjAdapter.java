@@ -77,7 +77,7 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 mPhotobj poi = mPhotobjList.get(position);
-                mOnItemClick.onItemClick(v, poi.getM_path(), position);
+                mOnItemClick.onItemClick(v, poi.getM_path(), position, poi.getM_time());
             }
         });
         holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -86,7 +86,7 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
                 if (mOnItemLong != null){
                     int position = holder.getAdapterPosition();
                     mPhotobj mphotobj = mPhotobjList.get(position);
-                    mOnItemLong.onItemLongClick(v, mphotobj.getM_path());
+                    mOnItemLong.onItemLongClick(v, mphotobj.getM_path(), mphotobj.getM_time());
                     holder.cardView.setCardBackgroundColor(Color.GRAY);
                 }
                 return true;
@@ -142,14 +142,14 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
 
 
     public interface OnRecyclerItemLongListener{
-        void onItemLongClick(View view,String path);
+        void onItemLongClick(View view, String path, String time);
     }
     public void setOnItemLongClickListener(mPhotobjAdapter.OnRecyclerItemLongListener listener){
         //Log.w(TAG, "setOnItemLongClickListener: " );
         this.mOnItemLong =  listener;
     }
     public interface OnRecyclerItemClickListener{
-        void onItemClick(View view,String path, int position);
+        void onItemClick(View view, String path, int position, String time);
     }
     public void setOnItemClickListener(OnRecyclerItemClickListener listener){
         this.mOnItemClick =  listener;

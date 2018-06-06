@@ -70,28 +70,32 @@ public class photoshow extends AppCompatActivity {
         adapter = new mPhotobjAdapter(mPhotobjList);
         adapter.setOnItemLongClickListener(new mPhotobjAdapter.OnRecyclerItemLongListener() {
             @Override
-            public void onItemLongClick(View view, String path) {
+            public void onItemLongClick(View view, String path, String time) {
                 setTitle(photoshow.this.getResources().getText(R.string.IsLongClicking));
-                deletePath = path;
+                //deletePath = path;
+                deletePath = time;
                 isLongClick = 0;
                 invalidateOptionsMenu();
             }
         });
         adapter.setOnItemClickListener(new mPhotobjAdapter.OnRecyclerItemClickListener() {
             @Override
-            public void onItemClick(View view, String path, int position) {
+            public void onItemClick(View view, String path, int position, String time) {
                 mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
                 if (isLongClick == 0){
                     if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
                         holder.cardView.setCardBackgroundColor(Color.GRAY);
-                        deletePath = deletePath + "wslzy" + path;
+                        //deletePath = deletePath + "wslzy" + path;
+                        deletePath = deletePath + "wslzy" + time;
                     }else {
                         holder.cardView.setCardBackgroundColor(Color.WHITE);
                         if (deletePath.contains("wslzy")) {
-                            String replace = "wslzy" + path;
+                            //String replace = "wslzy" + path;
+                            String replace = "wslzy" + time;
                             deletePath = deletePath.replace(replace, "");
                             if (deletePath.length() == deletePath.replace(replace, "").length()){
-                                String replace1 = path + "wslzy";
+                                //String replace1 = path + "wslzy";
+                                String replace1 = time + "wslzy";
                                 deletePath = deletePath.replace(replace1, "");
                             }
                         }else {
@@ -285,15 +289,16 @@ public class photoshow extends AppCompatActivity {
     }
 
     private void parseSelectedPath(){
-        List<POI> pois = DataSupport.where("poic = ?", POIC).find(POI.class);
         if (deletePath.contains("wslzy")){
             String[] nums = deletePath.split("wslzy");
             Log.w(TAG, "parseSelectedPath: " + nums[0] );
             for (int i = 0; i < nums.length; i++){
-                DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                //DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                DataSupport.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, nums[i]);
             }
         }else {
-            DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, deletePath);
+            //DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, deletePath);
+            DataSupport.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, deletePath);
         }
     }
 
