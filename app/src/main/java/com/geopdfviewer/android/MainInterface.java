@@ -4024,7 +4024,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
                                     ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             bt btt = new bt(bitmap, path);
-                            bts.add(btt);
+                            bts1.add(btt);
                         }
 
                     }
