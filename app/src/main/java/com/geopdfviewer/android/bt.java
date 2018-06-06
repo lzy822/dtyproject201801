@@ -5,12 +5,21 @@ import android.graphics.Bitmap;
 public class bt {
     private Bitmap m_bm;
     private String m_path;
+    private String poic;
     private int rotate;
 
     public bt(Bitmap m_bm, String m_path, int rotate) {
         this.m_bm = m_bm;
         this.m_path = m_path;
         this.rotate = rotate;
+    }
+
+    public String getPoic() {
+        return poic;
+    }
+
+    public void setPoic(String poic) {
+        this.poic = poic;
     }
 
     public int getRotate() {
