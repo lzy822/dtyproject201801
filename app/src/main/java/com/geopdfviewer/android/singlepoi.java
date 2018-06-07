@@ -130,35 +130,53 @@ int showNum = 0;
                         float distanceY = 0;
                         switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN:
-                                pt0.set(event.getX(), event.getY());
-                                Log.w(TAG, "onTouchdown: " + event.getX());
+                                    pt0.set(event.getX(), event.getY());
+                                    Log.w(TAG, "onTouchdown: " + event.getX());
+                                Log.w(TAG, "ACTION_POINTER_DOWN");
+                                Log.w(TAG, "同时按下的手指数量: " + event.getPointerCount());
                                 break;
                             case MotionEvent.ACTION_UP:
-                                Log.w(TAG, "onTouchup: " + event.getX());
-                                distanceX = event.getX() - pt0.x;
-                                distanceY = event.getY() - pt0.y;
-                                Log.w(TAG, "onTouch: " + distanceX);
-                                if (Math.abs(distanceX) > Math.abs(distanceY)) {
-                                    if (distanceX > 0){
-                                        Log.w(TAG, "bms.size : " + bms.size());
-                                        showNum++;
-                                        if (showNum > bms.size() - 1){
-                                            showNum = 0;
-                                            imageView.setImageBitmap(bms.get(0));
-                                        }else {
-                                            imageView.setImageBitmap(bms.get(showNum));
-                                        }
-                                    }else {
-                                        showNum--;
-                                        if (showNum < 0){
-                                            showNum = bms.size() - 1;
-                                            imageView.setImageBitmap(bms.get(showNum));
-                                        }else {
-                                            imageView.setImageBitmap(bms.get(showNum));
+                                    Log.w(TAG, "onTouchup: " + event.getX());
+                                    distanceX = event.getX() - pt0.x;
+                                    distanceY = event.getY() - pt0.y;
+                                    Log.w(TAG, "onTouch: " + distanceX);
+                                    if (Math.abs(distanceX) > Math.abs(distanceY) & Math.abs(distanceX) > 500 & Math.abs(distanceY) < 100) {
+                                        if (distanceX > 0) {
+                                            Log.w(TAG, "bms.size : " + bms.size());
+                                            showNum++;
+                                            if (showNum > bms.size() - 1) {
+                                                showNum = 0;
+                                                imageView.setImageBitmap(bms.get(0));
+                                            } else {
+                                                imageView.setImageBitmap(bms.get(showNum));
+                                            }
+                                        } else {
+                                            showNum--;
+                                            if (showNum < 0) {
+                                                showNum = bms.size() - 1;
+                                                imageView.setImageBitmap(bms.get(showNum));
+                                            } else {
+                                                imageView.setImageBitmap(bms.get(showNum));
+                                            }
                                         }
                                     }
+                                Log.w(TAG, "同时抬起的手指数量: " + event.getPointerCount());
+                                break;
+                            case MotionEvent.ACTION_MOVE:
+                                if (event.getPointerCount() == 3) {
+                                    Log.w(TAG, "3指滑动");
+                                }
+                                else if (event.getPointerCount() == 4) {
+                                    Log.w(TAG, "4指滑动");
+                                }
+                                else if (event.getPointerCount() == 5) {
+                                    Log.w(TAG, "5指滑动");
+                                }
+                                else if (event.getPointerCount() == 2) {
+                                    Log.w(TAG, "2指滑动");
                                 }
                                 break;
+
                         }
                         return true;
                     }
