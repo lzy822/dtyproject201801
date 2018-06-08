@@ -845,7 +845,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
                                 int size = bts.size();
                                 for (int j = 0; j < size; j++) {
-                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                    if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                         canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                         locError("lzy");
                                     }
@@ -855,7 +855,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
                                 int size = bts.size();
                                 for (int j = 0; j < size; j++) {
-                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                    if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                         canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                         locError("lzy");
                                     }
@@ -1841,6 +1841,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         pdfView.setBackgroundColor(Color.BLACK);
         final File file = new File(filePath);
         pdfView.fromFile(file)
+                .password("123123123")
                 .enableSwipe(false)
                 .defaultPage(pageNumber)
                 .enableAnnotationRendering(false)
@@ -3966,6 +3967,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
                                         ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                                 bt btt = new bt(bitmap, path);
+                                btt.setPoic("11");
                                 bts.add(btt);
                             }
                         }else {
