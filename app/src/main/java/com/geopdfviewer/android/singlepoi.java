@@ -69,6 +69,7 @@ public class singlepoi extends AppCompatActivity {
         setTitle("兴趣点信息");
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
+        textView_photonum = (TextView) findViewById(R.id.txt_photonumshow);
 
 
     }
@@ -79,8 +80,10 @@ public class singlepoi extends AppCompatActivity {
         refresh();
     }
 int showNum = 0;
-    List<Bitmap> bms;
+    List<bt> bms;
     PointF pt0 = new PointF();
+    boolean ges = false;
+    TextView textView_photonum;
 
     private void refresh(){
         List<POI> pois = DataSupport.where("poic = ?", POIC).find(POI.class);
@@ -98,6 +101,7 @@ int showNum = 0;
         if (photos.size() != 0) {
             poi1.setPhotonum(photos.size());
             final ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+            imageView.setVisibility(View.VISIBLE);
             String path = photos.get(0).getPath();
             File file = new File(path);
             try {
@@ -122,7 +126,7 @@ int showNum = 0;
             }catch (IOException e){
                 Log.w(TAG, e.toString());
             }
-            if (photos.size() > 1) {
+            if (photos.size() >= 1) {
                 imageView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
@@ -130,44 +134,92 @@ int showNum = 0;
                         float distanceY = 0;
                         switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN:
-                                    pt0.set(event.getX(), event.getY());
-                                    Log.w(TAG, "onTouchdown: " + event.getX());
+                                //第一个手指按下
+                                pt0.set(event.getX(0), event.getY(0));
+                                Log.w(TAG, "onTouchdown: " + event.getX());
+                                Log.w(TAG, "手指id: " + event.getActionIndex());
+                                Log.w(TAG, "ACTION_POINTER_DOWN");
+                                Log.w(TAG, "同时按下的手指数量: " + event.getPointerCount());
+                                break;
+                            case MotionEvent.ACTION_POINTER_DOWN:
+                                //第二个手指按下
+                                Log.w(TAG, "手指id: " + event.getActionIndex());
+                                Log.w(TAG, "onTouchdown: " + event.getX());
                                 Log.w(TAG, "ACTION_POINTER_DOWN");
                                 Log.w(TAG, "同时按下的手指数量: " + event.getPointerCount());
                                 break;
                             case MotionEvent.ACTION_UP:
+                                //最后一个手指抬起
+                                ges = false;
                                     Log.w(TAG, "onTouchup: " + event.getX());
-                                    distanceX = event.getX() - pt0.x;
-                                    distanceY = event.getY() - pt0.y;
+                                    Log.w(TAG, "getPointerId: " + event.getPointerId(0));
+                                    distanceX = event.getX(0) - pt0.x;
+                                    distanceY = event.getY(0) - pt0.y;
                                     Log.w(TAG, "onTouch: " + distanceX);
-                                    if (Math.abs(distanceX) > Math.abs(distanceY) & Math.abs(distanceX) > 500 & Math.abs(distanceY) < 100) {
+                                    if (Math.abs(distanceX) > Math.abs(distanceY) & Math.abs(distanceX) > 200 & Math.abs(distanceY) < 100) {
                                         if (distanceX > 0) {
                                             Log.w(TAG, "bms.size : " + bms.size());
                                             showNum++;
                                             if (showNum > bms.size() - 1) {
                                                 showNum = 0;
-                                                imageView.setImageBitmap(bms.get(0));
+                                                imageView.setImageBitmap(bms.get(0).getM_bm());
                                             } else {
-                                                imageView.setImageBitmap(bms.get(showNum));
+                                                imageView.setImageBitmap(bms.get(showNum).getM_bm());
                                             }
                                         } else {
                                             showNum--;
                                             if (showNum < 0) {
                                                 showNum = bms.size() - 1;
-                                                imageView.setImageBitmap(bms.get(showNum));
+                                                imageView.setImageBitmap(bms.get(showNum).getM_bm());
                                             } else {
-                                                imageView.setImageBitmap(bms.get(showNum));
+                                                imageView.setImageBitmap(bms.get(showNum).getM_bm());
                                             }
                                         }
-                                    }
-                                Log.w(TAG, "同时抬起的手指数量: " + event.getPointerCount());
+                                    Log.w(TAG, "同时抬起的手指数量: " + event.getPointerCount());
+                                    Log.w(TAG, "手指id: " + event.getActionIndex());
+                                }
                                 break;
                             case MotionEvent.ACTION_MOVE:
                                 if (event.getPointerCount() == 3) {
                                     Log.w(TAG, "3指滑动");
+
                                 }
                                 else if (event.getPointerCount() == 4) {
-                                    Log.w(TAG, "4指滑动");
+                                    if (!ges) {
+                                        Log.w(TAG, "4指滑动");
+                                        AlertDialog.Builder dialog = new AlertDialog.Builder(singlepoi.this);
+                                        dialog.setTitle("提示");
+                                        dialog.setMessage("确认删除图片吗?");
+                                        dialog.setCancelable(false);
+                                        dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                List<POI> pois1 = DataSupport.where("poic = ?", POIC).find(POI.class);
+                                                if (pois1.get(0).getPhotonum() > 0) {
+                                                    textView_photonum.setText(Integer.toString(pois1.get(0).getPhotonum() - 1));
+                                                    POI poi = new POI();
+                                                    poi.setPhotonum(pois1.get(0).getPhotonum() - 1);
+                                                    poi.updateAll("poic = ?", POIC);
+                                                    DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, bms.get(showNum).getM_path());
+                                                    bms.remove(showNum);
+                                                    if (showNum > pois1.get(0).getPhotonum() - 1) {
+                                                        if (bms.size() > 0) imageView.setImageBitmap(bms.get(0).getM_bm());
+                                                        else imageView.setVisibility(View.GONE);
+                                                    }
+                                                    else if (showNum < pois1.get(0).getPhotonum() - 1) imageView.setImageBitmap(bms.get(showNum).getM_bm());
+                                                    else imageView.setVisibility(View.GONE);
+                                                    Toast.makeText(singlepoi.this, "已经删除图片", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                        dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                            }
+                                        });
+                                        dialog.show();
+                                        ges = true;
+                                    }
                                 }
                                 else if (event.getPointerCount() == 5) {
                                     Log.w(TAG, "5指滑动");
@@ -204,7 +256,6 @@ int showNum = 0;
         TextView textView_time = (TextView) findViewById(R.id.txt_timeshow);
         textView_time.setText(poi.getTime());
         Log.w(TAG, Integer.toString(tapes.size()));
-        TextView textView_photonum = (TextView) findViewById(R.id.txt_photonumshow);
         textView_photonum.setText(Integer.toString(photos.size()));
         textView_photonum.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -270,7 +321,7 @@ int showNum = 0;
                                 Log.w(TAG, "showPopueWindowForPhoto: " + degree);
                                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                             }
-                                bms.add(bitmap);
+                                bms.add(new bt(bitmap,  path));
                             } catch (IOException e) {
                                 Log.w(TAG, e.toString());
                                 Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
@@ -278,7 +329,7 @@ int showNum = 0;
                                 Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
                                 bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
                                         ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                                bms.add(bitmap);
+                                bms.add(new bt(bitmap, ""));
                             }
                         } else {
                             Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
@@ -286,7 +337,7 @@ int showNum = 0;
                             Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
                             bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
                                     ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                            bms.add(bitmap);
+                            bms.add(new bt(bitmap, ""));
                         }
                 }
 
