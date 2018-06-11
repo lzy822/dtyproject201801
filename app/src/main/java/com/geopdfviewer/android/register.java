@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -41,7 +42,11 @@ public class register extends AppCompatActivity {
         SharedPreferences pref1 = getSharedPreferences("imei", MODE_PRIVATE);
         boolean isLicense = pref1.getBoolean("type", false);
         String endDate = pref1.getString("endDate", "");
-        Log.w(TAG, "password: " + DataUtil.getPassword(deviceId.substring(9)) );
+        String strr = DataUtil.getPassword1(deviceId.substring(deviceId.length() - 6));
+        Log.w(TAG, "password test: " + strr);
+        Log.w(TAG, "password test: " + DataUtil.reverseStr(strr));
+        Log.w(TAG, "password test: " + DataUtil.reReverseStr(DataUtil.reverseStr(strr)));
+        Log.w(TAG, "password test: " + (strr.equals(DataUtil.reReverseStr(DataUtil.reverseStr(strr)))));
         Log.w(TAG, "getIMEI: islicense" + Boolean.toString(isLicense) );
         Log.w(TAG, "endDate: " +  endDate);
         if (isLicense){
@@ -55,7 +60,7 @@ public class register extends AppCompatActivity {
                 Log.w(TAG, "see here: " );
                 SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
                 editor.putString("mimei", deviceId);
-                editor.putString("password", DataUtil.getPassword(deviceId.substring(9)));
+                editor.putString("password", DataUtil.getPassword1(deviceId.substring(deviceId.length() - 6)).substring(0, 6));
                 editor.putBoolean("type", false);
                 editor.apply();
                 Toast.makeText(register.this, "授权码已经过期, 请重新获取", Toast.LENGTH_LONG).show();
@@ -65,7 +70,7 @@ public class register extends AppCompatActivity {
             Log.w(TAG, "see here: " );
             SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
             editor.putString("mimei", deviceId);
-            editor.putString("password", DataUtil.getPassword(deviceId.substring(9)));
+            editor.putString("password", DataUtil.getPassword1(deviceId.substring(deviceId.length() - 6)).substring(0, 6));
             editor.putBoolean("type", false);
             editor.apply();
             return false;
@@ -175,7 +180,11 @@ public class register extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     String edittxt = editText.getText().toString();
-                    if (edittxt.length() >= 9 & edittxt.length() <= 11) {
+                    /*if (edittxt.length() >= 9 & edittxt.length() <= 11) {
+                        Log.w(TAG, "str: " + edittxt.substring(0, edittxt.length() - 2));
+                        manageInputLisence(edittxt);
+                    }*/
+                    if (edittxt.length() == 15) {
                         Log.w(TAG, "str: " + edittxt.substring(0, edittxt.length() - 2));
                         manageInputLisence(edittxt);
                     }
@@ -202,15 +211,19 @@ public class register extends AppCompatActivity {
     private boolean verifyInputLisence(String edittxt){
         SharedPreferences pref1 = getSharedPreferences("imei", MODE_PRIVATE);
         String password = pref1.getString("password", "");
-        if (edittxt.substring(0, edittxt.length() - 1).contentEquals(password)) return true;
+        Log.w(TAG, "verifyInputLisence: " + edittxt.substring(4, 10).toString());
+        Log.w(TAG, "verifyInputLisence password: " + password);
+        if (edittxt.substring(4, 10).contentEquals(password)) return true;
         else return false;
     }
 
     //处理输入信息
     private void manageInputLisence(String edittxt){
-        SimpleDateFormat df2 = new SimpleDateFormat(register.this.getResources().getText(R.string.Date).toString());
+        /*SimpleDateFormat df2 = new SimpleDateFormat(register.this.getResources().getText(R.string.Date).toString());
         Date date = new Date(System.currentTimeMillis());
-        String startTime = df2.format(date);
+        String startTime = df2.format(date);*/
+        String strr = DataUtil.reReverseStr(edittxt);
+        String startTime = DataUtil.getDateFromStr(strr.substring(6, strr.length() - 1));
         if (verifyInputLisence(edittxt)){
             boolean isOKforGo = false;
             SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();

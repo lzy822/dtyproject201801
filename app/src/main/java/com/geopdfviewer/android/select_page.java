@@ -1501,7 +1501,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
             else {
                 in = new FileInputStream(file);
-                bmPath = DataUtil.getDtThumbnail(name, "/TuZhi/" + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
+                bmPath = DataUtil.getDtThumbnail(name, "/TuZhi" + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
             }
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
