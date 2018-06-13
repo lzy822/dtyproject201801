@@ -224,49 +224,67 @@ public class register extends AppCompatActivity {
         String startTime = df2.format(date);*/
         String strr = DataUtil.reReverseStr(edittxt);
         String startTime = DataUtil.getDateFromStr(strr.substring(6, strr.length() - 1));
-        if (verifyInputLisence(edittxt)){
-            boolean isOKforGo = false;
-            SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
-            if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("x")) {
-                editor.putBoolean("type", true);
-                editor.putString("startDate", startTime);
-                editor.putString("endDate", DataUtil.datePlus(startTime, 7));
-                isOKforGo = true;
-            } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("X")) {
-                editor.putBoolean("type", true);
-                editor.putString("startDate", startTime);
-                editor.putString("endDate", DataUtil.datePlus(startTime, 180));
-                isOKforGo = true;
-            } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("y")) {
-                editor.putBoolean("type", true);
-                editor.putString("startDate", startTime);
-                editor.putString("endDate", DataUtil.datePlus(startTime, 366));
-                isOKforGo = true;
-            }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("g")) {
-                editor.putBoolean("type", true);
-                editor.putString("startDate", startTime);
-                editor.putString("endDate", DataUtil.datePlus(startTime, 30));
-                isOKforGo = true;
-            }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("G")) {
-                editor.putBoolean("type", true);
-                editor.putString("startDate", startTime);
-                editor.putString("endDate", DataUtil.datePlus(startTime, 90));
-                isOKforGo = true;
-            }else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("j")) {
-                editor.putBoolean("type", true);
-                editor.putString("startDate", startTime);
-                editor.putString("endDate", DataUtil.datePlus(startTime, 3660));
-                isOKforGo = true;
+            if (verifyInputLisence(edittxt)) {
+                boolean isOKforGo = false;
+                SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
+                if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("x")) {
+                    String endTime = DataUtil.datePlus(startTime, 7);
+                    if (DataUtil.verifyDate(endTime)) {
+                        editor.putBoolean("type", true);
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", endTime);
+                        isOKforGo = true;
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("X")) {
+                    String endTime = DataUtil.datePlus(startTime, 180);
+                    if (DataUtil.verifyDate(endTime)) {
+                        editor.putBoolean("type", true);
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", endTime);
+                        isOKforGo = true;
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("y")) {
+                    String endTime = DataUtil.datePlus(startTime, 366);
+                    if (DataUtil.verifyDate(endTime)) {
+                        editor.putBoolean("type", true);
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", endTime);
+                        isOKforGo = true;
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("g")) {
+                    String endTime = DataUtil.datePlus(startTime, 30);
+                    if (DataUtil.verifyDate(endTime)) {
+                        editor.putBoolean("type", true);
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", endTime);
+                        isOKforGo = true;
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("G")) {
+                    String endTime = DataUtil.datePlus(startTime, 90);
+                    if (DataUtil.verifyDate(endTime)) {
+                        editor.putBoolean("type", true);
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", endTime);
+                        isOKforGo = true;
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("j")) {
+                    String endTime = DataUtil.datePlus(startTime, 3660);
+                    if (DataUtil.verifyDate(endTime)) {
+                        editor.putBoolean("type", true);
+                        editor.putString("startDate", startTime);
+                        editor.putString("endDate", endTime);
+                        isOKforGo = true;
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                }
+                if (isOKforGo) {
+                    editor.apply();
+                    Intent intent = new Intent(register.this, select_page.class);
+                    startActivity(intent);
+                    register.this.finish();
+                } else
+                    Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
             }
-            if (isOKforGo){
-                editor.apply();
-                Intent intent = new Intent(register.this, select_page.class);
-                startActivity(intent);
-                register.this.finish();
-            }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
-        }
-
     }
 }
