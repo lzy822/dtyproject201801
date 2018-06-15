@@ -1,12 +1,12 @@
 package com.geopdfviewer.android;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.crud.LitePalSupport;
 
 /**
  * Created by 54286 on 2018/3/15.
  */
 
-public class POI  extends DataSupport {
+public class POI  extends LitePalSupport {
     private int id;
     private String ic;
     private String name;

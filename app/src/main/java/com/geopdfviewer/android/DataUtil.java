@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -841,15 +841,15 @@ public class DataUtil {
     public static void makeKML(){
         List<File> files = new ArrayList<File>();
         //POI
-        List<POI> pois = DataSupport.findAll(POI.class);
+        List<POI> pois = LitePal.findAll(POI.class);
         if (pois.size() > 0) {
             files.add(makePOIKML(pois));
         }
         //Trail
-        //List<Trail> trails = DataSupport.findAll(Trail.class);
+        //List<Trail> trails = LitePal.findAll(Trail.class);
         //if (trails.size() > 0) files.add(makeTrailKML(trails));
         //Lines_WhiteBlank
-        //List<Lines_WhiteBlank> whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
+        //List<Lines_WhiteBlank> whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
         //if (whiteBlanks.size() > 0) files.add(makeWhiteBlankKML(whiteBlanks));
     }
 
@@ -1022,7 +1022,7 @@ public class DataUtil {
             sb.append("\n");
             sb.append("<td>").append("photoStr").append("</td>").append("\n");
             sb.append("\n");
-            List<MPHOTO> mphotos = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+            List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
             String photoStr = "";
             for (int j = 0; j < mphotos.size(); j++){
                 if (j == 0){
@@ -1049,7 +1049,7 @@ public class DataUtil {
             sb.append("\n");
             sb.append("<td>").append("tapeStr").append("</td>").append("\n");
             sb.append("\n");
-            List<MTAPE> mtapes = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
+            List<MTAPE> mtapes = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
             String tapeStr = "";
             for (int j = 0; j < mtapes.size(); j++){
                 if (j == 0){
@@ -1206,7 +1206,7 @@ public class DataUtil {
     }
 
     public static void makeWhiteBlankKML(){
-        final List<Lines_WhiteBlank> whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
+        final List<Lines_WhiteBlank> whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
         StringBuffer sb = new StringBuffer();
         int size_whiteBlanks = whiteBlanks.size();
         makeKMLHead(sb, "WhiteBlank");
@@ -1274,14 +1274,14 @@ public class DataUtil {
 
     public static void makeTxt(){
         try {
-            final List<POI> pois = DataSupport.findAll(POI.class);
+            final List<POI> pois = LitePal.findAll(POI.class);
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
             makeTxtHead(sb);
             for (int i = 0; i < size_POI; i++) {
                 //属性表内容
                 sb.append(pois.get(i).getIc()).append(";").append(pois.get(i).getName()).append(";").append(pois.get(i).getPoic()).append(";");
-                List<MPHOTO> mphotos = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
                 String photoStr = "";
                 for (int j = 0; j < mphotos.size(); j++) {
                     if (j == 0) {
@@ -1291,7 +1291,7 @@ public class DataUtil {
                 }
                 photoStr = URLDecoder.decode(photoStr, "utf-8");
                 sb.append(photoStr).append(";");
-                List<MTAPE> mtapes = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
+                List<MTAPE> mtapes = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
                 String tapeStr = "";
                 for (int j = 0; j < mtapes.size(); j++) {
                     if (j == 0) {

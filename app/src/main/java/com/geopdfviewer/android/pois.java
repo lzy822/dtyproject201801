@@ -16,7 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +63,7 @@ public class pois extends AppCompatActivity {
 
     private void refreshCard(){
         mPOIobjList.clear();
-        Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+        Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
         if (cursor.moveToFirst()){
             do {
                 String POIC = cursor.getString(cursor.getColumnIndex("poic"));
@@ -170,9 +170,9 @@ public class pois extends AppCompatActivity {
                 resetView();
                 break;
             case R.id.deletepoi:
-                /*DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
-                DataSupport.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
-                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);*/
+                /*LitePal.deleteAll(POI.class, "POIC = ?", selectedPOIC);
+                LitePal.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
+                LitePal.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);*/
                 parseSelectedPOIC();
                 resetView();
                 break;
@@ -186,14 +186,14 @@ public class pois extends AppCompatActivity {
         if (selectedPOIC.contains(" ")){
             String[] nums = selectedPOIC.split(" ");
             for (int i = 0; i < nums.length; i++){
-                DataSupport.deleteAll(POI.class, "POIC = ?", nums[i]);
-                DataSupport.deleteAll(MTAPE.class, "POIC = ?", nums[i]);
-                DataSupport.deleteAll(MPHOTO.class, "POIC = ?", nums[i]);
+                LitePal.deleteAll(POI.class, "POIC = ?", nums[i]);
+                LitePal.deleteAll(MTAPE.class, "POIC = ?", nums[i]);
+                LitePal.deleteAll(MPHOTO.class, "POIC = ?", nums[i]);
             }
         }else {
-            DataSupport.deleteAll(POI.class, "POIC = ?", selectedPOIC);
-            DataSupport.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
-            DataSupport.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);
+            LitePal.deleteAll(POI.class, "POIC = ?", selectedPOIC);
+            LitePal.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
+            LitePal.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);
         }
     }
 }

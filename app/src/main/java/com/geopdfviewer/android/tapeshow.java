@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import org.litepal.LitePal;
 import org.litepal.crud.DataSupport;
 
 import java.io.File;
@@ -43,7 +44,7 @@ public class tapeshow extends AppCompatActivity {
 
     private void refreshCard(){
         mTapeobjList.clear();
-        List<MTAPE> mtapes = DataSupport.where("POIC = ?", POIC).find(MTAPE.class);
+        List<MTAPE> mtapes = LitePal.where("POIC = ?", POIC).find(MTAPE.class);
         for (MTAPE mtape : mtapes){
             mTapeobj mtapeobj = new mTapeobj(mtape.getPoic(), mtape.getPoic(), mtape.getTime(), mtape.getPath());
             mTapeobjList.add(mtapeobj);
@@ -159,9 +160,9 @@ public class tapeshow extends AppCompatActivity {
             case R.id.deletepoi:
                 isLongClick = 1;
                 invalidateOptionsMenu();
-                //DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
-                //DataSupport.deleteAll(MTAPE.class, "path = ?", deletePath);
-                //DataSupport.deleteAll(MTAPE.class, "POIC = ?", POIC);
+                //LitePal.deleteAll(MTAPE.class, "POIC = ?", POIC, "path = ?", deletePath);
+                //LitePal.deleteAll(MTAPE.class, "path = ?", deletePath);
+                //LitePal.deleteAll(MTAPE.class, "POIC = ?", POIC);
                 parseSelectedPath();
                 setTitle(tapeshow.this.getResources().getText(R.string.TapeList));
                 refreshCard();
@@ -186,7 +187,7 @@ public class tapeshow extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
             Uri uri = data.getData();
             long time = System.currentTimeMillis();
-            List<POI> POIs = DataSupport.where("POIC = ?", POIC).find(POI.class);
+            List<POI> POIs = LitePal.where("POIC = ?", POIC).find(POI.class);
             POI poi = new POI();
             poi.setTapenum(POIs.get(0).getTapenum() + 1);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(tapeshow.this.getResources().getText(R.string.DateAndTime).toString());
@@ -202,16 +203,16 @@ public class tapeshow extends AppCompatActivity {
     }
 
     private void parseSelectedPath(){
-        List<POI> pois = DataSupport.where("POIC = ?", POIC).find(POI.class);
+        List<POI> pois = LitePal.where("POIC = ?", POIC).find(POI.class);
         if (deletePath.contains("wslzy")){
             String[] nums = deletePath.split("wslzy");
             for (int i = 0; i < nums.length; i++){
                 Log.w(TAG, "parseSelectedPath: " + nums[i]);
-                DataSupport.deleteAll(MTAPE.class, "POIC = ? and path = ?", POIC, nums[i]);
+                LitePal.deleteAll(MTAPE.class, "POIC = ? and path = ?", POIC, nums[i]);
             }
         }else {
             Log.w(TAG, "parseSelectedPath111: " + deletePath);
-            DataSupport.deleteAll(MTAPE.class, "POIC = ? and path = ?", POIC, deletePath);
+            LitePal.deleteAll(MTAPE.class, "POIC = ? and path = ?", POIC, deletePath);
         }
     }
 

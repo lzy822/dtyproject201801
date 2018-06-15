@@ -52,7 +52,6 @@ import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
 import org.litepal.LitePal;
-import org.litepal.crud.DataSupport;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -529,14 +528,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     public void deleteMDatabase(String m_ic){
         /*
-        List<POI> pois = DataSupport.where("ic = ?", m_ic).find(POI.class);
+        List<POI> pois = LitePal.where("ic = ?", m_ic).find(POI.class);
         for ( POI poi : pois){
             String poic = poi.getPoic();
-            DataSupport.deleteAll(MTAPE.class, "POIC = ?", poic);
-            DataSupport.deleteAll(MPHOTO.class, "POIC = ?", poic);
+            LitePal.deleteAll(MTAPE.class, "POIC = ?", poic);
+            LitePal.deleteAll(MPHOTO.class, "POIC = ?", poic);
         }
-        DataSupport.deleteAll(POI.class, "ic = ?", m_ic);
-        DataSupport.deleteAll(Trail.class, "ic = ?", m_ic);*/
+        LitePal.deleteAll(POI.class, "ic = ?", m_ic);
+        LitePal.deleteAll(Trail.class, "ic = ?", m_ic);*/
     }
 
     public void deletemFile(String filePath){
@@ -1288,7 +1287,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         DataUtil.makeWhiteBlankKML();
                         List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();
-                        List<POI> pois = DataSupport.findAll(POI.class);
+                        List<POI> pois = LitePal.findAll(POI.class);
                         int size_POI = pois.size();
                         sb = sb.append("<POI>").append("\n");
                         for (int i = 0; i < size_POI; i++){
@@ -1304,7 +1303,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<time>").append(pois.get(i).getTime()).append("</time>").append("\n");
                         }
                         sb.append("</POI>").append("\n");
-                        List<Trail> trails = DataSupport.findAll(Trail.class);
+                        List<Trail> trails = LitePal.findAll(Trail.class);
                         int size_trail = trails.size();
                         sb = sb.append("<Trail>").append("\n");
                         for (int i = 0; i < size_trail; i++){
@@ -1316,7 +1315,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
                         }
                         sb.append("</Trail>").append("\n");
-                        List<MPHOTO> mphotos = DataSupport.findAll(MPHOTO.class);
+                        List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
                         int size_mphoto = mphotos.size();
                         sb = sb.append("<MPHOTO>").append("\n");
                         for (int i = 0; i < size_mphoto; i++){
@@ -1329,7 +1328,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
                         }
                         sb.append("</MPHOTO>").append("\n");
-                        List<MTAPE> mtapes = DataSupport.findAll(MTAPE.class);
+                        List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
                         int size_mtape = mtapes.size();
                         sb = sb.append("<MTAPE>").append("\n");
                         for (int i = 0; i < size_mtape; i++){
@@ -1342,7 +1341,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
                         }
                         sb.append("</MTAPE>").append("\n");
-                        List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.findAll(Lines_WhiteBlank.class);
+                        List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
                         int size_lines_whiteBlank = lines_whiteBlanks.size();
                         sb = sb.append("<Lines_WhiteBlank>").append("\n");
                         for (int i = 0; i < size_lines_whiteBlank; i++){

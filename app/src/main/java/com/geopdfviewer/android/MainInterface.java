@@ -88,7 +88,7 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.github.clans.fab.FloatingActionButton;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -364,7 +364,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         showLocationText(pt1);
         if (pt1.x != 0) {
             if (isDrawType == POI_DRAW_TYPE & !isQuery) {
-                List<POI> POIs = DataSupport.findAll(POI.class);
+                List<POI> POIs = LitePal.findAll(POI.class);
                 POI poi = new POI();
                 poi.setName("POI" + String.valueOf(POIs.size() + 1));
                 poi.setIc(ic);
@@ -560,7 +560,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (isQuery & isDrawType == NONE_DRAW_TYPE) {
                 Log.w(TAG, "onTap: ");
                 List<mPOIobj> pois = new ArrayList<>();
-                Cursor cursor = DataSupport.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+                Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
                 if (cursor.moveToFirst()) {
                     do {
                         String POIC = cursor.getString(cursor.getColumnIndex("poic"));
@@ -796,7 +796,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
         if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
-            List<Trail> trails = DataSupport.findAll(Trail.class);
+            List<Trail> trails = LitePal.findAll(Trail.class);
             for (Trail trail : trails){
                 String str1 = trail.getPath();
                 String[] TrailString = str1.split(" ");
@@ -822,9 +822,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         if(isDrawType == POI_DRAW_TYPE || showPOI){
             if (esterEgg_plq) drawPLQData(canvas);
-            //List<POI> pois = DataSupport.where("ic = ?", ic).find(POI.class);
+            //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
             List<PointF> showpts = new ArrayList<>();
-            List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+            List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
             int size0 = pois.size();
             for (int i = 0; i < size0; i++) {
                 if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
@@ -884,7 +884,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
                                 }
                             } else {
-                                List<MPHOTO> mphotos = DataSupport.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
                                 if (pois.get(i).getTapenum() == 0) {
                                     canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
                                     //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
@@ -925,7 +925,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                         }
                     } else {
-                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
+                        List<MPHOTO> mphotos = LitePal.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
                         if (poi.getTapenum() == 0) {
                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint4);
                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
@@ -2009,7 +2009,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 ExifInterface exifInterface = new ExifInterface(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 exifInterface.getLatLong(latandlong);
                 locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                final List<POI> POIs = DataSupport.findAll(POI.class);
+                final List<POI> POIs = LitePal.findAll(POI.class);
                 int size = POIs.size();
                 if (size > 0) {
                     float K = (float) 0.002;
@@ -2076,7 +2076,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             theNum = 0;
             final Uri uri = data.getData();
             final long time = System.currentTimeMillis();
-            final List<POI> POIs = DataSupport.findAll(POI.class);
+            final List<POI> POIs = LitePal.findAll(POI.class);
             int size = POIs.size();
             if (size > 0) {
                 float K = (float) 0.002;
@@ -2109,8 +2109,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             String POIC = "POI" + String.valueOf(time);
-                            //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
-                            //List<POI> POIs = DataSupport.findAll(POI.class);
+                            //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+                            //List<POI> POIs = LitePal.findAll(POI.class);
                             DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
                             DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
                             updateMapPage(POIC);
@@ -2119,16 +2119,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     dialog.show();
                 } else {
                     String POIC = "POI" + String.valueOf(time);
-                    //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
-                    //List<POI> POIs = DataSupport.findAll(POI.class);
+                    //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+                    //List<POI> POIs = LitePal.findAll(POI.class);
                     DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
                     DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(this, uri), ic, POIC, simpleDateFormat.format(date));
                     updateMapPage(POIC);
                 }
             }else {
                 String POIC = "POI" + String.valueOf(time);
-                //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
-                //List<POI> POIs = DataSupport.findAll(POI.class);
+                //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+                //List<POI> POIs = LitePal.findAll(POI.class);
                 DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
                 DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
                 updateMapPage(POIC);
@@ -2149,9 +2149,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     ExifInterface exifInterface = new ExifInterface(imageuri);
                     exifInterface.getLatLong(latandlong);
                     locError("see here" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                    //List<POI> POIs = DataSupport.where("ic = ?", ic).find(POI.class);
+                    //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
 
-                    final List<POI> POIs = DataSupport.findAll(POI.class);
+                    final List<POI> POIs = LitePal.findAll(POI.class);
                     int size = POIs.size();
                     if (size > 0) {
                         float K = (float) 0.002;
@@ -2199,7 +2199,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             });
                             dialog.show();
                         } else {
-                            //List<POI> POIs = DataSupport.findAll(POI.class);
+                            //List<POI> POIs = LitePal.findAll(POI.class);
                             //long time = System.currentTimeMillis();
                             String poic = "POI" + String.valueOf(time);
                             if (latandlong[0] != 0 & latandlong[1] != 0) {
@@ -2407,7 +2407,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         back_pop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+                List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                 int size = lines_whiteBlanks.size();
                 for (int kk = 0; kk < size; kk++){
                     Log.w(TAG, "onClick: " + lines_whiteBlanks.get(kk).getMmid());
@@ -2415,13 +2415,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 int size1 = geometry_whiteBlanks.size();
                 if (size <= 0) {
                     whiteBlankPt = "";
-                    //DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
+                    //LitePal.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
                     Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
                 }else {
                     whiteBlankPt = "";
-                    Log.w(TAG, "onClick: " + DataSupport.deleteAll(Lines_WhiteBlank.class, "mmid = ? and ic = ?", Integer.toString(size - 1), ic));
+                    Log.w(TAG, "onClick: " + LitePal.deleteAll(Lines_WhiteBlank.class, "mmid = ? and ic = ?", Integer.toString(size - 1), ic));
                     if (size1 != 0) geometry_whiteBlanks.remove(size1 - 1);
                     pdfView.zoomWithAnimation(c_zoom);
                     //Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
@@ -2466,17 +2466,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         eraseContent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Lines_WhiteBlank> lines_whiteBlanks = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+                List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                 int size = lines_whiteBlanks.size();
                 if (size <= 0) {
                     whiteBlankPt = "";
-                    //DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
+                    //LitePal.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
                     Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
                 }else {
                     whiteBlankPt = "";
-                    DataSupport.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
+                    LitePal.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
                     geometry_whiteBlanks.clear();
                     pdfView.zoomWithAnimation(c_zoom);
                     Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
@@ -2522,7 +2522,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //Toast.makeText(MainInterface.this, "抬起", Toast.LENGTH_SHORT).show();
                         geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(ic, whiteBlankPt, color_Whiteblank);
                         geometry_whiteBlanks.add(geometry_whiteBlank);
-                        List<Lines_WhiteBlank> liness = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+                        List<Lines_WhiteBlank> liness = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                         Log.w(TAG, "onTouch: " + liness.size());
                         int size = liness.size();
                         Lines_WhiteBlank lines = new Lines_WhiteBlank();
@@ -2642,7 +2642,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         sql = sql + " AND (x >= ? AND x <= ? AND y >= ? AND y <= ?)";
         Log.w(TAG, "showListPopupWindow: " + sql);
         final List<mPOIobj> pois = new ArrayList<>();
-        Cursor cursor = DataSupport.findBySQL(sql, String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+        Cursor cursor = LitePal.findBySQL(sql, String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
         if (cursor.moveToFirst()) {
             do {
                 String POIC = cursor.getString(cursor.getColumnIndex("poic"));
@@ -2665,7 +2665,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (i == 0) sql1 = sql1 + " dmbzmc LIKE '%" + strings1[i] + "%'";
                 else sql1 = sql1 + " AND dmbzmc LIKE '%" + strings1[i] + "%'";
             }
-            Cursor cursor1 = DataSupport.findBySQL(sql1);
+            Cursor cursor1 = LitePal.findBySQL(sql1);
             if (cursor1.moveToFirst()) {
                 do {
                     String xh = cursor1.getString(cursor1.getColumnIndex("xh"));
@@ -3032,12 +3032,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
                     stopService(stop_mService);
                     /*Trail trail = new Trail();
-                    List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                    List<Trail> trails = LitePal.where("ic = ?", ic).find(Trail.class);
                     trail.setIc(ic);
                     trail.setName("路径" + Integer.toString(trails.size() + 1));
                     trail.setPath(m_cTrail);
                     trail.save();*/
-                    List<Trail> trails = DataSupport.findAll(Trail.class);
+                    List<Trail> trails = LitePal.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
                     MainInterface.this.finish();
                 }
@@ -3059,7 +3059,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 public void onClick(DialogInterface dialog, int which) {
                     Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
                     stopService(stop_mService);
-                    List<Trail> trails = DataSupport.findAll(Trail.class);
+                    List<Trail> trails = LitePal.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
                     MainInterface.this.finish();
                 }
@@ -3227,14 +3227,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private boolean getEsterEgg_plq(){
         if (esterEgg_plq) {
-            kmltests = DataSupport.findAll(kmltest.class);
+            kmltests = LitePal.findAll(kmltest.class);
             File file1 = new File(Environment.getExternalStorageDirectory() + "/doc.kml");
             File file2 = new File(Environment.getExternalStorageDirectory() + "/地名标志录音");
             File file3 = new File(Environment.getExternalStorageDirectory() + "/地名标志照片");
             if (kmltests.size() == 0 & file1.exists() & file2.exists() & file3.exists() & file2.isDirectory() & file3.isDirectory()){
-                DataSupport.deleteAll(plqzp.class);
-                DataSupport.deleteAll(plqyp.class);
-                DataSupport.deleteAll(kmltest.class);
+                LitePal.deleteAll(plqzp.class);
+                LitePal.deleteAll(plqyp.class);
+                LitePal.deleteAll(kmltest.class);
                 //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));
                 new Thread(new Runnable() {
                     @Override
@@ -3248,7 +3248,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         });
                     }
                 }).start();
-                kmltests = DataSupport.findAll(kmltest.class);
+                kmltests = LitePal.findAll(kmltest.class);
                 return true;
             }else if (kmltests.size() == 0){
                 Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggErrorInfo), Toast.LENGTH_LONG).show();
@@ -3721,12 +3721,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
                     stopService(stop_mService);
                     /*Trail trail = new Trail();
-                    List<Trail> trails = DataSupport.where("ic = ?", ic).find(Trail.class);
+                    List<Trail> trails = LitePal.where("ic = ?", ic).find(Trail.class);
                     trail.setIc(ic);
                     trail.setName("路径" + Integer.toString(trails.size() + 1));
                     trail.setPath(m_cTrail);
                     trail.save();*/
-                    List<Trail> trails = DataSupport.findAll(Trail.class);
+                    List<Trail> trails = LitePal.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
                     if (showMode == CENTERMODE) isQuery = true;
                     else isQuery = false;
@@ -3910,7 +3910,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void getWhiteBlankData(){
-        List<Lines_WhiteBlank> lines = DataSupport.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+        List<Lines_WhiteBlank> lines = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
         if (lines.size() >= 0){
             for (Lines_WhiteBlank line : lines){
                 geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getIc(), line.getLines(), line.getColor());
@@ -3930,10 +3930,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void run() {
                 hasBitmap = false;
                 bts.clear();
-                List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+                List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
-                        List<MPHOTO> mphotos = DataSupport.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
+                        List<MPHOTO> mphotos = LitePal.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
                         //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
@@ -3996,7 +3996,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 bts1.clear();
                 if (kmltests.size() > 0){
                     for (int ii = 0; ii < kmltests.size(); ii++){
-                        List<plqzp> mphotos = DataSupport.where("xh = ?", kmltests.get(ii).getXh()).find(plqzp.class);
+                        List<plqzp> mphotos = LitePal.where("xh = ?", kmltests.get(ii).getXh()).find(plqzp.class);
                         //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
@@ -4041,12 +4041,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void updateDB(){
-        List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+        List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
         int size = pois.size();
         for (int i = 0; i < size; i++){
             String poic = pois.get(i).getPoic();
-            List<MPHOTO> mphotos = DataSupport.where("poic = ?", poic).find(MPHOTO.class);
-            List<MTAPE> mtapes = DataSupport.where("poic = ?", poic).find(MTAPE.class);
+            List<MPHOTO> mphotos = LitePal.where("poic = ?", poic).find(MPHOTO.class);
+            List<MTAPE> mtapes = LitePal.where("poic = ?", poic).find(MTAPE.class);
             POI poi1 = new POI();
             if (mtapes.size() != 0) poi1.setTapenum(mtapes.size());
             else poi1.setToDefault("tapenum");
@@ -4072,7 +4072,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         if (!poic.isEmpty()) {
             if (poic.contains("POI")) {
                 hasQueriedPoi = true;
-                Cursor cursor = DataSupport.findBySQL("select * from POI where poic = ?", poic);
+                Cursor cursor = LitePal.findBySQL("select * from POI where poic = ?", poic);
                 if (cursor.moveToFirst()) {
                     do {
                         String POIC = cursor.getString(cursor.getColumnIndex("poic"));
@@ -4089,7 +4089,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 cursor.close();
             }else {
                 hasQueriedPoi = true;
-                List<kmltest> kmltests = DataSupport.where("xh = ?", poic).find(kmltest.class);
+                List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
                 queriedPoi = new mPOIobj(poic, kmltests.get(0).getLat(), kmltests.get(0).getLongi(), "", 0, 0, "", "");
             }
         }
@@ -4119,7 +4119,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void run() {
                 bts.clear();
-                List<POI> pois = DataSupport.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+                List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
                         //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
@@ -4134,7 +4134,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
                             }
                         }else {
-                            List<MPHOTO> mphotos = DataSupport.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
+                            List<MPHOTO> mphotos = LitePal.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
                             bt btt = new bt(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
                             bts.add(btt);

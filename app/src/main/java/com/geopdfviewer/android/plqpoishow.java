@@ -23,7 +23,7 @@ import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -52,9 +52,9 @@ public class plqpoishow extends AppCompatActivity {
         setTitle("地名标志信息");
         Intent intent = getIntent();
         xh = intent.getStringExtra("xh");
-        List<kmltest> kmltests = DataSupport.where("xh = ?", xh).find(kmltest.class);
-        List<plqzp> plqzps = DataSupport.where("xh = ?", xh).find(plqzp.class);
-        List<plqyp> plqyps = DataSupport.where("xh = ?", xh).find(plqyp.class);
+        List<kmltest> kmltests = LitePal.where("xh = ?", xh).find(kmltest.class);
+        List<plqzp> plqzps = LitePal.where("xh = ?", xh).find(plqzp.class);
+        List<plqyp> plqyps = LitePal.where("xh = ?", xh).find(plqyp.class);
         dmbzbzmc = kmltests.get(0).getDmbzbzmc();
         dmbzmc = kmltests.get(0).getDmbzmc();
         xzqdm = kmltests.get(0).getDmszxzqdm();
@@ -76,14 +76,14 @@ public class plqpoishow extends AppCompatActivity {
     }
 
     private void refresh(){
-        List<kmltest> pois = DataSupport.findAll(kmltest.class);
+        List<kmltest> pois = LitePal.findAll(kmltest.class);
         int size = pois.size();
         int num = 0;
         for (int i = 0; i < size ; i++){
             if (xh.equals(pois.get(i).getXh())) num = i;
         }
-        final List<plqyp> tapes = DataSupport.where("xh = ?", xh).find(plqyp.class);
-        List<plqzp> photos = DataSupport.where("xh = ?", xh).find(plqzp.class);
+        final List<plqyp> tapes = LitePal.where("xh = ?", xh).find(plqyp.class);
+        List<plqzp> photos = LitePal.where("xh = ?", xh).find(plqzp.class);
         Log.w(TAG, "xhhh : poi" + pois.size());
         Log.w(TAG, "xhhh : tapes" + tapes.size());
         Log.w(TAG, "xhhh : photos" + dmbzbzmc);

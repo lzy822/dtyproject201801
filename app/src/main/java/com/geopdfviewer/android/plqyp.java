@@ -1,8 +1,8 @@
 package com.geopdfviewer.android;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.crud.LitePalSupport;
 
-public class plqyp extends DataSupport{
+public class plqyp extends LitePalSupport {
     private String xh;
     private String yp;
 

@@ -1,12 +1,12 @@
 package com.geopdfviewer.android;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.crud.LitePalSupport;
 
 /**
  * Created by 54286 on 2018/3/19.
  */
 
-public class MPHOTO extends DataSupport {
+public class MPHOTO extends LitePalSupport {
     private int id;
     private String pdfic;
     private String poic;

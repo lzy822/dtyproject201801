@@ -15,7 +15,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.List;
@@ -113,7 +113,7 @@ public class RecordTrail extends Service {
         isLocateEnd = true;
         recordTrail(last_x, last_y);
         Trail trail = new Trail();
-        List<Trail> trails = DataSupport.findAll(Trail.class);
+        List<Trail> trails = LitePal.findAll(Trail.class);
         trail.setIc(m_ic);
         trail.setName("路径" + Integer.toString(trails.size() + 1));
         trail.setPath(m_cTrail);

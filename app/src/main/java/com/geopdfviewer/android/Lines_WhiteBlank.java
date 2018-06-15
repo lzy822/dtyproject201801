@@ -1,8 +1,8 @@
 package com.geopdfviewer.android;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.crud.LitePalSupport;
 
-public class Lines_WhiteBlank extends DataSupport {
+public class Lines_WhiteBlank extends LitePalSupport {
     private String ic;
     private String lines;
     private int color;

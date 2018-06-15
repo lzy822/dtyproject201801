@@ -36,7 +36,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -86,9 +86,9 @@ int showNum = 0;
     TextView textView_photonum;
 
     private void refresh(){
-        List<POI> pois = DataSupport.where("poic = ?", POIC).find(POI.class);
-        List<MTAPE> tapes = DataSupport.where("poic = ?", POIC).find(MTAPE.class);
-        final List<MPHOTO> photos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
+        List<POI> pois = LitePal.where("poic = ?", POIC).find(POI.class);
+        List<MTAPE> tapes = LitePal.where("poic = ?", POIC).find(MTAPE.class);
+        final List<MPHOTO> photos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
         getBitmap(photos);
         Log.w(TAG, "pois: " + pois.size() + "\n");
         Log.w(TAG, "tapes1: " + pois.get(0).getTapenum() + "\n");
@@ -194,13 +194,13 @@ int showNum = 0;
                                         dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                List<POI> pois1 = DataSupport.where("poic = ?", POIC).find(POI.class);
+                                                List<POI> pois1 = LitePal.where("poic = ?", POIC).find(POI.class);
                                                 if (pois1.get(0).getPhotonum() > 0) {
                                                     textView_photonum.setText(Integer.toString(pois1.get(0).getPhotonum() - 1));
                                                     POI poi = new POI();
                                                     poi.setPhotonum(pois1.get(0).getPhotonum() - 1);
                                                     poi.updateAll("poic = ?", POIC);
-                                                    DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, bms.get(showNum).getM_path());
+                                                    LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, bms.get(showNum).getM_path());
                                                     bms.remove(showNum);
                                                     if (showNum > pois1.get(0).getPhotonum() - 1) {
                                                         if (bms.size() > 0) imageView.setImageBitmap(bms.get(0).getM_bm());
@@ -242,7 +242,7 @@ int showNum = 0;
         poi.setPhotonum(photos.size());
         poi.setTapenum(tapes.size());
         poi.updateAll("POIC = ?", POIC);*/
-        List<POI> pois1 = DataSupport.where("poic = ?", POIC).find(POI.class);
+        List<POI> pois1 = LitePal.where("poic = ?", POIC).find(POI.class);
         Log.w(TAG, "tapes2: " + pois1.get(0).getTapenum() + "\n");
         Log.w(TAG, "photos2: " + pois1.get(0).getPhotonum() + "\n");
         POI poi = pois.get(0);
@@ -430,7 +430,7 @@ int showNum = 0;
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
-            List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
+            List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
             POI poi = new POI();
             long time = System.currentTimeMillis();
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
@@ -448,7 +448,7 @@ int showNum = 0;
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
             Uri uri = data.getData();
             //long time = System.currentTimeMillis();
-            List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
+            List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
             POI poi = new POI();
             poi.setTapenum(POIs.get(0).getTapenum() + 1);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
@@ -473,7 +473,7 @@ int showNum = 0;
                 }
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
                 Date date = new Date(System.currentTimeMillis());
-                List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
+                List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
                 POI poi = new POI();
                 long time = System.currentTimeMillis();
                 poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
@@ -535,9 +535,9 @@ int showNum = 0;
                 dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        DataSupport.deleteAll(POI.class, "poic = ?", POIC);
-                        DataSupport.deleteAll(MPHOTO.class, "poic = ?", POIC);
-                        DataSupport.deleteAll(MTAPE.class, "poic = ?", POIC);
+                        LitePal.deleteAll(POI.class, "poic = ?", POIC);
+                        LitePal.deleteAll(MPHOTO.class, "poic = ?", POIC);
+                        LitePal.deleteAll(MTAPE.class, "poic = ?", POIC);
                         singlepoi.this.finish();
                     }
                 });

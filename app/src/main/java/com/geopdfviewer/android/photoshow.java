@@ -31,7 +31,7 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class photoshow extends AppCompatActivity {
 
     private void refreshCard(){
         mPhotobjList.clear();
-        List<MPHOTO> mphotos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
+        List<MPHOTO> mphotos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
         for (MPHOTO mphoto : mphotos){
             mPhotobj mphotobj = new mPhotobj(mphoto.getPoic(), mphoto.getPoic(), mphoto.getTime(), mphoto.getPath());
             mPhotobjList.add(mphotobj);
@@ -147,7 +147,7 @@ public class photoshow extends AppCompatActivity {
             @Override
             public void run() {
                 bts.clear();
-                List<MPHOTO> mphotos = DataSupport.where("poic = ?", POIC).find(MPHOTO.class);
+                List<MPHOTO> mphotos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
                 int size = mphotos.size();
                 for (int i = 0; i < size; i++) {
                     String path = mphotos.get(i).getPath();
@@ -214,7 +214,7 @@ public class photoshow extends AppCompatActivity {
                 isLongClick = 1;
                 setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
                 invalidateOptionsMenu();
-                //DataSupport.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
+                //LitePal.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
                 parseSelectedPath();
                 refreshCard();
                 break;
@@ -231,7 +231,7 @@ public class photoshow extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
-            List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
+            List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
             POI poi = new POI();
             long time = System.currentTimeMillis();
             poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
@@ -260,7 +260,7 @@ public class photoshow extends AppCompatActivity {
                 }
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat(photoshow.this.getResources().getText(R.string.DateAndTime).toString());
                 Date date = new Date(System.currentTimeMillis());
-                List<POI> POIs = DataSupport.where("poic = ?", POIC).find(POI.class);
+                List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
                 POI poi = new POI();
                 long time = System.currentTimeMillis();
                 poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
@@ -293,12 +293,12 @@ public class photoshow extends AppCompatActivity {
             String[] nums = deletePath.split("wslzy");
             Log.w(TAG, "parseSelectedPath: " + nums[0] );
             for (int i = 0; i < nums.length; i++){
-                //DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
-                DataSupport.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, nums[i]);
+                //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                LitePal.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, nums[i]);
             }
         }else {
-            //DataSupport.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, deletePath);
-            DataSupport.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, deletePath);
+            //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, deletePath);
+            LitePal.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, deletePath);
         }
     }
 

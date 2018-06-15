@@ -1,8 +1,8 @@
 package com.geopdfviewer.android;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.crud.LitePalSupport;
 
-public class kmltest extends DataSupport{
+public class kmltest extends LitePalSupport{
     private String xh;
     private String dmbzmc;
     private String dmszxzqdm;
