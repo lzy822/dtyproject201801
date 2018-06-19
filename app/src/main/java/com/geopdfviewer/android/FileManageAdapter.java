@@ -86,6 +86,7 @@ public class FileManageAdapter extends RecyclerView.Adapter<FileManageAdapter.Vi
         data = data.substring(data.lastIndexOf("/") + 1);
         holder.FileName.setText(data);
         if (data.contains(".dt")) holder.FileImage.setImageResource(R.drawable.ic_map_black_24dp);
+        else if (data.contains(".zip")) holder.FileImage.setImageResource(R.drawable.ic_work_black_24dp);
         else holder.FileImage.setImageResource(R.drawable.ic_folder_black_24dp);
     }
 

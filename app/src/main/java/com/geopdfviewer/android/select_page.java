@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.util.LogWriter;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -844,7 +845,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             LitePal.getDatabase();*/
                 //refreshRecycler();
                     break;
-                case REQUEST_CODE_INPUT:
+                /*case REQUEST_CODE_INPUT:
                     final File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
@@ -1003,8 +1004,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             }).start();
 
                         } else Toast.makeText(this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
-
-                        break;
+                        break;*/
                 case 17:
                     final String path = data.getStringExtra("filePath");
                     Log.w(TAG, "llll: " + path);
@@ -1175,7 +1175,90 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         dialog.show();
                     } else Toast.makeText(this, select_page.this.getResources().getText(R.string.AddedMapTip), Toast.LENGTH_SHORT).show();
                     break;
-
+                case 18:
+                    final File file33 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
+                    if (!file33.exists() && !file33.isDirectory()){
+                        file33.mkdirs();
+                    }
+                    final String path1 = data.getStringExtra("filePath");
+                    if (path1.contains(".zip")) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.w(TAG, "run1111: ");
+                                try {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toolbar.setTitle("正在解析数据");
+                                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetInputData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                    String configPath;
+                                    configPath = URLDecoder.decode(path1, "utf-8");
+                                    SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                    editor.putString("inputpath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                    editor.apply();
+                                    locError("filepath" + configPath.substring(0, configPath.lastIndexOf("/")));
+                                    File file1 = new File(configPath);
+                                    File outFile = null ;   // 输出文件的时候要有文件夹的操作
+                                    ZipFile zipFile = new ZipFile(file1) ;   // 实例化ZipFile对象
+                                    ZipInputStream zipInput = null ;    // 定义压缩输入流
+                                    OutputStream out = null ;   // 定义输出流，用于输出每一个实体内容
+                                    InputStream input = null ;  // 定义输入流，读取每一个ZipEntry
+                                    ZipEntry entry = null ; // 每一个压缩实体
+                                    zipInput = new ZipInputStream(new FileInputStream(file1)) ;  // 实例化ZIpInputStream
+                                    while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
+                                        //System.out.println("解压缩" + entry.getName() + "文件。") ;
+                                        locError(entry.toString());
+                                        outFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input", entry.getName()) ;   // 定义输出的文件路径
+                                        input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
+                                        out = new FileOutputStream(outFile) ;   // 实例化文件输出流
+                                        byte buffer[] = new byte[4096];
+                                        int realLength;
+                                        while ((realLength = input.read(buffer)) > 0){
+                                            out.write(buffer, 0, realLength);
+                                        }
+                                        input.close() ;     // 关闭输入流
+                                        out.close() ;   // 关闭输出流
+                                    }
+                                    input.close() ;
+                                    locError(configPath);
+                                    //locError(uri.toString());
+                                    //locError(findNameFromUri(uri));
+                                    //LitePal.getDatabase();
+                                } catch (UnsupportedEncodingException e) {
+                                    Log.w(TAG, "出错" );
+                                }catch (IOException e){
+                                    Log.w(TAG, "出错" );
+                                }
+                                //入库操作
+                                File ff = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
+                                if (!ff.exists() && !ff.isDirectory()){
+                                    ff.mkdirs();
+                                }
+                                File[] ffs = ff.listFiles();
+                                int size1 = ffs.length;
+                                for (int i = 0; i < size1; i++){
+                                    if (ffs[i].toString().contains(".dtdb")){
+                                        Log.e(TAG, "the cup of life: ");
+                                        addToDataBase(ffs[i].toString());
+                                        locError(ffs[i].toString());
+                                        ffs[i].delete();
+                                    }
+                                }
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                                        Log.w(TAG, "run: " );
+                                        Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.DataInputOk), Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        }).start();
+                    }else Toast.makeText(this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                    break;
             }
         }
     }
@@ -1301,11 +1384,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         continue;
                     }
                     if (line.contains("<starttime>")){
-                        starttime = line.substring(10, line.indexOf("</starttime>"));
+                        starttime = line.substring(11, line.indexOf("</starttime>"));
                         continue;
                     }
                     if (line.contains("<endtime>")){
-                        endtime = line.substring(13, line.indexOf("</endtime>"));
+                        endtime = line.substring(9, line.indexOf("</endtime>"));
                         Trail trail = new Trail();
                         trail.setId(id);
                         trail.setIc(ic);
@@ -1428,6 +1511,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 /*pickFile();
                 floatingActionsMenu.close(false);*/
                 Intent intent = new Intent(select_page.this, Activity_FileManage.class);
+                intent.putExtra("type", ".dt");
                 startActivityForResult(intent, 17);
             }
         });
@@ -1435,7 +1519,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         inputbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
+                /*Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
                 SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
                 String filepath = prf1.getString("inputpath", "");
                 if (filepath.isEmpty()) intent.setType("application/x-gzip");
@@ -1443,7 +1527,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     intent.setDataAndType(Uri.parse(filepath), "application/x-gzip");
                 }
                 startActivityForResult(intent, REQUEST_CODE_INPUT);
-                floatingActionsMenu.close(false);
+                floatingActionsMenu.close(false);*/
+                Intent intent = new Intent(select_page.this, Activity_FileManage.class);
+                intent.putExtra("type", ".zip");
+                startActivityForResult(intent, 18);
             }
         });
         //output_selectpage按钮事件编辑
@@ -1556,11 +1643,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 boolean isOK = false;
                                 for (int k = 0; k < i; k++) {
                                     if (files.get(i).getPath().equals(files.get(k).getPath())) break;
-                                    if (k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists()) isOK = true;
+                                    if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
                                 }
+                                Log.w(TAG, "aa");
+                                if (size == 1) isOK = true;
                                 if (isOK){
+                                    Log.w(TAG, "aa");
                                     InputStream inputStream = new FileInputStream(files.get(i));
+                                    Log.w(TAG, "aa");
                                     zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
+                                    Log.w(TAG, "aa");
                                     //int temp = 0;
                                     //while ((temp = inputStream.read()) != -1){
                                     //    zipOut.write(temp);
@@ -1586,6 +1678,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }catch (IOException e){
                             locError("出错!");
                             Log.w(TAG, "run: " + e.toString());
+                            Log.w(TAG, "run: " + e.getMessage());
                         }
                     }
                 }).start();

@@ -27,6 +27,7 @@ public class Activity_FileManage extends AppCompatActivity {
     private FileManageAdapter adapter;
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
+    String type = "";
     //声明Toolbar
     Toolbar toolbar;
 
@@ -59,43 +60,52 @@ public class Activity_FileManage extends AppCompatActivity {
                 return true;
             }
         });
-        SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
-        String filepath = prf1.getString("mapath", "");
-        Log.w(TAG, "onCreate: " + filepath);
+        Intent intent = getIntent();
+        type = intent.getStringExtra("type");
+        String filepath = "";
+        if (type.equals(".dt")) {
+            SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
+            filepath = prf1.getString("mapath", "");
+            Log.w(TAG, "onCreate: " + filepath);
+        }else if (type.equals(".zip")){
+            SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
+            filepath = prf1.getString("inputpath", "");
+            Log.w(TAG, "onCreate: " + filepath);
+        }
         if (filepath.isEmpty()) {
-            fileManage = new FileManage(".dt");
+            fileManage = new FileManage(type);
             String[] strings = fileManage.getFileSubset();
-            for (int i = 0; i < strings.length; i++){
-                if (!strings[i].contains(".dt")) fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", ".dt"));
+            for (int i = 0; i < strings.length; i++) {
+                if (!strings[i].contains(type))
+                    fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", type));
                 else {
                     fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", 1));
                 }
             }
-        }
-        else {
+        } else {
             File file = new File(filepath);
             if (file.exists() & file.isDirectory()) {
-                fileManage = new FileManage(filepath, filepath.substring(0, filepath.lastIndexOf("/") + 1), ".dt");
+                fileManage = new FileManage(filepath, filepath.substring(0, filepath.lastIndexOf("/") + 1), type);
                 String[] strings = fileManage.getFileSubset();
-                for (int i = 0; i < strings.length; i++){
-                    if (!strings[i].contains(".dt")) fileManages.add(new FileManage(filepath + "/" + strings[i], filepath + "/", ".dt"));
+                for (int i = 0; i < strings.length; i++) {
+                    if (!strings[i].contains(type))
+                        fileManages.add(new FileManage(filepath + "/" + strings[i], filepath + "/", type));
                     else {
                         fileManages.add(new FileManage(filepath + "/" + strings[i], filepath + "/", 1));
                     }
                 }
-            }
-            else {
-                fileManage = new FileManage(".dt");
+            } else {
+                fileManage = new FileManage(type);
                 String[] strings = fileManage.getFileSubset();
-                for (int i = 0; i < strings.length; i++){
-                    if (!strings[i].contains(".dt")) fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", ".dt"));
+                for (int i = 0; i < strings.length; i++) {
+                    if (!strings[i].contains(type))
+                        fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", type));
                     else {
                         fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", 1));
                     }
                 }
             }
         }
-
         refreshRecycler();
     }
 
@@ -108,13 +118,13 @@ public class Activity_FileManage extends AppCompatActivity {
         adapter.setOnItemClickListener(new FileManageAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, String RootPath, int position) {
-                if (!RootPath.contains(".dt")) {
+                if (!RootPath.contains(type)) {
                     fileManages.clear();
-                    fileManage = new FileManage(RootPath, RootPath.substring(0, RootPath.lastIndexOf("/")), ".dt");
+                    fileManage = new FileManage(RootPath, RootPath.substring(0, RootPath.lastIndexOf("/")), type);
                     String[] strings = fileManage.getFileSubset();
                     for (int i = 0; i < strings.length; i++) {
-                        if (!strings[i].contains(".dt"))
-                            fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", ".dt"));
+                        if (!strings[i].contains(type))
+                            fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", type));
                         else {
                             fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", 1));
                         }
