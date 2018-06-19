@@ -83,5 +83,6 @@
     <string name="CannotGetThumbnail">无法获取缩略图!</string>
     <string name="MessureNumOutOfIndex">目前只支持显示三条计算数据!</string>
     <string name="Date_1">yyyyMMdd</string>
+    <string name="FileManage">文件管理器</string>
 
 </resources>

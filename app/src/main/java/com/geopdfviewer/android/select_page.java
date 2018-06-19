@@ -1005,6 +1005,176 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         } else Toast.makeText(this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
 
                         break;
+                case 17:
+                    final String path = data.getStringExtra("filePath");
+                    Log.w(TAG, "llll: " + path);
+                    boolean isOKForAddMap1 = false;
+                    if (path.contains(".dt")) {
+                        try {
+                            String configPath;
+                            configPath = URLDecoder.decode(path, "utf-8");
+                            isOKForAddMap1 = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
+                        } catch (UnsupportedEncodingException e) {
+
+                        }
+                    } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path)).contains(".dt")) {
+                        try {
+                            String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
+                            configPath = URLDecoder.decode(configPath, "utf-8");
+                            isOKForAddMap1 = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
+                        } catch (UnsupportedEncodingException e) {
+
+                        }
+                    } else Toast.makeText(this, this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                    if (isOKForAddMap1) {
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(select_page.this);
+                        dialog.setTitle("请选择解析类型");
+                        dialog.setMessage("如果距离值显示有误， 请删除地图后， 选择另一类型再进行添加。");
+                        dialog.setCancelable(false);
+                        dialog.setPositiveButton("类型一", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (path.contains(".dt")) {
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            add_max++;
+                                            try {
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                                        Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                                                    }
+                                                });
+                                                String configPath;
+                                                configPath = URLDecoder.decode(path, "utf-8");
+                                                SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                                editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                                editor.apply();
+                                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
+                                                locError(configPath);
+                                                //locError(path);
+                                                //locError(findNameFromUri(uri));
+                                                //LitePal.getDatabase();
+                                                Message message = new Message();
+                                                message.what = UPDATE_TEXT;
+                                                handler.sendMessage(message);
+                                            } catch (UnsupportedEncodingException e) {
+
+                                            }
+                                        }
+                                    }).start();
+                                } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path)).contains(".dt")) {
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            add_max++;
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                                                }
+                                            });
+                                            try {
+                                                String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
+                                                configPath = URLDecoder.decode(configPath, "utf-8");
+                                                SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                                editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                                editor.apply();
+                                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
+                                            } catch (IOException e) {
+
+                                            }
+                                            //locError(path);
+                                            //locError(findNameFromUri(uri));
+                                            //LitePal.getDatabase();
+                                            Message message = new Message();
+                                            message.what = UPDATE_TEXT;
+                                            handler.sendMessage(message);
+
+
+                                        }
+                                    }).start();
+
+                                } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        dialog.setNegativeButton("类型二", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                if (path.contains(".dt")) {
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            add_max++;
+                                            try {
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                                        Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                                                    }
+                                                });
+                                                String configPath;
+                                                configPath = URLDecoder.decode(path, "utf-8");
+                                                SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                                editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                                editor.apply();
+                                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
+                                                locError(configPath);
+                                                //locError(path);
+                                                //locError(findNameFromUri(uri));
+                                                //LitePal.getDatabase();
+                                                Message message = new Message();
+                                                message.what = UPDATE_TEXT;
+                                                handler.sendMessage(message);
+                                            } catch (UnsupportedEncodingException e) {
+
+                                            }
+                                        }
+                                    }).start();
+                                } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path)).contains(".dt")) {
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            add_max++;
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                                                }
+                                            });
+                                            try {
+                                                String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
+                                                configPath = URLDecoder.decode(configPath, "utf-8");
+                                                SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                                                editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                                                editor.apply();
+                                                manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
+                                            } catch (IOException e) {
+
+                                            }
+                                            //locError(path);
+                                            //locError(findNameFromUri(uri));
+                                            //LitePal.getDatabase();
+                                            Message message = new Message();
+                                            message.what = UPDATE_TEXT;
+                                            handler.sendMessage(message);
+
+
+                                        }
+                                    }).start();
+
+                                } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        dialog.show();
+                    } else Toast.makeText(this, select_page.this.getResources().getText(R.string.AddedMapTip), Toast.LENGTH_SHORT).show();
+                    break;
 
             }
         }
@@ -1255,8 +1425,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         addbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pickFile();
-                floatingActionsMenu.close(false);
+                /*pickFile();
+                floatingActionsMenu.close(false);*/
+                Intent intent = new Intent(select_page.this, Activity_FileManage.class);
+                startActivityForResult(intent, 17);
             }
         });
         inputbt = (FloatingActionButton) findViewById(R.id.inputData_selectpage);
