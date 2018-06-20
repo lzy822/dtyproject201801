@@ -57,6 +57,7 @@
     <string name="FinishCopy">已复制到剪贴板</string>
     <string name="PermissionError">必须通过所有权限才能使用本程序</string>
     <string name="LocError">请打开定位功能!</string>
+    <string name="LocError1">请添加带有坐标的图片!</string>
     <string name="DeleteError">删除文件失败</string>
     <string name="OpenFileError">无法打开该文件</string>
     <string name="GetGeoInfo">正在提取地理信息</string>

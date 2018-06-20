@@ -48,7 +48,7 @@ public class Activity_FileManage extends AppCompatActivity {
                         fileManages.clear();
                         fileManage = fileManage.SelectLast();
                         String RootPath = fileManage.getRootPath();
-                        String[] strings = fileManage.getFileSubset();
+                        String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
                         for (int i = 0; i < strings.length; i++){
                             if (!strings[i].contains(".dt")) fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", ".dt"));
                             else {
@@ -74,7 +74,7 @@ public class Activity_FileManage extends AppCompatActivity {
         }
         if (filepath.isEmpty()) {
             fileManage = new FileManage(type);
-            String[] strings = fileManage.getFileSubset();
+            String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
             for (int i = 0; i < strings.length; i++) {
                 if (!strings[i].contains(type))
                     fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", type));
@@ -86,7 +86,7 @@ public class Activity_FileManage extends AppCompatActivity {
             File file = new File(filepath);
             if (file.exists() & file.isDirectory()) {
                 fileManage = new FileManage(filepath, filepath.substring(0, filepath.lastIndexOf("/") + 1), type);
-                String[] strings = fileManage.getFileSubset();
+                String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
                 for (int i = 0; i < strings.length; i++) {
                     if (!strings[i].contains(type))
                         fileManages.add(new FileManage(filepath + "/" + strings[i], filepath + "/", type));
@@ -96,7 +96,7 @@ public class Activity_FileManage extends AppCompatActivity {
                 }
             } else {
                 fileManage = new FileManage(type);
-                String[] strings = fileManage.getFileSubset();
+                String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
                 for (int i = 0; i < strings.length; i++) {
                     if (!strings[i].contains(type))
                         fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", type));
@@ -121,7 +121,7 @@ public class Activity_FileManage extends AppCompatActivity {
                 if (!RootPath.contains(type)) {
                     fileManages.clear();
                     fileManage = new FileManage(RootPath, RootPath.substring(0, RootPath.lastIndexOf("/")), type);
-                    String[] strings = fileManage.getFileSubset();
+                    String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
                     for (int i = 0; i < strings.length; i++) {
                         if (!strings[i].contains(type))
                             fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", type));

@@ -11,6 +11,7 @@ public class FileManage {
     private String FileType;
     private String[] FileSubset;
     private File file;
+    public static int BUBBLESORT = -1;
 
     public void setFileType(String fileType) {
         FileType = fileType;
@@ -30,7 +31,7 @@ public class FileManage {
                     num++;
                 }else {
                     File f = new File(RootPath + "/" + strings[i]);
-                    if (f.isDirectory()) num++;
+                    if (f.isDirectory() & !strings[i].substring(0, 1).equals(".")) num++;
                 }
             }
             FileSubset = new String[num];
@@ -40,7 +41,7 @@ public class FileManage {
                     j++;
                 }else {
                     File f = new File(RootPath + "/" + strings[i]);
-                    if (f.isDirectory()) {
+                    if (f.isDirectory() & !strings[i].substring(0, 1).equals(".")) {
                         FileSubset[j] = strings[i];
                         j++;
                     }
@@ -63,7 +64,7 @@ public class FileManage {
                     num++;
                 }else {
                     File f = new File(RootPath + "/" + strings[i]);
-                    if (f.isDirectory()) num++;
+                    if (f.isDirectory() & !strings[i].substring(0, 1).equals(".")) num++;
                 }
             }
             FileSubset = new String[num];
@@ -73,7 +74,7 @@ public class FileManage {
                     j++;
                 }else {
                     File f = new File(RootPath + "/" + strings[i]);
-                    if (f.isDirectory()) {
+                    if (f.isDirectory() & !strings[i].substring(0, 1).equals(".")) {
                         FileSubset[j] = strings[i];
                         j++;
                     }
@@ -102,7 +103,7 @@ public class FileManage {
                         num++;
                     }else {
                         File f = new File(RootPath + "/" + strings[i]);
-                        if (f.isDirectory()) num++;
+                        if (f.isDirectory() & !strings[i].substring(0, 1).equals(".")) num++;
                     }
                 }
                 FileSubset = new String[num];
@@ -112,7 +113,7 @@ public class FileManage {
                         j++;
                     }else {
                         File f = new File(RootPath + "/" + strings[i]);
-                        if (f.isDirectory()) {
+                        if (f.isDirectory() & !strings[i].substring(0, 1).equals(".")) {
                             FileSubset[j] = strings[i];
                             j++;
                         }
@@ -136,5 +137,24 @@ public class FileManage {
 
     public String[] getFileSubset() {
         return FileSubset;
+    }
+
+    public String[] getFileSubset(int type) {
+        if (type == BUBBLESORT) return bubbleSort(FileSubset);
+        else return FileSubset;
+    }
+
+    private String[] bubbleSort(String[] arr) {
+        int len = arr.length;
+        for (int i = 0; i < len - 1; i++) {
+            for (int j = 0; j < len - 1 - i; j++) {
+                if (arr[j].toUpperCase().charAt(0) > arr[j + 1].toUpperCase().charAt(0)) {        // 相邻元素两两对比
+                    String temp = arr[j+1];        // 元素交换
+                    arr[j+1] = arr[j];
+                    arr[j] = temp;
+                }
+            }
+        }
+        return arr;
     }
 }

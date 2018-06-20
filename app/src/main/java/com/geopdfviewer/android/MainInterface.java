@@ -2005,166 +2005,20 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             final Uri uri = data.getData();
             Log.w(TAG, "onActivityResult: " + DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
             final float[] latandlong = new float[2];
-            try{
+            try {
                 ExifInterface exifInterface = new ExifInterface(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 exifInterface.getLatLong(latandlong);
                 locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                final List<POI> POIs = LitePal.findAll(POI.class);
-                int size = POIs.size();
-                if (size > 0) {
-                    float K = (float) 0.002;
-                    float delta = Math.abs(POIs.get(0).getX() - latandlong[0]) + Math.abs(POIs.get(0).getY() - latandlong[1]);
-                    for (int i = 0; i < size; i++) {
-                        float theLat = POIs.get(i).getX();
-                        float theLong = POIs.get(i).getY();
-                        float delta1 = Math.abs(theLat - latandlong[0]) + Math.abs(theLong - latandlong[1]);
-                        if (delta1 < delta & delta1 < K) {
-                            delta = delta1;
-                            theNum = i;
-                        }
-                    }
-                    if (delta < K) {
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
-                        dialog.setTitle("提示");
-                        dialog.setMessage("你想怎样添加照片");
-                        dialog.setCancelable(false);
-                        dialog.setPositiveButton("合并到<" + POIs.get(theNum).getName() + ">点图集", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                POI poi = new POI();
-                                poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
-                                locError("holly :" + poi.updateAll("poic = ?", POIs.get(theNum).getPoic()));
-                                DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
-                                getBitmap();
-                                updateMapPage(POIs.get(theNum).getPoic());
-                            }
-                        });
-                        dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                long time = System.currentTimeMillis();
-                                String poic = "POI" + String.valueOf(time);
-                                DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
-                                DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
-                                getBitmap();
-                                updateMapPage(poic);
-                            }
-                        });
-                        dialog.show();
-                    } else {
-                        long time = System.currentTimeMillis();
-                        String poic = "POI" + String.valueOf(time);
-                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
-                        DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(this, uri), ic, poic, simpleDateFormat.format(date));
-                        getBitmap();
-                        updateMapPage(poic);
-                    }
-                }else {
-                    long time = System.currentTimeMillis();
-                    String poic = "POI" + String.valueOf(time);
-                    DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
-                    DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(this, uri), ic, poic, simpleDateFormat.format(date));
-                    getBitmap();
-                    updateMapPage(poic);
-                }
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-
-        }
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE) {
-            theNum = 0;
-            final Uri uri = data.getData();
-            final long time = System.currentTimeMillis();
-            final List<POI> POIs = LitePal.findAll(POI.class);
-            int size = POIs.size();
-            if (size > 0) {
-                float K = (float) 0.002;
-                float delta = Math.abs(POIs.get(0).getX() - (float) m_lat) + Math.abs(POIs.get(0).getY() - (float) m_long);
-                for (int i = 0; i < size; i++) {
-                    float theLat = POIs.get(i).getX();
-                    float theLong = POIs.get(i).getY();
-                    float delta1 = Math.abs(theLat - (float) m_lat) + Math.abs(theLong - (float) m_long);
-                    if (delta1 < delta & delta1 < K) {
-                        delta = delta1;
-                        theNum = i;
-                    }
-                }
-                if (delta < K) {
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
-                    dialog.setTitle("提示");
-                    dialog.setMessage("你想怎样添加音频");
-                    dialog.setCancelable(false);
-                    dialog.setPositiveButton("合并到<" + POIs.get(theNum).getName() + ">点音频集", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            POI poi = new POI();
-                            poi.setTapenum(POIs.get(theNum).getTapenum() + 1);
-                            poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
-                            DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
-                            updateMapPage(POIs.get(theNum).getPoic());
-                        }
-                    });
-                    dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String POIC = "POI" + String.valueOf(time);
-                            //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
-                            //List<POI> POIs = LitePal.findAll(POI.class);
-                            DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
-                            DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
-                            updateMapPage(POIC);
-                        }
-                    });
-                    dialog.show();
-                } else {
-                    String POIC = "POI" + String.valueOf(time);
-                    //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
-                    //List<POI> POIs = LitePal.findAll(POI.class);
-                    DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
-                    DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(this, uri), ic, POIC, simpleDateFormat.format(date));
-                    updateMapPage(POIC);
-                }
-            }else {
-                String POIC = "POI" + String.valueOf(time);
-                //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
-                //List<POI> POIs = LitePal.findAll(POI.class);
-                DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
-                DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
-                updateMapPage(POIC);
-            }
-        }
-        if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
-            theNum = 0;
-            final String imageuri;
-            if (Build.VERSION.SDK_INT >= 24) {
-                imageuri = DataUtil.getRealPath(imageUri.toString());
-            }else {
-                imageuri = imageUri.toString().substring(7);
-            }
-            File file = new File(imageuri);
-            if (file.length() != 0) {
-                final long time = System.currentTimeMillis();
-                locError("imageUri : " + imageuri.toString());
-                final float[] latandlong = new float[2];
-                try{
-                    MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
-                    // 最后通知图库更新
-                    MainInterface.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
-                    ExifInterface exifInterface = new ExifInterface(imageuri);
-                    exifInterface.getLatLong(latandlong);
-                    locError("see here" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                    //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
-
+                if (latandlong[0] != 0) {
                     final List<POI> POIs = LitePal.findAll(POI.class);
                     int size = POIs.size();
                     if (size > 0) {
                         float K = (float) 0.002;
-                        float delta = Math.abs(POIs.get(0).getX() - (float) m_lat) + Math.abs(POIs.get(0).getY() - (float) m_long);
+                        float delta = Math.abs(POIs.get(0).getX() - latandlong[0]) + Math.abs(POIs.get(0).getY() - latandlong[1]);
                         for (int i = 0; i < size; i++) {
                             float theLat = POIs.get(i).getX();
                             float theLong = POIs.get(i).getY();
-                            float delta1 = Math.abs(theLat - (float) m_lat) + Math.abs(theLong - (float) m_long);
+                            float delta1 = Math.abs(theLat - latandlong[0]) + Math.abs(theLong - latandlong[1]);
                             if (delta1 < delta & delta1 < K) {
                                 delta = delta1;
                                 theNum = i;
@@ -2180,9 +2034,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 public void onClick(DialogInterface dialog, int which) {
                                     POI poi = new POI();
                                     poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
-                                    poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
-                                    Date date = new Date(time);
-                                    DataUtil.addPhotoToDB(imageuri, ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
+                                    locError("holly :" + poi.updateAll("poic = ?", POIs.get(theNum).getPoic()));
+                                    DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
                                     getBitmap();
                                     updateMapPage(POIs.get(theNum).getPoic());
                                 }
@@ -2190,22 +2043,181 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    //long time = System.currentTimeMillis();
+                                    long time = System.currentTimeMillis();
                                     String poic = "POI" + String.valueOf(time);
-                                    if (latandlong[0] != 0 & latandlong[1] != 0) {
-                                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
-                                    } else {
-                                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
-                                    }
-                                    DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
+                                    DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                                    DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
                                     getBitmap();
                                     updateMapPage(poic);
                                 }
                             });
                             dialog.show();
                         } else {
-                            //List<POI> POIs = LitePal.findAll(POI.class);
-                            //long time = System.currentTimeMillis();
+                            long time = System.currentTimeMillis();
+                            String poic = "POI" + String.valueOf(time);
+                            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                            DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(this, uri), ic, poic, simpleDateFormat.format(date));
+                            getBitmap();
+                            updateMapPage(poic);
+                        }
+                    } else {
+                        long time = System.currentTimeMillis();
+                        String poic = "POI" + String.valueOf(time);
+                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                        DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(this, uri), ic, poic, simpleDateFormat.format(date));
+                        getBitmap();
+                        updateMapPage(poic);
+                    }
+                }else Toast.makeText(MainInterface.this, R.string.LocError1, Toast.LENGTH_LONG).show();
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+        }
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE) {
+            theNum = 0;
+                final Uri uri = data.getData();
+                final long time = System.currentTimeMillis();
+                final List<POI> POIs = LitePal.findAll(POI.class);
+                int size = POIs.size();
+                if (size > 0) {
+                    float K = (float) 0.002;
+                    float delta = Math.abs(POIs.get(0).getX() - (float) m_lat) + Math.abs(POIs.get(0).getY() - (float) m_long);
+                    for (int i = 0; i < size; i++) {
+                        float theLat = POIs.get(i).getX();
+                        float theLong = POIs.get(i).getY();
+                        float delta1 = Math.abs(theLat - (float) m_lat) + Math.abs(theLong - (float) m_long);
+                        if (delta1 < delta & delta1 < K) {
+                            delta = delta1;
+                            theNum = i;
+                        }
+                    }
+                    if (delta < K) {
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                        dialog.setTitle("提示");
+                        dialog.setMessage("你想怎样添加音频");
+                        dialog.setCancelable(false);
+                        dialog.setPositiveButton("合并到<" + POIs.get(theNum).getName() + ">点音频集", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                POI poi = new POI();
+                                poi.setTapenum(POIs.get(theNum).getTapenum() + 1);
+                                poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
+                                DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
+                                updateMapPage(POIs.get(theNum).getPoic());
+                            }
+                        });
+                        dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String POIC = "POI" + String.valueOf(time);
+                                //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+                                //List<POI> POIs = LitePal.findAll(POI.class);
+                                DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                                DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
+                                updateMapPage(POIC);
+                            }
+                        });
+                        dialog.show();
+                    } else {
+                        String POIC = "POI" + String.valueOf(time);
+                        //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+                        //List<POI> POIs = LitePal.findAll(POI.class);
+                        DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                        DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(this, uri), ic, POIC, simpleDateFormat.format(date));
+                        updateMapPage(POIC);
+                    }
+                } else {
+                    String POIC = "POI" + String.valueOf(time);
+                    //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+                    //List<POI> POIs = LitePal.findAll(POI.class);
+                    DataUtil.addPOI(ic, POIC, "录音POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                    DataUtil.addTapeToDB(DataUtil.getRealPathFromUriForAudio(MainInterface.this, uri), ic, POIC, simpleDateFormat.format(date));
+                    updateMapPage(POIC);
+                }
+        }
+        if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
+            theNum = 0;
+                final String imageuri;
+                if (Build.VERSION.SDK_INT >= 24) {
+                    imageuri = DataUtil.getRealPath(imageUri.toString());
+                } else {
+                    imageuri = imageUri.toString().substring(7);
+                }
+                File file = new File(imageuri);
+                if (file.length() != 0) {
+                    final long time = System.currentTimeMillis();
+                    locError("imageUri : " + imageuri.toString());
+                    final float[] latandlong = new float[2];
+                    try {
+                        MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
+                        // 最后通知图库更新
+                        MainInterface.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
+                        ExifInterface exifInterface = new ExifInterface(imageuri);
+                        exifInterface.getLatLong(latandlong);
+                        locError("see here" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                        //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+
+                        final List<POI> POIs = LitePal.findAll(POI.class);
+                        int size = POIs.size();
+                        if (size > 0) {
+                            float K = (float) 0.002;
+                            float delta = Math.abs(POIs.get(0).getX() - (float) m_lat) + Math.abs(POIs.get(0).getY() - (float) m_long);
+                            for (int i = 0; i < size; i++) {
+                                float theLat = POIs.get(i).getX();
+                                float theLong = POIs.get(i).getY();
+                                float delta1 = Math.abs(theLat - (float) m_lat) + Math.abs(theLong - (float) m_long);
+                                if (delta1 < delta & delta1 < K) {
+                                    delta = delta1;
+                                    theNum = i;
+                                }
+                            }
+                            if (delta < K) {
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                                dialog.setTitle("提示");
+                                dialog.setMessage("你想怎样添加照片");
+                                dialog.setCancelable(false);
+                                dialog.setPositiveButton("合并到<" + POIs.get(theNum).getName() + ">点图集", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        POI poi = new POI();
+                                        poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
+                                        poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
+                                        Date date = new Date(time);
+                                        DataUtil.addPhotoToDB(imageuri, ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
+                                        getBitmap();
+                                        updateMapPage(POIs.get(theNum).getPoic());
+                                    }
+                                });
+                                dialog.setNegativeButton("创建新兴趣点", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        //long time = System.currentTimeMillis();
+                                        String poic = "POI" + String.valueOf(time);
+                                        if (latandlong[0] != 0 & latandlong[1] != 0) {
+                                            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                                        } else {
+                                            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                                        }
+                                        DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
+                                        getBitmap();
+                                        updateMapPage(poic);
+                                    }
+                                });
+                                dialog.show();
+                            } else {
+                                //List<POI> POIs = LitePal.findAll(POI.class);
+                                //long time = System.currentTimeMillis();
+                                String poic = "POI" + String.valueOf(time);
+                                if (latandlong[0] != 0 & latandlong[1] != 0) {
+                                    DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                                } else {
+                                    DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
+                                }
+                                DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
+                                getBitmap();
+                                updateMapPage(poic);
+                            }
+                        } else {
                             String poic = "POI" + String.valueOf(time);
                             if (latandlong[0] != 0 & latandlong[1] != 0) {
                                 DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
@@ -2216,27 +2228,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             getBitmap();
                             updateMapPage(poic);
                         }
-                    }else {
-                        String poic = "POI" + String.valueOf(time);
-                        if (latandlong[0] != 0 & latandlong[1] != 0) {
-                            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
-                        } else {
-                            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date));
-                        }
-                        DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
-                        getBitmap();
-                        updateMapPage(poic);
+                    } catch (Exception e) {
+                        Log.w(TAG, e.toString());
                     }
-                }catch (Exception e){
-                    Log.w(TAG, e.toString());
+                } else {
+                    file.delete();
+                    Toast.makeText(MainInterface.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
                 }
-            }else {
-                file.delete();
-                Toast.makeText(MainInterface.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
-            }
-            locError(imageUri.toString());
-            //String imageuri = getRealPathFromUriForPhoto(this, imageUri);
-
+                locError(imageUri.toString());
+                //String imageuri = getRealPathFromUriForPhoto(this, imageUri);
 
         }
     }
@@ -2276,7 +2276,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         bt_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                takePhoto();
+                if (m_lat != 0) takePhoto();
+                else Toast.makeText(MainInterface.this, R.string.LocError, Toast.LENGTH_LONG).show();
                 popupWindow.dismiss();
 
             }
@@ -3892,9 +3893,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 //浮动按钮4 具体功能如下:
                 try {
-                    floatingActionsMenu.close(false);
-                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-                    startActivityForResult(intent, REQUEST_CODE_TAPE);
+                    if (m_lat != 0) {
+                        floatingActionsMenu.close(false);
+                        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                        startActivityForResult(intent, REQUEST_CODE_TAPE);
+                    }else Toast.makeText(MainInterface.this, R.string.LocError, Toast.LENGTH_LONG).show();
                 }catch (ActivityNotFoundException e){
                     Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
                 }
