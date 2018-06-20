@@ -2136,7 +2136,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
             theNum = 0;
-            final String imageuri = DataUtil.getRealPath(imageUri.toString());
+            final String imageuri;
+            if (Build.VERSION.SDK_INT >= 24) {
+                imageuri = DataUtil.getRealPath(imageUri.toString());
+            }else {
+                imageuri = imageUri.toString().substring(7);
+            }
             File file = new File(imageuri);
             if (file.length() != 0) {
                 final long time = System.currentTimeMillis();
@@ -4175,12 +4180,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void takePhoto(){
-        File file2 = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi");
+        File file2 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/photo");
         if (!file2.exists() && !file2.isDirectory()){
             file2.mkdirs();
         }
         long timenow = System.currentTimeMillis();
-        File outputImage = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi", Long.toString(timenow) + ".jpg");
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/TuZhi/photo", Long.toString(timenow) + ".jpg");
         try {
             if (outputImage.exists()){
                 outputImage.delete();

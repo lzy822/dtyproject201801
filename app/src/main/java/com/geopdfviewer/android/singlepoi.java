@@ -402,12 +402,12 @@ int showNum = 0;
     }
 
     private void takePhoto(){
-        File file2 = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi");
+        File file2 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/photo");
         if (!file2.exists() && !file2.isDirectory()){
             file2.mkdirs();
         }
         long timenow = System.currentTimeMillis();
-        File outputImage = new File(Environment.getExternalStorageDirectory() + "/photoForTuZhi", Long.toString(timenow) + ".jpg");
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/TuZhi/photo", Long.toString(timenow) + ".jpg");
         try {
             if (outputImage.exists()){
                 outputImage.delete();
@@ -462,8 +462,15 @@ int showNum = 0;
             mtape.save();
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
-            String imageuri = DataUtil.getRealPath(imageUri.toString());
+            Log.w(TAG, "onActivityResult1: " + imageUri.toString());
+            String imageuri;
+            if (Build.VERSION.SDK_INT >= 24) {
+                imageuri = DataUtil.getRealPath(imageUri.toString());
+            }else {
+                imageuri = imageUri.toString().substring(7);
+            }
             File file = new File(imageuri);
+            Log.w(TAG, "onActivityResult2: " + imageuri);
             if (file.length() != 0) {
                 try {
                     MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
