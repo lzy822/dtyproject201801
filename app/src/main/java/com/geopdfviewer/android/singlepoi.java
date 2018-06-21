@@ -97,11 +97,14 @@ int showNum = 0;
         List<MTAPE> tapes = LitePal.where("poic = ?", POIC).find(MTAPE.class);
         final List<MPHOTO> photos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
 
-        //定义新类型时候需要更改
-        if (pois.get(0).getType().equals("类型一")) type_spinner.setSelection(0);
-        else if (pois.get(0).getType().equals("类型二")) type_spinner.setSelection(1);
-        else if (pois.get(0).getType().equals("类型三")) type_spinner.setSelection(2);
         //
+        String[] strings = getResources().getStringArray(R.array.Type);
+        for (int i = 0; i < strings.length; i++) {
+            Log.w(TAG, "refresh: " + strings[i]);
+            if (pois.get(0).getType().equals(strings[i])) type_spinner.setSelection(i);
+        }
+        //
+
         type_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -333,6 +336,7 @@ int showNum = 0;
                 poi.setDescription(editText_des.getText().toString());
                 poi.setType(str);
                 poi.updateAll("poic = ?", POIC);
+                Toast.makeText(singlepoi.this, R.string.SaveInfo, Toast.LENGTH_SHORT).show();
             }
         });
     }

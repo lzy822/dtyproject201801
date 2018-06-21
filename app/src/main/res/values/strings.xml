@@ -6,6 +6,7 @@
     <string name="go">正式开始</string>
     <string name="stop">停止</string>
     <string name="querytip">查询</string>
+    <string name="SaveInfo">保存成功</string>
     <string name="toast_pick_file_error">不能打开文件, 请检查文件管理状态</string>
     <string name="InRedLine">在生态保护红线内</string>
     <string name="NoInRedLine">不在生态保护红线内</string>

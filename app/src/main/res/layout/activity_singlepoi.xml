@@ -176,10 +176,12 @@
             android:textSize="15dp"
             android:textColor="#FF0000"/>
     </LinearLayout>
+
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fab_saveinfo1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="right"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         app:menu_backgroundColor="#ccffffff"
@@ -188,6 +190,5 @@
         android:src="@drawable/ic_save_black_24dp"
         app:fab_label="@string/AddMap"
         app:fab_size="mini"/>
-
 </LinearLayout>
 </ScrollView>
