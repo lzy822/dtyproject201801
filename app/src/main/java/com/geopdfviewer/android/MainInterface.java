@@ -1642,7 +1642,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private void displayFromAsset(String assetFileName) {
         pdfFileName = assetFileName;
         pdfView = (PDFView) findViewById(R.id.pdfView);
-        pdfView.setBackgroundColor(Color.BLACK);
+        pdfView.setBackgroundColor(Color.WHITE);
         pdfView.fromAsset(SAMPLE_FILE)
                 .defaultPage(pageNumber)
                 .enableAnnotationRendering(true)
@@ -1838,7 +1838,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         locError("filePath: " + filePath);
         toolbar.setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
-        pdfView.setBackgroundColor(Color.BLACK);
+        pdfView.setBackgroundColor(Color.WHITE);
         final File file = new File(filePath);
         pdfView.fromFile(file)
                 .password("123123123")
