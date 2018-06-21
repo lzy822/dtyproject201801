@@ -11,12 +11,21 @@ public class POI  extends LitePalSupport {
     private String ic;
     private String name;
     private String poic;
+    private String type;
     private int photonum;
     private String description;
     private int tapenum;
     private float x;
     private float y;
     private String time;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getPoic() {
         return poic;

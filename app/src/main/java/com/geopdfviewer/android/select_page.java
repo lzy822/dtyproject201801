@@ -1287,7 +1287,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             READ_TYPE = NONE_TYPE;
-            String ic = "", name = "", poic = "", description = "", time = "", starttime = "", endtime = "", m_ic = "", m_lines = "", path = "";
+            String ic = "", name = "", poic = "", description = "", time = "", starttime = "", endtime = "", m_ic = "", m_lines = "", path = "", type = "";
             int color = 0, photonum = 0, tapenum = 0, id = 0;
             float x = 0, y = 0;
             while((line = bufferedReader.readLine()) != null) {
@@ -1319,6 +1319,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<ic>")){
                         ic = line.substring(4, line.indexOf("</ic>"));
+                        continue;
+                    }
+                    if (line.contains("<type>")){
+                        type = line.substring(6, line.indexOf("</type>"));
                         continue;
                     }
                     if (line.contains("<name>")){
@@ -1359,6 +1363,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         poi.setName(name);
                         poi.setX(x);
                         poi.setY(y);
+                        poi.setType(type);
                         poi.setTapenum(tapenum);
                         poi.setPhotonum(photonum);
                         poi.setDescription(description);
@@ -1541,12 +1546,29 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        List<POI> pois = LitePal.findAll(POI.class);
+                        List<String> types = new ArrayList<>();
+                        for (int i = 0; i < pois.size(); i++){
+                            String temp = pois.get(i).getType();
+                            if (!temp.equals("") || !temp.isEmpty()){
+                                for (int j = 0; j < types.size(); j++){
+                                    if (temp.equals(types.get(j))) break;
+                                    else {
+                                        if (j == types.size() - 1) types.add(temp);
+                                        else continue;
+                                    }
+                                }
+                            }
+                        }
                         DataUtil.makeKML();
-                        makeTxt();
+                        if (types.size() > 0) {
+                            for (int i = 0; i < types.size(); i++) {
+                                DataUtil.makeTxt(types.get(i));
+                            }
+                        }else DataUtil.makeTxt("");
                         DataUtil.makeWhiteBlankKML();
                         List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();
-                        List<POI> pois = LitePal.findAll(POI.class);
                         int size_POI = pois.size();
                         sb = sb.append("<POI>").append("\n");
                         for (int i = 0; i < size_POI; i++){
@@ -1554,6 +1576,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
                             sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
                             sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
+                            sb.append("<type>").append(pois.get(i).getType()).append("</type>").append("\n");
                             sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
                             sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
                             sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");

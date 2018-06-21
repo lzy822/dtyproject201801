@@ -28,13 +28,17 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.github.clans.fab.FloatingActionButton;
 
 import org.litepal.LitePal;
 
@@ -58,11 +62,13 @@ public class singlepoi extends AppCompatActivity {
     private final static int REQUEST_CODE_TAPE = 43;
     private final static int TAKE_PHOTO = 41;
     Uri imageUri;
+    Spinner type_spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_singlepoi);
+        type_spinner = (Spinner) findViewById(R.id.type_selection);
         //声明ToolBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -84,11 +90,29 @@ int showNum = 0;
     PointF pt0 = new PointF();
     boolean ges = false;
     TextView textView_photonum;
+    String str = "";
 
     private void refresh(){
         List<POI> pois = LitePal.where("poic = ?", POIC).find(POI.class);
         List<MTAPE> tapes = LitePal.where("poic = ?", POIC).find(MTAPE.class);
         final List<MPHOTO> photos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
+
+        //定义新类型时候需要更改
+        if (pois.get(0).getType().equals("类型一")) type_spinner.setSelection(0);
+        else if (pois.get(0).getType().equals("类型二")) type_spinner.setSelection(1);
+        else if (pois.get(0).getType().equals("类型三")) type_spinner.setSelection(2);
+        //
+        type_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                str = type_spinner.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                str = type_spinner.getSelectedItem().toString();
+            }
+        });
         getBitmap(photos);
         Log.w(TAG, "pois: " + pois.size() + "\n");
         Log.w(TAG, "tapes1: " + pois.get(0).getTapenum() + "\n");
@@ -298,6 +322,17 @@ int showNum = 0;
                     Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
                 }
 
+            }
+        });
+        FloatingActionButton fab_saveinfo = (FloatingActionButton) findViewById(R.id.fab_saveinfo1);
+        fab_saveinfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                POI poi = new POI();
+                poi.setName(editText_name.getText().toString());
+                poi.setDescription(editText_des.getText().toString());
+                poi.setType(str);
+                poi.updateAll("poic = ?", POIC);
             }
         });
     }
@@ -526,11 +561,10 @@ int showNum = 0;
                 this.finish();
                 break;
             case R.id.back_andupdate:
-                editText_des = (EditText) findViewById(R.id.edit_des);
-                editText_name = (EditText) findViewById(R.id.edit_name);
                 POI poi = new POI();
                 poi.setName(editText_name.getText().toString());
                 poi.setDescription(editText_des.getText().toString());
+                poi.setType(str);
                 poi.updateAll("poic = ?", POIC);
                 this.finish();
                 break;

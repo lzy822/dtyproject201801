@@ -1010,6 +1010,16 @@ public class DataUtil {
             //
             sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
+            sb.append("<td>").append("type").append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("<td>").append(pois.get(i).getType()).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
+            sb.append("\n");
             sb.append("<td>").append("POIC").append("</td>").append("\n");
             sb.append("\n");
             sb.append("<td>").append(pois.get(i).getPoic()).append("</td>").append("\n");
@@ -1267,14 +1277,15 @@ public class DataUtil {
         sb = sb.append("tape").append(";");
         sb = sb.append("description").append(";");
         sb = sb.append("time").append(";");
+        sb = sb.append("type").append(";");
         sb = sb.append("x").append(";");
         sb = sb.append("y").append("\n");
         return sb;
     }
 
-    public static void makeTxt(){
+    public static void makeTxt(String type){
         try {
-            final List<POI> pois = LitePal.findAll(POI.class);
+            final List<POI> pois = LitePal.where("type = ?", type).find(POI.class);
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
             makeTxtHead(sb);
@@ -1300,24 +1311,28 @@ public class DataUtil {
                         tapeStr = tapeStr + "|" + mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
                 }
                 tapeStr = URLDecoder.decode(tapeStr, "utf-8");
-                sb.append(tapeStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
+                sb.append(tapeStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getType()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
             }
-            File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
-            if (!file.exists() && !file.isDirectory()) {
-                file.mkdirs();
-            }
-            String outputPath = Long.toString(System.currentTimeMillis());
-            File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", outputPath + ".txt");
-            try {
-                FileOutputStream of = new FileOutputStream(file1);
-                of.write(sb.toString().getBytes());
-                of.close();
-            } catch (IOException e) {
-                Log.w(TAG, e.toString());
-            }
+            makeFile(sb, type);
         }catch (UnsupportedEncodingException e){
             Log.w(TAG, e.toString());
     }
+    }
+
+    public static void makeFile(StringBuffer sb, String type){
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()) {
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", type + outputPath + ".txt");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        } catch (IOException e) {
+            Log.w(TAG, e.toString());
+        }
     }
 
     public static String[] bubbleSort(String[] arr) {
