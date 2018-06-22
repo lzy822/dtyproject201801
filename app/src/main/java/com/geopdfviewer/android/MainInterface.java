@@ -381,6 +381,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 poi.setPhotonum(0);
                 String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
                 poi.setPoic(mpoic);
+                poi.setType(strings[0]);
                 poi.save();
                 locError(pt1.toString());
                 pdfView.zoomWithAnimation(c_zoom);
@@ -827,7 +828,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
             int size0 = pois.size();
             for (int i = 0; i < size0; i++) {
-                if (pois.get(i).getType().equals(strings[0]) & type1Checked) {
+                if (strings[0].equals(pois.get(i).getType()) & type1Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (showpts.size() == 0) {
@@ -911,7 +912,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                     }
-                }else if (pois.get(i).getType().equals(strings[1]) & type2Checked) {
+                }else if (strings[1].equals(pois.get(i).getType()) & type2Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (showpts.size() == 0) {
@@ -995,7 +996,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                     }
-                }else if (pois.get(i).getType().equals(strings[2]) & type3Checked) {
+                }else if (strings[0].equals(pois.get(i).getType()) & type3Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (showpts.size() == 0) {
@@ -4201,6 +4202,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             locError("poic = " + poi.getPoic());
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
                             String path = mphotos.get(0).getPath();
+                            locError("需要显示的缩略图数量1 : " + path);
                             File file = new File(path);
                             if (file.exists()){
                                 Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
