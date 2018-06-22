@@ -1286,6 +1286,7 @@ public class DataUtil {
     public static void makeTxt(String type){
         try {
             final List<POI> pois = LitePal.where("type = ?", type).find(POI.class);
+            Log.w(TAG, "makeTxt: " + pois.size());
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
             makeTxtHead(sb);

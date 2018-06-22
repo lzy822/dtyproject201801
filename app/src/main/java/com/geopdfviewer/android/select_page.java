@@ -1554,17 +1554,20 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             Log.w(TAG, "runlzy: " + temp);
                             if (temp != null) {
                                 if (!temp.isEmpty()) {
-                                    for (int j = 0; j < types.size(); j++) {
-                                        if (temp.equals(types.get(j))) break;
-                                        else {
-                                            if (j == types.size() - 1) types.add(temp);
-                                            else continue;
+                                    if (types.size() > 0) {
+                                        for (int j = 0; j < types.size(); j++) {
+                                            if (temp.equals(types.get(j))) break;
+                                            else {
+                                                if (j == types.size() - 1) types.add(temp);
+                                                else continue;
+                                            }
                                         }
-                                    }
+                                    }else types.add(temp);
                                 }
                             }
                         }
                         DataUtil.makeKML();
+                        Log.w(TAG, "runlzy: " + types.size());
                         if (types.size() > 0) {
                             for (int i = 0; i < types.size(); i++) {
                                 DataUtil.makeTxt(types.get(i));
@@ -1673,7 +1676,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
                                 }
                                 Log.w(TAG, "aa");
-                                if (i == 0) isOK = true;
+                                if (i == 0 & files.get(i).exists()) isOK = true;
                                 if (isOK){
                                     Log.w(TAG, "aa");
                                     InputStream inputStream = new FileInputStream(files.get(i));
