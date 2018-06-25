@@ -63,6 +63,7 @@ public class singlepoi extends AppCompatActivity {
     private final static int TAKE_PHOTO = 41;
     Uri imageUri;
     Spinner type_spinner;
+    float m_lat, m_lng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +77,6 @@ public class singlepoi extends AppCompatActivity {
         Intent intent = getIntent();
         POIC = intent.getStringExtra("POIC");
         textView_photonum = (TextView) findViewById(R.id.txt_photonumshow);
-
-
     }
 
     @Override
@@ -85,7 +84,7 @@ public class singlepoi extends AppCompatActivity {
         super.onResume();
         refresh();
     }
-int showNum = 0;
+    int showNum = 0;
     List<bt> bms;
     PointF pt0 = new PointF();
     boolean ges = false;
@@ -306,6 +305,8 @@ int showNum = 0;
         });
         TextView textView_loc = (TextView) findViewById(R.id.txt_locshow);
         DecimalFormat df = new DecimalFormat("0.0000");
+        m_lat = poi.getX();
+        m_lng = poi.getY();
         textView_loc.setText(df.format(poi.getX()) + ", " + df.format(poi.getY()));
         ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
         addphoto.setOnClickListener(new View.OnClickListener() {
@@ -333,6 +334,7 @@ int showNum = 0;
             public void onClick(View v) {
                 POI poi = new POI();
                 poi.setName(editText_name.getText().toString());
+                name = editText_name.getText().toString();
                 poi.setDescription(editText_des.getText().toString());
                 poi.setType(str);
                 poi.updateAll("poic = ?", POIC);
@@ -559,10 +561,45 @@ int showNum = 0;
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.query_poi_map:
-                SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
-                editor.putString("poic", POIC);
-                editor.apply();
-                this.finish();
+                AlertDialog.Builder dialog1 = new AlertDialog.Builder(singlepoi.this);
+                dialog1.setTitle("提示");
+                dialog1.setMessage("请选择定位方式");
+                dialog1.setCancelable(false);
+                dialog1.setPositiveButton("图上位置", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
+                        editor.putString("poic", POIC);
+                        editor.apply();
+                        singlepoi.this.finish();
+                    }
+                });
+                dialog1.setNegativeButton("路径规划", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Point pt = new Point(TransformLatLng.wgs84togcj02(m_lng, m_lat));
+                        if (CheckApkExist.checkTencentMapExist(MyApplication.getContext())) {
+                            Intent intent = new Intent();
+                            intent.setData(Uri.parse("qqmap://map/routeplan?type=walk&to=" + name + "&tocoord=" + pt.getY() + "," + pt.getX() + "&policy=1&referer=图志"));
+                            startActivity(intent);
+                        }else if (CheckApkExist.checkBaiduMapExist(MyApplication.getContext())) {
+                            Intent intent = new Intent();
+                            intent.setData(Uri.parse("baidumap://map/direction?" +
+                                    "destination=latlng:" + m_lat + "," + m_lng + "|name:" + name +"&mode=walking"));
+                            startActivity(intent);
+                        }else if (CheckApkExist.checkGaodeMapExist(MyApplication.getContext())) {
+                            Intent intent = new Intent();
+                            intent.setPackage("com.autonavi.minimap");
+                            intent.setAction("android.intent.action.VIEW");
+                            intent.addCategory("android.intent.category.DEFAULT");
+                            intent.setData(Uri.parse("androidamap://route?sourceApplication=图志&dlat=" + pt.getY() + "&dlon=" + pt.getX() + "&dname=" + name + "&dev=1&t=2"));
+                            startActivity(intent);
+                        }else {
+                            Toast.makeText(singlepoi.this, R.string.QueryPathError, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                dialog1.show();
                 break;
             case R.id.back_andupdate:
                 POI poi = new POI();
