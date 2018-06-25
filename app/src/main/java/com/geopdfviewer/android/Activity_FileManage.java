@@ -55,6 +55,7 @@ public class Activity_FileManage extends AppCompatActivity {
                                 fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", 1));
                             }
                         }
+                        toolbar.setTitle(RootPath.replace("/storage/emulated/0", "文件管理器"));
                         refreshRecycler();
                 }
                 return true;
@@ -82,10 +83,11 @@ public class Activity_FileManage extends AppCompatActivity {
                     fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", 1));
                 }
             }
+            toolbar.setTitle(fileManage.getRootPath().replace("/storage/emulated/0", "文件管理器"));
         } else {
             File file = new File(filepath);
             if (file.exists() & file.isDirectory()) {
-                fileManage = new FileManage(filepath, filepath.substring(0, filepath.lastIndexOf("/") + 1), type);
+                fileManage = new FileManage(filepath, filepath.substring(0, filepath.lastIndexOf("/")), type);
                 String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
                 for (int i = 0; i < strings.length; i++) {
                     if (!strings[i].contains(type))
@@ -105,6 +107,7 @@ public class Activity_FileManage extends AppCompatActivity {
                     }
                 }
             }
+            toolbar.setTitle(fileManage.getRootPath().replace("/storage/emulated/0", "文件管理器"));
         }
         refreshRecycler();
     }
