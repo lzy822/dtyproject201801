@@ -831,8 +831,88 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (strings[0].equals(pois.get(i).getType()) & type1Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (showpts.size() == 0) {
-                            showpts.add(pt3);
+                        if (c_zoom != 10) {
+                            if (showpts.size() == 0) {
+                                showpts.add(pt3);
+                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                if (pois.get(i).getPhotonum() == 0) {
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                    }
+                                } else {
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                        //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; j++) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
+                                        }
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; j++) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                float deltaDistance = 0;
+                                for (int j = 0; j < showpts.size(); j++) {
+                                    if (j == 0)
+                                        deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                    else {
+                                        float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                        if (deltaDistance1 < deltaDistance)
+                                            deltaDistance = deltaDistance1;
+                                    }
+                                }
+                                if (deltaDistance > 200) {
+                                    showpts.add(pt3);
+                                    canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    if (pois.get(i).getPhotonum() == 0) {
+                                        if (pois.get(i).getTapenum() == 0) {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                        } else {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                        }
+                                    } else {
+                                        List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                        if (pois.get(i).getTapenum() == 0) {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            int size = bts.size();
+                                            for (int j = 0; j < size; j++) {
+                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                    canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
+                                        } else {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                            int size = bts.size();
+                                            for (int j = 0; j < size; j++) {
+                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                    canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }else {
                             canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                             if (pois.get(i).getPhotonum() == 0) {
@@ -860,52 +940,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                             canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                             locError("lzy");
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            float deltaDistance = 0;
-                            for (int j = 0; j < showpts.size(); j++) {
-                                if (j == 0)
-                                    deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                else {
-                                    float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                    if (deltaDistance1 < deltaDistance)
-                                        deltaDistance = deltaDistance1;
-                                }
-                            }
-                            if (deltaDistance > 200) {
-                                showpts.add(pt3);
-                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                if (pois.get(i).getPhotonum() == 0) {
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                    }
-                                } else {
-                                    List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                        //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
-                                        }
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
-                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
                                         }
                                     }
                                 }
@@ -915,8 +949,88 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }else if (strings[1].equals(pois.get(i).getType()) & type2Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (showpts.size() == 0) {
-                            showpts.add(pt3);
+                        if (c_zoom != 10) {
+                            if (showpts.size() == 0) {
+                                showpts.add(pt3);
+                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                if (pois.get(i).getPhotonum() == 0) {
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                    }
+                                } else {
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                        //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; j++) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
+                                        }
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; j++) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                float deltaDistance = 0;
+                                for (int j = 0; j < showpts.size(); j++) {
+                                    if (j == 0)
+                                        deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                    else {
+                                        float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                        if (deltaDistance1 < deltaDistance)
+                                            deltaDistance = deltaDistance1;
+                                    }
+                                }
+                                if (deltaDistance > 200) {
+                                    showpts.add(pt3);
+                                    canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    if (pois.get(i).getPhotonum() == 0) {
+                                        if (pois.get(i).getTapenum() == 0) {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                        } else {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                        }
+                                    } else {
+                                        List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                        if (pois.get(i).getTapenum() == 0) {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            int size = bts.size();
+                                            for (int j = 0; j < size; j++) {
+                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                    canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
+                                        } else {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                            int size = bts.size();
+                                            for (int j = 0; j < size; j++) {
+                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                    canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }else {
                             canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                             if (pois.get(i).getPhotonum() == 0) {
@@ -944,63 +1058,97 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                             canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                             locError("lzy");
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            float deltaDistance = 0;
-                            for (int j = 0; j < showpts.size(); j++) {
-                                if (j == 0)
-                                    deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                else {
-                                    float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                    if (deltaDistance1 < deltaDistance)
-                                        deltaDistance = deltaDistance1;
-                                }
-                            }
-                            if (deltaDistance > 200) {
-                                showpts.add(pt3);
-                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                if (pois.get(i).getPhotonum() == 0) {
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                    }
-                                } else {
-                                    List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                        //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
-                                        }
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
-                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }else if (strings[0].equals(pois.get(i).getType()) & type3Checked) {
+                }else if (strings[2].equals(pois.get(i).getType()) & type3Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (showpts.size() == 0) {
-                            showpts.add(pt3);
+                        if (c_zoom != 10) {
+                            if (showpts.size() == 0) {
+                                showpts.add(pt3);
+                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                if (pois.get(i).getPhotonum() == 0) {
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                    }
+                                } else {
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                        //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; j++) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
+                                        }
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; j++) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                float deltaDistance = 0;
+                                for (int j = 0; j < showpts.size(); j++) {
+                                    if (j == 0)
+                                        deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                    else {
+                                        float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                        if (deltaDistance1 < deltaDistance)
+                                            deltaDistance = deltaDistance1;
+                                    }
+                                }
+                                if (deltaDistance > 200) {
+                                    showpts.add(pt3);
+                                    canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    if (pois.get(i).getPhotonum() == 0) {
+                                        if (pois.get(i).getTapenum() == 0) {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                        } else {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                        }
+                                    } else {
+                                        List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                        if (pois.get(i).getTapenum() == 0) {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            int size = bts.size();
+                                            for (int j = 0; j < size; j++) {
+                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                    canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
+                                        } else {
+                                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                            //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                            int size = bts.size();
+                                            for (int j = 0; j < size; j++) {
+                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                    canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                    locError("lzy");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }else {
                             canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                             if (pois.get(i).getPhotonum() == 0) {
@@ -1028,52 +1176,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                             canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                             locError("lzy");
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            float deltaDistance = 0;
-                            for (int j = 0; j < showpts.size(); j++) {
-                                if (j == 0)
-                                    deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                else {
-                                    float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                    if (deltaDistance1 < deltaDistance)
-                                        deltaDistance = deltaDistance1;
-                                }
-                            }
-                            if (deltaDistance > 200) {
-                                showpts.add(pt3);
-                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                if (pois.get(i).getPhotonum() == 0) {
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                    }
-                                } else {
-                                    List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                        //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
-                                        }
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
-                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
                                         }
                                     }
                                 }
