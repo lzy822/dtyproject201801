@@ -1176,7 +1176,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     } else Toast.makeText(this, select_page.this.getResources().getText(R.string.AddedMapTip), Toast.LENGTH_SHORT).show();
                     break;
                 case 18:
-                    final File file33 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
+                    final File file33 = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input");
                     if (!file33.exists() && !file33.isDirectory()){
                         file33.mkdirs();
                     }
@@ -1211,7 +1211,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
                                         //System.out.println("解压缩" + entry.getName() + "文件。") ;
                                         locError(entry.toString());
-                                        outFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input", entry.getName()) ;   // 定义输出的文件路径
+                                        outFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input", entry.getName()) ;   // 定义输出的文件路径
                                         input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
                                         out = new FileOutputStream(outFile) ;   // 实例化文件输出流
                                         byte buffer[] = new byte[4096];
@@ -1233,7 +1233,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     Log.w(TAG, "出错" );
                                 }
                                 //入库操作
-                                File ff = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input");
+                                File ff = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input");
                                 if (!ff.exists() && !ff.isDirectory()){
                                     ff.mkdirs();
                                 }
@@ -1287,7 +1287,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             READ_TYPE = NONE_TYPE;
-            String ic = "", name = "", poic = "", description = "", time = "", starttime = "", endtime = "", m_ic = "", m_lines = "", path = "";
+            String ic = "", name = "", poic = "", description = "", time = "", starttime = "", endtime = "", m_ic = "", m_lines = "", path = "", type = "";
             int color = 0, photonum = 0, tapenum = 0, id = 0;
             float x = 0, y = 0;
             while((line = bufferedReader.readLine()) != null) {
@@ -1319,6 +1319,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<ic>")){
                         ic = line.substring(4, line.indexOf("</ic>"));
+                        continue;
+                    }
+                    if (line.contains("<type>")){
+                        type = line.substring(6, line.indexOf("</type>"));
                         continue;
                     }
                     if (line.contains("<name>")){
@@ -1359,6 +1363,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         poi.setName(name);
                         poi.setX(x);
                         poi.setY(y);
+                        poi.setType(type);
                         poi.setTapenum(tapenum);
                         poi.setPhotonum(photonum);
                         poi.setDescription(description);
@@ -1415,7 +1420,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         locError("path : " + path);
                         continue;
                     }
@@ -1446,7 +1451,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         continue;
                     }
                     if (line.contains("<time>")){
@@ -1541,12 +1546,36 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        List<POI> pois = LitePal.findAll(POI.class);
+                        List<String> types = new ArrayList<>();
+                        Log.w(TAG, "runlzy: " + pois.size());
+                        for (int i = 0; i < pois.size(); i++){
+                            String temp = pois.get(i).getType();
+                            Log.w(TAG, "runlzy: " + temp);
+                            if (temp != null) {
+                                if (!temp.isEmpty()) {
+                                    if (types.size() > 0) {
+                                        for (int j = 0; j < types.size(); j++) {
+                                            if (temp.equals(types.get(j))) break;
+                                            else {
+                                                if (j == types.size() - 1) types.add(temp);
+                                                else continue;
+                                            }
+                                        }
+                                    }else types.add(temp);
+                                }
+                            }
+                        }
                         DataUtil.makeKML();
-                        makeTxt();
+                        Log.w(TAG, "runlzy: " + types.size());
+                        if (types.size() > 0) {
+                            for (int i = 0; i < types.size(); i++) {
+                                DataUtil.makeTxt(types.get(i));
+                            }
+                        }else DataUtil.makeTxt("");
                         DataUtil.makeWhiteBlankKML();
                         List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();
-                        List<POI> pois = LitePal.findAll(POI.class);
                         int size_POI = pois.size();
                         sb = sb.append("<POI>").append("\n");
                         for (int i = 0; i < size_POI; i++){
@@ -1554,6 +1583,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
                             sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
                             sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
+                            sb.append("<type>").append(pois.get(i).getType()).append("</type>").append("\n");
                             sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
                             sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
                             sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
@@ -1646,7 +1676,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
                                 }
                                 Log.w(TAG, "aa");
-                                if (size == 1) isOK = true;
+                                if (i == 0 & files.get(i).exists()) isOK = true;
                                 if (isOK){
                                     Log.w(TAG, "aa");
                                     InputStream inputStream = new FileInputStream(files.get(i));

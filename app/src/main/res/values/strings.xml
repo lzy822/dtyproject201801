@@ -6,12 +6,13 @@
     <string name="go">正式开始</string>
     <string name="stop">停止</string>
     <string name="querytip">查询</string>
+    <string name="SaveInfo">保存成功</string>
     <string name="toast_pick_file_error">不能打开文件, 请检查文件管理状态</string>
     <string name="InRedLine">在生态保护红线内</string>
     <string name="NoInRedLine">不在生态保护红线内</string>
     <string name="RedLineError">请输入标准经纬度格式</string>
     <string name="NoLongClickError">请长按某个子项后, 再选择菜单栏操作</string>
-    <string name="version_info">1.5.1</string>
+    <string name="version_info">1.5.2</string>
     <string name="version_info_0">当前版本: </string>
     <string name="version_info_1">云南省地图院数据分院制</string>
     <string name="version_info_2">联系电话: 13108714475</string>
@@ -51,6 +52,7 @@
     <string name="POIList">兴趣点列表</string>
     <string name="TapeList">录音列表</string>
     <string name="PhotoList">相片列表</string>
+    <string name="sava">保存</string>
     <string name="DateAndTime">yyyy年MM月dd日 HH:mm:ss</string>
     <string name="Date">yyyy年MM月dd日</string>
     <string name="InputLicenseError">请联系我们获取授权码</string>
