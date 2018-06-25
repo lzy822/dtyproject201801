@@ -12,7 +12,7 @@
     <string name="NoInRedLine">不在生态保护红线内</string>
     <string name="RedLineError">请输入标准经纬度格式</string>
     <string name="NoLongClickError">请长按某个子项后, 再选择菜单栏操作</string>
-    <string name="version_info">1.5.1</string>
+    <string name="version_info">1.5.2</string>
     <string name="version_info_0">当前版本: </string>
     <string name="version_info_1">云南省地图院数据分院制</string>
     <string name="version_info_2">联系电话: 13108714475</string>
