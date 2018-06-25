@@ -3590,6 +3590,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+
+        //数据库内容转换
+        String[] types = getResources().getStringArray(R.array.Type);
+        List<POI> poiList = LitePal.findAll(POI.class);
+        int sssizee = poiList.size();
+        for (int i = 0; i < sssizee; i++){
+            if (poiList.get(i).getType() == null){
+                POI poi = new POI();
+                poi.setType(types[0]);
+                poi.updateAll("poic = ?", poiList.get(i).getPoic());
+            }else if (poiList.get(i).getType().equals("")){
+                POI poi = new POI();
+                poi.setType(types[0]);
+                poi.updateAll("poic = ?", poiList.get(i).getPoic());
+            }
+        }
+        //
         type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
         type1_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
