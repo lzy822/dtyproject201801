@@ -101,7 +101,7 @@ int showNum = 0;
         String[] strings = getResources().getStringArray(R.array.Type);
         for (int i = 0; i < strings.length; i++) {
             Log.w(TAG, "refresh: " + strings[i]);
-            if (pois.get(0).getType().equals(strings[i])) type_spinner.setSelection(i);
+            if (strings[i].equals(pois.get(0).getType())) type_spinner.setSelection(i);
         }
         //
 

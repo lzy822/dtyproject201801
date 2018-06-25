@@ -826,6 +826,7 @@ public class DataUtil {
     }
 
     public static void addPOI(String ic, String poic, String name, float x, float y, String time){
+        String[] strings = MyApplication.getContext().getResources().getStringArray(R.array.Type);
         POI poi = new POI();
         poi.setIc(ic);
         if (name.contains("图片")) poi.setPhotonum(1);
@@ -834,6 +835,7 @@ public class DataUtil {
         poi.setName(name);
         poi.setX(x);
         poi.setY(y);
+        poi.setType(strings[0]);
         poi.setTime(time);
         poi.save();
     }
