@@ -578,25 +578,30 @@ public class singlepoi extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Point pt = new Point(TransformLatLng.wgs84togcj02(m_lng, m_lat));
-                        if (CheckApkExist.checkTencentMapExist(MyApplication.getContext())) {
-                            Intent intent = new Intent();
-                            intent.setData(Uri.parse("qqmap://map/routeplan?type=walk&to=" + name + "&tocoord=" + pt.getY() + "," + pt.getX() + "&policy=1&referer=图志"));
-                            startActivity(intent);
-                        }else if (CheckApkExist.checkBaiduMapExist(MyApplication.getContext())) {
-                            Intent intent = new Intent();
-                            intent.setData(Uri.parse("baidumap://map/direction?" +
-                                    "destination=latlng:" + m_lat + "," + m_lng + "|name:" + name +"&mode=walking"));
-                            startActivity(intent);
-                        }else if (CheckApkExist.checkGaodeMapExist(MyApplication.getContext())) {
-                            Intent intent = new Intent();
-                            intent.setPackage("com.autonavi.minimap");
-                            intent.setAction("android.intent.action.VIEW");
-                            intent.addCategory("android.intent.category.DEFAULT");
-                            intent.setData(Uri.parse("androidamap://route?sourceApplication=图志&dlat=" + pt.getY() + "&dlon=" + pt.getX() + "&dname=" + name + "&dev=1&t=2"));
-                            startActivity(intent);
-                        }else {
-                            Toast.makeText(singlepoi.this, R.string.QueryPathError, Toast.LENGTH_SHORT).show();
+                        try {
+                            if (CheckApkExist.checkTencentMapExist(MyApplication.getContext())) {
+                                Intent intent = new Intent();
+                                intent.setData(Uri.parse("qqmap://map/routeplan?type=walk&to=" + name + "&tocoord=" + pt.getY() + "," + pt.getX() + "&policy=1&referer=图志"));
+                                startActivity(intent);
+                            }else if (CheckApkExist.checkGaodeMapExist(MyApplication.getContext())) {
+                                Intent intent = new Intent();
+                                intent.setPackage("com.autonavi.minimap");
+                                intent.setAction("android.intent.action.VIEW");
+                                intent.addCategory("android.intent.category.DEFAULT");
+                                intent.setData(Uri.parse("androidamap://route?sourceApplication=图志&dlat=" + pt.getY() + "&dlon=" + pt.getX() + "&dname=" + name + "&dev=1&t=2"));
+                                startActivity(intent);
+                            }else if (CheckApkExist.checkBaiduMapExist(MyApplication.getContext())) {
+                                Intent intent = new Intent();
+                                intent.setData(Uri.parse("baidumap://map/direction?" +
+                                        "destination=latlng:" + m_lat + "," + m_lng + "|name:" + name +"&mode=walking"));
+                                startActivity(intent);
+                            }else {
+                                Toast.makeText(singlepoi.this, R.string.QueryPathError, Toast.LENGTH_SHORT).show();
+                            }
+                        }catch (Exception e){
+                            Toast.makeText(singlepoi.this, R.string.QueryPathError1, Toast.LENGTH_SHORT).show();
                         }
+
                     }
                 });
                 dialog1.show();
