@@ -438,7 +438,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         case 0:
                             int size = distanceLatLngs.size();
                             if (size > 0){
-                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
+                                double distance = LatLng.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
                                 DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
                                 distanceLatLngs.add(distanceLatLng);
                             }else {
@@ -449,7 +449,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         case 1:
                             int size1 = distanceLatLngs1.size();
                             if (size1 > 0){
-                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
+                                double distance = LatLng.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
                                 DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
                                 distanceLatLngs1.add(distanceLatLng);
                             }else {
@@ -460,7 +460,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         case 2:
                             int size2 = distanceLatLngs2.size();
                             if (size2 > 0){
-                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
+                                double distance = LatLng.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
                                 DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
                                 distanceLatLngs2.add(distanceLatLng);
                             }else {
@@ -479,7 +479,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         case 0:
                             int size = distanceLatLngs.size();
                             if (size > 0){
-                                double distance = DataUtil.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                double distance = LatLng.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
                                 DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
                                 distanceLatLngs.add(distanceLatLng);
                             }else {
@@ -490,7 +490,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         case 1:
                             int size1 = distanceLatLngs1.size();
                             if (size1 > 0){
-                                double distance = DataUtil.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                double distance = LatLng.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
                                 DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
                                 distanceLatLngs1.add(distanceLatLng);
                             }else {
@@ -501,7 +501,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         case 2:
                             int size2 = distanceLatLngs2.size();
                             if (size2 > 0){
-                                double distance = DataUtil.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                                double distance = LatLng.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
                                 DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
                                 distanceLatLngs2.add(distanceLatLng);
                             }else {
@@ -515,7 +515,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }
                 pdfView.zoomWithAnimation(c_zoom);
-                //PointF mpt = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                //PointF mpt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                 //DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, (float) distanceSum);
                 //distanceLatLngs.add(distanceLatLng);
             }
@@ -527,15 +527,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (kmltests.size() > 0) {
                     kmltest poii = kmltests.get(0);
                     PointF pointF = new PointF(poii.getLat(), poii.getLongi());
-                    pointF = RenderUtil.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     pointF = new PointF(pointF.x, pointF.y - 70);
                     //pointF = getGeoLocFromPixL(pointF);
-                    PointF pt8 = RenderUtil.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     locError("pt1special : " + pt8.toString());
                     float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
                     for (kmltest poi : kmltests) {
                         PointF mpointF = new PointF(poi.getLat(), poi.getLongi());
-                        mpointF = RenderUtil.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         mpointF = new PointF(mpointF.x, mpointF.y - 70);
                         if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
                             locError("mpointFspecial : " + mpointF.toString());
@@ -583,15 +583,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (pois.size() > 0) {
                     mPOIobj poii = pois.get(0);
                     PointF pointF1 = new PointF(poii.getM_X(), poii.getM_Y());
-                    pointF1 = RenderUtil.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    pointF1 = LatLng.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     pointF1 = new PointF(pointF1.x, pointF1.y - 70);
                     //pointF = getGeoLocFromPixL(pointF);
-                    PointF pt9 = RenderUtil.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt9 = LatLng.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     locError("pt1 : " + pt9.toString());
                     float delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
                     for (mPOIobj poi : pois) {
                         PointF mpointF1 = new PointF(poi.getM_X(), poi.getM_Y());
-                        mpointF1 = RenderUtil.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        mpointF1 = LatLng.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         mpointF1 = new PointF(mpointF1.x, mpointF1.y - 70);
                         if (Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < delta && Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < 35) {
                             locError("mpointF : " + mpointF1.toString());
@@ -718,7 +718,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         locError("zoom: " + Float.toString(c_zoom));
         getCurrentScreenLoc();
         double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
-        double scale_distance = DataUtil.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
+        double scale_distance = LatLng.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
         Log.w(TAG, "scale_distance: " + scale_distance);
         Log.w(TAG, "getMetric: " + getMetric());
         scale_distance = scale_distance * getMetric();
@@ -770,7 +770,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
         if (isGPSEnabled()){
             PointF pt = new PointF((float)m_lat, (float)m_long);
-            pt = RenderUtil.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            pt = LatLng.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             canvas.drawCircle(pt.x, pt.y, 23, paint);
             canvas.drawCircle(pt.x, pt.y, 20, paint5);
             canvas.drawCircle(pt.x, pt.y, 10, paint3);
@@ -807,8 +807,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 for (int j = 0; j < Trails.length - 2; j = j + 2){
                     PointF pt11, pt12;
-                    pt11 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    pt12 = RenderUtil.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    pt11 = LatLng.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    pt12 = LatLng.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
                 }
             }
@@ -830,7 +830,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             for (int i = 0; i < size0; i++) {
                 if (strings[0].equals(pois.get(i).getType()) & type1Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
-                        PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (c_zoom != 10) {
                             if (showpts.size() == 0) {
                                 showpts.add(pt3);
@@ -948,7 +948,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }else if (strings[1].equals(pois.get(i).getType()) & type2Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
-                        PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (c_zoom != 10) {
                             if (showpts.size() == 0) {
                                 showpts.add(pt3);
@@ -1066,7 +1066,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }else if (strings[2].equals(pois.get(i).getType()) & type3Checked) {
                     if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
-                        PointF pt3 = RenderUtil.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (c_zoom != 10) {
                             if (showpts.size() == 0) {
                                 showpts.add(pt3);
@@ -1186,7 +1186,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
             /*if (pois.size() > 0) {
                 for (POI poi : pois) {
-                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                     //locError(Boolean.toString(poi.getPath().isEmpty()));
                     //locError(Integer.toString(poi.getPath().length()));
@@ -1412,7 +1412,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
         }
         if (hasQueriedPoi) {
-            PointF ptf = RenderUtil.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            PointF ptf = LatLng.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             Paint ptSpecial = new Paint();
             ptSpecial.setColor(Color.rgb(255, 0, 255));
             ptSpecial.setStyle(Paint.Style.FILL);
@@ -1527,13 +1527,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
                     PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
-                    distanceCurrent = DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceCurrent = LatLng.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                     distanceSum = distanceCurrent;
                 }
                 for (int i = 0; i < pts.length; i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -1568,13 +1568,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                     PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
-                    distanceCurrent = DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceCurrent = LatLng.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                     distanceSum = distanceSum + distanceCurrent;
                 }
                 for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -1609,7 +1609,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 area = area - (mpts[0] * mpts[mpts.length - 1] - mpts[1] * mpts[mpts.length - 2]);
                 area = Math.abs((area) / 2) / c_zoom / c_zoom;
-                area = area * DataUtil.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2 + (max_long - min_long) / ( viewer_width - 2 * k_w), (max_lat + min_lat) / 2) * DataUtil.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2, (max_lat + min_lat) / 2 + (max_lat - min_lat) / (viewer_height - 2 * k_h));
+                area = area * LatLng.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2 + (max_long - min_long) / ( viewer_width - 2 * k_w), (max_lat + min_lat) / 2) * LatLng.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2, (max_lat + min_lat) / 2 + (max_lat - min_lat) / (viewer_height - 2 * k_h));
                 //area = area / 1.0965f;
                 //setTitle(df1.format(area) + "平方米");
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
@@ -1619,8 +1619,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
-        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx);
-        PointF pt22 = RenderUtil.getPixLocFromGeoL(yy);
+        PointF pt11 = LatLng.getPixLocFromGeoL(xx);
+        PointF pt22 = LatLng.getPixLocFromGeoL(yy);
         mpts[0] = pt11.x;
         mpts[1] = pt11.y;
         mpts[2] = pt22.x;
@@ -1660,7 +1660,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 for (int i = 0; i < pts.length; i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -1695,12 +1695,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                     PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
-                    distanceSum = distanceSum + DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    distanceSum = distanceSum + LatLng.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                 }
                 for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                     //mpts[i] = Float.valueOf(pts[i]);
                     PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                    PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     mpts[i] = pt11.x;
                     mpts[i + 1] = pt11.y;
                 }
@@ -1718,8 +1718,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
-        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx);
-        PointF pt22 = RenderUtil.getPixLocFromGeoL(yy);
+        PointF pt11 = LatLng.getPixLocFromGeoL(xx);
+        PointF pt22 = LatLng.getPixLocFromGeoL(yy);
         mpts[0] = pt11.x;
         mpts[1] = pt11.y;
         mpts[2] = pt22.x;
@@ -1758,7 +1758,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     for (int i = 0; i < pts.length; i = i + 2) {
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         mpts[i] = pt11.x;
                         mpts[i + 1] = pt11.y;
                     }
@@ -1793,12 +1793,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                         PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
-                        distanceSum = distanceSum + DataUtil.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                        distanceSum = distanceSum + LatLng.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
                     }
                     for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx = new PointF(mpts[i], mpts[i + 1]);
-                        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         mpts[i] = pt11.x;
                         mpts[i + 1] = pt11.y;
                     }
@@ -1816,8 +1816,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
-        PointF pt11 = RenderUtil.getPixLocFromGeoL(xx);
-        PointF pt22 = RenderUtil.getPixLocFromGeoL(yy);
+        PointF pt11 = LatLng.getPixLocFromGeoL(xx);
+        PointF pt22 = LatLng.getPixLocFromGeoL(yy);
         mpts[0] = pt11.x;
         mpts[1] = pt11.y;
         mpts[2] = pt22.x;
@@ -1850,7 +1850,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         for (int b = 0; b < sizzzze; b++) {
             int size = patchsForPix.get(b).size();
             for (int i = 0; i < size; i++) {
-                if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(b))) {
+                if (LatLng.PtInPolygon(lt, patchsForLatLng.get(b))) {
                     if (i < size - 1)
                         canvas.drawLine(patchsForPix.get(b).get(i).getLatitude(), patchsForPix.get(b).get(i).getLongitude(), patchsForPix.get(b).get(i + 1).getLatitude(), patchsForPix.get(b).get(i + 1).getLongitude(), paint10);
                     else
@@ -1873,7 +1873,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (kmltests.get(i).getLat() != 0) {
                 Log.w(TAG, "drawPLQData: ");
                 if ((kmltests.get(i).getLongi() < cs_right & kmltests.get(i).getLongi() > cs_left & kmltests.get(i).getLat() < cs_top & kmltests.get(i).getLat() > cs_bottom)) {
-                    PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     if (c_zoom != 10) {
                         if (showpts.size() == 0) {
                             showpts.add(pt2);
@@ -1946,7 +1946,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 for (int i = 0; i < distanceLatLngList.size(); i++) {
                     Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngList.size());
                     DistanceLatLng distanceLatLng = distanceLatLngList.get(i);
-                    PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF point = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     Paint paint0 = new Paint();
                     paint0.setColor(Color.RED);  //设置画笔颜色
                     paint0.setStrokeWidth(5);//设置画笔宽度
@@ -1962,7 +1962,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
                     if (i < distanceLatLngList.size() - 1) {
                         DistanceLatLng distanceLatLng1 = distanceLatLngList.get(i + 1);
-                        PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF point1 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
                     }
                     if (distanceLatLng.getDistance() < 1000) {
@@ -1987,7 +1987,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             for (int i = 0; i < distanceLatLngs.size(); i++){
                 Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs.size());
                 DistanceLatLng distanceLatLng = distanceLatLngs.get(i);
-                PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                PointF point = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                 Paint paint0 = new Paint();
                 paint0.setColor(Color.RED);  //设置画笔颜色
                 paint0.setStrokeWidth (5);//设置画笔宽度
@@ -2003,7 +2003,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
                 if (i < distanceLatLngs.size() - 1) {
                     DistanceLatLng distanceLatLng1 = distanceLatLngs.get(i + 1);
-                    PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF point1 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
                 }
                 if (distanceLatLng.getDistance() < 1000) {
@@ -2027,7 +2027,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             for (int i = 0; i < distanceLatLngs1.size(); i++){
                 Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs1.size());
                 DistanceLatLng distanceLatLng = distanceLatLngs1.get(i);
-                PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                PointF point = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                 Paint paint0 = new Paint();
                 paint0.setColor(Color.RED);  //设置画笔颜色
                 paint0.setStrokeWidth (5);//设置画笔宽度
@@ -2043,7 +2043,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
                 if (i < distanceLatLngs1.size() - 1) {
                     DistanceLatLng distanceLatLng1 = distanceLatLngs1.get(i + 1);
-                    PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF point1 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
                 }
                 if (distanceLatLng.getDistance() < 1000) {
@@ -2067,7 +2067,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             for (int i = 0; i < distanceLatLngs2.size(); i++){
                 Log.w(TAG, "onLayerDrawn: 1111 : " + distanceLatLngs2.size());
                 DistanceLatLng distanceLatLng = distanceLatLngs2.get(i);
-                PointF point = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                PointF point = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng.getLatitude(), distanceLatLng.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                 Paint paint0 = new Paint();
                 paint0.setColor(Color.RED);  //设置画笔颜色
                 paint0.setStrokeWidth (5);//设置画笔宽度
@@ -2083,7 +2083,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //else canvas.drawText(String.valueOf(distanceLatLng.getDistance() / 1000) + "千米", distanceLatLng.getLatitude(), distanceLatLng.getLongitude(), paint0);
                 if (i < distanceLatLngs2.size() - 1) {
                     DistanceLatLng distanceLatLng1 = distanceLatLngs2.get(i + 1);
-                    PointF point1 = RenderUtil.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF point1 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLng1.getLatitude(), distanceLatLng1.getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     canvas.drawLine(point.x, point.y, point1.x, point1.y, paint6);
                 }
                 if (distanceLatLng.getDistance() < 1000) {
@@ -2149,7 +2149,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (b == 0) {
                 int size222 = patchsForLatLng.get(b).size();
                 for (int i = 0; i < size222; i++) {
-                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt = LatLng.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     if (latLngs1_1.size() < size222)
                         latLngs1_1.add(new LatLng(pt.x, pt.y));
                     else {
@@ -2165,7 +2165,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }else if (b == 1) {
                 int size222 = patchsForLatLng.get(b).size();
                 for (int i = 0; i < size222; i++) {
-                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt = LatLng.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     if (latLngs1_2.size() < size222)
                         latLngs1_2.add(new LatLng(pt.x, pt.y));
                     else {
@@ -2182,7 +2182,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (b == 2) {
                 int size222 = patchsForLatLng.get(b).size();
                 for (int i = 0; i < size222; i++) {
-                    PointF pt = RenderUtil.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt = LatLng.getPixLocFromGeoL(new PointF(patchsForLatLng.get(b).get(i).getLatitude(), patchsForLatLng.get(b).get(i).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     if (latLngs1_3.size() < size222)
                         latLngs1_3.add(new LatLng(pt.x, pt.y));
                     else {
@@ -3424,7 +3424,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         int sizee = patchsForLatLng.size();
                                         boolean In = false;
                                         for (int a = 0; a < sizee; a++) {
-                                            if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                            if (LatLng.PtInPolygon(lt, patchsForLatLng.get(a))) {
                                                 In = true;
                                                 break;
                                             }
@@ -3443,7 +3443,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         int sizee = patchsForLatLng.size();
                                         boolean In = false;
                                         for (int a = 0; a < sizee; a++) {
-                                            if (DataUtil.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                            if (LatLng.PtInPolygon(lt, patchsForLatLng.get(a))) {
                                                 In = true;
                                                 break;
                                             }
@@ -4036,13 +4036,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 if (m_lat <= max_lat & m_lat >= min_lat & m_long <= max_long & m_long >= min_long){
                     toolbar.setTitle("准备记录轨迹");
-                /*PointF mmm = RenderUtil.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                /*PointF mmm = LatLng.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                 pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);*/
                     pdfView.resetZoomWithAnimation();
                     TimerTask task = new TimerTask() {
                         @Override
                         public void run() {
-                            final PointF ppz = RenderUtil.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            final PointF ppz = LatLng.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                             ppz.x = ppz.x - 10;
                             //final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                             runOnUiThread(new Runnable() {
@@ -4194,7 +4194,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     TimerTask task = new TimerTask() {
                         @Override
                         public void run() {
-                            final PointF ppz = RenderUtil.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            final PointF ppz = LatLng.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                             ppz.x = ppz.x - 10;
                             final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                             runOnUiThread(new Runnable() {
@@ -4211,11 +4211,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     };
                     Timer timer = new Timer();
                     timer.schedule(task, 1000);
-                    //PointF pp = RenderUtil.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                    //PointF pp = LatLng.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                     //pdfView.zoomWithAnimation(pp.x, pp.y, 10);
                 }else {
                     locHere_fab.setImageResource(R.drawable.ic_my_location);
-                    PointF ppz = RenderUtil.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF ppz = LatLng.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     ppz.x = ppz.x - 10;
                     pdfView.zoomCenteredTo(8, ppz);
                     //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
@@ -4312,7 +4312,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (pois.size() > 0){
                     for (POI poi : pois){
                         List<MPHOTO> mphotos = LitePal.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
-                        //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));
@@ -4376,7 +4376,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (kmltests.size() > 0){
                     for (int ii = 0; ii < kmltests.size(); ii++){
                         List<plqzp> mphotos = LitePal.where("xh = ?", kmltests.get(ii).getXh()).find(plqzp.class);
-                        //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));
@@ -4501,7 +4501,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 if (pois.size() > 0){
                     for (POI poi : pois){
-                        //PointF pt2 = RenderUtil.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                        //PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
                         //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));

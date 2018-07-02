@@ -204,17 +204,17 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             distance = 0;
         }else if (lat >= min_lat && lat <= max_lat && (longi < min_long || longi > max_long)){
             if (longi < min_long ){
-            distance = DataUtil.algorithm(longi, 0, min_long, 0);
-            }else distance = DataUtil.algorithm(longi, 0, max_long, 0);
+            distance = LatLng.algorithm(longi, 0, min_long, 0);
+            }else distance = LatLng.algorithm(longi, 0, max_long, 0);
         }else if (( lat < min_lat || lat > max_lat) && longi >= min_long && longi <= max_long){
             if (lat < min_lat){
-                distance = DataUtil.algorithm(0, lat, 0, min_lat);
-            }else distance = DataUtil.algorithm(0, lat, 0, max_lat);
+                distance = LatLng.algorithm(0, lat, 0, min_lat);
+            }else distance = LatLng.algorithm(0, lat, 0, max_lat);
         }else {
-            if (lat > max_lat && longi > max_long) distance = DataUtil.algorithm(longi, lat, max_long, max_lat);
-            else if (lat > max_lat && longi < min_long) distance = DataUtil.algorithm(longi, lat, min_long, max_lat);
-            else if (lat < min_lat && longi < min_long) distance = DataUtil.algorithm(longi, lat, min_long, min_lat);
-            else distance = DataUtil.algorithm(longi, lat, max_long, min_lat);
+            if (lat > max_lat && longi > max_long) distance = LatLng.algorithm(longi, lat, max_long, max_lat);
+            else if (lat > max_lat && longi < min_long) distance = LatLng.algorithm(longi, lat, min_long, max_lat);
+            else if (lat < min_lat && longi < min_long) distance = LatLng.algorithm(longi, lat, min_long, min_lat);
+            else distance = LatLng.algorithm(longi, lat, max_long, min_lat);
         }
         return distance;
     }
