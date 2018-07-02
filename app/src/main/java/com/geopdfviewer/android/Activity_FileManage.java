@@ -27,6 +27,7 @@ public class Activity_FileManage extends AppCompatActivity {
     private FileManageAdapter adapter;
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
+    private final String DeviceRootPath = Environment.getExternalStorageDirectory().toString();
     String type = "";
     //声明Toolbar
     Toolbar toolbar;
@@ -37,6 +38,7 @@ public class Activity_FileManage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity__file_manage);
+        Log.w(TAG, "aaa" + Environment.getExternalStorageDirectory().toString());
         toolbar = (Toolbar) findViewById(R.id.toolbar_filemanage);
         toolbar.setTitle(R.string.FileManage);
         toolbar.inflateMenu(R.menu.filemanagemenu);
@@ -55,7 +57,7 @@ public class Activity_FileManage extends AppCompatActivity {
                                 fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", 1));
                             }
                         }
-                        toolbar.setTitle(RootPath.replace("/storage/emulated/0", "文件管理器"));
+                        toolbar.setTitle(RootPath.replace(DeviceRootPath, "文件管理器"));
                         refreshRecycler();
                 }
                 return true;
@@ -83,7 +85,7 @@ public class Activity_FileManage extends AppCompatActivity {
                     fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", 1));
                 }
             }
-            toolbar.setTitle(fileManage.getRootPath().replace("/storage/emulated/0", "文件管理器"));
+            toolbar.setTitle(fileManage.getRootPath().replace(DeviceRootPath, "文件管理器"));
         } else {
             File file = new File(filepath);
             if (file.exists() & file.isDirectory()) {
@@ -107,7 +109,7 @@ public class Activity_FileManage extends AppCompatActivity {
                     }
                 }
             }
-            toolbar.setTitle(fileManage.getRootPath().replace("/storage/emulated/0", "文件管理器"));
+            toolbar.setTitle(fileManage.getRootPath().replace(DeviceRootPath, "文件管理器"));
         }
         refreshRecycler();
     }
@@ -124,6 +126,7 @@ public class Activity_FileManage extends AppCompatActivity {
                 if (!RootPath.contains(type)) {
                     fileManages.clear();
                     fileManage = new FileManage(RootPath, RootPath.substring(0, RootPath.lastIndexOf("/")), type);
+                    toolbar.setTitle(RootPath.replace(DeviceRootPath, "文件管理器"));
                     String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
                     for (int i = 0; i < strings.length; i++) {
                         if (!strings[i].contains(type))

@@ -1596,11 +1596,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             DecimalFormat df1 = new DecimalFormat("0.00");
             //locError(Double.toString(distanceSum));
             if (isMessureType == MESSURE_DISTANCE_TYPE){
-                if (isDrawTrail == TRAIL_DRAW_TYPE){
+                /*if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米(轨迹记录中)");
                 }else {
                     toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米");
-                }
+                }*/
                 //setTitle(df1.format(distanceSum) + "米");
             }else if (isMessureType == MESSURE_AREA_TYPE){
                 double area = 0;
@@ -3762,12 +3762,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         cancel_messure_fab.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                toolbar.setTitle("");
+                /*toolbar.setTitle("");
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("0.00米 , " + "0.00米(轨迹记录中)");
                 }else {
                     toolbar.setTitle("0.00米 , " + "0.00米");
-                }
+                }*/
                 distanceSum = 0;
                 poinum_messure = 0;
                 messure_pts = "";
