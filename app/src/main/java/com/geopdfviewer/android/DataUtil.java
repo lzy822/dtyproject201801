@@ -135,7 +135,7 @@ public class DataUtil {
                 endTimeDate = df.parse(endDate);
             }
         }catch (ParseException e){
-            Toast.makeText(MyApplication.getContext(), R.string.SpecialError + R.string.QLXWM, Toast.LENGTH_LONG).show();
+            Toast.makeText(MyApplication.getContext(), R.string.InputLicenseError + "_3", Toast.LENGTH_LONG).show();
         }
         if (nowDate.getTime() > endTimeDate.getTime()){
             return false;

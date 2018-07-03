@@ -63,7 +63,7 @@ public class register extends AppCompatActivity {
                 editor.putString("password", DataUtil.getPassword1(deviceId.substring(deviceId.length() - 6)).substring(0, 6));
                 editor.putBoolean("type", false);
                 editor.apply();
-                Toast.makeText(register.this, "授权码已经过期, 请重新获取", Toast.LENGTH_LONG).show();
+                Toast.makeText(register.this, R.string.RegisterError_1, Toast.LENGTH_LONG).show();
                 return false;
             }
         }else {
@@ -234,7 +234,7 @@ public class register extends AppCompatActivity {
                         editor.putString("startDate", startTime);
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
-                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
                 } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("X")) {
                     String endTime = DataUtil.datePlus(startTime, 180);
                     if (DataUtil.verifyDate(endTime)) {
@@ -242,7 +242,7 @@ public class register extends AppCompatActivity {
                         editor.putString("startDate", startTime);
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
-                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
                 } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("y")) {
                     String endTime = DataUtil.datePlus(startTime, 366);
                     if (DataUtil.verifyDate(endTime)) {
@@ -250,7 +250,7 @@ public class register extends AppCompatActivity {
                         editor.putString("startDate", startTime);
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
-                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
                 } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("g")) {
                     String endTime = DataUtil.datePlus(startTime, 30);
                     if (DataUtil.verifyDate(endTime)) {
@@ -258,7 +258,7 @@ public class register extends AppCompatActivity {
                         editor.putString("startDate", startTime);
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
-                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
                 } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("G")) {
                     String endTime = DataUtil.datePlus(startTime, 90);
                     if (DataUtil.verifyDate(endTime)) {
@@ -266,7 +266,7 @@ public class register extends AppCompatActivity {
                         editor.putString("startDate", startTime);
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
-                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
                 } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("j")) {
                     String endTime = DataUtil.datePlus(startTime, 3660);
                     if (DataUtil.verifyDate(endTime)) {
@@ -274,7 +274,7 @@ public class register extends AppCompatActivity {
                         editor.putString("startDate", startTime);
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
-                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                    }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
                 }
                 if (isOKforGo) {
                     editor.apply();
@@ -282,9 +282,9 @@ public class register extends AppCompatActivity {
                     startActivity(intent);
                     register.this.finish();
                 } else
-                    Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError), Toast.LENGTH_LONG).show();
+                Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_2", Toast.LENGTH_LONG).show();
             }
     }
 }

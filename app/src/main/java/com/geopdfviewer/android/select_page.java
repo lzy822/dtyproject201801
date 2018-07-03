@@ -717,8 +717,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             Message message = new Message();
                                             message.what = UPDATE_TEXT;
                                             handler.sendMessage(message);
-                                        } catch (UnsupportedEncodingException e) {
-
+                                        } catch (Exception e) {
+                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                         }
                                     }
                                 }).start();
@@ -741,8 +741,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
                                             editor.apply();
                                             manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
-                                        } catch (IOException e) {
-
+                                        } catch (Exception e) {
+                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                         }
                                         //locError(uri.toString());
                                         //locError(findNameFromUri(uri));
@@ -755,7 +755,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                 }).start();
 
-                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError)+ "_1", Toast.LENGTH_SHORT).show();
                         }
                     });
                     dialog.setNegativeButton("类型二", new DialogInterface.OnClickListener() {
@@ -795,8 +795,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             Message message = new Message();
                                             message.what = UPDATE_TEXT;
                                             handler.sendMessage(message);
-                                        } catch (UnsupportedEncodingException e) {
-
+                                        } catch (Exception e) {
+                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                         }
                                     }
                                 }).start();
@@ -819,8 +819,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
                                             editor.apply();
                                             manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
-                                        } catch (IOException e) {
-
+                                        } catch (Exception e) {
+                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                         }
                                         //locError(uri.toString());
                                         //locError(findNameFromUri(uri));
@@ -833,7 +833,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                 }).start();
 
-                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
                         }
                     });
                     dialog.show();
@@ -1022,8 +1022,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
                             configPath = URLDecoder.decode(configPath, "utf-8");
                             isOKForAddMap1 = isOKForAddMap(DataUtil.findNameFromUri(Uri.parse(configPath)));
-                        } catch (UnsupportedEncodingException e) {
-
+                        } catch (Exception e) {
+                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                         }
                     } else Toast.makeText(this, this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
                     if (isOKForAddMap1) {
@@ -1060,8 +1060,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                                 Message message = new Message();
                                                 message.what = UPDATE_TEXT;
                                                 handler.sendMessage(message);
-                                            } catch (UnsupportedEncodingException e) {
-
+                                            } catch (Exception e) {
+                                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     }).start();
@@ -1084,8 +1084,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                                 editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
                                                 editor.apply();
                                                 manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
-                                            } catch (IOException e) {
-
+                                            } catch (Exception e) {
+                                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                             }
                                             //locError(path);
                                             //locError(findNameFromUri(uri));
@@ -1131,8 +1131,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                                 Message message = new Message();
                                                 message.what = UPDATE_TEXT;
                                                 handler.sendMessage(message);
-                                            } catch (UnsupportedEncodingException e) {
-
+                                            } catch (Exception e) {
+                                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     }).start();
@@ -1155,8 +1155,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                                 editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
                                                 editor.apply();
                                                 manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
-                                            } catch (IOException e) {
-
+                                            } catch (Exception e) {
+                                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                             }
                                             //locError(path);
                                             //locError(findNameFromUri(uri));
@@ -1169,7 +1169,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         }
                                     }).start();
 
-                                } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                                } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
                             }
                         });
                         dialog.show();
@@ -1228,9 +1228,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     //locError(findNameFromUri(uri));
                                     //LitePal.getDatabase();
                                 } catch (UnsupportedEncodingException e) {
-                                    Log.w(TAG, "出错" );
+                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                 }catch (IOException e){
-                                    Log.w(TAG, "出错" );
+                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                 }
                                 //入库操作
                                 File ff = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input");
@@ -1257,7 +1257,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 });
                             }
                         }).start();
-                    }else Toast.makeText(this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                    }else Toast.makeText(this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -1651,7 +1651,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             of.close();
                             files.add(file1);
                         }catch (IOException e){
-                            locError("出错!");
+                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                         }
                         try {
                             runOnUiThread(new Runnable() {
@@ -1706,7 +1706,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 }
                             });
                         }catch (IOException e){
-                            locError("出错!");
+                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                             Log.w(TAG, "run: " + e.toString());
                             Log.w(TAG, "run: " + e.getMessage());
                         }

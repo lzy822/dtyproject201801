@@ -59,7 +59,7 @@
     <string name="Date">yyyy年MM月dd日</string>
     <string name="InputLicenseError">请联系我们获取授权码</string>
     <string name="FinishCopy">已复制到剪贴板</string>
-    <string name="PermissionError">必须通过所有权限才能使用本程序</string>
+    <string name="PermissionError">必须通过所有权限才能使用本程序!</string>
     <string name="LocError">请打开定位功能!</string>
     <string name="LocError1">请添加带有坐标的图片!</string>
     <string name="DeleteError">删除文件失败</string>
@@ -89,5 +89,6 @@
     <string name="MessureNumOutOfIndex">目前只支持显示三条计算数据!</string>
     <string name="Date_1">yyyyMMdd</string>
     <string name="FileManage">文件管理器</string>
+    <string name="RegisterError_1">授权码已经过期, 请重新获取!</string>
 
 </resources>
