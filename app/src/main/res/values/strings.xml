@@ -43,7 +43,7 @@
     <string name="Back">返回</string>
     <string name="Loc">定位</string>
     <string name="ShowWhiteBlank">白板图显示</string>
-    <string name="ShowPOI">兴趣点显示</string>
+    <string name="ShowPOI">图层控制器</string>
     <string name="ShowTrail">轨迹线显示</string>
     <string name="CenterMode">中心点模式</string>
     <string name="LatLngTip">在这里显示坐标值</string>

@@ -840,6 +840,21 @@ public class DataUtil {
         poi.save();
     }
 
+    public static void addPOI(String ic, String poic, String name, float x, float y, String time, int num){
+        String[] strings = MyApplication.getContext().getResources().getStringArray(R.array.Type);
+        POI poi = new POI();
+        poi.setIc(ic);
+        if (name.contains("图片")) poi.setPhotonum(1);
+        else if (name.contains("录音")) poi.setTapenum(1);
+        poi.setPoic(poic);
+        poi.setName(name);
+        poi.setX(x);
+        poi.setY(y);
+        poi.setType(strings[num]);
+        poi.setTime(time);
+        poi.save();
+    }
+
     public static void makeKML(){
         List<File> files = new ArrayList<File>();
         //POI
