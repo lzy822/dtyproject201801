@@ -690,30 +690,62 @@ public class DataUtil {
                             LatLng latLng = new LatLng(Float.valueOf(coordinates[0]), Float.valueOf(coordinates[1]));
                             READ_TYPE = NONE_TYPE;
                             kmltest kmltest = new kmltest();
+                            DMBZ dmbz = new DMBZ();
                             int size = keyAndValues.size();
                             for (int i = 0; i < size; i++){
-                                if (keyAndValues.get(i).getKey().equals("序号")) kmltest.setXh(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("地名标准名称")) kmltest.setDmbzmc(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("地名所在行政区_代码_")) kmltest.setDmszxzqdm(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("读音")) kmltest.setDy(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("地名标志标准名称")) kmltest.setDmbzbzmc(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("所在行政区")) kmltest.setSzxzq(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("设置单位")) kmltest.setSzdw(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("生产厂家")) kmltest.setSccj(keyAndValues.get(i).getValue());
-                                if (keyAndValues.get(i).getKey().equals("规格")) kmltest.setGg(keyAndValues.get(i).getValue());
+                                if (keyAndValues.get(i).getKey().equals("序号")) {
+                                    kmltest.setXh(keyAndValues.get(i).getValue());
+                                    dmbz.setXH(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("地名标准名称")) {
+                                    kmltest.setDmbzmc(keyAndValues.get(i).getValue());
+                                    dmbz.setBZMC(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("地名所在行政区_代码_")) {
+                                    kmltest.setDmszxzqdm(keyAndValues.get(i).getValue());
+                                    dmbz.setXZQDM(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("读音")) {
+                                    kmltest.setDy(keyAndValues.get(i).getValue());
+                                    dmbz.setDY(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("地名标志标准名称")) {
+                                    kmltest.setDmbzbzmc(keyAndValues.get(i).getValue());
+                                    dmbz.setBZMC(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("所在行政区")) {
+                                    kmltest.setSzxzq(keyAndValues.get(i).getValue());
+                                    dmbz.setXZQMC(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("设置单位")) {
+                                    kmltest.setSzdw(keyAndValues.get(i).getValue());
+                                    dmbz.setSZDW(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("生产厂家")) {
+                                    kmltest.setSccj(keyAndValues.get(i).getValue());
+                                    dmbz.setSCCJ(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("规格")) {
+                                    kmltest.setGg(keyAndValues.get(i).getValue());
+                                    dmbz.setGG(keyAndValues.get(i).getValue());
+                                }
                                 if (keyAndValues.get(i).getKey().equals("照片文件名")) {
                                     kmltest.setZp(keyAndValues.get(i).getValue());
+                                    dmbz.setIMGPATH(keyAndValues.get(i).getValue().replace("JPG", "jpg"));
                                 }
                             }
+                            dmbz.setLat(Float.valueOf(coordinates[0]));
+                            dmbz.setLng(Float.valueOf(coordinates[1]));
+                            dmbz.save();
                             //kmltest.setLatLng(latLng);
                             plqyp plqyp1 = new plqyp();
                             plqyp1.setXh(kmltest.getXh());
                             if (!kmltest.getDy().isEmpty()) plqyp1.setYp(Environment.getExternalStorageDirectory() + "/地名标志录音/" + kmltest.getDy());
                             plqyp1.save();
-                            String[] zps = new String[5];
+                            String[] zps = new String[10];
                             String zpath = kmltest.getZp().replace("JPG", "jpg");
                             int jpgTime = appearNumber(zpath, ".jpg");
-                            if (jpgTime == 2) {
+                            /*if (jpgTime == 2) {
                                 zps[0] = kmltest.getZp().substring(0, (int) Math.floor(Float.valueOf(zpath.length() / 2)));
                                 zps[1] = kmltest.getZp().substring((int) Math.ceil(Float.valueOf(zpath.length() / 2)) + 1, zpath.length());
                             }else if (jpgTime == 1) {
@@ -735,7 +767,7 @@ public class DataUtil {
                                 zps[2] = str.substring(0, str.indexOf(".jpg") + 4);
                                 str = str.substring(0, str.indexOf(".jpg") + 5);
                                 zps[3] = str.substring(0, str.indexOf(".jpg") + 4);
-                            }else{
+                            }else if (jpgTime == 5){
                                 String str = kmltest.getZp();
                                 zps[0] = str.substring(0, str.indexOf(".jpg") + 4);
                                 str = str.substring(0, str.indexOf(".jpg") + 5);
@@ -746,6 +778,11 @@ public class DataUtil {
                                 zps[3] = str.substring(0, str.indexOf(".jpg") + 4);
                                 str = str.substring(0, str.indexOf(".jpg") + 5);
                                 zps[4] = str.substring(0, str.indexOf(".jpg") + 4);
+                            }*/
+                            String str = kmltest.getZp();
+                            for (int kk = 0; kk < jpgTime; kk++){
+                                zps[kk] = str.substring(0, str.indexOf(".jpg") + 4);
+                                if (kk != jpgTime - 1) str = str.substring(0, str.indexOf(".jpg") + 5);
                             }
                             plqzp plqzp1 = new plqzp();
                             plqzp1.setXh(kmltest.getXh());

@@ -325,6 +325,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private static final int CENTERMODE = -1;
     private static final int NOCENTERMODE = -2;
 
+
+    private boolean esterEgg_lm = false;
+
     //记录分段距离值
     private List<DistanceLatLng>  distanceLatLngs =  new ArrayList<>();
     private List<DistanceLatLng>  distanceLatLngs1 =  new ArrayList<>();
@@ -348,8 +351,32 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     boolean CreatePOI = false;
     int POIType = -1;
+
+    private String AddNormalPOI(final PointF pt1, final int num){
+        List<POI> POIs = LitePal.findAll(POI.class);
+        POI poi = new POI();
+        poi.setName("POI" + String.valueOf(POIs.size() + 1));
+        poi.setIc(ic);
+        if (showMode == NOCENTERMODE) {
+            poi.setX(pt1.x);
+            poi.setY(pt1.y);
+        } else {
+            poi.setX(centerPointLoc.x);
+            poi.setY(centerPointLoc.y);
+        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
+        Date date = new Date(System.currentTimeMillis());
+        poi.setTime(simpleDateFormat.format(date));
+        poi.setPhotonum(0);
+        String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
+        poi.setPoic(mpoic);
+        poi.setType(strings[num]);
+        poi.save();
+        return mpoic;
+    }
+
     @Override
-    public boolean onTap(MotionEvent e) {
+    public boolean onTap(final MotionEvent e) {
         PointF pt = new PointF(e.getRawX(), e.getRawY());
         final PointF pt1 = getGeoLocFromPixL(pt);
         showLocationText(pt1);
@@ -363,25 +390,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 0;
-                        List<POI> POIs = LitePal.findAll(POI.class);
-                        POI poi = new POI();
-                        poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                        poi.setIc(ic);
-                        if (showMode == NOCENTERMODE) {
-                            poi.setX(pt1.x);
-                            poi.setY(pt1.y);
-                        } else {
-                            poi.setX(centerPointLoc.x);
-                            poi.setY(centerPointLoc.y);
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                         }
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                        Date date = new Date(System.currentTimeMillis());
-                        poi.setTime(simpleDateFormat.format(date));
-                        poi.setPhotonum(0);
-                        String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
-                        poi.setPoic(mpoic);
-                            poi.setType(strings[0]);
-                        poi.save();
                         pdfView.zoomWithAnimation(c_zoom);
                         POIType = -1;
                         CreatePOI = false;
@@ -392,25 +403,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 1;
-                        List<POI> POIs = LitePal.findAll(POI.class);
-                        POI poi = new POI();
-                        poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                        poi.setIc(ic);
-                        if (showMode == NOCENTERMODE) {
-                            poi.setX(pt1.x);
-                            poi.setY(pt1.y);
-                        } else {
-                            poi.setX(centerPointLoc.x);
-                            poi.setY(centerPointLoc.y);
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
+                        }else {
+                            List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                            int size = dmbzList.size();
+                            DMBZ dmbz = new DMBZ();
+                            if (showMode == NOCENTERMODE) {
+                                dmbz.setLat(pt1.x);
+                                dmbz.setLng(pt1.y);
+                            } else {
+                                dmbz.setLat(centerPointLoc.x);
+                                dmbz.setLng(centerPointLoc.y);
+                            }
+                            dmbz.setXH(String.valueOf(size));
+                            dmbz.save();
+                            GoDMBZSinglePOIPage(dmbz.getXH());
                         }
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                        Date date = new Date(System.currentTimeMillis());
-                        poi.setTime(simpleDateFormat.format(date));
-                        poi.setPhotonum(0);
-                        String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
-                        poi.setPoic(mpoic);
-                        poi.setType(strings[1]);
-                        poi.save();
                         pdfView.zoomWithAnimation(c_zoom);
                         POIType = -1;
                         CreatePOI = false;
@@ -421,25 +430,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 2;
-                        List<POI> POIs = LitePal.findAll(POI.class);
-                        POI poi = new POI();
-                        poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                        poi.setIc(ic);
-                        if (showMode == NOCENTERMODE) {
-                            poi.setX(pt1.x);
-                            poi.setY(pt1.y);
-                        } else {
-                            poi.setX(centerPointLoc.x);
-                            poi.setY(centerPointLoc.y);
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
                         }
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
-                        Date date = new Date(System.currentTimeMillis());
-                        poi.setTime(simpleDateFormat.format(date));
-                        poi.setPhotonum(0);
-                        String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
-                        poi.setPoic(mpoic);
-                        poi.setType(strings[2]);
-                        poi.save();
                         pdfView.zoomWithAnimation(c_zoom);
                         POIType = -1;
                         CreatePOI = false;
@@ -919,6 +912,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         if(isDrawType == POI_DRAW_TYPE || showPOI){
             if (esterEgg_plq) drawPLQData(canvas);
             //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
+            if (type2Checked){
+                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                for (int j = 0; j < dmbzList.size(); j++){
+                    Log.w(TAG, "onLayerDrawn:" + dmbzList.size());
+                    PointF ppt = LatLng.getPixLocFromGeoL(new PointF(dmbzList.get(j).getLat(), dmbzList.get(j).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawRect(new RectF(ppt.x - 5, ppt.y - 38, ppt.x + 5, ppt.y), paint2);
+                    if (dmbzList.get(j).getIMGPATH() == null || dmbzList.get(j).getIMGPATH().isEmpty()) {
+                        if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty()) canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                    }else {
+                        if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty()) canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
+                        int size = DMBZBts.size();
+                        String str = dmbzList.get(j).getIMGPATH();
+                        for (int m = 0; m < size; m++) {
+                            if (str.contains("|")) {
+                                if (str.substring(0, str.indexOf("|")).equals(DMBZBts.get(j).getM_path())) {
+                                    canvas.drawBitmap(DMBZBts.get(m).getM_bm(), ppt.x, ppt.y - 70, paint1);
+                                    locError("lzy");
+                                }
+                            }else {
+                                if (str.equals(DMBZBts.get(j).getM_path())) {
+                                    canvas.drawBitmap(DMBZBts.get(m).getM_bm(), ppt.x, ppt.y - 70, paint1);
+                                    locError("lzy");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             List<PointF> showpts = new ArrayList<>();
             List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
             int size0 = pois.size();
@@ -930,7 +954,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             if (showpts.size() == 0) {
                                 showpts.add(pt3);
                                 canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                //canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                                 if (pois.get(i).getPhotonum() == 0) {
                                     if (pois.get(i).getTapenum() == 0) {
                                         canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
@@ -2584,7 +2608,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             try {
                 ExifInterface exifInterface = new ExifInterface(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 exifInterface.getLatLong(latandlong);
-                locError(String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                locError("ADDPHOTO" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
                 if (latandlong[0] != 0) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
                     builder.setTitle("提示");
@@ -2592,19 +2616,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            AddPhoto(uri, latandlong, 0);
+                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 0);
                         }
                     });
                     builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            AddPhoto(uri, latandlong, 1);
+                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 1);
+                            else {
+                                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                                int size = dmbzList.size();
+                                DMBZ dmbz = new DMBZ();
+                                dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
+                                dmbz.setLat(latandlong[0]);
+                                dmbz.setLng(latandlong[1]);
+                                dmbz.setXH(String.valueOf(size));
+                                dmbz.save();
+                                getDMBZBitmap();
+                                pdfView.zoomWithAnimation(c_zoom);
+                            }
                         }
                     });
                     builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            AddPhoto(uri, latandlong, 2);
+                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 2);
                         }
                     });
                     builder.show();
@@ -2621,19 +2657,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    AddTape(uri,0);
+                    if (!esterEgg_lm) AddTape(uri,0);
                 }
             });
             builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    AddTape(uri,1);
+                    if (!esterEgg_lm) AddTape(uri,1);
+                    else {
+                        List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                        int size = dmbzList.size();
+                        DMBZ dmbz = new DMBZ();
+                        dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
+                        dmbz.setLat((float) m_lat);
+                        dmbz.setLng((float)m_long);
+                        dmbz.setXH(String.valueOf(size));
+                        dmbz.save();
+                        getDMBZBitmap();
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }
                 }
             });
             builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    AddTape(uri,2);
+                    if (!esterEgg_lm) AddTape(uri,2);
                 }
             });
             builder.show();
@@ -2665,19 +2713,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            AddTakePhoto(uri, latandlong, 0);
+                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 0);
                         }
                     });
                     builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            AddTakePhoto(uri, latandlong, 1);
+                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 1);
+                            else {
+                                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                                int size = dmbzList.size();
+                                DMBZ dmbz = new DMBZ();
+                                dmbz.setLat(latandlong[0]);
+                                dmbz.setLng(latandlong[1]);
+                                dmbz.setIMGPATH(imageuri);
+                                dmbz.setXH(String.valueOf(size));
+                                dmbz.save();
+                                getDMBZBitmap();
+                                pdfView.zoomWithAnimation(c_zoom);
+                            }
                         }
                     });
                     builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            AddTakePhoto(uri, latandlong, 2);
+                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 2);
                         }
                     });
                     builder.show();
@@ -2702,7 +2762,32 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         /*Intent intent = new Intent(MainInterface.this, singlepoi.class);
         intent.putExtra("POIC", poic);
         startActivity(intent);*/
+        if (!esterEgg_lm) GoNormalSinglePOIPage(poic);
     }
+
+    private void GoNormalSinglePOIPage(String poic){
+        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+        intent.putExtra("POIC", poic);
+        startActivity(intent);
+    }
+
+    private void GoDMBZSinglePOIPage(String XH){
+        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+        intent.putExtra("DMBZ", XH);
+        startActivity(intent);
+    }
+
+    /*private void GoNormalSinglePOIPage(String poic){
+        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+        intent.putExtra("POIC", poic);
+        startActivity(intent);
+    }
+
+    private void GoNormalSinglePOIPage(String poic){
+        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+        intent.putExtra("POIC", poic);
+        startActivity(intent);
+    }*/
 
     private void showPopueWindowForPhoto(){
         View popView = View.inflate(this,R.layout.popupwindow_camera_need,null);
@@ -3077,6 +3162,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             editor.apply();
             esterEgg_redline = false;
             pdfView.zoomWithAnimation(c_zoom);
+            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
+        }else if (query.equals("kqlm")){
+            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+            editor.putBoolean("open_lm", true);
+            editor.apply();
+            esterEgg_lm = true;
+            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
+        }else if (query.equals("gblm")){
+            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+            editor.putBoolean("open_lm", false);
+            editor.apply();
+            esterEgg_lm = false;
             Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
         }
         String sql = "select * from POI where";
@@ -3760,6 +3857,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         return false;
     }
+
     boolean type1Checked = false;
     boolean type2Checked = false;
     boolean type3Checked = false;
@@ -3767,11 +3865,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     CheckBox type2_checkbox;
     CheckBox type3_checkbox;
     String[] strings;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
-
+        getDMBZBitmap();
+        //LitePal.deleteAll(DMBZ.class);
         //数据库内容转换
         String[] types = getResources().getStringArray(R.array.Type);
         List<POI> poiList = LitePal.findAll(POI.class);
@@ -3863,6 +3964,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         esterEgg_redline = pref1.getBoolean("open_redline", false);
         getEsterEgg_plq();
         getEsterEgg_redline();
+        SharedPreferences pref2 = getSharedPreferences("easter_egg", MODE_PRIVATE);
+        esterEgg_lm = pref2.getBoolean("open_lm", false);
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
         centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
@@ -4597,6 +4700,55 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();
         if (hasBitmap1) pdfView.zoomWithAnimation(c_zoom);
+        //////////////////////////////////////////////////////////////////
+    }
+
+    List<bt> DMBZBts;
+    private boolean hasDMBZBitmap = false;
+
+    public void getDMBZBitmap(){
+        ////////////////////////缓存Bitmap//////////////////////////////
+        DMBZBts = new ArrayList<bt>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                hasDMBZBitmap = false;
+                DMBZBts.clear();
+                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                if (dmbzList.size() > 0){
+                    for (int ii = 0; ii < dmbzList.size(); ii++){
+                        String path = dmbzList.get(ii).getIMGPATH();
+                        if (path.contains("|")) path = path.substring(0, path.indexOf("|"));
+                        File file = new File(path);
+                        if (file.exists()) {
+                            Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
+                            int degree = DataUtil.getPicRotate(path);
+                            if (degree != 0) {
+                                Matrix m = new Matrix();
+                                m.setRotate(degree); // 旋转angle度
+                                Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                            }
+                            bt btt = new bt(bitmap, path);
+                            DMBZBts.add(btt);
+                        }else {
+                            //Resources res = MyApplication.getContext().getResources();
+                            //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
+                            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                            BitmapDrawable bd = (BitmapDrawable) drawable;
+                            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                            bt btt = new bt(bitmap, path);
+                            DMBZBts.add(btt);
+                        }
+
+                    }
+                }
+                hasDMBZBitmap = true;
+            }
+        }).start();
+        if (hasDMBZBitmap) pdfView.zoomWithAnimation(c_zoom);
         //////////////////////////////////////////////////////////////////
     }
 
