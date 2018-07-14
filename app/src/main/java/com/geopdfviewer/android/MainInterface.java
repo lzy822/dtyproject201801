@@ -406,7 +406,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if (!esterEgg_lm) {
                             GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
                         }else {
-                            List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                            dmbzList = LitePal.findAll(DMBZ.class);
                             int size = dmbzList.size();
                             DMBZ dmbz = new DMBZ();
                             if (showMode == NOCENTERMODE) {
@@ -607,46 +607,86 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, (float) distanceSum);
                 //distanceLatLngs.add(distanceLatLng);
             }
-
-            if (isQuery & esterEgg_plq){
+            boolean isQueried = false;
+            if (isQuery & ( esterEgg_plq || esterEgg_lm)){
                 Log.w(TAG, "onTapspecial : ");
-                int n = 0;
-                int num = 0;
-                if (kmltests.size() > 0) {
-                    kmltest poii = kmltests.get(0);
-                    PointF pointF = new PointF(poii.getLat(), poii.getLongi());
-                    pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    pointF = new PointF(pointF.x, pointF.y - 70);
-                    //pointF = getGeoLocFromPixL(pointF);
-                    PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    locError("pt1special : " + pt8.toString());
-                    float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
-                    for (kmltest poi : kmltests) {
-                        PointF mpointF = new PointF(poi.getLat(), poi.getLongi());
-                        mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        mpointF = new PointF(mpointF.x, mpointF.y - 70);
-                        if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
-                            locError("mpointFspecial : " + mpointF.toString());
-                            delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
-                            num = n;
+                if (esterEgg_plq) {
+                    int n = 0;
+                    int num = 0;
+                    if (kmltests.size() > 0) {
+                        kmltest poii = kmltests.get(0);
+                        PointF pointF = new PointF(poii.getLat(), poii.getLongi());
+                        pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        pointF = new PointF(pointF.x, pointF.y - 70);
+                        //pointF = getGeoLocFromPixL(pointF);
+                        PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        locError("pt1special : " + pt8.toString());
+                        float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                        for (kmltest poi : kmltests) {
+                            PointF mpointF = new PointF(poi.getLat(), poi.getLongi());
+                            mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                            if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                                locError("mpointFspecial : " + mpointF.toString());
+                                delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                                num = n;
+                            }
+                            locError("n : " + Integer.toString(n));
+                            n++;
                         }
-                        locError("n : " + Integer.toString(n));
-                        n++;
+                        locError("numspecial : " + Integer.toString(num));
+                        locError("deltaspecial : " + Float.toString(delta));
+                        if (delta < 35 || num != 0) {
+                            Intent intent = new Intent(MainInterface.this, plqpoishow.class);
+                            Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
+                            intent.putExtra("xh", kmltests.get(num).getXh());
+                            startActivity(intent);
+                            isQueried = true;
+                            //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
+                            //locError(Integer.toString(kmltests.get(num).getPhotonum()));
+                        } else locError("没有正常查询");
                     }
-                    locError("numspecial : " + Integer.toString(num));
-                    locError("deltaspecial : " + Float.toString(delta));
-                    if (delta < 35 || num != 0) {
-                        Intent intent = new Intent(MainInterface.this, plqpoishow.class);
+                }else if (esterEgg_lm){
+                    int n = 0;
+                    int num = 0;
+                    if (dmbzList.size() > 0) {
+                        DMBZ poii = dmbzList.get(0);
+                        PointF pointF = new PointF(poii.getLat(), poii.getLng());
+                        pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        pointF = new PointF(pointF.x, pointF.y - 70);
+                        //pointF = getGeoLocFromPixL(pointF);
+                        PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        locError("pt1special : " + pt8.toString());
+                        float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                        for (DMBZ poi : dmbzList) {
+                            PointF mpointF = new PointF(poi.getLat(), poi.getLng());
+                            mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                            if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                                locError("mpointFspecial : " + mpointF.toString());
+                                delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                                num = n;
+                            }
+                            locError("n : " + Integer.toString(n));
+                            n++;
+                        }
+                        locError("numspecial : " + Integer.toString(num));
+                        locError("deltaspecial : " + Float.toString(delta));
+                        if (delta < 35 || num != 0) {
+                        /*Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                         Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
                         intent.putExtra("xh", kmltests.get(num).getXh());
-                        startActivity(intent);
-                        //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
-                        //locError(Integer.toString(kmltests.get(num).getPhotonum()));
-                    } else locError("没有正常查询");
+                        startActivity(intent);*/
+                            GoDMBZSinglePOIPage(dmbzList.get(num).getXH());
+                            isQueried = true;
+                            //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
+                            //locError(Integer.toString(kmltests.get(num).getPhotonum()));
+                        } else locError("没有正常查询");
+                    }
                 }
             }
 
-            if (isQuery & isDrawType == NONE_DRAW_TYPE) {
+            if (isQuery & isDrawType == NONE_DRAW_TYPE & !isQueried) {
                 Log.w(TAG, "onTap: ");
                 List<mPOIobj> pois = new ArrayList<>();
                 Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
@@ -693,9 +733,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     locError("delta : " + Float.toString(delta));
                     if (delta < 35 || num != 0) {
                         locError("起飞 : " + Float.toString(delta));
-                        Intent intent = new Intent(MainInterface.this, singlepoi.class);
-                        intent.putExtra("POIC", pois.get(num).getM_POIC());
-                        startActivity(intent);
+                        GoNormalSinglePOIPage(pois.get(num).getM_POIC());
                         //locError(Integer.toString(pois.get(num).getPhotonum()));
                     } else locError("没有正常查询");
                 }
@@ -759,6 +797,15 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         m_long = Double.valueOf(df.format(longt));
         textView = (TextView) findViewById(R.id.txt) ;
         textView.setText( df.format(lat)+ "$$" + df.format(longt));
+    }
+
+    private boolean InspectTrail(float[] trails){
+        for (int i = 0; i < trails.length; i = i + 2){
+            if (trails[i] < cs_right & trails[i] > cs_left & trails[i + 1] < cs_top & trails[i + 1] > cs_bottom) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -884,20 +931,22 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
             }
         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
-        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
-            List<Trail> trails = LitePal.findAll(Trail.class);
-            for (Trail trail : trails){
-                String str1 = trail.getPath();
+        if (isLocateEnd & !m_cTrail.isEmpty() || showTrail){
+            for (int ii = 0; ii < trails.size(); ii++){
+                String str1 = trails.get(ii).getPath();
                 String[] TrailString = str1.split(" ");
                 float[] Trails = new float[TrailString.length];
                 for (int i = 0; i < TrailString.length; i++){
                     Trails[i] = Float.valueOf(TrailString[i]);
                 }
-                for (int j = 0; j < Trails.length - 2; j = j + 2){
-                    PointF pt11, pt12;
-                    pt11 = LatLng.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    pt12 = LatLng.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
+                if (InspectTrail(Trails)) {
+                    Log.w(TAG, "onLayerDrawn: ");
+                    for (int j = 0; j < Trails.length - 2; j = j + 2) {
+                        PointF pt11, pt12;
+                        pt11 = LatLng.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        pt12 = LatLng.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
+                    }
                 }
             }
         }
@@ -913,7 +962,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (esterEgg_plq) drawPLQData(canvas);
             //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
             if (type2Checked){
-                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                dmbzList = LitePal.findAll(DMBZ.class);
                 for (int j = 0; j < dmbzList.size(); j++){
                     Log.w(TAG, "onLayerDrawn:" + dmbzList.size());
                     PointF ppt = LatLng.getPixLocFromGeoL(new PointF(dmbzList.get(j).getLat(), dmbzList.get(j).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -2624,7 +2673,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddPhoto(uri, latandlong, 1);
                             else {
-                                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                                dmbzList = LitePal.findAll(DMBZ.class);
                                 int size = dmbzList.size();
                                 DMBZ dmbz = new DMBZ();
                                 dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
@@ -2665,7 +2714,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 public void onClick(DialogInterface dialog, int which) {
                     if (!esterEgg_lm) AddTape(uri,1);
                     else {
-                        List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                        dmbzList = LitePal.findAll(DMBZ.class);
                         int size = dmbzList.size();
                         DMBZ dmbz = new DMBZ();
                         dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
@@ -2721,7 +2770,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 1);
                             else {
-                                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                                dmbzList = LitePal.findAll(DMBZ.class);
                                 int size = dmbzList.size();
                                 DMBZ dmbz = new DMBZ();
                                 dmbz.setLat(latandlong[0]);
@@ -2762,18 +2811,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         /*Intent intent = new Intent(MainInterface.this, singlepoi.class);
         intent.putExtra("POIC", poic);
         startActivity(intent);*/
+        Log.w(TAG, "updateMapPage: ");
         if (!esterEgg_lm) GoNormalSinglePOIPage(poic);
     }
 
     private void GoNormalSinglePOIPage(String poic){
+        Log.w(TAG, "updateMapPage: 0");
         Intent intent = new Intent(MainInterface.this, singlepoi.class);
         intent.putExtra("POIC", poic);
+        intent.putExtra("type", 0);
         startActivity(intent);
     }
 
     private void GoDMBZSinglePOIPage(String XH){
+        Log.w(TAG, "updateMapPage: 1");
         Intent intent = new Intent(MainInterface.this, singlepoi.class);
         intent.putExtra("DMBZ", XH);
+        intent.putExtra("type", 1);
         startActivity(intent);
     }
 
@@ -3130,6 +3184,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         });
     }
 
+    List<DMBZ> dmbzList;
+
     public void showListPopupWindow(View view, String query) {
         final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
         query = query.trim();
@@ -3168,12 +3224,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             editor.putBoolean("open_lm", true);
             editor.apply();
             esterEgg_lm = true;
+            dmbzList = LitePal.findAll(DMBZ.class);
             Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
         }else if (query.equals("gblm")){
             SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
             editor.putBoolean("open_lm", false);
             editor.apply();
             esterEgg_lm = false;
+            dmbzList.clear();
             Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
         }
         String sql = "select * from POI where";
@@ -3594,7 +3652,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     trail.setName("路径" + Integer.toString(trails.size() + 1));
                     trail.setPath(m_cTrail);
                     trail.save();*/
-                    List<Trail> trails = LitePal.findAll(Trail.class);
+                    trails = LitePal.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
                     MainInterface.this.finish();
                 }
@@ -3616,7 +3674,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 public void onClick(DialogInterface dialog, int which) {
                     Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
                     stopService(stop_mService);
-                    List<Trail> trails = LitePal.findAll(Trail.class);
+                    trails = LitePal.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
                     MainInterface.this.finish();
                 }
@@ -3865,12 +3923,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     CheckBox type2_checkbox;
     CheckBox type3_checkbox;
     String[] strings;
-
+    List<Trail> trails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        trails = LitePal.findAll(Trail.class);
         getDMBZBitmap();
         //LitePal.deleteAll(DMBZ.class);
         //数据库内容转换
@@ -3966,6 +4025,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getEsterEgg_redline();
         SharedPreferences pref2 = getSharedPreferences("easter_egg", MODE_PRIVATE);
         esterEgg_lm = pref2.getBoolean("open_lm", false);
+        if (esterEgg_lm){
+            dmbzList = LitePal.findAll(DMBZ.class);
+        }
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
         centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
@@ -4386,7 +4448,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     trail.setName("路径" + Integer.toString(trails.size() + 1));
                     trail.setPath(m_cTrail);
                     trail.save();*/
-                    List<Trail> trails = LitePal.findAll(Trail.class);
+                    trails = LitePal.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
                     if (showMode == CENTERMODE) isQuery = true;
                     else isQuery = false;
@@ -4714,7 +4776,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void run() {
                 hasDMBZBitmap = false;
                 DMBZBts.clear();
-                List<DMBZ> dmbzList = LitePal.findAll(DMBZ.class);
+                dmbzList = LitePal.findAll(DMBZ.class);
                 if (dmbzList.size() > 0){
                     for (int ii = 0; ii < dmbzList.size(); ii++){
                         String path = dmbzList.get(ii).getIMGPATH();
@@ -4799,10 +4861,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     } while (cursor.moveToNext());
                 }
                 cursor.close();
-            }else {
+            }else if (poic.contains("DMBZ")){
                 hasQueriedPoi = true;
-                List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
-                queriedPoi = new mPOIobj(poic, kmltests.get(0).getLat(), kmltests.get(0).getLongi(), "", 0, 0, "", "");
+                poic = poic.replace("DMBZ", "");
+                //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
+                List<DMBZ> dmbzList = LitePal.where("xh = ?", poic).find(DMBZ.class);
+                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
             }
         }
         String currentProvider = LocationManager.NETWORK_PROVIDER;

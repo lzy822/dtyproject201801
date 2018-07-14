@@ -64,26 +64,165 @@ public class singlepoi extends AppCompatActivity {
     Uri imageUri;
     Spinner type_spinner;
     float m_lat, m_lng;
+    private int POITYPE = -1;
+    private String DMXH;
+    private EditText edit_XH;
+    private EditText edit_DY;
+    private EditText edit_MC;
+    private EditText edit_BZMC;
+    private EditText edit_XZQMC;
+    private EditText edit_XZQDM;
+    private EditText edit_SZDW;
+    private EditText edit_SCCJ;
+    private EditText edit_GG;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_singlepoi);
-        type_spinner = (Spinner) findViewById(R.id.type_selection);
         //声明ToolBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        setTitle("兴趣点信息");
         Intent intent = getIntent();
-        POIC = intent.getStringExtra("POIC");
+        POITYPE = intent.getIntExtra("type", -1);
+        Log.w(TAG, "onCreate: " + POITYPE);
+
         textView_photonum = (TextView) findViewById(R.id.txt_photonumshow);
+        textView_photonum.setVisibility(View.VISIBLE);
+
+        if (POITYPE == 0) {
+            setTitle("兴趣点信息");
+            POIC = intent.getStringExtra("POIC");
+            type_spinner = (Spinner) findViewById(R.id.type_selection);
+            type_spinner.setVisibility(View.VISIBLE);
+            Log.w(TAG, "onCreate: 0 ");
+        }else if (POITYPE == 1){
+            setTitle("地名标志信息");
+            DMXH = intent.getStringExtra("DMBZ");
+            Log.w(TAG, "onCreate: 1 ");
+            RefreshDMBZ();
+        }
+    }
+
+    private void RefreshDMBZ(){
+        List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+        TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
+        txt_XH.setVisibility(View.VISIBLE);
+        TextView txt_DY = (TextView) findViewById(R.id.txt_DY);
+        txt_DY.setVisibility(View.VISIBLE);
+        TextView txt_MC = (TextView) findViewById(R.id.txt_MC);
+        txt_MC.setVisibility(View.VISIBLE);
+        TextView txt_BZMC = (TextView) findViewById(R.id.txt_BZMC);
+        txt_BZMC.setVisibility(View.VISIBLE);
+        TextView txt_XZQMC = (TextView) findViewById(R.id.txt_XZQMC);
+        txt_XZQMC.setVisibility(View.VISIBLE);
+        TextView txt_XZQDM = (TextView) findViewById(R.id.txt_XZQDM);
+        txt_XZQDM.setVisibility(View.VISIBLE);
+        TextView txt_SZDW = (TextView) findViewById(R.id.txt_SZDW);
+        txt_SZDW.setVisibility(View.VISIBLE);
+        TextView txt_SCCJ = (TextView) findViewById(R.id.txt_SCCJ);
+        txt_SCCJ.setVisibility(View.VISIBLE);
+        TextView txt_GG = (TextView) findViewById(R.id.txt_GG);
+        txt_GG.setVisibility(View.VISIBLE);
+        edit_XH = (EditText) findViewById(R.id.edit_XH);
+        edit_XH.setText(dmbzList.get(0).getXH());
+        edit_XH.setVisibility(View.VISIBLE);
+        edit_DY = (EditText) findViewById(R.id.edit_DY);
+        edit_DY.setText(dmbzList.get(0).getDY());
+        edit_DY.setVisibility(View.VISIBLE);
+        edit_MC = (EditText) findViewById(R.id.edit_MC);
+        edit_MC.setText(dmbzList.get(0).getMC());
+        edit_MC.setVisibility(View.VISIBLE);
+        edit_BZMC = (EditText) findViewById(R.id.edit_BZMC);
+        edit_BZMC.setText(dmbzList.get(0).getBZMC());
+        edit_BZMC.setVisibility(View.VISIBLE);
+        edit_XZQMC = (EditText) findViewById(R.id.edit_XZQMC);
+        edit_XZQMC.setText(dmbzList.get(0).getXZQMC());
+        edit_XZQMC.setVisibility(View.VISIBLE);
+        edit_XZQDM = (EditText) findViewById(R.id.edit_XZQDM);
+        edit_XZQDM.setText(dmbzList.get(0).getXZQDM());
+        edit_XZQDM.setVisibility(View.VISIBLE);
+        edit_SZDW = (EditText) findViewById(R.id.edit_SZDW);
+        edit_SZDW.setText(dmbzList.get(0).getSZDW());
+        edit_SZDW.setVisibility(View.VISIBLE);
+        edit_SCCJ = (EditText) findViewById(R.id.edit_SCCJ);
+        edit_SCCJ.setText(dmbzList.get(0).getSCCJ());
+        edit_SCCJ.setVisibility(View.VISIBLE);
+        edit_GG = (EditText) findViewById(R.id.edit_GG);
+        edit_GG.setText(dmbzList.get(0).getGG());
+        edit_GG.setVisibility(View.VISIBLE);
+        TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
+        Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
+        if (dmbzList.get(0).getIMGPATH() != null) {
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
+            ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+            String path = dmbzList.get(0).getIMGPATH().substring(0, dmbzList.get(0).getIMGPATH().indexOf(".jpg") + 4);
+            File file = new File(path);
+            if (file.exists()) {
+                try {
+                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                    int degree = DataUtil.getPicRotate(path);
+                    if (degree != 0) {
+                        Matrix m = new Matrix();
+                        m.setRotate(degree); // 旋转angle度
+                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                    }
+                    imageView.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    Log.w(TAG, e.toString());
+                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                    BitmapDrawable bd = (BitmapDrawable) drawable;
+                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                    imageView.setImageBitmap(bitmap);
+                }
+            } else {
+                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                BitmapDrawable bd = (BitmapDrawable) drawable;
+                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                imageView.setImageBitmap(bitmap);
+            }
+            imageView.setVisibility(View.VISIBLE);
+        }
+        txt_photonum.setVisibility(View.VISIBLE);
+        TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
+        if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".jpg")));
+        else txt_tapenum.setText(String.valueOf(0));
+        txt_tapenum.setVisibility(View.VISIBLE);
+        TextView txt_loc = (TextView) findViewById(R.id.txt_locshow);
+        m_lng = dmbzList.get(0).getLng();
+        m_lat = dmbzList.get(0).getLat();
+        txt_loc.setText(m_lat + ", " + m_lng);
+        txt_loc.setVisibility(View.VISIBLE);
+        FloatingActionButton fab_saveinfo = (FloatingActionButton) findViewById(R.id.fab_saveinfo1);
+        fab_saveinfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DMBZ poi = new DMBZ();
+                poi.setXH(DMXH);
+                poi.setDY(edit_DY.getText().toString());
+                poi.setMC(edit_MC.getText().toString());
+                poi.setBZMC(edit_BZMC.getText().toString());
+                poi.setXZQMC(edit_XZQMC.getText().toString());
+                poi.setXZQDM(edit_XZQDM.getText().toString());
+                poi.setSZDW(edit_SZDW.getText().toString());
+                poi.setSCCJ(edit_SCCJ.getText().toString());
+                poi.setGG(edit_GG.getText().toString());
+                poi.updateAll("xh = ?", DMXH);
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        refresh();
+        if (POITYPE == 0) refresh();
     }
+
     int showNum = 0;
     List<bt> bms;
     PointF pt0 = new PointF();
@@ -92,6 +231,21 @@ public class singlepoi extends AppCompatActivity {
     String str = "";
 
     private void refresh(){
+        TextView txt_name = (TextView) findViewById(R.id.txt_name);
+        txt_name.setVisibility(View.VISIBLE);
+        TextView txt_time = (TextView) findViewById(R.id.txt_time);
+        txt_time.setVisibility(View.VISIBLE);
+        TextView txt_des = (TextView) findViewById(R.id.txt_des);
+        txt_des.setVisibility(View.VISIBLE);
+        TextView txt_type = (TextView) findViewById(R.id.txt_type);
+        txt_type.setVisibility(View.VISIBLE);
+        TextView txt_photonum = (TextView) findViewById(R.id.txt_photonum);
+        txt_photonum.setVisibility(View.VISIBLE);
+        TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenum);
+        txt_tapenum.setVisibility(View.VISIBLE);
+        TextView txt_loc = (TextView) findViewById(R.id.txt_loc);
+        txt_loc.setVisibility(View.VISIBLE);
+
         List<POI> pois = LitePal.where("poic = ?", POIC).find(POI.class);
         List<MTAPE> tapes = LitePal.where("poic = ?", POIC).find(MTAPE.class);
         final List<MPHOTO> photos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
@@ -274,15 +428,19 @@ public class singlepoi extends AppCompatActivity {
         POI poi = pois.get(0);
         name = poi.getName();
         editText_name = (EditText) findViewById(R.id.edit_name);
+        editText_name.setVisibility(View.VISIBLE);
         editText_name.setText(name);
         editText_des = (EditText) findViewById(R.id.edit_des);
+        editText_des.setVisibility(View.VISIBLE);
         if (poi.getDescription() != null) {
             editText_des.setText(poi.getDescription());
         }else editText_des.setText("");
         TextView textView_time = (TextView) findViewById(R.id.txt_timeshow);
+        textView_time.setVisibility(View.VISIBLE);
         textView_time.setText(poi.getTime());
         Log.w(TAG, Integer.toString(tapes.size()));
         textView_photonum.setText(Integer.toString(photos.size()));
+        textView_photonum.setVisibility(View.VISIBLE);
         textView_photonum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -293,6 +451,7 @@ public class singlepoi extends AppCompatActivity {
             }
         });
         TextView textView_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
+        textView_tapenum.setVisibility(View.VISIBLE);
         textView_tapenum.setText(Integer.toString(tapes.size()));
         textView_tapenum.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -304,11 +463,13 @@ public class singlepoi extends AppCompatActivity {
             }
         });
         TextView textView_loc = (TextView) findViewById(R.id.txt_locshow);
+        textView_loc.setVisibility(View.VISIBLE);
         DecimalFormat df = new DecimalFormat("0.0000");
         m_lat = poi.getX();
         m_lng = poi.getY();
         textView_loc.setText(df.format(poi.getX()) + ", " + df.format(poi.getY()));
         ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
+        addphoto.setVisibility(View.VISIBLE);
         addphoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -316,6 +477,7 @@ public class singlepoi extends AppCompatActivity {
             }
         });
         ImageButton addtape = (ImageButton)findViewById(R.id.addTape_singlepoi);
+        addtape.setVisibility(View.VISIBLE);
         addtape.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -347,7 +509,7 @@ public class singlepoi extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.w(TAG, "run: photo.size" + photos.size());
+                //Log.w(TAG, "run: photo.size" + photos.size());
                 bms = new ArrayList<>();
                 for (int i = 0; i < photos.size(); i++) {
                     String path = photos.get(i).getPath();
@@ -380,6 +542,50 @@ public class singlepoi extends AppCompatActivity {
                                     ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             bms.add(new bt(bitmap, ""));
                         }
+                }
+
+                Log.w(TAG, "getBitmap: " + bms.size());
+            }
+        }).start();
+    }
+
+    private void getBitmapDMBZ(final List<DMBZ> photos){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Log.w(TAG, "run: photo.size" + photos.size());
+                bms = new ArrayList<>();
+                for (int i = 0; i < photos.size(); i++) {
+                    String path = photos.get(i).getIMGPATH().substring(0, photos.get(i).getIMGPATH().indexOf(".jpg") + 4);
+                    File file = new File(path);
+                    if (file.exists()) {
+                        try {
+                            Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                            int degree = DataUtil.getPicRotate(path);
+                            if (degree != 0) {
+                                Matrix m = new Matrix();
+                                m.setRotate(degree); // 旋转angle度
+                                Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                            }
+                            bms.add(new bt(bitmap,  path));
+                        } catch (IOException e) {
+                            Log.w(TAG, e.toString());
+                            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                            BitmapDrawable bd = (BitmapDrawable) drawable;
+                            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                            bms.add(new bt(bitmap, ""));
+                        }
+                    } else {
+                        Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                        BitmapDrawable bd = (BitmapDrawable) drawable;
+                        Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                        bms.add(new bt(bitmap, ""));
+                    }
                 }
 
                 Log.w(TAG, "getBitmap: " + bms.size());
@@ -471,36 +677,55 @@ public class singlepoi extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
-            List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
-            POI poi = new POI();
-            long time = System.currentTimeMillis();
-            poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
-            Date date = new Date(System.currentTimeMillis());
-            poi.updateAll("poic = ?", POIC);
-            MPHOTO mphoto = new MPHOTO();
-            mphoto.setPdfic(POIs.get(0).getIc());
-            mphoto.setPoic(POIC);
-            //mphoto.setPath(getRealPath(uri.getPath()));
-            mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-            mphoto.setTime(simpleDateFormat.format(date));
-            mphoto.save();
+            if (POITYPE == 0) {
+                List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
+                POI poi = new POI();
+                poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
+                Date date = new Date(System.currentTimeMillis());
+                poi.updateAll("poic = ?", POIC);
+                MPHOTO mphoto = new MPHOTO();
+                mphoto.setPdfic(POIs.get(0).getIc());
+                mphoto.setPoic(POIC);
+                //mphoto.setPath(getRealPath(uri.getPath()));
+                mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                mphoto.setTime(simpleDateFormat.format(date));
+                mphoto.save();
+            }else if (POITYPE == 1){
+                List<DMBZ> dmbzs = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                DMBZ dmbz = new DMBZ();
+                if (dmbzs.get(0).getIMGPATH() != null) {
+                    String imgpath = dmbzs.get(0).getIMGPATH();
+                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                }
+            }
         }
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
             Uri uri = data.getData();
             //long time = System.currentTimeMillis();
-            List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
-            POI poi = new POI();
-            poi.setTapenum(POIs.get(0).getTapenum() + 1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
-            Date date = new Date(System.currentTimeMillis());
-            poi.updateAll("poic = ?", POIC);
-            MTAPE mtape = new MTAPE();
-            mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
-            mtape.setPdfic(POIs.get(0).getIc());
-            mtape.setPoic(POIC);
-            mtape.setTime(simpleDateFormat.format(date));
-            mtape.save();
+            if (POITYPE == 0) {
+                List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
+                POI poi = new POI();
+                poi.setTapenum(POIs.get(0).getTapenum() + 1);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
+                Date date = new Date(System.currentTimeMillis());
+                poi.updateAll("poic = ?", POIC);
+                MTAPE mtape = new MTAPE();
+                mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
+                mtape.setPdfic(POIs.get(0).getIc());
+                mtape.setPoic(POIC);
+                mtape.setTime(simpleDateFormat.format(date));
+                mtape.save();
+            }else if (POITYPE == 1){
+                List<DMBZ> dmbzs = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                DMBZ dmbz = new DMBZ();
+                if (dmbzs.get(0).getTAPEPATH() != null) {
+                    String tapepath = dmbzs.get(0).getTAPEPATH();
+                    if (DataUtil.appearNumber(tapepath, ".jpg") > 0) dmbz.setTAPEPATH(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                }
+            }
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
             Log.w(TAG, "onActivityResult1: " + imageUri.toString());
@@ -519,18 +744,28 @@ public class singlepoi extends AppCompatActivity {
                     singlepoi.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
                 }catch (IOException e){
                 }
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
-                Date date = new Date(System.currentTimeMillis());
-                List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
-                POI poi = new POI();
-                long time = System.currentTimeMillis();
-                poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-                poi.updateAll("poic = ?", POIC);
-                MPHOTO mphoto = new MPHOTO();
-                mphoto.setPoic(POIC);
-                mphoto.setPath(imageuri);
-                mphoto.setTime(simpleDateFormat.format(date));
-                mphoto.save();
+                if (POITYPE == 0) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(singlepoi.this.getResources().getText(R.string.DateAndTime).toString());
+                    Date date = new Date(System.currentTimeMillis());
+                    List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
+                    POI poi = new POI();
+                    long time = System.currentTimeMillis();
+                    poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
+                    poi.updateAll("poic = ?", POIC);
+                    MPHOTO mphoto = new MPHOTO();
+                    mphoto.setPoic(POIC);
+                    mphoto.setPath(imageuri);
+                    mphoto.setTime(simpleDateFormat.format(date));
+                    mphoto.save();
+                }else if (POITYPE == 1){
+                    List<DMBZ> dmbzs = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                    DMBZ dmbz = new DMBZ();
+                    if (dmbzs.get(0).getIMGPATH() != null) {
+                        String imgpath = dmbzs.get(0).getIMGPATH();
+                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + imageuri);
+                        else dmbz.setIMGPATH(imageuri);
+                    }
+                }
             }else {
                 file.delete();
                 Toast.makeText(singlepoi.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
@@ -568,9 +803,15 @@ public class singlepoi extends AppCompatActivity {
                 dialog1.setPositiveButton("图上位置", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
-                        editor.putString("poic", POIC);
-                        editor.apply();
+                        if (POITYPE == 0) {
+                            SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
+                            editor.putString("poic", POIC);
+                            editor.apply();
+                        }else if (POITYPE == 1) {
+                            SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
+                            editor.putString("poic", "DMBZ" + DMXH);
+                            editor.apply();
+                        }
                         singlepoi.this.finish();
                     }
                 });
@@ -607,11 +848,25 @@ public class singlepoi extends AppCompatActivity {
                 dialog1.show();
                 break;
             case R.id.back_andupdate:
-                POI poi = new POI();
-                poi.setName(editText_name.getText().toString());
-                poi.setDescription(editText_des.getText().toString());
-                poi.setType(str);
-                poi.updateAll("poic = ?", POIC);
+                if (POITYPE == 0) {
+                    POI poi = new POI();
+                    poi.setName(editText_name.getText().toString());
+                    poi.setDescription(editText_des.getText().toString());
+                    poi.setType(str);
+                    poi.updateAll("poic = ?", POIC);
+                }else if (POITYPE == 1) {
+                    DMBZ poi = new DMBZ();
+                    poi.setXH(DMXH);
+                    poi.setDY(edit_DY.getText().toString());
+                    poi.setMC(edit_MC.getText().toString());
+                    poi.setBZMC(edit_BZMC.getText().toString());
+                    poi.setXZQMC(edit_XZQMC.getText().toString());
+                    poi.setXZQDM(edit_XZQDM.getText().toString());
+                    poi.setSZDW(edit_SZDW.getText().toString());
+                    poi.setSCCJ(edit_SCCJ.getText().toString());
+                    poi.setGG(edit_GG.getText().toString());
+                    poi.updateAll("xh = ?", DMXH);
+                }
                 this.finish();
                 break;
             case R.id.deletepoi:
@@ -622,9 +877,13 @@ public class singlepoi extends AppCompatActivity {
                 dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        LitePal.deleteAll(POI.class, "poic = ?", POIC);
-                        LitePal.deleteAll(MPHOTO.class, "poic = ?", POIC);
-                        LitePal.deleteAll(MTAPE.class, "poic = ?", POIC);
+                        if (POITYPE == 0) {
+                            LitePal.deleteAll(POI.class, "poic = ?", POIC);
+                            LitePal.deleteAll(MPHOTO.class, "poic = ?", POIC);
+                            LitePal.deleteAll(MTAPE.class, "poic = ?", POIC);
+                        }else if (POITYPE == 1) {
+                            LitePal.deleteAll(DMBZ.class, "xh = ?", DMXH);
+                        }
                         singlepoi.this.finish();
                     }
                 });
