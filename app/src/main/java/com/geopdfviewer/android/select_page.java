@@ -1573,6 +1573,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 DataUtil.makeTxt(types.get(i));
                             }
                         }else DataUtil.makeTxt("");
+                        DataUtil.makeTxt1();
                         DataUtil.makeWhiteBlankKML();
                         List<File> files = new ArrayList<File>();
                         StringBuffer sb = new StringBuffer();

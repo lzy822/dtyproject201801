@@ -156,7 +156,7 @@ public class singlepoi extends AppCompatActivity {
         if (dmbzList.get(0).getIMGPATH() != null) {
             txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
             ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            String path = dmbzList.get(0).getIMGPATH().substring(0, dmbzList.get(0).getIMGPATH().indexOf(".jpg") + 4);
+            String path = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/" + dmbzList.get(0).getIMGPATH().substring(0, dmbzList.get(0).getIMGPATH().indexOf(".jpg") + 4);
             File file = new File(path);
             if (file.exists()) {
                 try {

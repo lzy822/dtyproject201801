@@ -844,6 +844,112 @@ public class DataUtil {
         }
     }
 
+    public static boolean getKML1(String filePath){
+        File file = new File(filePath);
+        InputStream in = null;
+        int READ_TYPE;
+        final int POI_TYPE = 0;
+        final int NONE_TYPE = -1;
+        int readingTable = 0, readingTd = 0;
+        String coordinate = "";
+        boolean readingTr = false;
+        String title = "";
+        String value = "";
+        try {
+            List<KeyAndValue> keyAndValues = new ArrayList<>();
+            String line;
+            in = new FileInputStream(file);
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            READ_TYPE = NONE_TYPE;
+            while((line = bufferedReader.readLine()) != null) {
+                if (line.contains("<table")) readingTable++;
+                if (line.contains("</table")) readingTable--;
+                if (readingTable == 0){
+                    if (line.contains("<Point>")){
+                        READ_TYPE = POI_TYPE;
+                    }
+                    /*if (line.contains("</Point>")){
+                        READ_TYPE = NONE_TYPE;
+                    }*/
+                    if (READ_TYPE == POI_TYPE){
+                        if (line.contains("<coordinates>")){
+                            coordinate = line.substring(line.indexOf("<coordinates>") + 13, line.indexOf("</coordinates>"));
+                            coordinate = coordinate.trim();
+                            String[] coordinates = coordinate.split(",");
+                            LatLng latLng = new LatLng(Float.valueOf(coordinates[0]), Float.valueOf(coordinates[1]));
+                            READ_TYPE = NONE_TYPE;
+                            DMBZ dmbz = new DMBZ();
+                            int size = keyAndValues.size();
+                            for (int i = 0; i < size; i++){
+                                if (keyAndValues.get(i).getKey().equals("序号")) {
+                                    dmbz.setXH(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("地名标准名称")) {
+                                    dmbz.setBZMC(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("地名所在行政区_代码_")) {
+                                    dmbz.setXZQDM(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("读音")) {
+                                    dmbz.setTAPEPATH(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("地名标志标准名称")) {
+                                    dmbz.setBZMC(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("所在行政区")) {
+                                    dmbz.setXZQMC(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("设置单位")) {
+                                    dmbz.setSZDW(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("生产厂家")) {
+                                    dmbz.setSCCJ(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("规格")) {
+                                    dmbz.setGG(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("照片文件名")) {
+                                    dmbz.setIMGPATH(keyAndValues.get(i).getValue().replace("JPG", "jpg"));
+                                }
+                            }
+                            dmbz.setLat(Float.valueOf(coordinates[1]));
+                            dmbz.setLng(Float.valueOf(coordinates[0]));
+                            dmbz.save();
+                            //kmltest.setLatLng(latLng);
+                        }
+                    }
+                }else if (readingTable == 2){
+                    if (line.contains("<tr")){
+                        readingTr = true;
+                    }
+                    if (readingTr){
+                        if (line.contains("<td>")){
+                            if (readingTd == 0){
+                                title = line.substring(4, line.indexOf("</td>"));
+                                Log.w(TAG, "title : " + title);
+                            }else if (readingTd == 1){
+                                value = line.substring(4, line.indexOf("</td>"));
+                                Log.w(TAG, "value : " + value);
+                                KeyAndValue keyAndValue = new KeyAndValue(title, value);
+                                keyAndValues.add(keyAndValue);
+                            }
+                            readingTd++;
+                        }
+                        if (line.contains("</tr>")){
+                            readingTr = false;
+                            readingTd = 0;
+                        }
+                    }
+                }
+            }
+            return true;
+        }catch (Exception e){
+            Log.w(TAG, "getKML: " + e.getLocalizedMessage());
+            return false;
+        }
+    }
+
     public static void addPhotoToDB(String path, String ic, String poic, String time){
         MPHOTO mphoto = new MPHOTO();
         mphoto.setPdfic(ic);
@@ -1337,13 +1443,29 @@ public class DataUtil {
         return sb;
     }
 
+    public static StringBuffer makeTxtHead1(StringBuffer sb){
+        sb = sb.append("XH").append(";");
+        sb = sb.append("DY").append(";");
+        sb = sb.append("MC").append(";");
+        sb = sb.append("BZMC").append(";");
+        sb = sb.append("XZQMC").append(";");
+        sb = sb.append("XZQDM").append(";");
+        sb = sb.append("SZDW").append(";");
+        sb = sb.append("SCCJ").append(";");
+        sb = sb.append("GG").append(";");
+        sb = sb.append("x").append(";");
+        sb = sb.append("y").append(";");
+        sb = sb.append("IMGPATH").append("\n");
+        return sb;
+    }
+
     public static void makeTxt(String type){
         try {
             final List<POI> pois = LitePal.where("type = ?", type).find(POI.class);
             Log.w(TAG, "makeTxt: " + pois.size());
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
-            makeTxtHead(sb);
+            sb = makeTxtHead(sb);
             for (int i = 0; i < size_POI; i++) {
                 //属性表内容
                 sb.append(pois.get(i).getIc()).append(";").append(pois.get(i).getName()).append(";").append(pois.get(i).getPoic()).append(";");
@@ -1371,7 +1493,25 @@ public class DataUtil {
             makeFile(sb, type);
         }catch (UnsupportedEncodingException e){
             Log.w(TAG, e.toString());
+        }
     }
+
+    public static void makeTxt1(){
+        try {
+            final List<DMBZ> pois = LitePal.findAll(DMBZ.class);
+            Log.w(TAG, "makeTxt: " + pois.size());
+            StringBuffer sb = new StringBuffer();
+            int size_POI = pois.size();
+            sb = makeTxtHead1(sb);
+            for (int i = 0; i < size_POI; i++) {
+                //属性表内容
+                sb.append(pois.get(i).getXH()).append(";").append(pois.get(i).getDY()).append(";").append(pois.get(i).getMC()).append(";").append(pois.get(i).getBZMC()).append(";").append(pois.get(i).getXZQMC()).append(";").append(pois.get(i).getXZQDM()).append(";").append(pois.get(i).getSZDW()).append(";").append(pois.get(i).getSCCJ()).append(";").append(pois.get(i).getGG()).append(";").append(pois.get(i).getIMGPATH()).append(";").append(pois.get(i).getLng()).append(";");
+                sb.append(pois.get(i).getLat()).append("\n");
+            }
+            makeFile1(sb);
+        }catch (Exception e){
+            Log.w(TAG, e.toString());
+        }
     }
 
     public static void makeFile(StringBuffer sb, String type){
@@ -1380,7 +1520,23 @@ public class DataUtil {
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", type + outputPath + ".txt");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", "DMBZ" + type + outputPath + ".txt");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        } catch (IOException e) {
+            Log.w(TAG, e.toString());
+        }
+    }
+
+    public static void makeFile1(StringBuffer sb){
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()) {
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", "DMBZ" + outputPath + ".txt");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());

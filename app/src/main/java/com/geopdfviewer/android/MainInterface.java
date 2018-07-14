@@ -408,6 +408,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         }else {
                             dmbzList = LitePal.findAll(DMBZ.class);
                             int size = dmbzList.size();
+                            Log.w(TAG, "dmbzList: " + size);
                             DMBZ dmbz = new DMBZ();
                             if (showMode == NOCENTERMODE) {
                                 dmbz.setLat(pt1.x);
@@ -420,7 +421,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             dmbz.save();
                             GoDMBZSinglePOIPage(dmbz.getXH());
                         }
-                        pdfView.zoomWithAnimation(c_zoom);
+                        //pdfView.zoomWithAnimation(c_zoom);
                         POIType = -1;
                         CreatePOI = false;
                     }
@@ -677,6 +678,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
                         intent.putExtra("xh", kmltests.get(num).getXh());
                         startActivity(intent);*/
+                            locError("GoDMBZSinglePOIPage" + dmbzList.get(num).getXH());
                             GoDMBZSinglePOIPage(dmbzList.get(num).getXH());
                             isQueried = true;
                             //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
@@ -962,7 +964,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (esterEgg_plq) drawPLQData(canvas);
             //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
             if (type2Checked){
-                dmbzList = LitePal.findAll(DMBZ.class);
                 for (int j = 0; j < dmbzList.size(); j++){
                     Log.w(TAG, "onLayerDrawn:" + dmbzList.size());
                     PointF ppt = LatLng.getPixLocFromGeoL(new PointF(dmbzList.get(j).getLat(), dmbzList.get(j).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -973,20 +974,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }else {
                         if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty()) canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
                         else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
-                        int size = DMBZBts.size();
-                        String str = dmbzList.get(j).getIMGPATH();
-                        for (int m = 0; m < size; m++) {
-                            if (str.contains("|")) {
-                                if (str.substring(0, str.indexOf("|")).equals(DMBZBts.get(j).getM_path())) {
-                                    canvas.drawBitmap(DMBZBts.get(m).getM_bm(), ppt.x, ppt.y - 70, paint1);
-                                    locError("lzy");
-                                }
-                            }else {
-                                if (str.equals(DMBZBts.get(j).getM_path())) {
-                                    canvas.drawBitmap(DMBZBts.get(m).getM_bm(), ppt.x, ppt.y - 70, paint1);
-                                    locError("lzy");
-                                }
-                            }
+                        if (hasDMBZBitmap & j <= DMBZBts.size() - 1) {
+                            canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
                         }
                     }
                 }
@@ -3929,8 +3918,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        /*LitePal.deleteAll(kmltest.class);
+        LitePal.deleteAll(plqzp.class);
+        LitePal.deleteAll(plqyp.class);*/
+        //LitePal.deleteAll(DMBZ.class);
+        //DataUtil.getKML1(Environment.getExternalStorageDirectory().toString() + "/doc.kml");
         trails = LitePal.findAll(Trail.class);
-        getDMBZBitmap();
         //LitePal.deleteAll(DMBZ.class);
         //数据库内容转换
         String[] types = getResources().getStringArray(R.array.Type);
@@ -4026,7 +4019,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         SharedPreferences pref2 = getSharedPreferences("easter_egg", MODE_PRIVATE);
         esterEgg_lm = pref2.getBoolean("open_lm", false);
         if (esterEgg_lm){
-            dmbzList = LitePal.findAll(DMBZ.class);
+            getDMBZBitmap();
         }
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
@@ -4765,22 +4758,23 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //////////////////////////////////////////////////////////////////
     }
 
-    List<bt> DMBZBts;
+    List<bt> DMBZBts = new ArrayList<>();
     private boolean hasDMBZBitmap = false;
 
     public void getDMBZBitmap(){
         ////////////////////////缓存Bitmap//////////////////////////////
-        DMBZBts = new ArrayList<bt>();
+        DMBZBts = new ArrayList<>();
         new Thread(new Runnable() {
             @Override
             public void run() {
                 hasDMBZBitmap = false;
                 DMBZBts.clear();
                 dmbzList = LitePal.findAll(DMBZ.class);
+                Log.w(TAG, "dmbzList: " + dmbzList.size());
                 if (dmbzList.size() > 0){
                     for (int ii = 0; ii < dmbzList.size(); ii++){
                         String path = dmbzList.get(ii).getIMGPATH();
-                        if (path.contains("|")) path = path.substring(0, path.indexOf("|"));
+                        if (path.contains(".jpg")) path = Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf(".jpg") + 4);
                         File file = new File(path);
                         if (file.exists()) {
                             Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
