@@ -66,7 +66,7 @@ public class singlepoi extends AppCompatActivity {
     float m_lat, m_lng;
     private int POITYPE = -1;
     private String DMXH;
-    private EditText edit_XH;
+    private TextView edit_XH;
     private EditText edit_DY;
     private EditText edit_MC;
     private EditText edit_BZMC;
@@ -124,7 +124,7 @@ public class singlepoi extends AppCompatActivity {
         txt_SCCJ.setVisibility(View.VISIBLE);
         TextView txt_GG = (TextView) findViewById(R.id.txt_GG);
         txt_GG.setVisibility(View.VISIBLE);
-        edit_XH = (EditText) findViewById(R.id.edit_XH);
+        edit_XH = (TextView) findViewById(R.id.edit_XH);
         edit_XH.setText(dmbzList.get(0).getXH());
         edit_XH.setVisibility(View.VISIBLE);
         edit_DY = (EditText) findViewById(R.id.edit_DY);
@@ -187,10 +187,11 @@ public class singlepoi extends AppCompatActivity {
                 imageView.setImageBitmap(bitmap);
             }
             imageView.setVisibility(View.VISIBLE);
-        }
+        }else txt_photonum.setText(String.valueOf(0));
         txt_photonum.setVisibility(View.VISIBLE);
         TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
-        if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".jpg")));
+        Log.w(TAG, "RefreshDMBZ: " + dmbzList.get(0).getTAPEPATH());
+        if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".mp3")));
         else txt_tapenum.setText(String.valueOf(0));
         txt_tapenum.setVisibility(View.VISIBLE);
         TextView txt_loc = (TextView) findViewById(R.id.txt_locshow);
@@ -215,12 +216,35 @@ public class singlepoi extends AppCompatActivity {
                 poi.updateAll("xh = ?", DMXH);
             }
         });
+        ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
+        addphoto.setVisibility(View.VISIBLE);
+        addphoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopueWindowForPhoto();
+            }
+        });
+        ImageButton addtape = (ImageButton)findViewById(R.id.addTape_singlepoi);
+        addtape.setVisibility(View.VISIBLE);
+        addtape.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, REQUEST_CODE_TAPE);
+                }catch (ActivityNotFoundException e){
+                    Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (POITYPE == 0) refresh();
+        else if (POITYPE == 1) RefreshDMBZ();
     }
 
     int showNum = 0;
@@ -698,7 +722,8 @@ public class singlepoi extends AppCompatActivity {
                     String imgpath = dmbzs.get(0).getIMGPATH();
                     if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                }
+                }else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                dmbz.updateAll("xh = ?", DMXH);
             }
         }
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
@@ -724,7 +749,8 @@ public class singlepoi extends AppCompatActivity {
                     String tapepath = dmbzs.get(0).getTAPEPATH();
                     if (DataUtil.appearNumber(tapepath, ".jpg") > 0) dmbz.setTAPEPATH(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                }
+                }else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                dmbz.updateAll("xh = ?", DMXH);
             }
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
@@ -764,7 +790,8 @@ public class singlepoi extends AppCompatActivity {
                         String imgpath = dmbzs.get(0).getIMGPATH();
                         if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + imageuri);
                         else dmbz.setIMGPATH(imageuri);
-                    }
+                    }else dmbz.setIMGPATH(imageuri);
+                    dmbz.updateAll("xh = ?", DMXH);
                 }
             }else {
                 file.delete();

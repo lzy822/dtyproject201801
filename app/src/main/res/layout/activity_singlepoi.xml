@@ -126,7 +126,7 @@
             android:textColor="#000000"
             android:text="序号: "
             android:visibility="gone"/>
-        <EditText
+        <TextView
             android:id="@+id/edit_XH"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
