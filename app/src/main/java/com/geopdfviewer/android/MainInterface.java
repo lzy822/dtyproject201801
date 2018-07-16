@@ -417,8 +417,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 dmbz.setLat(centerPointLoc.x);
                                 dmbz.setLng(centerPointLoc.y);
                             }
-                            dmbz.setXH(String.valueOf(size));
+                            dmbz.setXH(String.valueOf(size + 1));
                             dmbz.save();
+                            dmbzList = LitePal.findAll(DMBZ.class);
                             GoDMBZSinglePOIPage(dmbz.getXH());
                         }
                         //pdfView.zoomWithAnimation(c_zoom);
@@ -2670,7 +2671,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
                                 dmbz.setLat(latandlong[0]);
                                 dmbz.setLng(latandlong[1]);
-                                dmbz.setXH(String.valueOf(size));
+                                dmbz.setXH(String.valueOf(size + 1));
                                 dmbz.save();
                                 getDMBZBitmap();
                                 pdfView.zoomWithAnimation(c_zoom);
@@ -2711,7 +2712,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
                         dmbz.setLat((float) m_lat);
                         dmbz.setLng((float)m_long);
-                        dmbz.setXH(String.valueOf(size));
+                        dmbz.setXH(String.valueOf(size + 1));
                         dmbz.save();
                         getDMBZBitmap();
                         pdfView.zoomWithAnimation(c_zoom);
@@ -2767,7 +2768,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 dmbz.setLat(latandlong[0]);
                                 dmbz.setLng(latandlong[1]);
                                 dmbz.setIMGPATH(imageuri);
-                                dmbz.setXH(String.valueOf(size));
+                                dmbz.setXH(String.valueOf(size + 1));
                                 dmbz.save();
                                 getDMBZBitmap();
                                 pdfView.zoomWithAnimation(c_zoom);
@@ -4805,29 +4806,43 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 if (dmbzList.size() > 0){
                     for (int ii = 0; ii < dmbzList.size(); ii++){
                         String path = dmbzList.get(ii).getIMGPATH();
-                        if (path.contains(".jpg")) path = Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf(".jpg") + 4);
-                        File file = new File(path);
-                        if (file.exists()) {
-                            Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
-                            int degree = DataUtil.getPicRotate(path);
-                            if (degree != 0) {
-                                Matrix m = new Matrix();
-                                m.setRotate(degree); // 旋转angle度
-                                Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                        try {
+                            if (path != null) {
+                                if (path.contains(".jpg")) {
+                                    if (!path.substring(0, path.indexOf(".jpg") + 4).contains(Environment.getExternalStorageDirectory().toString())) {
+                                        Log.w(TAG, "run: " + Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf(".jpg") + 4));
+                                        path = Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf(".jpg") + 4);
+                                    }else{
+                                        Log.w(TAG, "run: " + path.substring(0, path.indexOf(".jpg") + 4));
+                                        path = path.substring(0, path.indexOf(".jpg") + 4);
+                                    }
+                                    File file = new File(path);
+                                    if (file.exists()) {
+                                        Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
+                                        int degree = DataUtil.getPicRotate(path);
+                                        if (degree != 0) {
+                                            Matrix m = new Matrix();
+                                            m.setRotate(degree); // 旋转angle度
+                                            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                                        }
+                                        bt btt = new bt(bitmap, path);
+                                        DMBZBts.add(btt);
+                                    } else {
+                                        //Resources res = MyApplication.getContext().getResources();
+                                        //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
+                                        Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                        BitmapDrawable bd = (BitmapDrawable) drawable;
+                                        Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                        bt btt = new bt(bitmap, path);
+                                        DMBZBts.add(btt);
+                                    }
+                                }
                             }
-                            bt btt = new bt(bitmap, path);
-                            DMBZBts.add(btt);
-                        }else {
-                            //Resources res = MyApplication.getContext().getResources();
-                            //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
-                            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                            BitmapDrawable bd = (BitmapDrawable) drawable;
-                            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                            bt btt = new bt(bitmap, path);
-                            DMBZBts.add(btt);
+                        }catch (Exception e){
+
                         }
 
                     }

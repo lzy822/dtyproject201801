@@ -15,6 +15,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -100,7 +101,7 @@ public class singlepoi extends AppCompatActivity {
             setTitle("地名标志信息");
             DMXH = intent.getStringExtra("DMBZ");
             Log.w(TAG, "onCreate: 1 ");
-            RefreshDMBZ();
+            //RefreshDMBZ();
         }
     }
 
@@ -152,41 +153,13 @@ public class singlepoi extends AppCompatActivity {
         edit_GG.setText(dmbzList.get(0).getGG());
         edit_GG.setVisibility(View.VISIBLE);
         TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
-        Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
+        //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
         if (dmbzList.get(0).getIMGPATH() != null) {
             txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
             ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            String path = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/" + dmbzList.get(0).getIMGPATH().substring(0, dmbzList.get(0).getIMGPATH().indexOf(".jpg") + 4);
-            File file = new File(path);
-            if (file.exists()) {
-                try {
-                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
-                    int degree = DataUtil.getPicRotate(path);
-                    if (degree != 0) {
-                        Matrix m = new Matrix();
-                        m.setRotate(degree); // 旋转angle度
-                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                    }
-                    imageView.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    Log.w(TAG, e.toString());
-                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                    BitmapDrawable bd = (BitmapDrawable) drawable;
-                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                    imageView.setImageBitmap(bitmap);
-                }
-            } else {
-                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                BitmapDrawable bd = (BitmapDrawable) drawable;
-                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                imageView.setImageBitmap(bitmap);
-            }
-            imageView.setVisibility(View.VISIBLE);
+            if (DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg") > 0)
+            getBitmapDMBZ(dmbzList.get(0).getIMGPATH(), imageView);
+
         }else txt_photonum.setText(String.valueOf(0));
         txt_photonum.setVisibility(View.VISIBLE);
         TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
@@ -573,14 +546,29 @@ public class singlepoi extends AppCompatActivity {
         }).start();
     }
 
-    private void getBitmapDMBZ(final List<DMBZ> photos){
+    private void getBitmapDMBZ(final String ImgPath, final ImageView imageView){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 //Log.w(TAG, "run: photo.size" + photos.size());
                 bms = new ArrayList<>();
-                for (int i = 0; i < photos.size(); i++) {
-                    String path = photos.get(i).getIMGPATH().substring(0, photos.get(i).getIMGPATH().indexOf(".jpg") + 4);
+                String ImgPathTemp = ImgPath;
+                String[] imgPath = new String[DataUtil.appearNumber(ImgPath, ".jpg")];
+                Log.w(TAG, "run: " + ImgPathTemp);
+                for (int k = 0; k < imgPath.length; k++){
+                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
+                    if (k < imgPath.length - 1)
+                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
+                    Log.w(TAG, "run: " + ImgPathTemp);
+                }
+                for (int kk = 0; kk < imgPath.length; kk++) {
+                    String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/";
+                    String path;
+                    if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())){
+                        path = rootpath + imgPath[kk];
+                    }else {
+                        path = imgPath[kk];
+                    }
                     File file = new File(path);
                     if (file.exists()) {
                         try {
@@ -592,7 +580,7 @@ public class singlepoi extends AppCompatActivity {
                                 Log.w(TAG, "showPopueWindowForPhoto: " + degree);
                                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                             }
-                            bms.add(new bt(bitmap,  path));
+                            bms.add(new bt(bitmap, imgPath[kk]));
                         } catch (IOException e) {
                             Log.w(TAG, e.toString());
                             Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
@@ -611,7 +599,131 @@ public class singlepoi extends AppCompatActivity {
                         bms.add(new bt(bitmap, ""));
                     }
                 }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (bms.size() > 0)
+                            imageView.setImageBitmap(bms.get(0).getM_bm());
+                            imageView.setVisibility(View.VISIBLE);
+                            imageView.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                float distanceX = 0;
+                                float distanceY = 0;
+                                switch (event.getAction()) {
+                                    case MotionEvent.ACTION_DOWN:
+                                        //第一个手指按下
+                                        pt0.set(event.getX(0), event.getY(0));
+                                        Log.w(TAG, "onTouchdown: " + event.getX());
+                                        Log.w(TAG, "手指id: " + event.getActionIndex());
+                                        Log.w(TAG, "ACTION_POINTER_DOWN");
+                                        Log.w(TAG, "同时按下的手指数量: " + event.getPointerCount());
+                                        break;
+                                    case MotionEvent.ACTION_POINTER_DOWN:
+                                        //第二个手指按下
+                                        Log.w(TAG, "手指id: " + event.getActionIndex());
+                                        Log.w(TAG, "onTouchdown: " + event.getX());
+                                        Log.w(TAG, "ACTION_POINTER_DOWN");
+                                        Log.w(TAG, "同时按下的手指数量: " + event.getPointerCount());
+                                        break;
+                                    case MotionEvent.ACTION_UP:
+                                        //最后一个手指抬起
+                                        ges = false;
+                                        Log.w(TAG, "onTouchup: " + event.getX());
+                                        Log.w(TAG, "getPointerId: " + event.getPointerId(0));
+                                        distanceX = event.getX(0) - pt0.x;
+                                        distanceY = event.getY(0) - pt0.y;
+                                        Log.w(TAG, "onTouch: " + distanceX);
+                                        if (Math.abs(distanceX) > Math.abs(distanceY) & Math.abs(distanceX) > 200 & Math.abs(distanceY) < 100) {
+                                            if (distanceX > 0) {
+                                                Log.w(TAG, "bms.size : " + bms.size());
+                                                showNum++;
+                                                if (showNum > bms.size() - 1) {
+                                                    showNum = 0;
+                                                    imageView.setImageBitmap(bms.get(0).getM_bm());
+                                                } else {
+                                                    imageView.setImageBitmap(bms.get(showNum).getM_bm());
+                                                }
+                                            } else {
+                                                showNum--;
+                                                if (showNum < 0) {
+                                                    showNum = bms.size() - 1;
+                                                    imageView.setImageBitmap(bms.get(showNum).getM_bm());
+                                                } else {
+                                                    imageView.setImageBitmap(bms.get(showNum).getM_bm());
+                                                }
+                                            }
+                                            Log.w(TAG, "同时抬起的手指数量: " + event.getPointerCount());
+                                            Log.w(TAG, "手指id: " + event.getActionIndex());
+                                        }
+                                        break;
+                                    case MotionEvent.ACTION_MOVE:
+                                        if (event.getPointerCount() == 3) {
+                                            Log.w(TAG, "3指滑动");
 
+                                        }
+                                        else if (event.getPointerCount() == 4) {
+                                            if (!ges) {
+                                                Log.w(TAG, "4指滑动");
+                                                AlertDialog.Builder dialog = new AlertDialog.Builder(singlepoi.this);
+                                                dialog.setTitle("提示");
+                                                dialog.setMessage("确认删除图片吗?");
+                                                dialog.setCancelable(false);
+                                                dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        Log.w(TAG, "onClick: " + bms.size());
+                                                        List<DMBZ> pois1 = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                                                        if (DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") > 0) {
+                                                            textView_photonum.setText(Integer.toString(DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") - 1));
+                                                            DMBZ poi = new DMBZ();
+                                                            if (DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") > 1){
+                                                                if (pois1.get(0).getIMGPATH().indexOf(bms.get(showNum).getM_path()) != 0)
+                                                                    poi.setIMGPATH(pois1.get(0).getIMGPATH().replace("|" + bms.get(showNum).getM_path(), ""));
+                                                                else
+                                                                    poi.setIMGPATH(pois1.get(0).getIMGPATH().replace(bms.get(showNum).getM_path() + "|", ""));
+                                                            }else {
+                                                                poi.setIMGPATH("");
+                                                            }
+                                                            poi.updateAll("xh = ?", DMXH);
+                                                            bms.remove(showNum);
+                                                            Log.w(TAG, "onClick: " + bms.size());
+                                                            if (showNum > DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") - 1) {
+                                                                if (bms.size() > 0) imageView.setImageBitmap(bms.get(0).getM_bm());
+                                                                else imageView.setVisibility(View.GONE);
+                                                            }
+                                                            else if (showNum < DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") - 1) imageView.setImageBitmap(bms.get(showNum).getM_bm());
+                                                            else {
+                                                                if (bms.size() > 0) imageView.setImageBitmap(bms.get(showNum - 1).getM_bm());
+                                                                else imageView.setVisibility(View.GONE);
+                                                            }
+                                                            Toast.makeText(singlepoi.this, "已经删除图片", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+                                                dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                    }
+                                                });
+                                                dialog.show();
+                                                ges = true;
+                                            }
+                                        }
+                                        else if (event.getPointerCount() == 5) {
+                                            Log.w(TAG, "5指滑动");
+                                        }
+                                        else if (event.getPointerCount() == 2) {
+                                            Log.w(TAG, "2指滑动");
+                                        }
+                                        break;
+
+                                }
+                                return true;
+                            }
+                        });
+                    }
+                });
                 Log.w(TAG, "getBitmap: " + bms.size());
             }
         }).start();
