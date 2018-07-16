@@ -812,8 +812,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+        Log.w(TAG, "zoomCenteredTo: " + current_pageheight + "; " + current_pagewidth);
         current_pageheight = pageHeight;
         current_pagewidth = pageWidth;
+        Log.w(TAG, "zoomCenteredTo: " + current_pageheight + "; " + current_pagewidth);
         viewer_height = pdfView.getHeight();
         viewer_width = pdfView.getWidth();
 
@@ -3280,6 +3282,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
             cursor1.close();
         }
+        if (esterEgg_lm) {
+            String sql1 = "select * from DMBZ where";
+            String[] strings1 = query.split(" ");
+            for (int i = 0; i < strings1.length; i++) {
+                if (i == 0) sql1 = sql1 + " bzmc LIKE '%" + strings1[i] + "%'";
+                else sql1 = sql1 + " AND bzmc LIKE '%" + strings1[i] + "%'";
+            }
+            Cursor cursor1 = LitePal.findBySQL(sql1);
+            if (cursor1.moveToFirst()) {
+                do {
+                    String xh = cursor1.getString(cursor1.getColumnIndex("xh"));
+                    String dmbzmc = cursor1.getString(cursor1.getColumnIndex("bzmc"));
+                    mPOIobj mPOIobj = new mPOIobj(xh, dmbzmc);
+                    pois.add(mPOIobj);
+                } while (cursor1.moveToNext());
+            }
+            cursor1.close();
+        }
         String[] items = new String[pois.size()];
         for (int i = 0; i < pois.size(); i++){
             items[i] = pois.get(i).getM_name();
@@ -3296,10 +3316,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     Intent intent = new Intent(MainInterface.this, singlepoi.class);
                     intent.putExtra("POIC", pois.get(position).getM_POIC());
                     MainInterface.this.startActivity(intent);
-                }else {
+                }else if (esterEgg_plq & !esterEgg_lm){
                     Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                     intent.putExtra("xh", pois.get(position).getM_POIC());
                     MainInterface.this.startActivity(intent);
+                }else if (esterEgg_lm){
+                    GoDMBZSinglePOIPage(pois.get(position).getM_POIC());
                 }
                 listPopupWindow.dismiss();
                 isDrawTrail = NONE_DRAW_TYPE;
@@ -4542,6 +4564,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     locHere_fab.setImageResource(R.drawable.ic_my_location);
                                     pdfView.zoomCenteredTo(8, ppz);
                                     pdfView.setPositionOffset(verx);
+                                    /*pdfView.zoomTo(8);
+                                    pdfView.zoomWithAnimation(8);
+                                    Log.w(TAG, "zoomCenteredTo: " + current_pagewidth / 2 + "; " + current_pageheight / 2);
+                                    Log.w(TAG, "zoomCenteredTo: " + c_zoom);
+                                    pdfView.zoomCenteredTo(c_zoom, new PointF(current_pagewidth / 4, current_pageheight / 2));*/
                                     floatingActionsMenu.close(false);
                                 }
                             });
@@ -4557,8 +4584,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     PointF ppz = LatLng.getPixLocFromGeoL(new PointF((float)m_lat, (float)m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     ppz.x = ppz.x - 10;
                     pdfView.zoomCenteredTo(8, ppz);
-                    //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
                     pdfView.setPositionOffset(verx);
+                    /*pdfView.zoomTo(8);
+                    pdfView.zoomWithAnimation(8);
+                    Log.w(TAG, "zoomCenteredTo: " + current_pagewidth / 2 + "; " + current_pageheight / 2);
+                    Log.w(TAG, "zoomCenteredTo: " + c_zoom);
+                    pdfView.zoomCenteredTo(c_zoom, new PointF(current_pagewidth / 4, current_pageheight / 2));*/
                     isPos = true;
                     floatingActionsMenu.close(false);
                 }
