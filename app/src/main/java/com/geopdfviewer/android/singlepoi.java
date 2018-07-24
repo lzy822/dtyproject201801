@@ -105,6 +105,22 @@ public class singlepoi extends AppCompatActivity {
         }
     }
 
+    private void GoDMBZSinglePhotoPage(String XH){
+        Log.w(TAG, "updateMapPage: 1");
+        Intent intent = new Intent(singlepoi.this, photoshow.class);
+        intent.putExtra("DMBZ", XH);
+        intent.putExtra("type", 1);
+        startActivity(intent);
+    }
+
+    private void GoDMBZSingleTapePage(String XH){
+        Log.w(TAG, "updateMapPage: 1");
+        Intent intent = new Intent(singlepoi.this, tapeshow.class);
+        intent.putExtra("DMBZ", XH);
+        intent.putExtra("type", 1);
+        startActivity(intent);
+    }
+
     private void RefreshDMBZ(){
         List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
         TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
@@ -161,11 +177,23 @@ public class singlepoi extends AppCompatActivity {
             getBitmapDMBZ(dmbzList.get(0).getIMGPATH(), imageView);
 
         }else txt_photonum.setText(String.valueOf(0));
+        txt_photonum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GoDMBZSinglePhotoPage(DMXH);
+            }
+        });
         txt_photonum.setVisibility(View.VISIBLE);
         TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
         Log.w(TAG, "RefreshDMBZ: " + dmbzList.get(0).getTAPEPATH());
         if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".mp3")));
         else txt_tapenum.setText(String.valueOf(0));
+        txt_tapenum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GoDMBZSingleTapePage(DMXH);
+            }
+        });
         txt_tapenum.setVisibility(View.VISIBLE);
         TextView txt_loc = (TextView) findViewById(R.id.txt_locshow);
         m_lng = dmbzList.get(0).getLng();
@@ -444,6 +472,7 @@ public class singlepoi extends AppCompatActivity {
                 //打开图片列表
                 Intent intent1 = new Intent(singlepoi.this, photoshow.class);
                 intent1.putExtra("POIC", POIC);
+                intent1.putExtra("type", 0);
                 startActivity(intent1);
             }
         });
@@ -456,6 +485,7 @@ public class singlepoi extends AppCompatActivity {
                 //打开录音列表
                 Intent intent2 = new Intent(singlepoi.this, tapeshow.class);
                 intent2.putExtra("POIC", POIC);
+                intent2.putExtra("type", 0);
                 startActivity(intent2);
             }
         });

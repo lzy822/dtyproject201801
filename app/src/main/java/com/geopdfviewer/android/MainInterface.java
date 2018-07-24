@@ -418,6 +418,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 dmbz.setLng(centerPointLoc.y);
                             }
                             dmbz.setXH(String.valueOf(size + 1));
+                            dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
                             dmbz.save();
                             dmbzList = LitePal.findAll(DMBZ.class);
                             GoDMBZSinglePOIPage(dmbz.getXH());
@@ -2672,6 +2673,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 dmbz.setLat(latandlong[0]);
                                 dmbz.setLng(latandlong[1]);
                                 dmbz.setXH(String.valueOf(size + 1));
+                                dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
                                 dmbz.save();
                                 getDMBZBitmap();
                                 pdfView.zoomWithAnimation(c_zoom);
@@ -2713,6 +2715,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         dmbz.setLat((float) m_lat);
                         dmbz.setLng((float)m_long);
                         dmbz.setXH(String.valueOf(size + 1));
+                        dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
                         dmbz.save();
                         getDMBZBitmap();
                         pdfView.zoomWithAnimation(c_zoom);
@@ -2769,6 +2772,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 dmbz.setLng(latandlong[1]);
                                 dmbz.setIMGPATH(imageuri);
                                 dmbz.setXH(String.valueOf(size + 1));
+                                dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
                                 dmbz.save();
                                 getDMBZBitmap();
                                 pdfView.zoomWithAnimation(c_zoom);
@@ -3936,11 +3940,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     CheckBox type3_checkbox;
     String[] strings;
     List<Trail> trails;
+    SimpleDateFormat simpleDateFormat1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+        simpleDateFormat1 = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.Date).toString());
         /*LitePal.deleteAll(kmltest.class);
         LitePal.deleteAll(plqzp.class);
         LitePal.deleteAll(plqyp.class);*/

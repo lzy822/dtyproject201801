@@ -12,6 +12,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
@@ -845,6 +846,8 @@ public class DataUtil {
     }
 
     public static boolean getKML1(String filePath){
+        SimpleDateFormat simpleDateFormat1;
+        simpleDateFormat1 = new SimpleDateFormat(MyApplication.getContext().getResources().getString(R.string.Date));
         File file = new File(filePath);
         InputStream in = null;
         int READ_TYPE;
@@ -915,6 +918,7 @@ public class DataUtil {
                             }
                             dmbz.setLat(Float.valueOf(coordinates[1]));
                             dmbz.setLng(Float.valueOf(coordinates[0]));
+                            dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
                             dmbz.save();
                             //kmltest.setLatLng(latLng);
                         }

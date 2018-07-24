@@ -34,6 +34,7 @@ import android.widget.Toast;
 import org.litepal.LitePal;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,8 +57,10 @@ public class photoshow extends AppCompatActivity {
     Uri imageUri;
     private List<bt> bts;
     boolean isCreateBitmap = false;
+    private int POIType;
+    private String DMXH;
 
-    private void refreshCard(){
+    private void refreshCardFromPOI(){
         mPhotobjList.clear();
         List<MPHOTO> mphotos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
         for (MPHOTO mphoto : mphotos){
@@ -111,6 +114,81 @@ public class photoshow extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
+    private void refreshCardFromDMBZ(){
+        mPhotobjList.clear();
+        List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+        String ImgPathTemp = dmbzList.get(0).getIMGPATH();
+        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+        Log.w(TAG, "run: " + ImgPathTemp);
+        for (int k = 0; k < imgPath.length; k++){
+            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
+            if (k < imgPath.length - 1)
+                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
+            Log.w(TAG, "run: " + ImgPathTemp);
+        }
+        for (int kk = 0; kk < imgPath.length; kk++) {
+            String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/";
+            String path;
+            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                path = rootpath + imgPath[kk];
+            } else {
+                path = imgPath[kk];
+            }
+            mPhotobj mphotobj = new mPhotobj(path.replace(Environment.getExternalStorageDirectory().toString() + "/地名标志照片/", ""), path.replace(Environment.getExternalStorageDirectory().toString() + "/地名标志照片/", ""), dmbzList.get(0).getTime(), path);
+            mPhotobjList.add(mphotobj);
+        }
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_photo);
+        layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new mPhotobjAdapter(mPhotobjList);
+        adapter.setOnItemLongClickListener(new mPhotobjAdapter.OnRecyclerItemLongListener() {
+            @Override
+            public void onItemLongClick(View view, String path, String time) {
+                setTitle(photoshow.this.getResources().getText(R.string.IsLongClicking));
+                //deletePath = path;
+                deletePath = path.replace(Environment.getExternalStorageDirectory().toString() + "/地名标志照片/", "");
+                Log.w(TAG, "onItemLongClick: " + deletePath);
+                isLongClick = 0;
+                invalidateOptionsMenu();
+            }
+        });
+        adapter.setOnItemClickListener(new mPhotobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String path, int position, String time) {
+                mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
+                if (isLongClick == 0){
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        //deletePath = deletePath + "wslzy" + path;
+                        deletePath = deletePath + "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/地名标志照片/", "");
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            //String replace = "wslzy" + path;
+                            String replace = "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/地名标志照片/", "");
+                            deletePath = deletePath.replace(replace, "");
+                            if (deletePath.length() == deletePath.replace(replace, "").length()){
+                                //String replace1 = path + "wslzy";
+                                String replace1 = path + "wslzy";
+                                deletePath = deletePath.replace(replace1, "");
+                            }
+                        }else {
+                            resetView();
+                        }
+                    }
+                    Log.w(TAG, "onItemLongClick: " + deletePath);
+                }else {
+                    //Log.w(TAG, "onItemClick: " + path );
+                    if (isCreateBitmap) {
+                        Log.w(TAG, "onItemClick: " + path );
+                        showPopueWindowForPhoto(path);
+                    }
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         //toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -135,43 +213,99 @@ public class photoshow extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photoshow);
-        bts = new ArrayList<bt>();
+        bts = new ArrayList<>();
         /////////////////////////
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar4);
         setSupportActionBar(toolbar);
         setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
         Intent intent = getIntent();
-        POIC = intent.getStringExtra("POIC");
+        POIType = intent.getIntExtra("type", -1);
+
+        if (POIType == 1) {
+            DMXH = intent.getStringExtra("DMBZ");
+        }
+        else if (POIType == 0) {
+            POIC = intent.getStringExtra("POIC");
+        }
+
+        getBitmap();
+    }
+
+    private void getBitmap(){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 bts.clear();
-                List<MPHOTO> mphotos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
-                int size = mphotos.size();
-                for (int i = 0; i < size; i++) {
-                    String path = mphotos.get(i).getPath();
-                    File file = new File(path);
-                    if (file.exists()) {
-                        Bitmap bitmap = DataUtil.getImageThumbnail(path, 2048, 2048);
-                        int degree = DataUtil.getPicRotate(path);
-                        if (degree != 0) {
-                            Matrix m = new Matrix();
-                            m.setRotate(degree); // 旋转angle度
-                            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                if (POIType == 0) {
+                    List<MPHOTO> mphotos = LitePal.where("poic = ?", POIC).find(MPHOTO.class);
+                    int size = mphotos.size();
+                    for (int i = 0; i < size; i++) {
+                        String path = mphotos.get(i).getPath();
+                        File file = new File(path);
+                        if (file.exists()) {
+                            Bitmap bitmap = DataUtil.getImageThumbnail(path, 2048, 2048);
+                            int degree = DataUtil.getPicRotate(path);
+                            if (degree != 0) {
+                                Matrix m = new Matrix();
+                                m.setRotate(degree); // 旋转angle度
+                                Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                            }
+                            bt btt = new bt(bitmap, path);
+                            bts.add(btt);
                         }
-                        bt btt = new bt(bitmap, path);
-                        bts.add(btt);
-                    }else {
-                        /*Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                        BitmapDrawable bd = (BitmapDrawable) drawable;
-                        Bitmap bitmap = bd.getBitmap();
-                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
-                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                        bt btt = new bt(bitmap, path);
-                        bts.add(btt);*/
+                    }
+                }else if (POIType == 1){
+                    List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                    if (dmbzList.size() >= 1) {
+                        String ImgPathTemp = dmbzList.get(0).getIMGPATH();
+                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+                        Log.w(TAG, "run: " + ImgPathTemp);
+                        for (int k = 0; k < imgPath.length; k++) {
+                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
+                            if (k < imgPath.length - 1)
+                                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
+                            Log.w(TAG, "run: " + ImgPathTemp);
+                        }
+                        for (int kk = 0; kk < imgPath.length; kk++) {
+                            String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/";
+                            String path;
+                            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                                path = rootpath + imgPath[kk];
+                            } else {
+                                path = imgPath[kk];
+                            }
+                            File file = new File(path);
+                            if (file.exists()) {
+                                try {
+                                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                                    int degree = DataUtil.getPicRotate(path);
+                                    if (degree != 0) {
+                                        Matrix m = new Matrix();
+                                        m.setRotate(degree); // 旋转angle度
+                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                                    }
+                                    bts.add(new bt(bitmap, imgPath[kk]));
+                                } catch (IOException e) {
+                                    Log.w(TAG, e.toString());
+                                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                    BitmapDrawable bd = (BitmapDrawable) drawable;
+                                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                    bts.add(new bt(bitmap, ""));
+                                }
+                            } else {
+                                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                BitmapDrawable bd = (BitmapDrawable) drawable;
+                                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                bts.add(new bt(bitmap, ""));
+                            }
+                        }
                     }
                 }
                 isCreateBitmap = true;
@@ -182,7 +316,8 @@ public class photoshow extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        refreshCard();
+        if (POIType == 0) refreshCardFromPOI();
+        else if (POIType == 1) refreshCardFromDMBZ();
     }
 
     @Override
@@ -196,7 +331,8 @@ public class photoshow extends AppCompatActivity {
     private void resetView(){
         isLongClick = 1;
         setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
-        refreshCard();
+        if (POIType == 0) refreshCardFromPOI();
+        else if (POIType == 1) refreshCardFromDMBZ();
         invalidateOptionsMenu();
     }
 
@@ -215,38 +351,57 @@ public class photoshow extends AppCompatActivity {
                 setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
                 invalidateOptionsMenu();
                 //LitePal.deleteAll(MPHOTO.class, "POIC = ?", POIC, "path = ?", deletePath);
-                parseSelectedPath();
-                refreshCard();
+                if (POIType == 0) {
+                    parseSelectedPathToPOI();
+                    refreshCardFromPOI();
+                }
+                else if (POIType == 1) {
+                    parseSelectedPathToDMBZ();
+                    refreshCardFromDMBZ();
+                }
                 break;
             case R.id.add_pois:
                 showPopueWindowForPhoto();
-                //refreshCard();
+                //refreshCardFromPOI();
                 break;
             default:
                 break;
         }
         return true;
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             Uri uri = data.getData();
-            List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
-            POI poi = new POI();
-            long time = System.currentTimeMillis();
-            poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(photoshow.this.getResources().getText(R.string.DateAndTime).toString());
-            Date date = new Date(System.currentTimeMillis());
-            poi.updateAll("poic = ?", POIC);
-            MPHOTO mphoto = new MPHOTO();
-            mphoto.setPdfic(POIs.get(0).getIc());
-            mphoto.setPoic(POIC);
-            //Log.w(TAG, "onActivityResult: " + uri.getPath() );
-            //mphoto.setPath(getRealPath(uri.getPath()));
-            mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-            mphoto.setTime(simpleDateFormat.format(date));
-            mphoto.save();
-            refreshCard();
+            if (POIType == 0) {
+                List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
+                POI poi = new POI();
+                poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(photoshow.this.getResources().getText(R.string.DateAndTime).toString());
+                Date date = new Date(System.currentTimeMillis());
+                poi.updateAll("poic = ?", POIC);
+                MPHOTO mphoto = new MPHOTO();
+                mphoto.setPdfic(POIs.get(0).getIc());
+                mphoto.setPoic(POIC);
+                //Log.w(TAG, "onActivityResult: " + uri.getPath() );
+                //mphoto.setPath(getRealPath(uri.getPath()));
+                mphoto.setPath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                mphoto.setTime(simpleDateFormat.format(date));
+                mphoto.save();
+                refreshCardFromPOI();
+            }else if (POIType == 1){
+                List<DMBZ> dmbzs = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                DMBZ dmbz = new DMBZ();
+                if (dmbzs.get(0).getIMGPATH() != null) {
+                    String imgpath = dmbzs.get(0).getIMGPATH();
+                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                }else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                dmbz.updateAll("xh = ?", DMXH);
+                refreshCardFromDMBZ();
+            }
+            getBitmap();
         }
         if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
             String imageuri;
@@ -265,17 +420,29 @@ public class photoshow extends AppCompatActivity {
                 }
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat(photoshow.this.getResources().getText(R.string.DateAndTime).toString());
                 Date date = new Date(System.currentTimeMillis());
-                List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
-                POI poi = new POI();
-                long time = System.currentTimeMillis();
-                poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
-                poi.updateAll("poic = ?", POIC);
-                MPHOTO mphoto = new MPHOTO();
-                mphoto.setPoic(POIC);
-                mphoto.setPath(imageuri);
-                mphoto.setTime(simpleDateFormat.format(date));
-                mphoto.save();
-                refreshCard();
+                if (POIType == 0) {
+                    List<POI> POIs = LitePal.where("poic = ?", POIC).find(POI.class);
+                    POI poi = new POI();
+                    poi.setPhotonum(POIs.get(0).getPhotonum() + 1);
+                    poi.updateAll("poic = ?", POIC);
+                    MPHOTO mphoto = new MPHOTO();
+                    mphoto.setPoic(POIC);
+                    mphoto.setPath(imageuri);
+                    mphoto.setTime(simpleDateFormat.format(date));
+                    mphoto.save();
+                    refreshCardFromPOI();
+                }else if (POIType == 1){
+                    List<DMBZ> dmbzs = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                    DMBZ dmbz = new DMBZ();
+                    if (dmbzs.get(0).getIMGPATH() != null) {
+                        String imgpath = dmbzs.get(0).getIMGPATH();
+                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + imageuri);
+                        else dmbz.setIMGPATH(imageuri);
+                    }else dmbz.setIMGPATH(imageuri);
+                    dmbz.updateAll("xh = ?", DMXH);
+                    refreshCardFromDMBZ();
+                }
+                getBitmap();
             }else {
                 file.delete();
                 Toast.makeText(photoshow.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
@@ -293,10 +460,10 @@ public class photoshow extends AppCompatActivity {
         }
     }
 
-    private void parseSelectedPath(){
+    private void parseSelectedPathToPOI(){
         if (deletePath.contains("wslzy")){
             String[] nums = deletePath.split("wslzy");
-            Log.w(TAG, "parseSelectedPath: " + nums[0] );
+            Log.w(TAG, "parseSelectedPathToPOI: " + nums[0] );
             for (int i = 0; i < nums.length; i++){
                 //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
                 LitePal.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, nums[i]);
@@ -304,6 +471,48 @@ public class photoshow extends AppCompatActivity {
         }else {
             //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, deletePath);
             LitePal.deleteAll(MPHOTO.class, "poic = ? and time = ?", POIC, deletePath);
+        }
+    }
+
+    private void parseSelectedPathToDMBZ(){
+        if (deletePath.contains("wslzy")){
+            String[] nums = deletePath.split("wslzy");
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + nums[0] );
+            List<DMBZ> pois1 = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+            String path = pois1.get(0).getIMGPATH();
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
+            for (int i = 0; i < nums.length; i++){
+                //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                if (DataUtil.appearNumber(path, ".jpg") > 0) {
+                    if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                        if (path.indexOf(nums[i]) != 0)
+                            path = path.replace("|" + nums[i], "");
+                        else{
+                            path = path.replace(nums[i] + "|", "");
+                        }
+                    } else {
+                        path = "";
+                    }
+                }
+            }
+            DMBZ poi = new DMBZ();
+            poi.setIMGPATH(path);
+            poi.updateAll("xh = ?", DMXH);
+        }else {
+            List<DMBZ> pois1 = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+            String path = pois1.get(0).getIMGPATH();
+            if (DataUtil.appearNumber(path, ".jpg") > 0) {
+                DMBZ poi = new DMBZ();
+                if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                    if (path.indexOf(deletePath) != 0)
+                        poi.setIMGPATH(path.replace("|" + deletePath, ""));
+                    else
+                        poi.setIMGPATH(path.replace(deletePath + "|", ""));
+                } else {
+                    poi.setIMGPATH("");
+                }
+                poi.updateAll("xh = ?", DMXH);
+            }
         }
     }
 
@@ -396,7 +605,7 @@ public class photoshow extends AppCompatActivity {
         //
         int size = bts.size();
         for (int i = 0; i < size; i++){
-            if (path.equals(bts.get(i).getM_path())) imageView1.setImageBitmap(bts.get(i).getM_bm());
+            if (path.contains(bts.get(i).getM_path())) imageView1.setImageBitmap(bts.get(i).getM_bm());
         }
 
         //获取屏幕宽高
