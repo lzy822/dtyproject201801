@@ -11,6 +11,7 @@ import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
+import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -745,6 +746,46 @@ public class singlepoi extends AppCompatActivity {
                                         }
                                         else if (event.getPointerCount() == 2) {
                                             Log.w(TAG, "2指滑动");
+                                            Log.w(TAG, "onClick: ");
+                                            List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                                            String tapePath = dmbzList.get(0).getTAPEPATH();
+                                            if (tapePath != null){
+                                                if (!tapePath.isEmpty()){
+                                                    int num = DataUtil.appearNumber(tapePath, ".mp3");
+                                                    if (num > 1){
+                                                        tapePath = tapePath.substring(0, tapePath.indexOf(".mp3") + 4);
+                                                        File file = null;
+                                                        if (tapePath.contains(Environment.getExternalStorageDirectory().toString())){
+                                                            file = new File(tapePath);
+                                                        }else {
+                                                            tapePath = Environment.getExternalStorageDirectory().toString() + "/地名标志录音/" + tapePath;
+                                                            file = new File(tapePath);
+                                                        }
+                                                        Log.w(TAG, "onClick: " + tapePath);
+                                                        if (file.exists()) {
+                                                            MediaPlayer mediaPlayer = MediaPlayer.create(singlepoi.this, Uri.parse(tapePath));
+                                                            mediaPlayer.start();
+                                                        }else {
+                                                            Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError1, Toast.LENGTH_LONG).show();
+                                                        }
+                                                    }else if (num == 1){
+                                                        File file = null;
+                                                        if (tapePath.contains(Environment.getExternalStorageDirectory().toString())){
+                                                            file = new File(tapePath);
+                                                        }else {
+                                                            tapePath = Environment.getExternalStorageDirectory().toString() + "/地名标志录音/" + tapePath;
+                                                            file = new File(tapePath);
+                                                        }
+                                                        Log.w(TAG, "onClick: " + tapePath);
+                                                        if (file.exists()) {
+                                                            MediaPlayer mediaPlayer = MediaPlayer.create(singlepoi.this, Uri.parse(tapePath));
+                                                            mediaPlayer.start();
+                                                        }else {
+                                                            Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError1, Toast.LENGTH_LONG).show();
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                         break;
 

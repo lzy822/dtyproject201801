@@ -102,24 +102,26 @@ public class tapeshow extends AppCompatActivity {
         mTapeobjList.clear();
         List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
         String ImgPathTemp = dmbzList.get(0).getTAPEPATH();
-        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".mp3")];
-        Log.w(TAG, "run: " + ImgPathTemp);
-        for (int k = 0; k < imgPath.length; k++){
-            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".mp3") + 4);
-            if (k < imgPath.length - 1)
-                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".mp3") + 5);
+        if (ImgPathTemp != null) {
+            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".mp3")];
             Log.w(TAG, "run: " + ImgPathTemp);
-        }
-        for (int kk = 0; kk < imgPath.length; kk++) {
-            String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志录音/";
-            String path;
-            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
-                path = rootpath + imgPath[kk];
-            } else {
-                path = imgPath[kk];
+            for (int k = 0; k < imgPath.length; k++) {
+                imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".mp3") + 4);
+                if (k < imgPath.length - 1)
+                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".mp3") + 5);
+                Log.w(TAG, "run: " + ImgPathTemp);
             }
-            mTapeobj mtapeobj = new mTapeobj(dmbzList.get(0).getBZMC(), dmbzList.get(0).getBZMC(), dmbzList.get(0).getTime(), path);
-            mTapeobjList.add(mtapeobj);
+            for (int kk = 0; kk < imgPath.length; kk++) {
+                String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志录音/";
+                String path;
+                if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                    path = rootpath + imgPath[kk];
+                } else {
+                    path = imgPath[kk];
+                }
+                mTapeobj mtapeobj = new mTapeobj(dmbzList.get(0).getBZMC(), dmbzList.get(0).getBZMC(), dmbzList.get(0).getTime(), path);
+                mTapeobjList.add(mtapeobj);
+            }
         }
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_tape);
         layoutManager = new GridLayoutManager(this,1);
