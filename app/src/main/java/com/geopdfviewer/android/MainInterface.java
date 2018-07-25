@@ -433,9 +433,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 2;
-                        if (!esterEgg_lm) {
+                        //if (!esterEgg_lm) {
                             GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
-                        }
+                        //}
                         pdfView.zoomWithAnimation(c_zoom);
                         POIType = -1;
                         CreatePOI = false;

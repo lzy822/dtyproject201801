@@ -25,6 +25,7 @@ import org.litepal.LitePal;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1563,5 +1564,170 @@ public class DataUtil {
         }
         return arr;
     }
+    public static String readtxt(String path) {//按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+//        String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                if (len != 0) {// 处理换行符的问题，第一行不换行
+                    txtContent.append(new String(("\r\n" + s).getBytes(), "utf-8"));
+                } else {
+                    txtContent.append(new String(s.getBytes(), "utf-8"));
+                }
+                len++;
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    /*try {
+        BufferedReader br = new BufferedReader(new FileReader(new File(path)));
+        String s = null;
+        while((s=br.readLine())!=null){
+            result = result + "\n" + s;
+        }
+    } catch (FileNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }*/
+        return txtContent.toString();
+    }
+
+    public static void getDMLJGX(String path){
+        String str = readtxt(path);
+        str = str.replace("地名信息连接关系", "");
+        str = str.replace("\n", "");
+        str = str.replace("\t", "");
+        str = str.replace(" ", "");
+        str = str.trim();
+        String[] strings = str.split("\\}");
+        int size = strings.length;
+        String[] str0s = null;
+        String[] str1s = null;
+        String DiMing = null;
+        String DiMingId = null;
+        String MapId = null;
+        long num = 0;
+        for (int i = 0; i < size; i++){
+            if (strings[i].contains("{")) {
+                strings[i] = strings[i].substring(strings[i].indexOf("{") + 1);
+                str0s = strings[i].split(",");
+                for (int j = 0; j < str0s.length; j++){
+                    str1s = str0s[j].split("\\:");
+                    //Log.w(TAG, "getDMLJGX: " + str1s.length);
+                    if (str1s.length == 2) {
+                        //Log.w(TAG, "getDMLJGX: " + str1s[1]);
+                        if (str1s[0].contains("DiMingName")) {
+                            DiMing = str1s[1].replace("\"", "");
+                            //Log.w(TAG, "getDMLJGX: " + DiMing);
+                        }
+                        if (str1s[0].contains("DiMingId")) {
+                            DiMingId = str1s[1].replace("\"", "");
+                            //Log.w(TAG, "getDMLJGX: " + DiMingId);
+                        }
+                        if (str1s[0].contains("MapId")) {
+                            MapId = str1s[1].replace("\"", "");
+                            //Log.w(TAG, "getDMLJGX: " + MapId);
+                        }
+                    }
+                }
+                try {
+                    if (DiMing.contains("路") || DiMing.contains("巷") || DiMing.contains("街") || DiMing.contains("沟")){
+                        DMLine dmLine = new DMLine();
+                        dmLine.setXh(num);
+                        dmLine.setBzmc(DiMing);
+                        dmLine.setDiMingId(DiMingId);
+                        dmLine.setMapId(MapId);
+                        dmLine.save();
+                        num++;
+                    }else {
+                        DMPoint dmPoint = new DMPoint();
+                        dmPoint.setXh(num);
+                        dmPoint.setBzmc(DiMing);
+                        dmPoint.setDiMingId(DiMingId);
+                        dmPoint.setMapId(MapId);
+                        dmPoint.save();
+                        num++;
+                    }
+                }
+                catch (Exception e){
+                    Log.w(TAG, "getDMLJGX: " + String.valueOf(DiMing == null));
+                    Log.w(TAG, "getDMLJGX: " + DiMingId);
+                    Log.w(TAG, "getDMLJGX: " + MapId);
+                    Log.w(TAG, "getDMLJGX: " + i);
+                }
+            }
+        }
+    }
+
+    public static void getDMXX(String path){
+        String str = readtxt(path);
+        str = str.replace("地名信息", "");
+        str = str.replace("\n", "");
+        str = str.replace("\t", "");
+        str = str.replace(" ", "");
+        str = str.replace("\"", "");
+        str = str.trim();
+        String[] strings = str.split("\\]");
+        int size = strings.length;
+        String[] str0s = null;
+        String[] str1s = null;
+        int DiMingNum = 0;
+        int DiMingIdNum = 0;
+        int MapIdNum = 0;
+        String DiMing = null;
+        String DiMingId = null;
+        String MapId = null;
+        for (int i = 0; i < size; i++){
+            if (i < size - 1) {
+                strings[i] = strings[i].substring(2);
+                str0s = strings[i].split(",");
+
+                for (int j = 0; j < str0s.length; j++){
+                    str1s = str0s[j].split("\\:");
+                    if (str1s.length == 2 & str1s[0].contains("DiMingName")) {
+                        DiMingNum++;
+                        DiMing = str1s[1];
+                    }
+                    if (str1s.length == 2 & str1s[0].contains("DiMingId")) {
+                        DiMingIdNum++;
+                        DiMingId = str1s[1];
+                    }
+                    if (str1s.length == 2 & str1s[0].contains("MapId")) {
+                        MapIdNum++;
+                        MapId = str1s[1];
+                    }
+                }
+                if (DiMing.contains("路") || DiMing.contains("巷") || DiMing.contains("街")){
+                    DMLine dmLine = new DMLine();
+                    dmLine.setBzmc(DiMing);
+                    dmLine.setDiMingId(DiMingId);
+                    dmLine.setMapId(MapId);
+                    dmLine.save();
+                }else {
+                    DMPoint dmPoint = new DMPoint();
+                    dmPoint.setBzmc(DiMing);
+                    dmPoint.setDiMingId(DiMingId);
+                    dmPoint.setMapId(MapId);
+                    dmPoint.save();
+                }
+            }
+        }
+    }
+
 
 }

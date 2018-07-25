@@ -1502,6 +1502,114 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        ///////获取地名数据
+        LitePal.deleteAll(DMLine.class);
+        LitePal.deleteAll(DMPoint.class);
+        DataUtil.getDMLJGX(Environment.getExternalStorageDirectory().toString() + "/20180716/地名信息连接关系.txt");
+        /*String str1 = "\"hello world\"";
+        Log.w(TAG, "onCreate: " + str1);
+        Log.w(TAG, "onCreate: " + str1.replace("\"", ""));*/
+        String str = DataUtil.readtxt(Environment.getExternalStorageDirectory().toString() + "/20180716/地名信息.txt");
+        str = str.replace("地名信息", "");
+        str = str.replace("\n", "");
+        str = str.replace("\t", "");
+        str = str.replace(" ", "");
+        str = str.trim();
+        String qydm = null;
+        String lbdm = null;
+        String bzmc = null;
+        String cym = null;
+        String jc = null;
+        String bm = null;
+        String dfyz = null;
+        String zt = null;
+        String dmll = null;
+        String dmhy = null;
+        String lsyg = null;
+        String dlstms = null;
+        String zlly = null;
+        String imgpath = null;
+        String tapepath = null;
+        String id = null;
+        String[] strings = str.split("\\}");
+        int size = strings.length;
+        for (int i = 0; i < size; i++){
+            if (strings[i].contains("{")) {
+                strings[i] = strings[i].substring(strings[i].indexOf("{") + 1);
+                String[] strings1 = strings[i].split(",");
+                for (int j = 0; j < strings1.length; j++){
+                    String[] strings2 = strings1[j].split("\\:");
+                    if (strings2.length == 2){
+                        if (strings2[0].equals("BieMing")) bm = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("JianCheng")) jc = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("SuoShuQuYu")) qydm = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("DiMingLeiBie")) lbdm = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("CengYongMing")) cym = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("DiMingYuZhong")) dfyz = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("PuChaZhuangTai")) zt = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("DiMingLaiLi")) dmll = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("DiMingHanYi")) dmhy = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("LiShiYanGe")) lsyg = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("DiLiShiTi")) dlstms = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("ZiLiaoLaiYuan")) zlly = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("DuoMeiTi")) imgpath = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("PuTongHuaDuYin")) tapepath = strings2[1].replace("\"", "");
+                        if (strings2[0].equals("ID")) id = strings2[1].replace("\"", "");
+                    }
+                }
+
+            }
+        }
+        Log.w(TAG, "size!!!: " + size);
+        Log.w(TAG, "size!!!: " + strings[0]);
+        Log.w(TAG, "size!!!: " + strings[1]);
+        Log.w(TAG, "size!!!: " + strings[size - 1]);
+
+        /*
+        String[] str0s = null;
+        String[] str1s = null;
+        int DiMingNum = 0;
+        int DiMingIdNum = 0;
+        int MapIdNum = 0;
+        String DiMing = null;
+        String DiMingId = null;
+        String MapId = null;
+        for (int i = 0; i < size; i++){
+            if (i < size - 1) {
+                strings[i] = strings[i].substring(2);
+                str0s = strings[i].split(",");
+
+                for (int j = 0; j < str0s.length; j++){
+                    str1s = str0s[j].split("\\:");
+                    if (str1s.length == 2 & str1s[0].contains("DiMingName")) {
+                        DiMingNum++;
+                        DiMing = str1s[1];
+                    }
+                    if (str1s.length == 2 & str1s[0].contains("DiMingId")) {
+                        DiMingIdNum++;
+                        DiMingId = str1s[1];
+                    }
+                    if (str1s.length == 2 & str1s[0].contains("MapId")) {
+                        MapIdNum++;
+                        MapId = str1s[1];
+                    }
+                }
+                if (DiMing.contains("路") || DiMing.contains("巷") || DiMing.contains("街")){
+                    DMLine dmLine = new DMLine();
+                    dmLine.setBzmc(DiMing);
+                    dmLine.setDiMingId(DiMingId);
+                    dmLine.setMapId(MapId);
+                    dmLine.save();
+                }else {
+                    DMPoint dmPoint = new DMPoint();
+                    dmPoint.setBzmc(DiMing);
+                    dmPoint.setDiMingId(DiMingId);
+                    dmPoint.setMapId(MapId);
+                    dmPoint.save();
+                }
+            }
+        }*/
+        ///////
         floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
         floatingActionsMenu.setClosedOnTouchOutside(true);
         setTitle(select_page.this.getResources().getText(R.string.MapList));
