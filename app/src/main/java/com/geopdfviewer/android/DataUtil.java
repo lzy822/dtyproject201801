@@ -883,6 +883,7 @@ public class DataUtil {
                             String[] coordinates = coordinate.split(",");
                             LatLng latLng = new LatLng(Float.valueOf(coordinates[0]), Float.valueOf(coordinates[1]));
                             READ_TYPE = NONE_TYPE;
+
                             DMBZ dmbz = new DMBZ();
                             int size = keyAndValues.size();
                             for (int i = 0; i < size; i++){
@@ -923,6 +924,103 @@ public class DataUtil {
                             dmbz.save();
                             //kmltest.setLatLng(latLng);
                         }
+                    }
+                }else if (readingTable == 2){
+                    if (line.contains("<tr")){
+                        readingTr = true;
+                    }
+                    if (readingTr){
+                        if (line.contains("<td>")){
+                            if (readingTd == 0){
+                                title = line.substring(4, line.indexOf("</td>"));
+                                Log.w(TAG, "title : " + title);
+                            }else if (readingTd == 1){
+                                value = line.substring(4, line.indexOf("</td>"));
+                                Log.w(TAG, "value : " + value);
+                                KeyAndValue keyAndValue = new KeyAndValue(title, value);
+                                keyAndValues.add(keyAndValue);
+                            }
+                            readingTd++;
+                        }
+                        if (line.contains("</tr>")){
+                            readingTr = false;
+                            readingTd = 0;
+                        }
+                    }
+                }
+            }
+            return true;
+        }catch (Exception e){
+            Log.w(TAG, "getKML: " + e.getLocalizedMessage());
+            return false;
+        }
+    }
+
+    public static boolean getKML2(String filePath){
+        SimpleDateFormat simpleDateFormat1;
+        simpleDateFormat1 = new SimpleDateFormat(MyApplication.getContext().getResources().getString(R.string.Date));
+        File file = new File(filePath);
+        InputStream in = null;
+        int READ_TYPE;
+        final int POI_TYPE = 0;
+        final int NONE_TYPE = -1;
+        final int LINE_TYPE = 1;
+        int readingTable = 0, readingTd = 0;
+        String coordinate = "";
+        boolean readingTr = false;
+        String title = "";
+        String value = "";
+        try {
+            List<KeyAndValue> keyAndValues = new ArrayList<>();
+            String line;
+            in = new FileInputStream(file);
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            READ_TYPE = NONE_TYPE;
+            while((line = bufferedReader.readLine()) != null) {
+                if (line.contains("<table")) readingTable++;
+                if (line.contains("</table")) readingTable--;
+                if (readingTable == 0){
+                    if (line.contains("<Point>")){
+                        READ_TYPE = POI_TYPE;
+                    }else if (line.contains("<Point>")){
+                        READ_TYPE = LINE_TYPE;
+                    }
+                    /*if (line.contains("</Point>")){
+                        READ_TYPE = NONE_TYPE;
+                    }*/
+                    if (READ_TYPE == POI_TYPE){
+                        if (line.contains("<coordinates>")){
+                            coordinate = line.substring(line.indexOf("<coordinates>") + 13, line.indexOf("</coordinates>"));
+                            coordinate = coordinate.trim();
+                            String[] coordinates = coordinate.split(",");
+                            LatLng latLng = new LatLng(Float.valueOf(coordinates[0]), Float.valueOf(coordinates[1]));
+                            READ_TYPE = NONE_TYPE;
+
+                            DMPoint d = new DMPoint();
+                            int size = keyAndValues.size();
+                            for (int i = 0; i < size; i++){
+                                if (keyAndValues.get(i).getKey().equals("FID")) {
+                                    d.setXh(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("标识码")) {
+                                    d.setMapId(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("图上名")) {
+                                    d.setBzmc(keyAndValues.get(i).getValue());
+                                }
+                                if (keyAndValues.get(i).getKey().equals("类别代")) {
+                                    d.setLbdm(keyAndValues.get(i).getValue());
+                                }
+                            }
+                            d.setLat(Float.valueOf(coordinates[1]));
+                            d.setLng(Float.valueOf(coordinates[0]));
+                            d.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
+                            d.save();
+                            //kmltest.setLatLng(latLng);
+                        }
+                    }else if (READ_TYPE == LINE_TYPE){
+
                     }
                 }else if (readingTable == 2){
                     if (line.contains("<tr")){
@@ -1585,10 +1683,8 @@ public class DataUtil {
             reader.close();
             in.close();
         } catch (UnsupportedEncodingException | FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     /*try {
@@ -1598,10 +1694,8 @@ public class DataUtil {
             result = result + "\n" + s;
         }
     } catch (FileNotFoundException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
     } catch (IOException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
     }*/
         return txtContent.toString();
@@ -1634,19 +1728,18 @@ public class DataUtil {
                         if (str1s[0].contains("DiMingName")) {
                             DiMing = str1s[1].replace("\"", "");
                             //Log.w(TAG, "getDMLJGX: " + DiMing);
-                        }
-                        if (str1s[0].contains("DiMingId")) {
+                        }else if (str1s[0].contains("DiMingId")) {
                             DiMingId = str1s[1].replace("\"", "");
                             //Log.w(TAG, "getDMLJGX: " + DiMingId);
-                        }
-                        if (str1s[0].contains("MapId")) {
+                        }else if (str1s[0].contains("MapId")) {
                             MapId = str1s[1].replace("\"", "");
                             //Log.w(TAG, "getDMLJGX: " + MapId);
                         }
                     }
                 }
                 try {
-                    if (DiMing.contains("路") || DiMing.contains("巷") || DiMing.contains("街") || DiMing.contains("沟")){
+                    // TODO 根据MapId进行入库操作
+                    /*if (DiMing.contains("路") || DiMing.contains("巷") || DiMing.contains("街") || DiMing.contains("沟")){
                         DMLine dmLine = new DMLine();
                         dmLine.setXh(num);
                         dmLine.setBzmc(DiMing);
@@ -1662,7 +1755,7 @@ public class DataUtil {
                         dmPoint.setMapId(MapId);
                         dmPoint.save();
                         num++;
-                    }
+                    }*/
                 }
                 catch (Exception e){
                     Log.w(TAG, "getDMLJGX: " + String.valueOf(DiMing == null));
@@ -1674,57 +1767,62 @@ public class DataUtil {
         }
     }
 
+    private static boolean IsLine(String ysdm){
+        // TODO 根据类别代码判断是否属于线状要素
+        if (ysdm.contains("") || ysdm.contains("")) return true;
+        else return false;
+    }
+
     public static void getDMXX(String path){
-        String str = readtxt(path);
+        String str = DataUtil.readtxt(Environment.getExternalStorageDirectory().toString() + "/20180716/地名信息.txt");
         str = str.replace("地名信息", "");
         str = str.replace("\n", "");
         str = str.replace("\t", "");
         str = str.replace(" ", "");
-        str = str.replace("\"", "");
         str = str.trim();
-        String[] strings = str.split("\\]");
+        String qydm = null;
+        String lbdm = null;
+        String bzmc = null;
+        String cym = null;
+        String jc = null;
+        String bm = null;
+        String dfyz = null;
+        String zt = null;
+        String dmll = null;
+        String dmhy = null;
+        String lsyg = null;
+        String dlstms = null;
+        String zlly = null;
+        String imgpath = null;
+        String tapepath = null;
+        String id = null;
+        String[] strings = str.split("\\}");
         int size = strings.length;
-        String[] str0s = null;
-        String[] str1s = null;
-        int DiMingNum = 0;
-        int DiMingIdNum = 0;
-        int MapIdNum = 0;
-        String DiMing = null;
-        String DiMingId = null;
-        String MapId = null;
         for (int i = 0; i < size; i++){
-            if (i < size - 1) {
-                strings[i] = strings[i].substring(2);
-                str0s = strings[i].split(",");
-
-                for (int j = 0; j < str0s.length; j++){
-                    str1s = str0s[j].split("\\:");
-                    if (str1s.length == 2 & str1s[0].contains("DiMingName")) {
-                        DiMingNum++;
-                        DiMing = str1s[1];
-                    }
-                    if (str1s.length == 2 & str1s[0].contains("DiMingId")) {
-                        DiMingIdNum++;
-                        DiMingId = str1s[1];
-                    }
-                    if (str1s.length == 2 & str1s[0].contains("MapId")) {
-                        MapIdNum++;
-                        MapId = str1s[1];
+            if (strings[i].contains("{")) {
+                strings[i] = strings[i].substring(strings[i].indexOf("{") + 1);
+                String[] strings1 = strings[i].split(",");
+                for (int j = 0; j < strings1.length; j++){
+                    String[] strings2 = strings1[j].split("\\:");
+                    if (strings2.length == 2){
+                        if (strings2[0].equals("BieMing")) bm = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("JianCheng")) jc = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("SuoShuQuYu")) qydm = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("DiMingLeiBie")) lbdm = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("CengYongMing")) cym = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("DiMingYuZhong")) dfyz = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("PuChaZhuangTai")) zt = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("DiMingLaiLi")) dmll = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("DiMingHanYi")) dmhy = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("LiShiYanGe")) lsyg = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("DiLiShiTi")) dlstms = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("ZiLiaoLaiYuan")) zlly = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("DuoMeiTi")) imgpath = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("PuTongHuaDuYin")) tapepath = strings2[1].replace("\"", "");
+                        else if (strings2[0].equals("ID")) id = strings2[1].replace("\"", "");
                     }
                 }
-                if (DiMing.contains("路") || DiMing.contains("巷") || DiMing.contains("街")){
-                    DMLine dmLine = new DMLine();
-                    dmLine.setBzmc(DiMing);
-                    dmLine.setDiMingId(DiMingId);
-                    dmLine.setMapId(MapId);
-                    dmLine.save();
-                }else {
-                    DMPoint dmPoint = new DMPoint();
-                    dmPoint.setBzmc(DiMing);
-                    dmPoint.setDiMingId(DiMingId);
-                    dmPoint.setMapId(MapId);
-                    dmPoint.save();
-                }
+                // TODO 根据DiMingId进行入库操作
             }
         }
     }

@@ -3,7 +3,7 @@ package com.geopdfviewer.android;
 import org.litepal.crud.LitePalSupport;
 
 public class DMPoint extends LitePalSupport{
-    private long xh;
+    private String xh;
     private String qydm;
     private String lbdm;
     private String bzmc;
@@ -59,11 +59,11 @@ public class DMPoint extends LitePalSupport{
         this.qydm = qydm;
     }
 
-    public long getXh() {
+    public String getXh() {
         return xh;
     }
 
-    public void setXh(long xh) {
+    public void setXh(String xh) {
         this.xh = xh;
     }
 
