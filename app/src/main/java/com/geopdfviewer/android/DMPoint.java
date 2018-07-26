@@ -20,36 +20,26 @@ public class DMPoint extends LitePalSupport{
     private String imgpath;
     private String tapepath;
     private String time;
+    private String dimingid;
+    private String mapid;
     private float lat;
     private float lng;
 
-    public String getDiMingId() {
-        return DiMingId;
+    public String getDimingid() {
+        return dimingid;
     }
 
-    public void setDiMingId(String diMingId) {
-        DiMingId = diMingId;
+    public void setDimingid(String dimingid) {
+        this.dimingid = dimingid;
     }
 
-    public String getMapId() {
-        return MapId;
+    public String getMapid() {
+        return mapid;
     }
 
-    public void setMapId(String mapId) {
-        MapId = mapId;
+    public void setMapid(String mapid) {
+        this.mapid = mapid;
     }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    private String DiMingId;
-    private String MapId;
-    private int type;
 
     public String getQydm() {
         return qydm;

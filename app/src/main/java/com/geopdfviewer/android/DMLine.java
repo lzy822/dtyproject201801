@@ -2,6 +2,8 @@ package com.geopdfviewer.android;
 
 import org.litepal.crud.LitePalSupport;
 
+import java.util.List;
+
 public class DMLine extends LitePalSupport{
     private String xh;
     private String qydm;
@@ -20,37 +22,37 @@ public class DMLine extends LitePalSupport{
     private String imgpath;
     private String tapepath;
     private String time;
-    private String multiline;
+    private List<String> multiline;
+    private int linenum;
     private float maxlat;
     private float maxlng;
     private float minlat;
     private float minlng;
-    private String DiMingId;
-    private String MapId;
-    private int type;
+    private String dimingid;
+    private String mapid;
 
-    public String getDiMingId() {
-        return DiMingId;
+    public int getLinenum() {
+        return linenum;
     }
 
-    public void setDiMingId(String diMingId) {
-        DiMingId = diMingId;
+    public void setLinenum(int linenum) {
+        this.linenum = linenum;
     }
 
-    public String getMapId() {
-        return MapId;
+    public String getDimingid() {
+        return dimingid;
     }
 
-    public void setMapId(String mapId) {
-        MapId = mapId;
+    public void setDimingid(String dimingid) {
+        this.dimingid = dimingid;
     }
 
-    public int getType() {
-        return type;
+    public String getMapid() {
+        return mapid;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setMapid(String mapid) {
+        this.mapid = mapid;
     }
 
     public String getQydm() {
@@ -77,11 +79,11 @@ public class DMLine extends LitePalSupport{
         this.lbdm = lbdm;
     }
 
-    public String getMultiline() {
+    public List<String> getMultiline() {
         return multiline;
     }
 
-    public void setMultiline(String multiline) {
+    public void setMultiline(List<String> multiline) {
         this.multiline = multiline;
     }
 
