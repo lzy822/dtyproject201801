@@ -900,7 +900,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 paint.setColor(Color.BLACK);
             boolean colorChange = false;
             for (int k = 0; k < linenum1; k++){
-                String[] strings = lines.get(k).split(" ");
+                String mline = lineUtil.getExternalPolygon(lines.get(k), 1);
+                String[] strings = mline.split(" ");
+                //String[] strings = lines.get(k).split(" ");
                 for (int n = 0; n < strings.length - 1; n++){
                     String[] ptx1 = strings[n].split(",");
                     String[] ptx2 = strings[n + 1].split(",");
@@ -5206,13 +5208,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     } else {
                                         //Resources res = MyApplication.getContext().getResources();
                                         //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
-                                        Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                        BitmapDrawable bd = (BitmapDrawable) drawable;
-                                        Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                                        bt btt = new bt(bitmap, id);
-                                        DMBts.add(btt);
                                     }
                                 }else if (path.contains(".JPG")){
                                     if (!path.substring(0, path.indexOf(".JPG") + 4).contains(Environment.getExternalStorageDirectory().toString())) {
@@ -5224,6 +5219,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     }
                                     File file = new File(path);
                                     if (file.exists()) {
+                                        Log.w(TAG, "run: 存在文件");
                                         Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
                                         int degree = DataUtil.getPicRotate(path);
                                         if (degree != 0) {
@@ -5237,13 +5233,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     } else {
                                         //Resources res = MyApplication.getContext().getResources();
                                         //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
-                                        Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                        BitmapDrawable bd = (BitmapDrawable) drawable;
-                                        Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                                        bt btt = new bt(bitmap, id);
-                                        DMBts.add(btt);
+
                                     }
                                 }
                             }

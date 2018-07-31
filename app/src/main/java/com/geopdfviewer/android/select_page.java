@@ -1502,10 +1502,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("102,25 102.5,25.5 101.5,24.5", 0.5));
         ///////获取地名数据
-        LitePal.deleteAll(DMLine.class);
+        /*LitePal.deleteAll(DMLine.class);
         LitePal.deleteAll(DMPoint.class);
-        DataUtil.getDM("/20180716/联盟街道点状地名/doc.kml", "/20180716/联盟街道线状地名/doc.kml", "/20180716/地名信息连接关系.txt", "/20180716/地名信息.txt");
+        DataUtil.getDM("/20180716/联盟街道点状地名/doc.kml", "/20180716/联盟街道线状地名/doc.kml", "/20180716/地名信息连接关系.txt", "/20180716/地名信息.txt");*/
         /*String str1 = "\"hello world\"";
         Log.w(TAG, "onCreate: " + str1);
         Log.w(TAG, "onCreate: " + str1.replace("\"", ""));*/
