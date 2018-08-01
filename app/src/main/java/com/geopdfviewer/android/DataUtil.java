@@ -1872,7 +1872,6 @@ public class DataUtil {
                     }
                 }
                 try {
-                    // TODO 根据MapId进行入库操作
                     List<DMPoint> dmPoints = LitePal.where("mapid = ?", MapId).find(DMPoint.class);
                     if (dmPoints.size() != 0){
                         DMPoint dmPoint = new DMPoint();
@@ -1894,11 +1893,7 @@ public class DataUtil {
         }
     }
 
-    private static boolean IsLine(String ysdm){
-        // TODO 根据类别代码判断是否属于线状要素
-        if (ysdm.contains("") || ysdm.contains("")) return true;
-        else return false;
-    }
+
 
     public static void getDMXX(String path){
         String str = DataUtil.readtxt(Environment.getExternalStorageDirectory().toString() + "/20180716/地名信息.txt");
@@ -1949,7 +1944,6 @@ public class DataUtil {
                         else if (strings2[0].contains("ID")) id = strings2[1].replace("\"", "");
                     }
                 }
-                // TODO 根据DiMingId进行入库操作
                 List<DMPoint> dmPoints = LitePal.where("dimingid = ?", id).find(DMPoint.class);
                 if (dmPoints.size() != 0){
                     DMPoint dmPoint = new DMPoint();

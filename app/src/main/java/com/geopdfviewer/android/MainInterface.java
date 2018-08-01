@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -432,71 +433,113 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public boolean onTap(final MotionEvent e) {
         PointF pt = new PointF(e.getRawX(), e.getRawY());
         final PointF pt1 = getGeoLocFromPixL(pt);
-        if (dmLines.size() > 0){
-            Log.w(TAG, "onTap!!!!!!!!!!!: " + dmLines.size());
-            int linenum = dmLines.size();
-            double deltas = 0;
-            String theId = "";
-            long calnum = 1;
-            //显示线状要素
-            for (int j = 0; j < linenum; j++){
-                List<String> lines = dmLines.get(j).getMultiline();
-                int linenum1 = lines.size();
+        if (esterEgg_dm) {
+            if (dmLines.size() > 0) {
+                Log.w(TAG, "onTap!!!!!!!!!!!: " + dmLines.size());
+                int linenum = dmLines.size();
+                double deltas = 0;
+                String theId = "";
+                long calnum = 1;
+                //显示线状要素
+                for (int j = 0; j < linenum; j++) {
+                    List<String> lines = dmLines.get(j).getMultiline();
+                    int linenum1 = lines.size();
                 /*Paint paintk = new Paint();
                 paintk.setStrokeWidth(0.15f);
                 paintk.setColor(Color.BLACK);
                 paintk.setStyle(Paint.Style.STROKE);*/
-                for (int k = 0; k < linenum1; k++){
-                    //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
-                    //String[] strings = mline.split(" ");
-                    String[] strings = lines.get(k).split(" ");
-                    for (int cc = 0; cc < strings.length - 1; cc++){
-                        String[] ptx1 = strings[cc].split(",");
-                        String[] ptx2 = strings[cc + 1].split(",");
-                        //PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        //PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        //PointF theTouchPt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        Point pointF = new Point(Double.valueOf(ptx1[1]), Double.valueOf(ptx1[0]));
-                        Point pointF1 = new Point(Double.valueOf(ptx2[1]), Double.valueOf(ptx2[0]));
-                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF);
-                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF1);
-                        PointF theTouchPt = pt1;
-                        if (deltas == 0){
-                            //deltas = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
-                            double thedis = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
-                            if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
-                                deltas = thedis;
+                    for (int k = 0; k < linenum1; k++) {
+                        //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
+                        //String[] strings = mline.split(" ");
+                        String[] strings = lines.get(k).split(" ");
+                        for (int cc = 0; cc < strings.length - 1; cc++) {
+                            String[] ptx1 = strings[cc].split(",");
+                            String[] ptx2 = strings[cc + 1].split(",");
+                            //PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            //PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            //PointF theTouchPt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            Point pointF = new Point(Double.valueOf(ptx1[1]), Double.valueOf(ptx1[0]));
+                            Point pointF1 = new Point(Double.valueOf(ptx2[1]), Double.valueOf(ptx2[0]));
+                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF);
+                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF1);
+                            PointF theTouchPt = pt1;
+                            if (deltas == 0) {
+                                //deltas = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
+                                double thedis = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
+                                if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                                    deltas = thedis;
+                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                    theId = dmLines.get(j).getBzmc();
+                                } else {
+                                    deltas = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
+                                }
+                            } else {
+                                //double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
+                                double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
+                                if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                                    //deltas = delta1;
+                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                    //theId = dmLines.get(j).getBzmc();
+                                } else
+                                    delta1 = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
                                 //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                theId = dmLines.get(j).getBzmc();
-                            }else {
-                                deltas = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
+                                if (delta1 < deltas) {
+                                    deltas = delta1;
+                                    theId = dmLines.get(j).getMapid();
+                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + pt1.toString());
+                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
+                                }
+                                calnum++;
                             }
-                        }else {
-                            //double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
-                            double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
-                            if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
-                                //deltas = delta1;
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                //theId = dmLines.get(j).getBzmc();
-                            }else delta1 = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
-                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                            if (delta1 < deltas){
-                                deltas = delta1;
-                                theId = dmLines.get(j).getBzmc();
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + pt1.toString());
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
-                            }
-                            calnum++;
+                            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
+                            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
                         }
-                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
-                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
                     }
                 }
+                Log.w(TAG, "onTap!!!!!!!!!!!: " + calnum);
+                if (deltas < 0.000005) {
+                    Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
+                    // TODO : 设计并完成查询语句
+                    GoDMLSinglePOIPage(theId);
+                }
             }
-            Log.w(TAG, "onTap!!!!!!!!!!!: " + calnum);
-            if (deltas < 0.000005){
-                Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
+            int n = 0;
+            int num = 0;
+            if (dmPoints.size() > 0) {
+                DMPoint poii = dmPoints.get(0);
+                PointF pointF = new PointF(poii.getLat(), poii.getLng());
+                pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                pointF = new PointF(pointF.x, pointF.y - 70);
+                //pointF = getGeoLocFromPixL(pointF);
+                PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                locError("pt1special : " + pt8.toString());
+                float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                for (DMPoint poi : dmPoints) {
+                    PointF mpointF = new PointF(poi.getLat(), poi.getLng());
+                    mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                    if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                        locError("mpointFspecial : " + mpointF.toString());
+                        delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                        num = n;
+                    }
+                    locError("n : " + Integer.toString(n));
+                    n++;
+                }
+                locError("numspecial : " + Integer.toString(num));
+                locError("deltaspecial : " + Float.toString(delta));
+                if (delta < 35 || num != 0) {
+                        /*Intent intent = new Intent(MainInterface.this, plqpoishow.class);
+                        Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
+                        intent.putExtra("xh", kmltests.get(num).getXh());
+                        startActivity(intent);*/
+                    locError("GoDMBZSinglePOIPage" + dmPoints.get(num).getDimingid());
+                    GoDMPSinglePOIPage(dmPoints.get(num).getDimingid());
+                    //isQueried = true;
+                    //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
+                    //locError(Integer.toString(kmltests.get(num).getPhotonum()));
+                } else locError("没有正常查询");
             }
         }
         showLocationText(pt1);
@@ -1003,13 +1046,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
                         if (dmPoints.get(i).getImgpath() != null){
                             if (!dmPoints.get(i).getImgpath().isEmpty()) {
-                                    /*int size = bts.size();
-                                    for (int j = 0; j < size; j++) {
-                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                            locError("lzy");
-                                        }
-                                    }*/
+                                if (hasDMBitmap) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
                                 if (dmPoints.get(i).getTapepath() != null) {
                                     if (!dmPoints.get(i).getTapepath().isEmpty())
                                         canvas.drawCircle(pt.x, pt.y - 70, 35, paint1);
@@ -1056,6 +1093,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
                             if (dmPoints.get(i).getImgpath() != null){
                                 if (!dmPoints.get(i).getImgpath().isEmpty()) {
+                                    if (hasDMBitmap & i < DMBts.size()) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
                                     /*int size = bts.size();
                                     for (int j = 0; j < size; j++) {
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
@@ -1099,6 +1137,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
                     if (dmPoints.get(i).getImgpath() != null){
                         if (!dmPoints.get(i).getImgpath().isEmpty()) {
+                            if (hasDMBitmap & i < DMBts.size()) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
                                     /*int size = bts.size();
                                     for (int j = 0; j < size; j++) {
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
@@ -1141,6 +1180,125 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
         //////////////////////
 
+    }
+
+    private void drawDMBZ(Canvas canvas){
+        List<PointF> showpts = new ArrayList<>();
+        for (int j = 0; j < dmbzList.size(); j++) {
+            Log.w(TAG, "onLayerDrawn:" + dmbzList.size());
+            PointF ppt = LatLng.getPixLocFromGeoL(new PointF(dmbzList.get(j).getLat(), dmbzList.get(j).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            if ((dmbzList.get(j).getLng() < cs_right & dmbzList.get(j).getLng() > cs_left & dmbzList.get(j).getLat() < cs_top & dmbzList.get(j).getLat() > cs_bottom)) {
+                if (c_zoom == 10) {
+                    canvas.drawRect(new RectF(ppt.x - 5, ppt.y - 38, ppt.x + 5, ppt.y), paint2);
+                    if (dmbzList.get(j).getIMGPATH() == null || dmbzList.get(j).getIMGPATH().isEmpty()) {
+                        if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty())
+                            canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                    } else {
+                        if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty())
+                            canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
+                        if (hasDMBZBitmap & j <= DMBZBts.size() - 1) {
+                            canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
+                        }
+                    }
+                } else {
+                    if (showpts.size() == 0) {
+                        showpts.add(ppt);
+                        canvas.drawRect(new RectF(ppt.x - 5, ppt.y - 38, ppt.x + 5, ppt.y), paint2);
+                        canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                        if (dmbzList.get(j).getIMGPATH() != null){
+                            if (!dmbzList.get(j).getIMGPATH().isEmpty()) {
+                                if (hasDMBZBitmap & j < DMBZBts.size()) canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
+                                if (dmbzList.get(j).getTAPEPATH() != null) {
+                                    if (!dmbzList.get(j).getTAPEPATH().isEmpty())
+                                        canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
+                                    else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                } else {
+                                    canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                }
+                            }else {
+                                if (dmbzList.get(j).getTAPEPATH() != null) {
+                                    if (!dmbzList.get(j).getTAPEPATH().isEmpty())
+                                        canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                    else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                                    //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+
+                                } else {
+                                    canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                                    //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                }
+                            }
+                        } else {
+                            if (dmbzList.get(j).getTAPEPATH() != null) {
+                                if (!dmbzList.get(j).getTAPEPATH().isEmpty())
+                                    canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                                //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+                            } else {
+                                canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                            }
+                        }
+                    } else {
+                        float deltaDistance = 0;
+                        for (int k = 0; k < showpts.size(); k++) {
+                            if (k == 0)
+                                deltaDistance = Math.abs(ppt.x - showpts.get(k).x) + Math.abs(ppt.y - showpts.get(k).y);
+                            else {
+                                float deltaDistance1 = Math.abs(ppt.x - showpts.get(k).x) + Math.abs(ppt.y - showpts.get(k).y);
+                                if (deltaDistance1 < deltaDistance)
+                                    deltaDistance = deltaDistance1;
+                            }
+                        }
+                        if (deltaDistance > 200) {
+                            showpts.add(ppt);
+                            canvas.drawRect(new RectF(ppt.x - 5, ppt.y - 38, ppt.x + 5, ppt.y), paint2);
+                            canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                            if (dmbzList.get(j).getIMGPATH() != null){
+                                if (!dmbzList.get(j).getIMGPATH().isEmpty()) {
+                                    if (hasDMBitmap & j < DMBZBts.size()) canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
+                                    /*int size = bts.size();
+                                    for (int j = 0; j < size; j++) {
+                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                            locError("lzy");
+                                        }
+                                    }*/
+                                    if (dmbzList.get(j).getTAPEPATH() != null) {
+                                        if (!dmbzList.get(j).getTAPEPATH().isEmpty())
+                                            canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
+                                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                    } else {
+                                        canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                    }
+                                }else {
+                                    if (dmbzList.get(j).getTAPEPATH() != null) {
+                                        if (!dmbzList.get(j).getTAPEPATH().isEmpty())
+                                            canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                                        //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+
+                                    } else {
+                                        canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                    }
+                                }
+                            } else {
+                                if (dmbzList.get(j).getTAPEPATH() != null) {
+                                    if (!dmbzList.get(j).getTAPEPATH().isEmpty())
+                                        canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
+                                    else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                                    //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+                                } else {
+                                    canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     @Override
@@ -1306,21 +1464,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             if (esterEgg_plq) drawPLQData(canvas);
             //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
             if (type2Checked & esterEgg_lm){
-                for (int j = 0; j < dmbzList.size(); j++){
-                    Log.w(TAG, "onLayerDrawn:" + dmbzList.size());
-                    PointF ppt = LatLng.getPixLocFromGeoL(new PointF(dmbzList.get(j).getLat(), dmbzList.get(j).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    canvas.drawRect(new RectF(ppt.x - 5, ppt.y - 38, ppt.x + 5, ppt.y), paint2);
-                    if (dmbzList.get(j).getIMGPATH() == null || dmbzList.get(j).getIMGPATH().isEmpty()) {
-                        if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty()) canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
-                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
-                    }else {
-                        if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty()) canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
-                        else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
-                        if (hasDMBZBitmap & j <= DMBZBts.size() - 1) {
-                            canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
-                        }
-                    }
-                }
+                drawDMBZ(canvas);
             }
 
             List<PointF> showpts = new ArrayList<>();
@@ -3160,6 +3304,22 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Intent intent = new Intent(MainInterface.this, singlepoi.class);
         intent.putExtra("DMBZ", XH);
         intent.putExtra("type", 1);
+        startActivity(intent);
+    }
+
+    private void GoDMLSinglePOIPage(String MapId){
+        Log.w(TAG, "updateMapPage: 1");
+        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+        intent.putExtra("DML", MapId);
+        intent.putExtra("type", 2);
+        startActivity(intent);
+    }
+
+    private void GoDMPSinglePOIPage(String MapId){
+        Log.w(TAG, "updateMapPage: 1");
+        Intent intent = new Intent(MainInterface.this, singlepoi.class);
+        intent.putExtra("DMP", MapId);
+        intent.putExtra("type", 3);
         startActivity(intent);
     }
 
@@ -5273,8 +5433,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                         bt btt = new bt(bitmap, id);
                                         DMBts.add(btt);
                                     } else {
-                                        //Resources res = MyApplication.getContext().getResources();
-                                        //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
+                                        bt btt = new bt(Bitmap.createBitmap(100, 80, Bitmap.Config.ALPHA_8), id);
+                                        DMBts.add(btt);
                                     }
                                 }else if (path.contains(".JPG")){
                                     if (!path.substring(0, path.indexOf(".JPG") + 4).contains(Environment.getExternalStorageDirectory().toString())) {
@@ -5300,12 +5460,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                     } else {
                                         //Resources res = MyApplication.getContext().getResources();
                                         //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
-
+                                        bt btt = new bt(Bitmap.createBitmap(100, 80, Bitmap.Config.ALPHA_8), id);
+                                        DMBts.add(btt);
                                     }
                                 }
                             }
                         }catch (Exception e){
-
+                            Log.w(TAG, "run: 发生重要错误");
                         }
 
                     }
@@ -5375,6 +5536,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
                 List<DMBZ> dmbzList = LitePal.where("xh = ?", poic).find(DMBZ.class);
                 queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
+            }else if (poic.contains("DMP")){
+                hasQueriedPoi = true;
+                poic = poic.replace("DMX", "");
+                //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
+                List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
+                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
             }
         }
         String currentProvider = LocationManager.NETWORK_PROVIDER;
@@ -5398,6 +5565,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         ////////////////////////缓存Bitmap//////////////////////////////
         getBitmap();
+        getDMBZBitmap();
+        getDMitmap();
         /*bts = new ArrayList<bt>();
         new Thread(new Runnable() {
             @Override

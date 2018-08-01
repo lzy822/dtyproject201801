@@ -68,6 +68,8 @@ public class singlepoi extends AppCompatActivity {
     float m_lat, m_lng;
     private int POITYPE = -1;
     private String DMXH;
+    private String DMP;
+    private String DML;
     private TextView edit_XH;
     private EditText edit_DY;
     private EditText edit_MC;
@@ -101,6 +103,16 @@ public class singlepoi extends AppCompatActivity {
         }else if (POITYPE == 1){
             setTitle("地名标志信息");
             DMXH = intent.getStringExtra("DMBZ");
+            Log.w(TAG, "onCreate: 1 ");
+            //RefreshDMBZ();
+        }else if (POITYPE == 2){
+            setTitle("地名信息");
+            DML = intent.getStringExtra("DML");
+            Log.w(TAG, "onCreate: 1 ");
+            //RefreshDMBZ();
+        }else if (POITYPE == 3){
+            setTitle("地名信息");
+            DMP = intent.getStringExtra("DMP");
             Log.w(TAG, "onCreate: 1 ");
             //RefreshDMBZ();
         }
@@ -242,11 +254,255 @@ public class singlepoi extends AppCompatActivity {
         });
     }
 
+    private void RefreshDML(){
+        List<DMLine> dmbzList = LitePal.where("dimingid = ?", DML).find(DMLine.class);
+        // TODO : 设计并实现地名线属性编辑页面
+        /*TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
+        txt_XH.setVisibility(View.VISIBLE);
+        TextView txt_DY = (TextView) findViewById(R.id.txt_DY);
+        txt_DY.setVisibility(View.VISIBLE);
+        TextView txt_MC = (TextView) findViewById(R.id.txt_MC);
+        txt_MC.setVisibility(View.VISIBLE);
+        TextView txt_BZMC = (TextView) findViewById(R.id.txt_BZMC);
+        txt_BZMC.setVisibility(View.VISIBLE);
+        TextView txt_XZQMC = (TextView) findViewById(R.id.txt_XZQMC);
+        txt_XZQMC.setVisibility(View.VISIBLE);
+        TextView txt_XZQDM = (TextView) findViewById(R.id.txt_XZQDM);
+        txt_XZQDM.setVisibility(View.VISIBLE);
+        TextView txt_SZDW = (TextView) findViewById(R.id.txt_SZDW);
+        txt_SZDW.setVisibility(View.VISIBLE);
+        TextView txt_SCCJ = (TextView) findViewById(R.id.txt_SCCJ);
+        txt_SCCJ.setVisibility(View.VISIBLE);
+        TextView txt_GG = (TextView) findViewById(R.id.txt_GG);
+        txt_GG.setVisibility(View.VISIBLE);
+        edit_XH = (TextView) findViewById(R.id.edit_XH);
+        edit_XH.setText(dmbzList.get(0).getXH());
+        edit_XH.setVisibility(View.VISIBLE);
+        edit_DY = (EditText) findViewById(R.id.edit_DY);
+        edit_DY.setText(dmbzList.get(0).getDY());
+        edit_DY.setVisibility(View.VISIBLE);
+        edit_MC = (EditText) findViewById(R.id.edit_MC);
+        edit_MC.setText(dmbzList.get(0).getMC());
+        edit_MC.setVisibility(View.VISIBLE);
+        edit_BZMC = (EditText) findViewById(R.id.edit_BZMC);
+        edit_BZMC.setText(dmbzList.get(0).getBZMC());
+        edit_BZMC.setVisibility(View.VISIBLE);
+        edit_XZQMC = (EditText) findViewById(R.id.edit_XZQMC);
+        edit_XZQMC.setText(dmbzList.get(0).getXZQMC());
+        edit_XZQMC.setVisibility(View.VISIBLE);
+        edit_XZQDM = (EditText) findViewById(R.id.edit_XZQDM);
+        edit_XZQDM.setText(dmbzList.get(0).getXZQDM());
+        edit_XZQDM.setVisibility(View.VISIBLE);
+        edit_SZDW = (EditText) findViewById(R.id.edit_SZDW);
+        edit_SZDW.setText(dmbzList.get(0).getSZDW());
+        edit_SZDW.setVisibility(View.VISIBLE);
+        edit_SCCJ = (EditText) findViewById(R.id.edit_SCCJ);
+        edit_SCCJ.setText(dmbzList.get(0).getSCCJ());
+        edit_SCCJ.setVisibility(View.VISIBLE);
+        edit_GG = (EditText) findViewById(R.id.edit_GG);
+        edit_GG.setText(dmbzList.get(0).getGG());
+        edit_GG.setVisibility(View.VISIBLE);
+        TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
+        //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
+        if (dmbzList.get(0).getIMGPATH() != null) {
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
+            ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+            if (DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg") > 0)
+                getBitmapDMBZ(dmbzList.get(0).getIMGPATH(), imageView);
+
+        }else txt_photonum.setText(String.valueOf(0));
+        txt_photonum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GoDMBZSinglePhotoPage(DMXH);
+            }
+        });
+        txt_photonum.setVisibility(View.VISIBLE);
+        TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
+        Log.w(TAG, "RefreshDMBZ: " + dmbzList.get(0).getTAPEPATH());
+        if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".mp3")));
+        else txt_tapenum.setText(String.valueOf(0));
+        txt_tapenum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GoDMBZSingleTapePage(DMXH);
+            }
+        });
+        txt_tapenum.setVisibility(View.VISIBLE);
+        TextView txt_loc = (TextView) findViewById(R.id.txt_locshow);
+        m_lng = dmbzList.get(0).getLng();
+        m_lat = dmbzList.get(0).getLat();
+        txt_loc.setText(m_lat + ", " + m_lng);
+        txt_loc.setVisibility(View.VISIBLE);
+        FloatingActionButton fab_saveinfo = (FloatingActionButton) findViewById(R.id.fab_saveinfo1);
+        fab_saveinfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DMBZ poi = new DMBZ();
+                poi.setXH(DMXH);
+                poi.setDY(edit_DY.getText().toString());
+                poi.setMC(edit_MC.getText().toString());
+                poi.setBZMC(edit_BZMC.getText().toString());
+                poi.setXZQMC(edit_XZQMC.getText().toString());
+                poi.setXZQDM(edit_XZQDM.getText().toString());
+                poi.setSZDW(edit_SZDW.getText().toString());
+                poi.setSCCJ(edit_SCCJ.getText().toString());
+                poi.setGG(edit_GG.getText().toString());
+                poi.updateAll("xh = ?", DMXH);
+            }
+        });
+        ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
+        addphoto.setVisibility(View.VISIBLE);
+        addphoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopueWindowForPhoto();
+            }
+        });
+        ImageButton addtape = (ImageButton)findViewById(R.id.addTape_singlepoi);
+        addtape.setVisibility(View.VISIBLE);
+        addtape.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, REQUEST_CODE_TAPE);
+                }catch (ActivityNotFoundException e){
+                    Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });*/
+    }
+
+    private void RefreshDMP(){
+        List<DMPoint> dmbzList = LitePal.where("dimingid = ?", DMP).find(DMPoint.class);
+        // TODO : 设计并实现地名点属性编辑页面
+        /*TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
+        txt_XH.setVisibility(View.VISIBLE);
+        TextView txt_DY = (TextView) findViewById(R.id.txt_DY);
+        txt_DY.setVisibility(View.VISIBLE);
+        TextView txt_MC = (TextView) findViewById(R.id.txt_MC);
+        txt_MC.setVisibility(View.VISIBLE);
+        TextView txt_BZMC = (TextView) findViewById(R.id.txt_BZMC);
+        txt_BZMC.setVisibility(View.VISIBLE);
+        TextView txt_XZQMC = (TextView) findViewById(R.id.txt_XZQMC);
+        txt_XZQMC.setVisibility(View.VISIBLE);
+        TextView txt_XZQDM = (TextView) findViewById(R.id.txt_XZQDM);
+        txt_XZQDM.setVisibility(View.VISIBLE);
+        TextView txt_SZDW = (TextView) findViewById(R.id.txt_SZDW);
+        txt_SZDW.setVisibility(View.VISIBLE);
+        TextView txt_SCCJ = (TextView) findViewById(R.id.txt_SCCJ);
+        txt_SCCJ.setVisibility(View.VISIBLE);
+        TextView txt_GG = (TextView) findViewById(R.id.txt_GG);
+        txt_GG.setVisibility(View.VISIBLE);
+        edit_XH = (TextView) findViewById(R.id.edit_XH);
+        edit_XH.setText(dmbzList.get(0).getXH());
+        edit_XH.setVisibility(View.VISIBLE);
+        edit_DY = (EditText) findViewById(R.id.edit_DY);
+        edit_DY.setText(dmbzList.get(0).getDY());
+        edit_DY.setVisibility(View.VISIBLE);
+        edit_MC = (EditText) findViewById(R.id.edit_MC);
+        edit_MC.setText(dmbzList.get(0).getMC());
+        edit_MC.setVisibility(View.VISIBLE);
+        edit_BZMC = (EditText) findViewById(R.id.edit_BZMC);
+        edit_BZMC.setText(dmbzList.get(0).getBZMC());
+        edit_BZMC.setVisibility(View.VISIBLE);
+        edit_XZQMC = (EditText) findViewById(R.id.edit_XZQMC);
+        edit_XZQMC.setText(dmbzList.get(0).getXZQMC());
+        edit_XZQMC.setVisibility(View.VISIBLE);
+        edit_XZQDM = (EditText) findViewById(R.id.edit_XZQDM);
+        edit_XZQDM.setText(dmbzList.get(0).getXZQDM());
+        edit_XZQDM.setVisibility(View.VISIBLE);
+        edit_SZDW = (EditText) findViewById(R.id.edit_SZDW);
+        edit_SZDW.setText(dmbzList.get(0).getSZDW());
+        edit_SZDW.setVisibility(View.VISIBLE);
+        edit_SCCJ = (EditText) findViewById(R.id.edit_SCCJ);
+        edit_SCCJ.setText(dmbzList.get(0).getSCCJ());
+        edit_SCCJ.setVisibility(View.VISIBLE);
+        edit_GG = (EditText) findViewById(R.id.edit_GG);
+        edit_GG.setText(dmbzList.get(0).getGG());
+        edit_GG.setVisibility(View.VISIBLE);
+        TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
+        //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
+        if (dmbzList.get(0).getIMGPATH() != null) {
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
+            ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+            if (DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg") > 0)
+                getBitmapDMBZ(dmbzList.get(0).getIMGPATH(), imageView);
+
+        }else txt_photonum.setText(String.valueOf(0));
+        txt_photonum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GoDMBZSinglePhotoPage(DMXH);
+            }
+        });
+        txt_photonum.setVisibility(View.VISIBLE);
+        TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
+        Log.w(TAG, "RefreshDMBZ: " + dmbzList.get(0).getTAPEPATH());
+        if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".mp3")));
+        else txt_tapenum.setText(String.valueOf(0));
+        txt_tapenum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GoDMBZSingleTapePage(DMXH);
+            }
+        });
+        txt_tapenum.setVisibility(View.VISIBLE);
+        TextView txt_loc = (TextView) findViewById(R.id.txt_locshow);
+        m_lng = dmbzList.get(0).getLng();
+        m_lat = dmbzList.get(0).getLat();
+        txt_loc.setText(m_lat + ", " + m_lng);
+        txt_loc.setVisibility(View.VISIBLE);
+        FloatingActionButton fab_saveinfo = (FloatingActionButton) findViewById(R.id.fab_saveinfo1);
+        fab_saveinfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DMBZ poi = new DMBZ();
+                poi.setXH(DMXH);
+                poi.setDY(edit_DY.getText().toString());
+                poi.setMC(edit_MC.getText().toString());
+                poi.setBZMC(edit_BZMC.getText().toString());
+                poi.setXZQMC(edit_XZQMC.getText().toString());
+                poi.setXZQDM(edit_XZQDM.getText().toString());
+                poi.setSZDW(edit_SZDW.getText().toString());
+                poi.setSCCJ(edit_SCCJ.getText().toString());
+                poi.setGG(edit_GG.getText().toString());
+                poi.updateAll("xh = ?", DMXH);
+            }
+        });
+        ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
+        addphoto.setVisibility(View.VISIBLE);
+        addphoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopueWindowForPhoto();
+            }
+        });
+        ImageButton addtape = (ImageButton)findViewById(R.id.addTape_singlepoi);
+        addtape.setVisibility(View.VISIBLE);
+        addtape.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                    startActivityForResult(intent, REQUEST_CODE_TAPE);
+                }catch (ActivityNotFoundException e){
+                    Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });*/
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         if (POITYPE == 0) refresh();
         else if (POITYPE == 1) RefreshDMBZ();
+        else if (POITYPE == 2) RefreshDML();
+        else if (POITYPE == 3) RefreshDMP();
     }
 
     int showNum = 0;
