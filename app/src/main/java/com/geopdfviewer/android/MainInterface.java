@@ -432,6 +432,73 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public boolean onTap(final MotionEvent e) {
         PointF pt = new PointF(e.getRawX(), e.getRawY());
         final PointF pt1 = getGeoLocFromPixL(pt);
+        if (dmLines.size() > 0){
+            Log.w(TAG, "onTap!!!!!!!!!!!: " + dmLines.size());
+            int linenum = dmLines.size();
+            double deltas = 0;
+            String theId = "";
+            long calnum = 1;
+            //显示线状要素
+            for (int j = 0; j < linenum; j++){
+                List<String> lines = dmLines.get(j).getMultiline();
+                int linenum1 = lines.size();
+                /*Paint paintk = new Paint();
+                paintk.setStrokeWidth(0.15f);
+                paintk.setColor(Color.BLACK);
+                paintk.setStyle(Paint.Style.STROKE);*/
+                for (int k = 0; k < linenum1; k++){
+                    //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
+                    //String[] strings = mline.split(" ");
+                    String[] strings = lines.get(k).split(" ");
+                    for (int cc = 0; cc < strings.length - 1; cc++){
+                        String[] ptx1 = strings[cc].split(",");
+                        String[] ptx2 = strings[cc + 1].split(",");
+                        //PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //PointF theTouchPt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        Point pointF = new Point(Double.valueOf(ptx1[1]), Double.valueOf(ptx1[0]));
+                        Point pointF1 = new Point(Double.valueOf(ptx2[1]), Double.valueOf(ptx2[0]));
+                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF);
+                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF1);
+                        PointF theTouchPt = pt1;
+                        if (deltas == 0){
+                            //deltas = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
+                            double thedis = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
+                            if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                                deltas = thedis;
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                theId = dmLines.get(j).getBzmc();
+                            }else {
+                                deltas = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
+                            }
+                        }else {
+                            //double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
+                            double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
+                            if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                                //deltas = delta1;
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                //theId = dmLines.get(j).getBzmc();
+                            }else delta1 = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
+                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                            if (delta1 < deltas){
+                                deltas = delta1;
+                                theId = dmLines.get(j).getBzmc();
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + pt1.toString());
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
+                            }
+                            calnum++;
+                        }
+                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
+                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
+                    }
+                }
+            }
+            Log.w(TAG, "onTap!!!!!!!!!!!: " + calnum);
+            if (deltas < 0.000005){
+                Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
+            }
+        }
         showLocationText(pt1);
         if (pt1.x != 0) {
             if (isDrawType == POI_DRAW_TYPE & !isQuery) {
@@ -900,9 +967,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 paint.setColor(Color.BLACK);
             boolean colorChange = false;
             for (int k = 0; k < linenum1; k++){
-                String mline = lineUtil.getExternalPolygon(lines.get(k), 1);
-                String[] strings = mline.split(" ");
-                //String[] strings = lines.get(k).split(" ");
+                //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
+                //String[] strings = mline.split(" ");
+                String[] strings = lines.get(k).split(" ");
                 for (int n = 0; n < strings.length - 1; n++){
                     String[] ptx1 = strings[n].split(",");
                     String[] ptx2 = strings[n + 1].split(",");

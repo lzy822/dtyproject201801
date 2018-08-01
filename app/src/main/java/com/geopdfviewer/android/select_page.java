@@ -1502,7 +1502,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
-        Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("102,25 102.5,25.5 101.5,24.5", 0.5));
+        Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
         ///////获取地名数据
         /*LitePal.deleteAll(DMLine.class);
         LitePal.deleteAll(DMPoint.class);
