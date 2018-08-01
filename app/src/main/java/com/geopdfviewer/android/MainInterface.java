@@ -5261,7 +5261,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        pdfView.zoomWithAnimation(c_zoom);
+                        try {
+                            pdfView.zoomWithAnimation(c_zoom);
+                        }catch (Exception e){
+
+                        }
                     }
                 });
             }
@@ -5390,7 +5394,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        pdfView.zoomWithAnimation(c_zoom);
+                        try {
+                            pdfView.zoomWithAnimation(c_zoom);
+                        }catch (Exception e){
+
+                        }
                     }
                 });
             }
@@ -5475,7 +5483,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        pdfView.zoomWithAnimation(c_zoom);
+                        try {
+                            pdfView.zoomWithAnimation(c_zoom);
+                        }catch (Exception e){
+
+                        }
                     }
                 });
             }
