@@ -429,119 +429,156 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return mpoic;
     }
 
-    @Override
-    public boolean onTap(final MotionEvent e) {
-        PointF pt = new PointF(e.getRawX(), e.getRawY());
-        final PointF pt1 = getGeoLocFromPixL(pt);
-        if (esterEgg_dm) {
-            if (dmLines.size() > 0) {
-                Log.w(TAG, "onTap!!!!!!!!!!!: " + dmLines.size());
-                int linenum = dmLines.size();
-                double deltas = 0;
-                String theId = "";
-                long calnum = 1;
-                //显示线状要素
-                for (int j = 0; j < linenum; j++) {
-                    List<String> lines = dmLines.get(j).getMultiline();
-                    int linenum1 = lines.size();
+    private void queryDMPOI(final PointF pt1){
+        String theLineId = "";
+        String Linebzmc = "";
+        boolean QueryLine = false;
+        String thePointId = "";
+        String Pointbzmc = "";
+        boolean QueryPoint = false;
+        if (dmLines.size() > 0) {
+            Log.w(TAG, "onTap!!!!!!!!!!!: " + dmLines.size());
+            int linenum = dmLines.size();
+            double deltas = 0;
+            long calnum = 1;
+            //显示线状要素
+            for (int j = 0; j < linenum; j++) {
+                List<String> lines = dmLines.get(j).getMultiline();
+                int linenum1 = lines.size();
                 /*Paint paintk = new Paint();
                 paintk.setStrokeWidth(0.15f);
                 paintk.setColor(Color.BLACK);
                 paintk.setStyle(Paint.Style.STROKE);*/
-                    for (int k = 0; k < linenum1; k++) {
-                        //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
-                        //String[] strings = mline.split(" ");
-                        String[] strings = lines.get(k).split(" ");
-                        for (int cc = 0; cc < strings.length - 1; cc++) {
-                            String[] ptx1 = strings[cc].split(",");
-                            String[] ptx2 = strings[cc + 1].split(",");
-                            //PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            //PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            //PointF theTouchPt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                            Point pointF = new Point(Double.valueOf(ptx1[1]), Double.valueOf(ptx1[0]));
-                            Point pointF1 = new Point(Double.valueOf(ptx2[1]), Double.valueOf(ptx2[0]));
-                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF);
-                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF1);
-                            PointF theTouchPt = pt1;
-                            if (deltas == 0) {
-                                //deltas = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
-                                double thedis = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
-                                if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
-                                    deltas = thedis;
-                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                    theId = dmLines.get(j).getBzmc();
-                                } else {
-                                    deltas = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
-                                }
-                            } else {
-                                //double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
-                                double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
-                                if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
-                                    //deltas = delta1;
-                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                    //theId = dmLines.get(j).getBzmc();
-                                } else
-                                    delta1 = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
+                for (int k = 0; k < linenum1; k++) {
+                    //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
+                    //String[] strings = mline.split(" ");
+                    String[] strings = lines.get(k).split(" ");
+                    for (int cc = 0; cc < strings.length - 1; cc++) {
+                        String[] ptx1 = strings[cc].split(",");
+                        String[] ptx2 = strings[cc + 1].split(",");
+                        //PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //PointF theTouchPt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        Point pointF = new Point(Double.valueOf(ptx1[1]), Double.valueOf(ptx1[0]));
+                        Point pointF1 = new Point(Double.valueOf(ptx2[1]), Double.valueOf(ptx2[0]));
+                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF);
+                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF1);
+                        PointF theTouchPt = pt1;
+                        if (deltas == 0) {
+                            //deltas = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
+                            double thedis = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
+                            if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                                deltas = thedis;
                                 //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                if (delta1 < deltas) {
-                                    deltas = delta1;
-                                    theId = dmLines.get(j).getMapid();
-                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + pt1.toString());
-                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                    //Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
-                                }
-                                calnum++;
+                                theLineId = dmLines.get(j).getMapid();
+                                Linebzmc = dmLines.get(j).getBzmc();
+                            } else {
+                                deltas = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
                             }
-                            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
-                            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
+                        } else {
+                            //double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
+                            double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
+                            if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                                //deltas = delta1;
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                //theId = dmLines.get(j).getBzmc();
+                            } else
+                                delta1 = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
+                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                            if (delta1 < deltas) {
+                                deltas = delta1;
+                                theLineId = dmLines.get(j).getMapid();
+                                Linebzmc = dmLines.get(j).getBzmc();
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + pt1.toString());
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
+                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
+                            }
+                            calnum++;
                         }
+                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
+                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
                     }
-                }
-                Log.w(TAG, "onTap!!!!!!!!!!!: " + calnum);
-                if (deltas < 0.000005) {
-                    Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
-                    // TODO : 设计并完成查询语句
-                    GoDMLSinglePOIPage(theId);
                 }
             }
-            int n = 0;
-            int num = 0;
-            if (dmPoints.size() > 0) {
-                DMPoint poii = dmPoints.get(0);
-                PointF pointF = new PointF(poii.getLat(), poii.getLng());
-                pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                pointF = new PointF(pointF.x, pointF.y - 70);
-                //pointF = getGeoLocFromPixL(pointF);
-                PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                locError("pt1special : " + pt8.toString());
-                float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
-                for (DMPoint poi : dmPoints) {
-                    PointF mpointF = new PointF(poi.getLat(), poi.getLng());
-                    mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
-                    if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
-                        locError("mpointFspecial : " + mpointF.toString());
-                        delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
-                        num = n;
-                    }
-                    locError("n : " + Integer.toString(n));
-                    n++;
+            Log.w(TAG, "onTap!!!!!!!!!!!: " + calnum);
+            if (deltas < 0.000005) {
+                Log.w(TAG, "onTap!!!!!!!!!!!: " + theLineId);
+                // TODO : 设计并完成查询语句
+                //GoDMLSinglePOIPage(theLineId);
+                QueryLine = true;
+            }
+        }
+
+        int n = 0;
+        int num = 0;
+        if (dmPoints.size() > 0) {
+            DMPoint poii = dmPoints.get(0);
+            PointF pointF = new PointF(poii.getLat(), poii.getLng());
+            pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            pointF = new PointF(pointF.x, pointF.y - 70);
+            //pointF = getGeoLocFromPixL(pointF);
+            PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            locError("pt1special : " + pt8.toString());
+            float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+            for (DMPoint poi : dmPoints) {
+                PointF mpointF = new PointF(poi.getLat(), poi.getLng());
+                mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                    locError("mpointFspecial : " + mpointF.toString());
+                    delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                    num = n;
                 }
-                locError("numspecial : " + Integer.toString(num));
-                locError("deltaspecial : " + Float.toString(delta));
-                if (delta < 35 || num != 0) {
+                locError("n : " + Integer.toString(n));
+                n++;
+            }
+            locError("numspecial : " + Integer.toString(num));
+            locError("deltaspecial : " + Float.toString(delta));
+            if (delta < 35 || num != 0) {
                         /*Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                         Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
                         intent.putExtra("xh", kmltests.get(num).getXh());
                         startActivity(intent);*/
-                    locError("GoDMBZSinglePOIPage" + dmPoints.get(num).getDimingid());
-                    GoDMPSinglePOIPage(dmPoints.get(num).getDimingid());
-                    //isQueried = true;
-                    //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
-                    //locError(Integer.toString(kmltests.get(num).getPhotonum()));
-                } else locError("没有正常查询");
-            }
+                locError("GoDMBZSinglePOIPage" + dmPoints.get(num).getDimingid());
+                QueryPoint = true;
+                Pointbzmc = dmPoints.get(num).getBzmc();
+                thePointId = dmPoints.get(num).getDimingid();
+                //GoDMPSinglePOIPage(dmPoints.get(num).getDimingid());
+                //isQueried = true;
+                //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
+                //locError(Integer.toString(kmltests.get(num).getPhotonum()));
+            } else locError("没有正常查询");
         }
+
+        if (QueryPoint & QueryLine){
+            final String lineId = theLineId;
+            final String pointId = thePointId;
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
+            builder.setTitle("提示");
+            builder.setMessage("请选择你编辑的要素");
+            builder.setPositiveButton(Linebzmc + "(线要素)", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    GoDMLSinglePOIPage(lineId);
+                }
+            });
+            builder.setNegativeButton(Pointbzmc + "(点要素)", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    GoDMPSinglePOIPage(pointId);
+                }
+            });
+            builder.show();
+        }else {
+            if (QueryPoint) GoDMPSinglePOIPage(thePointId);
+            else if (QueryLine) GoDMLSinglePOIPage(theLineId);
+        }
+    }
+
+    @Override
+    public boolean onTap(final MotionEvent e) {
+        PointF pt = new PointF(e.getRawX(), e.getRawY());
+        final PointF pt1 = getGeoLocFromPixL(pt);
         showLocationText(pt1);
         if (pt1.x != 0) {
             if (isDrawType == POI_DRAW_TYPE & !isQuery) {
@@ -774,7 +811,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //distanceLatLngs.add(distanceLatLng);
             }
             boolean isQueried = false;
-            if (isQuery & ( esterEgg_plq || esterEgg_lm)){
+            if (isQuery & ( esterEgg_plq || esterEgg_lm || esterEgg_dm)){
                 Log.w(TAG, "onTapspecial : ");
                 if (esterEgg_plq) {
                     int n = 0;
@@ -850,6 +887,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             //locError(Integer.toString(kmltests.get(num).getPhotonum()));
                         } else locError("没有正常查询");
                     }
+                }
+
+                if (esterEgg_dm) {
+                    PointF dmPt = pt1;
+                    queryDMPOI(dmPt);
                 }
             }
 

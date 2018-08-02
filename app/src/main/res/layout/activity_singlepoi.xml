@@ -22,6 +22,8 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:visibility="gone"/>
+
+    <!--一般兴趣点显示内容-->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -113,6 +115,7 @@
             android:visibility="gone">
         </Spinner>
     </LinearLayout>
+    <!--地名标志显示内容-->
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -311,6 +314,294 @@
             android:textColor="#FF0000"
             android:visibility="gone"/>
     </LinearLayout>
+    <!--地名信息展示内容-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_qydm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="区域代码: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_qydm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_lbdm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="类别代码: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_lbdm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_dmbzmc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="标准名称: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_dmbzmc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_cym"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="曾用名: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_cym"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_jc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="简称: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_jc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_bm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="别名: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_bm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_dfyz"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="地名语种: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_dfyz"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_zt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="状态: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_zt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_dmll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="地名来历: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_dmll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_dmhy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="地名含义: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_dmhy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_lsyg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="历史沿革: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_lsyg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_dlstms"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="地类实体描述: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_dlstms"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txt_zlly"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:text="资料来源: "
+            android:visibility="gone"/>
+        <EditText
+            android:id="@+id/edit_zlly"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+    </LinearLayout>
+    <!--照片及录音显示控件-->
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
