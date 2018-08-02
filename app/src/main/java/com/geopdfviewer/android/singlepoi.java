@@ -79,6 +79,19 @@ public class singlepoi extends AppCompatActivity {
     private EditText edit_SZDW;
     private EditText edit_SCCJ;
     private EditText edit_GG;
+    private TextView edit_qydm;
+    private EditText edit_lbdm;
+    private EditText edit_bzmc;
+    private EditText edit_cym;
+    private EditText edit_jc;
+    private EditText edit_bm;
+    private EditText edit_dfyz;
+    private EditText edit_zt;
+    private EditText edit_dmll;
+    private EditText edit_dmhy;
+    private EditText edit_lsyg;
+    private EditText edit_dlstms;
+    private EditText edit_zlly;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -255,60 +268,93 @@ public class singlepoi extends AppCompatActivity {
     }
 
     private void RefreshDML(){
-        List<DMLine> dmbzList = LitePal.where("dimingid = ?", DML).find(DMLine.class);
+        List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
         // TODO : 设计并实现地名线属性编辑页面
-        /*TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
+        //提示性文字初始化
+        TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
         txt_XH.setVisibility(View.VISIBLE);
-        TextView txt_DY = (TextView) findViewById(R.id.txt_DY);
-        txt_DY.setVisibility(View.VISIBLE);
-        TextView txt_MC = (TextView) findViewById(R.id.txt_MC);
-        txt_MC.setVisibility(View.VISIBLE);
-        TextView txt_BZMC = (TextView) findViewById(R.id.txt_BZMC);
-        txt_BZMC.setVisibility(View.VISIBLE);
-        TextView txt_XZQMC = (TextView) findViewById(R.id.txt_XZQMC);
-        txt_XZQMC.setVisibility(View.VISIBLE);
-        TextView txt_XZQDM = (TextView) findViewById(R.id.txt_XZQDM);
-        txt_XZQDM.setVisibility(View.VISIBLE);
-        TextView txt_SZDW = (TextView) findViewById(R.id.txt_SZDW);
-        txt_SZDW.setVisibility(View.VISIBLE);
-        TextView txt_SCCJ = (TextView) findViewById(R.id.txt_SCCJ);
-        txt_SCCJ.setVisibility(View.VISIBLE);
-        TextView txt_GG = (TextView) findViewById(R.id.txt_GG);
-        txt_GG.setVisibility(View.VISIBLE);
+        TextView txt_qydm = (TextView) findViewById(R.id.txt_qydm);
+        txt_qydm.setVisibility(View.VISIBLE);
+        TextView txt_lbdm = (TextView) findViewById(R.id.txt_lbdm);
+        txt_lbdm.setVisibility(View.VISIBLE);
+        TextView txt_bzmc = (TextView) findViewById(R.id.txt_dmbzmc);
+        txt_bzmc.setVisibility(View.VISIBLE);
+        TextView txt_cym = (TextView) findViewById(R.id.txt_cym);
+        txt_cym.setVisibility(View.VISIBLE);
+        TextView txt_jc = (TextView) findViewById(R.id.txt_jc);
+        txt_jc.setVisibility(View.VISIBLE);
+        TextView txt_bm = (TextView) findViewById(R.id.txt_bm);
+        txt_bm.setVisibility(View.VISIBLE);
+        TextView txt_dfyz = (TextView) findViewById(R.id.txt_dfyz);
+        txt_dfyz.setVisibility(View.VISIBLE);
+        TextView txt_zt = (TextView) findViewById(R.id.txt_zt);
+        txt_zt.setVisibility(View.VISIBLE);
+        TextView txt_dmll = (TextView) findViewById(R.id.txt_dmll);
+        txt_dmll.setVisibility(View.VISIBLE);
+        TextView txt_dmhy = (TextView) findViewById(R.id.txt_dmhy);
+        txt_dmhy.setVisibility(View.VISIBLE);
+        TextView txt_lsyg = (TextView) findViewById(R.id.txt_lsyg);
+        txt_lsyg.setVisibility(View.VISIBLE);
+        TextView txt_dlstms = (TextView) findViewById(R.id.txt_dlstms);
+        txt_dlstms.setVisibility(View.VISIBLE);
+        TextView txt_zlly = (TextView) findViewById(R.id.txt_zlly);
+        txt_zlly.setVisibility(View.VISIBLE);
+        ////////////////////////
+        //输入框体初始化
         edit_XH = (TextView) findViewById(R.id.edit_XH);
-        edit_XH.setText(dmbzList.get(0).getXH());
+        edit_XH.setText(dmLines.get(0).getXh());
         edit_XH.setVisibility(View.VISIBLE);
-        edit_DY = (EditText) findViewById(R.id.edit_DY);
-        edit_DY.setText(dmbzList.get(0).getDY());
-        edit_DY.setVisibility(View.VISIBLE);
-        edit_MC = (EditText) findViewById(R.id.edit_MC);
-        edit_MC.setText(dmbzList.get(0).getMC());
-        edit_MC.setVisibility(View.VISIBLE);
-        edit_BZMC = (EditText) findViewById(R.id.edit_BZMC);
-        edit_BZMC.setText(dmbzList.get(0).getBZMC());
-        edit_BZMC.setVisibility(View.VISIBLE);
-        edit_XZQMC = (EditText) findViewById(R.id.edit_XZQMC);
-        edit_XZQMC.setText(dmbzList.get(0).getXZQMC());
-        edit_XZQMC.setVisibility(View.VISIBLE);
-        edit_XZQDM = (EditText) findViewById(R.id.edit_XZQDM);
-        edit_XZQDM.setText(dmbzList.get(0).getXZQDM());
-        edit_XZQDM.setVisibility(View.VISIBLE);
-        edit_SZDW = (EditText) findViewById(R.id.edit_SZDW);
-        edit_SZDW.setText(dmbzList.get(0).getSZDW());
-        edit_SZDW.setVisibility(View.VISIBLE);
-        edit_SCCJ = (EditText) findViewById(R.id.edit_SCCJ);
-        edit_SCCJ.setText(dmbzList.get(0).getSCCJ());
-        edit_SCCJ.setVisibility(View.VISIBLE);
-        edit_GG = (EditText) findViewById(R.id.edit_GG);
-        edit_GG.setText(dmbzList.get(0).getGG());
-        edit_GG.setVisibility(View.VISIBLE);
+        edit_qydm = (EditText) findViewById(R.id.edit_qydm);
+        edit_qydm.setText(dmLines.get(0).getQydm());
+        edit_qydm.setVisibility(View.VISIBLE);
+        edit_lbdm = (EditText) findViewById(R.id.edit_lbdm);
+        edit_lbdm.setText(dmLines.get(0).getLbdm());
+        edit_lbdm.setVisibility(View.VISIBLE);
+        edit_bzmc = (EditText) findViewById(R.id.edit_dmbzmc);
+        edit_bzmc.setText(dmLines.get(0).getBzmc());
+        edit_bzmc.setVisibility(View.VISIBLE);
+        edit_cym = (EditText) findViewById(R.id.edit_cym);
+        edit_cym.setText(dmLines.get(0).getCym());
+        edit_cym.setVisibility(View.VISIBLE);
+        edit_jc = (EditText) findViewById(R.id.edit_jc);
+        edit_jc.setText(dmLines.get(0).getJc());
+        edit_jc.setVisibility(View.VISIBLE);
+        edit_bm = (EditText) findViewById(R.id.edit_bm);
+        edit_bm.setText(dmLines.get(0).getBm());
+        edit_bm.setVisibility(View.VISIBLE);
+        edit_dfyz = (EditText) findViewById(R.id.edit_dfyz);
+        edit_dfyz.setText(dmLines.get(0).getDfyz());
+        edit_dfyz.setVisibility(View.VISIBLE);
+        edit_zt = (EditText) findViewById(R.id.edit_zt);
+        edit_zt.setText(dmLines.get(0).getZt());
+        edit_zt.setVisibility(View.VISIBLE);
+
+        edit_dmll = (EditText) findViewById(R.id.edit_dmll);
+        edit_dmll.setText(dmLines.get(0).getDmll());
+        edit_dmll.setVisibility(View.VISIBLE);
+
+        edit_dmhy = (EditText) findViewById(R.id.edit_dmhy);
+        edit_dmhy.setText(dmLines.get(0).getDmhy());
+        edit_dmhy.setVisibility(View.VISIBLE);
+
+        edit_lsyg = (EditText) findViewById(R.id.edit_lsyg);
+        edit_lsyg.setText(dmLines.get(0).getLsyg());
+        edit_lsyg.setVisibility(View.VISIBLE);
+
+        edit_dlstms = (EditText) findViewById(R.id.edit_dlstms);
+        edit_dlstms.setText(dmLines.get(0).getDlstms());
+        edit_dlstms.setVisibility(View.VISIBLE);
+
+        edit_zlly = (EditText) findViewById(R.id.edit_zlly);
+        edit_zlly.setText(dmLines.get(0).getZlly());
+        edit_zlly.setVisibility(View.VISIBLE);
         TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
-        //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
-        if (dmbzList.get(0).getIMGPATH() != null) {
-            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
+        //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmLines.get(0).getIMGPATH(), ".jpg"));
+        if (dmLines.get(0).getImgpath() != null) {
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmLines.get(0).getImgpath(), ".jpg")));
             ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            if (DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg") > 0)
-                getBitmapDMBZ(dmbzList.get(0).getIMGPATH(), imageView);
+            if (DataUtil.appearNumber(dmLines.get(0).getImgpath(), ".jpg") > 0)
+                getBitmapDMBZ(dmLines.get(0).getImgpath(), imageView);
 
         }else txt_photonum.setText(String.valueOf(0));
         txt_photonum.setOnClickListener(new View.OnClickListener() {
@@ -319,27 +365,27 @@ public class singlepoi extends AppCompatActivity {
         });
         txt_photonum.setVisibility(View.VISIBLE);
         TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
-        Log.w(TAG, "RefreshDMBZ: " + dmbzList.get(0).getTAPEPATH());
-        if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".mp3")));
+        Log.w(TAG, "RefreshDMBZ: " + dmLines.get(0).getTapepath());
+        if (dmLines.get(0).getTapepath() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmLines.get(0).getTapepath(), ".mp3")));
         else txt_tapenum.setText(String.valueOf(0));
         txt_tapenum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GoDMBZSingleTapePage(DMXH);
+                //GoDMBZSingleTapePage(DMXH);
             }
         });
         txt_tapenum.setVisibility(View.VISIBLE);
         TextView txt_loc = (TextView) findViewById(R.id.txt_locshow);
-        m_lng = dmbzList.get(0).getLng();
-        m_lat = dmbzList.get(0).getLat();
+        m_lng = (dmLines.get(0).getMaxlng() + dmLines.get(0).getMinlng()) / 2;
+        m_lat = (dmLines.get(0).getMaxlat() + dmLines.get(0).getMinlat()) / 2;
         txt_loc.setText(m_lat + ", " + m_lng);
         txt_loc.setVisibility(View.VISIBLE);
         FloatingActionButton fab_saveinfo = (FloatingActionButton) findViewById(R.id.fab_saveinfo1);
         fab_saveinfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DMBZ poi = new DMBZ();
-                poi.setXH(DMXH);
+                /*DMLine poi = new DMLine();
+                poi.set(DMXH);
                 poi.setDY(edit_DY.getText().toString());
                 poi.setMC(edit_MC.getText().toString());
                 poi.setBZMC(edit_BZMC.getText().toString());
@@ -348,7 +394,7 @@ public class singlepoi extends AppCompatActivity {
                 poi.setSZDW(edit_SZDW.getText().toString());
                 poi.setSCCJ(edit_SCCJ.getText().toString());
                 poi.setGG(edit_GG.getText().toString());
-                poi.updateAll("xh = ?", DMXH);
+                poi.updateAll("mapid = ?", DMLine);*/
             }
         });
         ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
@@ -372,65 +418,97 @@ public class singlepoi extends AppCompatActivity {
                 }
 
             }
-        });*/
+        });
     }
 
     private void RefreshDMP(){
-        List<DMPoint> dmbzList = LitePal.where("dimingid = ?", DMP).find(DMPoint.class);
+        List<DMPoint> dmPoints = LitePal.where("dimingid = ?", DMP).find(DMPoint.class);
         // TODO : 设计并实现地名点属性编辑页面
-        /*TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
+        //提示性文字初始化
+        TextView txt_XH = (TextView) findViewById(R.id.txt_XH);
         txt_XH.setVisibility(View.VISIBLE);
-        TextView txt_DY = (TextView) findViewById(R.id.txt_DY);
-        txt_DY.setVisibility(View.VISIBLE);
-        TextView txt_MC = (TextView) findViewById(R.id.txt_MC);
-        txt_MC.setVisibility(View.VISIBLE);
-        TextView txt_BZMC = (TextView) findViewById(R.id.txt_BZMC);
-        txt_BZMC.setVisibility(View.VISIBLE);
-        TextView txt_XZQMC = (TextView) findViewById(R.id.txt_XZQMC);
-        txt_XZQMC.setVisibility(View.VISIBLE);
-        TextView txt_XZQDM = (TextView) findViewById(R.id.txt_XZQDM);
-        txt_XZQDM.setVisibility(View.VISIBLE);
-        TextView txt_SZDW = (TextView) findViewById(R.id.txt_SZDW);
-        txt_SZDW.setVisibility(View.VISIBLE);
-        TextView txt_SCCJ = (TextView) findViewById(R.id.txt_SCCJ);
-        txt_SCCJ.setVisibility(View.VISIBLE);
-        TextView txt_GG = (TextView) findViewById(R.id.txt_GG);
-        txt_GG.setVisibility(View.VISIBLE);
+        TextView txt_qydm = (TextView) findViewById(R.id.txt_qydm);
+        txt_qydm.setVisibility(View.VISIBLE);
+        TextView txt_lbdm = (TextView) findViewById(R.id.txt_lbdm);
+        txt_lbdm.setVisibility(View.VISIBLE);
+        TextView txt_bzmc = (TextView) findViewById(R.id.txt_dmbzmc);
+        txt_bzmc.setVisibility(View.VISIBLE);
+        TextView txt_cym = (TextView) findViewById(R.id.txt_cym);
+        txt_cym.setVisibility(View.VISIBLE);
+        TextView txt_jc = (TextView) findViewById(R.id.txt_jc);
+        txt_jc.setVisibility(View.VISIBLE);
+        TextView txt_bm = (TextView) findViewById(R.id.txt_bm);
+        txt_bm.setVisibility(View.VISIBLE);
+        TextView txt_dfyz = (TextView) findViewById(R.id.txt_dfyz);
+        txt_dfyz.setVisibility(View.VISIBLE);
+        TextView txt_zt = (TextView) findViewById(R.id.txt_zt);
+        txt_zt.setVisibility(View.VISIBLE);
+        TextView txt_dmll = (TextView) findViewById(R.id.txt_dmll);
+        txt_dmll.setVisibility(View.VISIBLE);
+        TextView txt_dmhy = (TextView) findViewById(R.id.txt_dmhy);
+        txt_dmhy.setVisibility(View.VISIBLE);
+        TextView txt_lsyg = (TextView) findViewById(R.id.txt_lsyg);
+        txt_lsyg.setVisibility(View.VISIBLE);
+        TextView txt_dlstms = (TextView) findViewById(R.id.txt_dlstms);
+        txt_dlstms.setVisibility(View.VISIBLE);
+        TextView txt_zlly = (TextView) findViewById(R.id.txt_zlly);
+        txt_zlly.setVisibility(View.VISIBLE);
+        ////////////////////////
+        //输入框体初始化
         edit_XH = (TextView) findViewById(R.id.edit_XH);
-        edit_XH.setText(dmbzList.get(0).getXH());
+        edit_XH.setText(dmPoints.get(0).getXh());
         edit_XH.setVisibility(View.VISIBLE);
-        edit_DY = (EditText) findViewById(R.id.edit_DY);
-        edit_DY.setText(dmbzList.get(0).getDY());
-        edit_DY.setVisibility(View.VISIBLE);
-        edit_MC = (EditText) findViewById(R.id.edit_MC);
-        edit_MC.setText(dmbzList.get(0).getMC());
-        edit_MC.setVisibility(View.VISIBLE);
-        edit_BZMC = (EditText) findViewById(R.id.edit_BZMC);
-        edit_BZMC.setText(dmbzList.get(0).getBZMC());
-        edit_BZMC.setVisibility(View.VISIBLE);
-        edit_XZQMC = (EditText) findViewById(R.id.edit_XZQMC);
-        edit_XZQMC.setText(dmbzList.get(0).getXZQMC());
-        edit_XZQMC.setVisibility(View.VISIBLE);
-        edit_XZQDM = (EditText) findViewById(R.id.edit_XZQDM);
-        edit_XZQDM.setText(dmbzList.get(0).getXZQDM());
-        edit_XZQDM.setVisibility(View.VISIBLE);
-        edit_SZDW = (EditText) findViewById(R.id.edit_SZDW);
-        edit_SZDW.setText(dmbzList.get(0).getSZDW());
-        edit_SZDW.setVisibility(View.VISIBLE);
-        edit_SCCJ = (EditText) findViewById(R.id.edit_SCCJ);
-        edit_SCCJ.setText(dmbzList.get(0).getSCCJ());
-        edit_SCCJ.setVisibility(View.VISIBLE);
-        edit_GG = (EditText) findViewById(R.id.edit_GG);
-        edit_GG.setText(dmbzList.get(0).getGG());
-        edit_GG.setVisibility(View.VISIBLE);
-        TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
-        //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
-        if (dmbzList.get(0).getIMGPATH() != null) {
-            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
-            ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            if (DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg") > 0)
-                getBitmapDMBZ(dmbzList.get(0).getIMGPATH(), imageView);
+        edit_qydm = (EditText) findViewById(R.id.edit_qydm);
+        edit_qydm.setText(dmPoints.get(0).getQydm());
+        edit_qydm.setVisibility(View.VISIBLE);
+        edit_lbdm = (EditText) findViewById(R.id.edit_lbdm);
+        edit_lbdm.setText(dmPoints.get(0).getLbdm());
+        edit_lbdm.setVisibility(View.VISIBLE);
+        edit_bzmc = (EditText) findViewById(R.id.edit_dmbzmc);
+        edit_bzmc.setText(dmPoints.get(0).getBzmc());
+        edit_bzmc.setVisibility(View.VISIBLE);
+        edit_cym = (EditText) findViewById(R.id.edit_cym);
+        edit_cym.setText(dmPoints.get(0).getCym());
+        edit_cym.setVisibility(View.VISIBLE);
+        edit_jc = (EditText) findViewById(R.id.edit_jc);
+        edit_jc.setText(dmPoints.get(0).getJc());
+        edit_jc.setVisibility(View.VISIBLE);
+        edit_bm = (EditText) findViewById(R.id.edit_bm);
+        edit_bm.setText(dmPoints.get(0).getBm());
+        edit_bm.setVisibility(View.VISIBLE);
+        edit_dfyz = (EditText) findViewById(R.id.edit_dfyz);
+        edit_dfyz.setText(dmPoints.get(0).getDfyz());
+        edit_dfyz.setVisibility(View.VISIBLE);
+        edit_zt = (EditText) findViewById(R.id.edit_zt);
+        edit_zt.setText(dmPoints.get(0).getZt());
+        edit_zt.setVisibility(View.VISIBLE);
 
+        edit_dmll = (EditText) findViewById(R.id.edit_dmll);
+        edit_dmll.setText(dmPoints.get(0).getDmll());
+        edit_dmll.setVisibility(View.VISIBLE);
+
+        edit_dmhy = (EditText) findViewById(R.id.edit_dmhy);
+        edit_dmhy.setText(dmPoints.get(0).getDmhy());
+        edit_dmhy.setVisibility(View.VISIBLE);
+
+        edit_lsyg = (EditText) findViewById(R.id.edit_lsyg);
+        edit_lsyg.setText(dmPoints.get(0).getLsyg());
+        edit_lsyg.setVisibility(View.VISIBLE);
+
+        edit_dlstms = (EditText) findViewById(R.id.edit_dlstms);
+        edit_dlstms.setText(dmPoints.get(0).getDlstms());
+        edit_dlstms.setVisibility(View.VISIBLE);
+
+        edit_zlly = (EditText) findViewById(R.id.edit_zlly);
+        edit_zlly.setText(dmPoints.get(0).getZlly());
+        edit_zlly.setVisibility(View.VISIBLE);
+        TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
+        //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmPoints.get(0).getIMGPATH(), ".jpg"));
+        if (dmPoints.get(0).getImgpath() != null) {
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmPoints.get(0).getImgpath(), ".jpg")));
+            ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+            //if (DataUtil.appearNumber(dmPoints.get(0).getImgpath(), ".jpg") > 0)
+                //getBitmapDMBZ(dmPoints.get(0).getImgpath(), imageView);
         }else txt_photonum.setText(String.valueOf(0));
         txt_photonum.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -440,27 +518,27 @@ public class singlepoi extends AppCompatActivity {
         });
         txt_photonum.setVisibility(View.VISIBLE);
         TextView txt_tapenum = (TextView) findViewById(R.id.txt_tapenumshow);
-        Log.w(TAG, "RefreshDMBZ: " + dmbzList.get(0).getTAPEPATH());
-        if (dmbzList.get(0).getTAPEPATH() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getTAPEPATH(), ".mp3")));
+        Log.w(TAG, "RefreshDMBZ: " + dmPoints.get(0).getTapepath());
+        if (dmPoints.get(0).getTapepath() != null) txt_tapenum.setText(String.valueOf(DataUtil.appearNumber(dmPoints.get(0).getTapepath(), ".mp3")));
         else txt_tapenum.setText(String.valueOf(0));
         txt_tapenum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GoDMBZSingleTapePage(DMXH);
+                //GoDMBZSingleTapePage(DMXH);
             }
         });
         txt_tapenum.setVisibility(View.VISIBLE);
         TextView txt_loc = (TextView) findViewById(R.id.txt_locshow);
-        m_lng = dmbzList.get(0).getLng();
-        m_lat = dmbzList.get(0).getLat();
+        m_lng = dmPoints.get(0).getLng();
+        m_lat = dmPoints.get(0).getLat();
         txt_loc.setText(m_lat + ", " + m_lng);
         txt_loc.setVisibility(View.VISIBLE);
         FloatingActionButton fab_saveinfo = (FloatingActionButton) findViewById(R.id.fab_saveinfo1);
         fab_saveinfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DMBZ poi = new DMBZ();
-                poi.setXH(DMXH);
+                /*DMLine poi = new DMLine();
+                poi.set(DMXH);
                 poi.setDY(edit_DY.getText().toString());
                 poi.setMC(edit_MC.getText().toString());
                 poi.setBZMC(edit_BZMC.getText().toString());
@@ -469,7 +547,7 @@ public class singlepoi extends AppCompatActivity {
                 poi.setSZDW(edit_SZDW.getText().toString());
                 poi.setSCCJ(edit_SCCJ.getText().toString());
                 poi.setGG(edit_GG.getText().toString());
-                poi.updateAll("xh = ?", DMXH);
+                poi.updateAll("mapid = ?", DMLine);*/
             }
         });
         ImageButton addphoto = (ImageButton)findViewById(R.id.addPhoto_singlepoi);
@@ -493,7 +571,7 @@ public class singlepoi extends AppCompatActivity {
                 }
 
             }
-        });*/
+        });
     }
 
     @Override

@@ -5300,7 +5300,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 locError("需要显示的缩略图数量2 : " + Integer.toString(bts.size()));
                 isCreateBitmap = true;
                 hasBitmap = true;
-                runOnUiThread(new Runnable() {
+                /*runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -5309,7 +5309,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
                         }
                     }
-                });
+                });*/
             }
         }).start();
         //////////////////////////////////////////////////////////////////
@@ -5433,7 +5433,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }
                 hasDMBZBitmap = true;
-                runOnUiThread(new Runnable() {
+                /*runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -5442,7 +5442,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
                         }
                     }
-                });
+                });*/
             }
         }).start();
         //////////////////////////////////////////////////////////////////
@@ -5522,7 +5522,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }
                 hasDMBitmap = true;
-                runOnUiThread(new Runnable() {
+                /*runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -5531,7 +5531,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
                         }
                     }
-                });
+                });*/
             }
         }).start();
         //////////////////////////////////////////////////////////////////
