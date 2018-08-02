@@ -858,7 +858,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         pointF = new PointF(pointF.x, pointF.y - 70);
                         //pointF = getGeoLocFromPixL(pointF);
-                        PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pt8 = LatLng.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         locError("pt1special : " + pt8.toString());
                         float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
                         for (DMBZ poi : dmbzList) {
@@ -890,7 +890,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
 
                 if (esterEgg_dm) {
-                    PointF dmPt = pt1;
+                    PointF dmPt = getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY()));
                     queryDMPOI(dmPt);
                 }
             }
