@@ -176,13 +176,15 @@ public class tapeshow extends AppCompatActivity {
         List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
         String ImgPathTemp = dmLines.get(0).getTapepath();
         if (ImgPathTemp != null) {
-            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".MP3")];
+            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
             Log.w(TAG, "run: " + ImgPathTemp);
             for (int k = 0; k < imgPath.length; k++) {
-                imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".MP3") + 4);
-                if (k < imgPath.length - 1)
-                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".MP3") + 5);
-                Log.w(TAG, "run: " + ImgPathTemp);
+                if (imgPath.length > 1) {
+                    if (k < imgPath.length - 1) {
+                        imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                        ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                    }else imgPath[k] = ImgPathTemp;
+                }else imgPath[k] = ImgPathTemp;
             }
             for (int kk = 0; kk < imgPath.length; kk++) {
                 String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/录音/";
@@ -247,13 +249,15 @@ public class tapeshow extends AppCompatActivity {
         List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
         String ImgPathTemp = dmPoints.get(0).getTapepath();
         if (ImgPathTemp != null) {
-            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".MP3")];
+            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
             Log.w(TAG, "run: " + ImgPathTemp);
             for (int k = 0; k < imgPath.length; k++) {
-                imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".MP3") + 4);
-                if (k < imgPath.length - 1)
-                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".MP3") + 5);
-                Log.w(TAG, "run: " + ImgPathTemp);
+                if (imgPath.length > 1) {
+                    if (k < imgPath.length - 1) {
+                        imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                        ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                    }else imgPath[k] = ImgPathTemp;
+                }else imgPath[k] = ImgPathTemp;
             }
             for (int kk = 0; kk < imgPath.length; kk++) {
                 String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/录音/";

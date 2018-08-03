@@ -1503,6 +1503,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
         Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
+
+        String str = "asdf.jpg|asdfad.jpg";
+        String str1 = "asdf.jpg";
+        Log.w(TAG, "onCreate: " + str);
+        Log.w(TAG, "onCreate: " + str.indexOf("|"));
+        Log.w(TAG, "onCreate: " + str.contains("|"));
+        Log.w(TAG, "onCreate: " + str1.contains("|"));
+        Log.w(TAG, "onCreate: " + DataUtil.appearNumber(str, "\\|"));
         ///////获取地名数据
         /*LitePal.deleteAll(DMLine.class);
         LitePal.deleteAll(DMPoint.class);

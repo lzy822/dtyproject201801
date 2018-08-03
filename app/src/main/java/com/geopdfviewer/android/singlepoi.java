@@ -238,9 +238,9 @@ public class singlepoi extends AppCompatActivity {
         TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
         //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg"));
         if (dmbzList.get(0).getIMGPATH() != null) {
-            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg")));
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), "\\|") + 1));
             ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            if (DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), ".jpg") > 0)
+            if (DataUtil.appearNumber(dmbzList.get(0).getIMGPATH(), "\\|") + 1 > 0)
             getBitmapDMBZ(dmbzList.get(0).getIMGPATH(), imageView);
 
         }else txt_photonum.setText(String.valueOf(0));
@@ -393,9 +393,9 @@ public class singlepoi extends AppCompatActivity {
         TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
         //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmLines.get(0).getIMGPATH(), ".jpg"));
         if (dmLines.get(0).getImgpath() != null) {
-            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmLines.get(0).getImgpath(), ".jpg")));
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmLines.get(0).getImgpath(), "\\|") + 1));
             ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            if (DataUtil.appearNumber(dmLines.get(0).getImgpath(), ".jpg") > 0)
+            if (DataUtil.appearNumber(dmLines.get(0).getImgpath(), "\\|")  + 1 > 0)
                 getBitmapDM(dmLines.get(0).getImgpath(), imageView);
 
         }else txt_photonum.setText(String.valueOf(0));
@@ -552,9 +552,9 @@ public class singlepoi extends AppCompatActivity {
         TextView txt_photonum = (TextView) findViewById(R.id.txt_photonumshow);
         //Log.w(TAG, "RefreshDMBZ: " + DataUtil.appearNumber(dmPoints.get(0).getIMGPATH(), ".jpg"));
         if (dmPoints.get(0).getImgpath() != null) {
-            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmPoints.get(0).getImgpath(), ".jpg")));
+            txt_photonum.setText(String.valueOf(DataUtil.appearNumber(dmPoints.get(0).getImgpath(), "\\|") + 1));
             ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            if (DataUtil.appearNumber(dmPoints.get(0).getImgpath(), ".jpg") > 0)
+            if (DataUtil.appearNumber(dmPoints.get(0).getImgpath(), "\\|") + 1 > 0)
                 getBitmapDM(dmPoints.get(0).getImgpath(), imageView);
         }else txt_photonum.setText(String.valueOf(0));
         txt_photonum.setOnClickListener(new View.OnClickListener() {
@@ -929,10 +929,10 @@ public class singlepoi extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 Log.w(TAG, "onClick: " + bms.size());
                 List<DMBZ> pois1 = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
-                if (DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") > 0) {
-                    textView_photonum.setText(Integer.toString(DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") - 1));
+                if (DataUtil.appearNumber(pois1.get(0).getIMGPATH(), "\\|") + 1 > 0) {
+                    textView_photonum.setText(Integer.toString(DataUtil.appearNumber(pois1.get(0).getIMGPATH(), "\\|")));
                     DMBZ poi = new DMBZ();
-                    if (DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") > 1){
+                    if (DataUtil.appearNumber(pois1.get(0).getIMGPATH(), "\\|") + 1 > 1){
                         if (pois1.get(0).getIMGPATH().indexOf(bms.get(showNum).getM_path()) != 0)
                             poi.setIMGPATH(pois1.get(0).getIMGPATH().replace("|" + bms.get(showNum).getM_path(), ""));
                         else
@@ -943,11 +943,11 @@ public class singlepoi extends AppCompatActivity {
                     poi.updateAll("xh = ?", DMXH);
                     bms.remove(showNum);
                     Log.w(TAG, "onClick: " + bms.size());
-                    if (showNum > DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") - 1) {
+                    if (showNum > DataUtil.appearNumber(pois1.get(0).getIMGPATH(), "\\|")) {
                         if (bms.size() > 0) imageView.setImageBitmap(bms.get(0).getM_bm());
                         else imageView.setVisibility(View.GONE);
                     }
-                    else if (showNum < DataUtil.appearNumber(pois1.get(0).getIMGPATH(), ".jpg") - 1) imageView.setImageBitmap(bms.get(showNum).getM_bm());
+                    else if (showNum < DataUtil.appearNumber(pois1.get(0).getIMGPATH(), "\\|")) imageView.setImageBitmap(bms.get(showNum).getM_bm());
                     else {
                         if (bms.size() > 0) imageView.setImageBitmap(bms.get(showNum - 1).getM_bm());
                         else imageView.setVisibility(View.GONE);
@@ -976,10 +976,10 @@ public class singlepoi extends AppCompatActivity {
                 Log.w(TAG, "onClick: " + bms.size());
                 if (type == 2) {
                     List<DMLine> pois1 = LitePal.where("xh = ?", DML).find(DMLine.class);
-                    if (DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") > 0) {
-                        textView_photonum.setText(Integer.toString(DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") - 1));
+                    if (DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|") + 1 > 0) {
+                        textView_photonum.setText(Integer.toString(DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|")));
                         DMLine dmLine = new DMLine();
-                        if (DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") > 1) {
+                        if (DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|") + 1 > 1) {
                             if (pois1.get(0).getImgpath().indexOf(bms.get(showNum).getM_path()) != 0)
                                 dmLine.setImgpath(pois1.get(0).getImgpath().replace("|" + bms.get(showNum).getM_path(), ""));
                             else
@@ -990,10 +990,10 @@ public class singlepoi extends AppCompatActivity {
                         dmLine.updateAll("xh = ?", DMXH);
                         bms.remove(showNum);
                         Log.w(TAG, "onClick: " + bms.size());
-                        if (showNum > DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") - 1) {
+                        if (showNum > DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|")) {
                             if (bms.size() > 0) imageView.setImageBitmap(bms.get(0).getM_bm());
                             else imageView.setVisibility(View.GONE);
-                        } else if (showNum < DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") - 1)
+                        } else if (showNum < DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|"))
                             imageView.setImageBitmap(bms.get(showNum).getM_bm());
                         else {
                             if (bms.size() > 0)
@@ -1004,10 +1004,10 @@ public class singlepoi extends AppCompatActivity {
                     }
                 }else if (type == 3){
                     List<DMPoint> pois1 = LitePal.where("xh = ?", DMP).find(DMPoint.class);
-                    if (DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") > 0) {
-                        textView_photonum.setText(Integer.toString(DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") - 1));
+                    if (DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|") + 1 > 0) {
+                        textView_photonum.setText(Integer.toString(DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|")));
                         DMPoint dmPoint = new DMPoint();
-                        if (DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") > 1) {
+                        if (DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|") + 1 > 1) {
                             if (pois1.get(0).getImgpath().indexOf(bms.get(showNum).getM_path()) != 0)
                                 dmPoint.setImgpath(pois1.get(0).getImgpath().replace("|" + bms.get(showNum).getM_path(), ""));
                             else
@@ -1018,10 +1018,10 @@ public class singlepoi extends AppCompatActivity {
                         dmPoint.updateAll("xh = ?", DMXH);
                         bms.remove(showNum);
                         Log.w(TAG, "onClick: " + bms.size());
-                        if (showNum > DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") - 1) {
+                        if (showNum > DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|")) {
                             if (bms.size() > 0) imageView.setImageBitmap(bms.get(0).getM_bm());
                             else imageView.setVisibility(View.GONE);
-                        } else if (showNum < DataUtil.appearNumber(pois1.get(0).getImgpath(), ".jpg") - 1)
+                        } else if (showNum < DataUtil.appearNumber(pois1.get(0).getImgpath(), "\\|"))
                             imageView.setImageBitmap(bms.get(showNum).getM_bm());
                         else {
                             if (bms.size() > 0)
@@ -1083,13 +1083,15 @@ public class singlepoi extends AppCompatActivity {
                 //Log.w(TAG, "run: photo.size" + photos.size());
                 bms = new ArrayList<>();
                 String ImgPathTemp = ImgPath;
-                String[] imgPath = new String[DataUtil.appearNumber(ImgPath, ".jpg")];
+                String[] imgPath = new String[DataUtil.appearNumber(ImgPath, "\\|") + 1];
                 Log.w(TAG, "run: " + ImgPathTemp);
                 for (int k = 0; k < imgPath.length; k++){
-                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-                    if (k < imgPath.length - 1)
-                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-                    Log.w(TAG, "run: " + ImgPathTemp);
+                    if (imgPath.length > 1) {
+                        if (k < imgPath.length - 1) {
+                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                            ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                        }else imgPath[k] = ImgPathTemp;
+                    }else imgPath[k] = ImgPathTemp;
                 }
                 for (int kk = 0; kk < imgPath.length; kk++) {
                     String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/";
@@ -1253,13 +1255,16 @@ public class singlepoi extends AppCompatActivity {
                 //Log.w(TAG, "run: photo.size" + photos.size());
                 bms = new ArrayList<>();
                 String ImgPathTemp = ImgPath;
-                String[] imgPath = new String[DataUtil.appearNumber(ImgPath, ".jpg")];
+                String[] imgPath = new String[DataUtil.appearNumber(ImgPath, "\\|") + 1];
                 Log.w(TAG, "run: " + ImgPathTemp);
                 for (int k = 0; k < imgPath.length; k++){
-                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-                    if (k < imgPath.length - 1)
-                        ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-                    Log.w(TAG, "run: " + ImgPathTemp);
+                    if (imgPath.length > 1) {
+                        if (k < imgPath.length - 1) {
+                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                            ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                        }else imgPath[k] = ImgPathTemp;
+                        Log.w(TAG, "run: " + ImgPathTemp);
+                    }else imgPath[k] = ImgPathTemp;
                 }
                 for (int kk = 0; kk < imgPath.length; kk++) {
                     String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
@@ -1519,7 +1524,7 @@ public class singlepoi extends AppCompatActivity {
                 DMBZ dmbz = new DMBZ();
                 if (dmbzs.get(0).getIMGPATH() != null) {
                     String imgpath = dmbzs.get(0).getIMGPATH();
-                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmbz.setIMGPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmbz.updateAll("xh = ?", DMXH);
@@ -1528,7 +1533,7 @@ public class singlepoi extends AppCompatActivity {
                 DMLine dmLine = new DMLine();
                 if (dmLines.get(0).getImgpath() != null) {
                     String imgpath = dmLines.get(0).getImgpath();
-                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmLine.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmLine.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmLine.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmLine.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmLine.updateAll("mapid = ?", DML);
@@ -1537,7 +1542,7 @@ public class singlepoi extends AppCompatActivity {
                 DMPoint dmPoint = new DMPoint();
                 if (dmPoints.get(0).getImgpath() != null) {
                     String imgpath = dmPoints.get(0).getImgpath();
-                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmPoint.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmPoint.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmPoint.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmPoint.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmPoint.updateAll("mapid = ?", DMP);
@@ -1564,7 +1569,7 @@ public class singlepoi extends AppCompatActivity {
                 DMBZ dmbz = new DMBZ();
                 if (dmbzs.get(0).getTAPEPATH() != null) {
                     String tapepath = dmbzs.get(0).getTAPEPATH();
-                    if (DataUtil.appearNumber(tapepath, ".jpg") > 0) dmbz.setTAPEPATH(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(tapepath, "\\|") + 1 > 0) dmbz.setTAPEPATH(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmbz.updateAll("xh = ?", DMXH);
@@ -1573,7 +1578,7 @@ public class singlepoi extends AppCompatActivity {
                 DMLine dmLine = new DMLine();
                 if (dmLines.get(0).getTapepath() != null) {
                     String tapepath = dmLines.get(0).getTapepath();
-                    if (DataUtil.appearNumber(tapepath, ".jpg") > 0) dmLine.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(tapepath, "\\|") + 1 > 0) dmLine.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmLine.updateAll("mapid = ?", DML);
@@ -1582,7 +1587,7 @@ public class singlepoi extends AppCompatActivity {
                 DMPoint dmPoint = new DMPoint();
                 if (dmPoints.get(0).getTapepath() != null) {
                     String tapepath = dmPoints.get(0).getImgpath();
-                    if (DataUtil.appearNumber(tapepath, ".jpg") > 0) dmPoint.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(tapepath, "\\|") + 1 > 0) dmPoint.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmPoint.updateAll("mapid = ?", DMP);
@@ -1623,7 +1628,7 @@ public class singlepoi extends AppCompatActivity {
                     DMBZ dmbz = new DMBZ();
                     if (dmbzs.get(0).getIMGPATH() != null) {
                         String imgpath = dmbzs.get(0).getIMGPATH();
-                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + imageuri);
+                        if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmbz.setIMGPATH(imgpath + "|" + imageuri);
                         else dmbz.setIMGPATH(imageuri);
                     }else dmbz.setIMGPATH(imageuri);
                     dmbz.updateAll("xh = ?", DMXH);
@@ -1632,7 +1637,7 @@ public class singlepoi extends AppCompatActivity {
                     DMLine dmLine = new DMLine();
                     if (dmLines.get(0).getImgpath() != null) {
                         String imgpath = dmLines.get(0).getImgpath();
-                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmLine.setImgpath(imgpath + "|" + imageuri);
+                        if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmLine.setImgpath(imgpath + "|" + imageuri);
                         else dmLine.setImgpath(imageuri);
                     }else dmLine.setImgpath(imageuri);
                     dmLine.updateAll("mapid = ?", DML);
@@ -1641,7 +1646,7 @@ public class singlepoi extends AppCompatActivity {
                     DMPoint dmPoint = new DMPoint();
                     if (dmPoints.get(0).getImgpath() != null) {
                         String imgpath = dmPoints.get(0).getImgpath();
-                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmPoint.setImgpath(imgpath + "|" + imageuri);
+                        if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmPoint.setImgpath(imgpath + "|" + imageuri);
                         else dmPoint.setImgpath(imageuri);
                     }else dmPoint.setImgpath(imageuri);
                     dmPoint.updateAll("mapid = ?", DMP);

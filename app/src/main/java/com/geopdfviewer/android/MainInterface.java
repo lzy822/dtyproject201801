@@ -389,7 +389,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private SensorEventListener listener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (degree != 0 & predegree != degree & Math.abs(degree - predegree) > 10){
+            if (degree != 0 && predegree != degree && Math.abs(degree - predegree) > 10){
                 predegree = degree;
                 if (isRomance){
                     pdfView.zoomWithAnimation(c_zoom);
@@ -466,7 +466,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if (deltas == 0) {
                             //deltas = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
                             double thedis = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
-                            if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                            if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) && thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
                                 deltas = thedis;
                                 //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
                                 theLineId = dmLines.get(j).getMapid();
@@ -477,7 +477,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         } else {
                             //double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
                             double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
-                            if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) & delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
+                            if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) && delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
                                 //deltas = delta1;
                                 //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
                                 //theId = dmLines.get(j).getBzmc();
@@ -549,7 +549,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } else locError("没有正常查询");
         }
 
-        if (QueryPoint & QueryLine){
+        if (QueryPoint && QueryLine){
             final String lineId = theLineId;
             final String pointId = thePointId;
             AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
@@ -580,7 +580,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         final PointF pt1 = getGeoLocFromPixL(pt);
         showLocationText(pt1);
         if (pt1.x != 0) {
-            if (isDrawType == POI_DRAW_TYPE & !isQuery) {
+            if (isDrawType == POI_DRAW_TYPE && !isQuery) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
                 builder.setTitle("提示");
                 builder.setMessage("请选择你要添加的图层");
@@ -641,7 +641,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 });
                 builder.show();
-                /*if (CreatePOI & POIType != -1) {
+                /*if (CreatePOI && POIType != -1) {
                     List<POI> POIs = LitePal.findAll(POI.class);
                     POI poi = new POI();
                     poi.setName("POI" + String.valueOf(POIs.size() + 1));
@@ -810,7 +810,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //distanceLatLngs.add(distanceLatLng);
             }
             boolean isQueried = false;
-            if (isQuery & ( esterEgg_plq || esterEgg_lm || esterEgg_dm)){
+            if (isQuery && ( esterEgg_plq || esterEgg_lm || esterEgg_dm)){
                 Log.w(TAG, "onTapspecial : ");
                 if (esterEgg_plq) {
                     int n = 0;
@@ -894,7 +894,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
 
-            if (isQuery & isDrawType == NONE_DRAW_TYPE & !isQueried) {
+            if (isQuery && isDrawType == NONE_DRAW_TYPE && !isQueried) {
                 Log.w(TAG, "onTap: ");
                 List<mPOIobj> pois = new ArrayList<>();
                 Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
@@ -1009,7 +1009,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private boolean InspectTrail(float[] trails){
         for (int i = 0; i < trails.length; i = i + 2){
-            if (trails[i] < cs_right & trails[i] > cs_left & trails[i + 1] < cs_top & trails[i + 1] > cs_bottom) {
+            if (trails[i] < cs_right && trails[i] > cs_left && trails[i + 1] < cs_top && trails[i + 1] > cs_bottom) {
                 return true;
             }
         }
@@ -1077,7 +1077,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         for (int i = 0; i < ptnum; i++){
             //Log.w(TAG, "onLayerDrawn!!!: " + dmPoints.get(i).getLat());
             PointF pt = LatLng.getPixLocFromGeoL(new PointF(dmPoints.get(i).getLat(), dmPoints.get(i).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-            if ((dmPoints.get(i).getLng() < cs_right & dmPoints.get(i).getLng() > cs_left & dmPoints.get(i).getLat() < cs_top & dmPoints.get(i).getLat() > cs_bottom)) {
+            if ((dmPoints.get(i).getLng() < cs_right && dmPoints.get(i).getLng() > cs_left && dmPoints.get(i).getLat() < cs_top && dmPoints.get(i).getLat() > cs_bottom)) {
                 //canvas.drawRect(new RectF(pt.x - 5, pt.y - 38, pt.x + 5, pt.y), paint2);
                 //canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
                 if (c_zoom != 10) {
@@ -1087,7 +1087,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
                         if (dmPoints.get(i).getImgpath() != null){
                             if (!dmPoints.get(i).getImgpath().isEmpty()) {
-                                if (hasDMBitmap) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
+                                if (hasDMBitmap && i < DMBts.size()) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
                                 if (dmPoints.get(i).getTapepath() != null) {
                                     if (!dmPoints.get(i).getTapepath().isEmpty())
                                         canvas.drawCircle(pt.x, pt.y - 70, 35, paint1);
@@ -1134,7 +1134,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
                             if (dmPoints.get(i).getImgpath() != null){
                                 if (!dmPoints.get(i).getImgpath().isEmpty()) {
-                                    if (hasDMBitmap & i < DMBts.size()) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
+                                    if (hasDMBitmap && i < DMBts.size()) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
                                     /*int size = bts.size();
                                     for (int j = 0; j < size; j++) {
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
@@ -1178,7 +1178,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
                     if (dmPoints.get(i).getImgpath() != null){
                         if (!dmPoints.get(i).getImgpath().isEmpty()) {
-                            if (hasDMBitmap & i < DMBts.size()) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
+                            if (hasDMBitmap && i < DMBts.size()) canvas.drawBitmap(DMBts.get(i).getM_bm(), pt.x, pt.y - 70, paint1);
                                     /*int size = bts.size();
                                     for (int j = 0; j < size; j++) {
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
@@ -1228,7 +1228,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         for (int j = 0; j < dmbzList.size(); j++) {
             Log.w(TAG, "onLayerDrawn:" + dmbzList.size());
             PointF ppt = LatLng.getPixLocFromGeoL(new PointF(dmbzList.get(j).getLat(), dmbzList.get(j).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-            if ((dmbzList.get(j).getLng() < cs_right & dmbzList.get(j).getLng() > cs_left & dmbzList.get(j).getLat() < cs_top & dmbzList.get(j).getLat() > cs_bottom)) {
+            if ((dmbzList.get(j).getLng() < cs_right && dmbzList.get(j).getLng() > cs_left && dmbzList.get(j).getLat() < cs_top && dmbzList.get(j).getLat() > cs_bottom)) {
                 if (c_zoom == 10) {
                     canvas.drawRect(new RectF(ppt.x - 5, ppt.y - 38, ppt.x + 5, ppt.y), paint2);
                     if (dmbzList.get(j).getIMGPATH() == null || dmbzList.get(j).getIMGPATH().isEmpty()) {
@@ -1239,7 +1239,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if (dmbzList.get(j).getTAPEPATH() == null || dmbzList.get(j).getTAPEPATH().isEmpty())
                             canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint4);
                         else canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
-                        if (hasDMBZBitmap & j <= DMBZBts.size() - 1) {
+                        if (hasDMBZBitmap && j <= DMBZBts.size() - 1) {
                             canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
                         }
                     }
@@ -1250,7 +1250,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
                         if (dmbzList.get(j).getIMGPATH() != null){
                             if (!dmbzList.get(j).getIMGPATH().isEmpty()) {
-                                if (hasDMBZBitmap & j < DMBZBts.size()) canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
+                                if (hasDMBZBitmap && j < DMBZBts.size()) canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
                                 if (dmbzList.get(j).getTAPEPATH() != null) {
                                     if (!dmbzList.get(j).getTAPEPATH().isEmpty())
                                         canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint1);
@@ -1297,7 +1297,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawCircle(ppt.x, ppt.y - 70, 35, paint);
                             if (dmbzList.get(j).getIMGPATH() != null){
                                 if (!dmbzList.get(j).getIMGPATH().isEmpty()) {
-                                    if (hasDMBitmap & j < DMBZBts.size()) canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
+                                    if (hasDMBitmap && j < DMBZBts.size()) canvas.drawBitmap(DMBZBts.get(j).getM_bm(), ppt.x, ppt.y - 70, paint1);
                                     /*int size = bts.size();
                                     for (int j = 0; j < size; j++) {
                                         if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
@@ -1351,7 +1351,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         viewer_height = pdfView.getHeight();
         viewer_width = pdfView.getWidth();
 
-                        /*if (isQuery & num_map == 4 & c_zoom > 5 & ( ( cs_bottom > 24.6 & cs_top < 25.3) & ( cs_left > 102.48 & cs_right < 102.97))){
+                        /*if (isQuery && num_map == 4 & c_zoom > 5 & ( ( cs_bottom > 24.6 & cs_top < 25.3) & ( cs_left > 102.48 & cs_right < 102.97))){
                             getInfo(3);
                             displayFromFile(uri);
                             getScreen();
@@ -1367,7 +1367,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             isQuery = false;
                         }*/
         //float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
-        if (pdfView.getPositionOffset() != verx & isPos){
+        if (pdfView.getPositionOffset() != verx && isPos){
             locHere_fab.setImageResource(R.drawable.ic_location_searching);
             isPos = false;
             locError("lzy");
@@ -1402,11 +1402,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
         //Log.w(TAG, "onLayerDrawn!!!: " + dmPoints.size());
         //Log.w(TAG, "onLayerDrawn!!!: " + type1Checked);
-        if (esterEgg_dm & type1Checked){
+        if (esterEgg_dm && type1Checked){
             drawDM(canvas);
         }
 
-        if (isMessure & showMode == CENTERMODE){
+        if (isMessure && showMode == CENTERMODE){
             String messure_pts1 = messure_pts;
             locError("messure_pts1" + messure_pts1);
             int poinum_messure1 = poinum_messure + 1;
@@ -1433,7 +1433,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             parseAndrawMessure(messure_pts1, canvas);
 
         }
-        if (isMessure & showMode == NOCENTERMODE){
+        if (isMessure && showMode == NOCENTERMODE){
             parseAndrawMessure(messure_pts, canvas);
         }
 
@@ -1452,7 +1452,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             canvas.drawCircle(pt.x, pt.y, 23, paint);
             canvas.drawCircle(pt.x, pt.y, 20, paint5);
             canvas.drawCircle(pt.x, pt.y, 10, paint3);
-                            /*if (predegree >= 0 & predegree < 90){
+                            /*if (predegree >= 0 && predegree < 90){
                                 locError("您当前处于第一象限");
                                 locError(Float.toString(predegree));
                                 canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(predegree)), (float)(pt.y - 50 * Math.cos(predegree)), paint6);
@@ -1474,7 +1474,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
             }
         }else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
-        if (isLocateEnd & !m_cTrail.isEmpty() || showTrail){
+        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail){
             for (int ii = 0; ii < trails.size(); ii++){
                 String str1 = trails.get(ii).getPath();
                 String[] TrailString = str1.split(" ");
@@ -1497,14 +1497,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             parseAndrawLinesforWhiteBlank(canvas);
             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
         }
-        if (showMode == CENTERMODE & esterEgg_redline) {
+        if (showMode == CENTERMODE && esterEgg_redline) {
             managePatchsData();
             drawDemoArea(canvas);
         }
         if(isDrawType == POI_DRAW_TYPE || showPOI){
             if (esterEgg_plq) drawPLQData(canvas);
             //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
-            if (type2Checked & esterEgg_lm){
+            if (type2Checked && esterEgg_lm){
                 drawDMBZ(canvas);
             }
 
@@ -1512,8 +1512,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
             int size0 = pois.size();
             for (int i = 0; i < size0; i++) {
-                if (strings[0].equals(pois.get(i).getType()) & type1Checked) {
-                    if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
+                if (strings[0].equals(pois.get(i).getType()) && type1Checked) {
+                    if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (c_zoom != 10) {
                             if (showpts.size() == 0) {
@@ -1630,8 +1630,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                     }
-                }else if (strings[1].equals(pois.get(i).getType()) & type2Checked) {
-                    if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
+                }else if (strings[1].equals(pois.get(i).getType()) && type2Checked) {
+                    if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (c_zoom != 10) {
                             if (showpts.size() == 0) {
@@ -1748,8 +1748,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                     }
-                }else if (strings[2].equals(pois.get(i).getType()) & type3Checked) {
-                    if ((pois.get(i).getY() < cs_right & pois.get(i).getY() > cs_left & pois.get(i).getX() < cs_top & pois.get(i).getX() > cs_bottom)) {
+                }else if (strings[2].equals(pois.get(i).getType()) && type3Checked) {
+                    if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         if (c_zoom != 10) {
                             if (showpts.size() == 0) {
@@ -1922,7 +1922,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }*/
         }
-        if (isAutoTrans & (isZoom == ZOOM_IN || c_zoom == 10)){
+        if (isAutoTrans && (isZoom == ZOOM_IN || c_zoom == 10)){
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
             if (size != 0){
@@ -1997,7 +1997,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 double deltaK_trans;
                 deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_IN);
                 locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
+                if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans){
                     geometry_whiteBlanks.clear();
                     num_whiteBlankPt = 0;
                     isWhiteBlank = false;
@@ -2014,7 +2014,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     getWhiteBlankData();
                 }
             }else Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-        }else if (c_zoom <= 1.5 & isAutoTrans & isZoom == ZOOM_OUT){
+        }else if (c_zoom <= 1.5 && isAutoTrans && isZoom == ZOOM_OUT){
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
             if (size != 0){
@@ -2061,7 +2061,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
                     float mmin_long = (pt_lt.y + pt_lb.y) / 2;
                     float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                    if (mmax_lat > max_lat & mmin_lat < min_lat & mmax_long > max_long & mmin_long < min_long){
+                    if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long){
                         float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
                         if (thedelta == 0) {
                             thedelta = thedelta1;
@@ -2077,7 +2077,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 double deltaK_trans;
                 deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, ZOOM_OUT);
                 locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                if (thenum != num_map & thenum != 0 & thedelta < deltaK_trans){
+                if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans){
                     geometry_whiteBlanks.clear();
                     num_whiteBlankPt = 0;
                     isWhiteBlank = false;
@@ -2102,6 +2102,36 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             ptSpecial.setStyle(Paint.Style.FILL);
             canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
             canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
+        }
+        if (hasQueriedLine) {
+            int linenum = dmLines.size();
+            //显示线状要素
+            for (int j = 0; j < linenum; j++){
+                List<String> lines = queriedLine.getMultiline();
+                int linenum1 = lines.size();
+                /*Paint paintk = new Paint();
+                paintk.setStrokeWidth(0.15f);
+                paintk.setColor(Color.BLACK);
+                paintk.setStyle(Paint.Style.STROKE);*/
+                Paint paint = new Paint();
+                paint.setStrokeWidth(10);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.rgb(255, 0, 255));
+                for (int kk = 0; kk < linenum1; kk++){
+                    //String mline = lineUtil.getExternalPolygon(lines.get(kk), 0.001);
+                    //String[] strings = mline.split(" ");
+                    String[] strings = lines.get(kk).split(" ");
+                    for (int n = 0; n < strings.length - 1; n++){
+                        String[] ptx1 = strings[n].split(",");
+                        String[] ptx2 = strings[n + 1].split(",");
+                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        canvas.drawLine(pointF.x, pointF.y, pointF1.x, pointF1.y, paint);
+                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
+                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
+                    }
+                }
+            }
         }
         if (isMessure) drawMessureLine(canvas);
     }
@@ -2190,13 +2220,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     //解析测量字符串并绘制
     private void parseAndrawMessure(String mmessure_pts, Canvas canvas){
-        if (isMessure & !mmessure_pts.isEmpty()) {
+        if (isMessure && !mmessure_pts.isEmpty()) {
             distanceSum = 0;
             double distanceCurrent = 0;
             mmessure_pts = mmessure_pts.trim();
             String[] pts = mmessure_pts.split(" ");
             float[] mpts;
-            if (pts.length <= 4 & pts.length > 3) {
+            if (pts.length <= 4 && pts.length > 3) {
                 mpts = new float[pts.length];
                 for (int i = 0; i < pts.length; i++) {
                     mpts[i] = Float.valueOf(pts[i]);
@@ -2321,11 +2351,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             paint7.setStrokeWidth(10);
             paint7.setColor(geometry_whiteBlanks.get(k).getM_color());
             paint7.setStyle(Paint.Style.STROKE);
-        if (isWhiteBlank & !geometry_whiteBlanks.get(k).getM_lines().isEmpty()) {
+        if (isWhiteBlank && !geometry_whiteBlanks.get(k).getM_lines().isEmpty()) {
             geometry_whiteBlanks.get(k).setM_lines(geometry_whiteBlanks.get(k).getM_lines());
             String[] pts = geometry_whiteBlanks.get(k).getM_lines().split(" ");
             float[] mpts;
-            if (pts.length <= 4 & pts.length > 3) {
+            if (pts.length <= 4 && pts.length > 3) {
                 mpts = new float[pts.length];
                 for (int i = 0; i < pts.length; i++) {
                     mpts[i] = Float.valueOf(pts[i]);
@@ -2419,11 +2449,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             paint7.setStrokeWidth(10);
             paint7.setColor(color_Whiteblank);
             paint7.setStyle(Paint.Style.STROKE);
-            if (isWhiteBlank & !whiteBlankPt.isEmpty()) {
+            if (isWhiteBlank && !whiteBlankPt.isEmpty()) {
                 whiteBlankPt = whiteBlankPt.trim();
                 String[] pts = whiteBlankPt.split(" ");
                 float[] mpts;
-                if (pts.length <= 4 & pts.length > 3) {
+                if (pts.length <= 4 && pts.length > 3) {
                     mpts = new float[pts.length];
                     for (int i = 0; i < pts.length; i++) {
                         mpts[i] = Float.valueOf(pts[i]);
@@ -2553,14 +2583,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             //LatLng latLng = kmltests.get(i).getLatLng();
             if (kmltests.get(i).getLat() != 0) {
                 Log.w(TAG, "drawPLQData: ");
-                if ((kmltests.get(i).getLongi() < cs_right & kmltests.get(i).getLongi() > cs_left & kmltests.get(i).getLat() < cs_top & kmltests.get(i).getLat() > cs_bottom)) {
+                if ((kmltests.get(i).getLongi() < cs_right && kmltests.get(i).getLongi() > cs_left && kmltests.get(i).getLat() < cs_top && kmltests.get(i).getLat() > cs_bottom)) {
                     PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     if (c_zoom != 10) {
                         if (showpts.size() == 0) {
                             showpts.add(pt2);
                             canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                             canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                            if (hasBitmap1 & i <= bts1.size() - 1)
+                            if (hasBitmap1 && i <= bts1.size() - 1)
                                 canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                         } else {
                             float deltaDistance = 0;
@@ -2577,14 +2607,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                                 showpts.add(pt2);
                                 canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                                 canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                                if (hasBitmap1 & i <= bts1.size() - 1)
+                                if (hasBitmap1 && i <= bts1.size() - 1)
                                     canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                             }
                         }
                     } else {
                         canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
                         canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                        if (hasBitmap1 & i <= bts1.size() - 1)
+                        if (hasBitmap1 && i <= bts1.size() - 1)
                             canvas.drawBitmap(bts1.get(i).getM_bm(), pt2.x, pt2.y - 70, paint1);
                     }
                 }
@@ -2884,11 +2914,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         double deltaLatK, deltaLongK;
         deltaLatK = (max_lat - min_lat) * 0.014;
         deltaLongK = (max_long - min_long) * 0.014;
-        if ((mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
-        else if ((mmax_lat + deltaLatK) > cs_top & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
-        else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmin_long - deltaLongK) < cs_left) return true;
-        else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right) return true;
-        else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
+        if ((mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmin_long - deltaLongK) < cs_left) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right) return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left) return true;
         else return false;
     }
 
@@ -2897,18 +2927,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             double deltaLatK, deltaLongK;
             deltaLatK = (max_lat - min_lat) * 0.014;
             deltaLongK = (max_long - min_long) * 0.014;
-            if ((mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
-            else if ((mmax_lat + deltaLatK) > cs_top & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
-            else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmin_long - deltaLongK) < cs_left) return true;
-            else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right) return true;
-            else if ((mmax_lat + deltaLatK) > cs_top & (mmin_lat - deltaLatK) < cs_bottom & (mmax_long + deltaLongK) > cs_right & (mmin_long - deltaLongK) < cs_left) return true;
+            if ((mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left) return true;
+            else if ((mmax_lat + deltaLatK) > cs_top && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left) return true;
+            else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmin_long - deltaLongK) < cs_left) return true;
+            else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right) return true;
+            else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left) return true;
             else return false;
         }else {
-            if (mmin_lat < cs_bottom & mmax_long > cs_right & mmin_long < cs_left) return true;
-            else if (mmax_lat > cs_top & mmax_long > cs_right & mmin_long < cs_left) return true;
-            else if (mmax_lat > cs_top & mmin_lat < cs_bottom & mmin_long < cs_left) return true;
-            else if (mmax_lat > cs_top & mmin_lat < cs_bottom & mmax_long > cs_right) return true;
-            else if (mmax_lat > cs_top & mmin_lat < cs_bottom & mmax_long > cs_right & mmin_long < cs_left) return true;
+            if (mmin_lat < cs_bottom && mmax_long > cs_right && mmin_long < cs_left) return true;
+            else if (mmax_lat > cs_top && mmax_long > cs_right && mmin_long < cs_left) return true;
+            else if (mmax_lat > cs_top && mmin_lat < cs_bottom && mmin_long < cs_left) return true;
+            else if (mmax_lat > cs_top && mmin_lat < cs_bottom && mmax_long > cs_right) return true;
+            else if (mmax_lat > cs_top && mmin_lat < cs_bottom && mmax_long > cs_right && mmin_long < cs_left) return true;
             else return false;
         }
     }
@@ -2963,7 +2993,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 float theLat = POIs.get(i).getX();
                 float theLong = POIs.get(i).getY();
                 float delta1 = Math.abs(theLat - latandlong[0]) + Math.abs(theLong - latandlong[1]);
-                if (delta1 < delta & delta1 < K) {
+                if (delta1 < delta && delta1 < K) {
                     delta = delta1;
                     theNum = i;
                 }
@@ -3031,7 +3061,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 float theLat = POIs.get(i).getX();
                 float theLong = POIs.get(i).getY();
                 float delta1 = Math.abs(theLat - (float) m_lat) + Math.abs(theLong - (float) m_long);
-                if (delta1 < delta & delta1 < K) {
+                if (delta1 < delta && delta1 < K) {
                     delta = delta1;
                     theNum = i;
                 }
@@ -3094,7 +3124,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 float theLat = POIs.get(i).getX();
                 float theLong = POIs.get(i).getY();
                 float delta1 = Math.abs(theLat - (float) m_lat) + Math.abs(theLong - (float) m_long);
-                if (delta1 < delta & delta1 < K) {
+                if (delta1 < delta && delta1 < K) {
                     delta = delta1;
                     theNum = i;
                 }
@@ -3121,7 +3151,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onClick(DialogInterface dialog, int which) {
                         //long time = System.currentTimeMillis();
                         String poic = "POI" + String.valueOf(time);
-                        if (latandlong[0] != 0 & latandlong[1] != 0) {
+                        if (latandlong[0] != 0 && latandlong[1] != 0) {
                             DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
                         } else {
                             DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date), num);
@@ -3136,7 +3166,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //List<POI> POIs = LitePal.findAll(POI.class);
                 //long time = System.currentTimeMillis();
                 String poic = "POI" + String.valueOf(time);
-                if (latandlong[0] != 0 & latandlong[1] != 0) {
+                if (latandlong[0] != 0 && latandlong[1] != 0) {
                     DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
                 } else {
                     DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date), num);
@@ -3147,7 +3177,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         } else {
             String poic = "POI" + String.valueOf(time);
-            if (latandlong[0] != 0 & latandlong[1] != 0) {
+            if (latandlong[0] != 0 && latandlong[1] != 0) {
                 DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
             } else {
                 DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date), num);
@@ -3659,7 +3689,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //pt_last = pt_current;
                 //pt_current = pt;
                 pdfView.zoomWithAnimation(c_zoom);
-                /*if (event.getRawY() >= height - 100 & event.getRawY() <= height & event.getRawX() >= 50 & event.getRawX() <= 150){
+                /*if (event.getRawY() >= height - 100 && event.getRawY() <= height && event.getRawX() >= 50 && event.getRawX() <= 150){
                     popupWindow.dismiss();
                     whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
                 }*/
@@ -3895,7 +3925,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     Intent intent = new Intent(MainInterface.this, singlepoi.class);
                     intent.putExtra("POIC", pois.get(position).getM_POIC());
                     MainInterface.this.startActivity(intent);
-                }else if (esterEgg_plq & !esterEgg_lm){
+                }else if (esterEgg_plq && !esterEgg_lm){
                     Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                     intent.putExtra("xh", pois.get(position).getM_POIC());
                     MainInterface.this.startActivity(intent);
@@ -4184,7 +4214,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         /*
         locError("isFullLocation : " + Boolean.toString(isFullLocation));
         locError("location : " + location.toString());
-        if(isFullLocation & location != null){
+        if(isFullLocation && location != null){
         Geocoder gc = new Geocoder(MainInterface.this);
         List<Address> addresses = null;
         String msg = "";
@@ -4417,7 +4447,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             File file1 = new File(Environment.getExternalStorageDirectory() + "/doc.kml");
             File file2 = new File(Environment.getExternalStorageDirectory() + "/地名标志录音");
             File file3 = new File(Environment.getExternalStorageDirectory() + "/地名标志照片");
-            if (kmltests.size() == 0 & file1.exists() & file2.exists() & file3.exists() & file2.isDirectory() & file3.isDirectory()){
+            if (kmltests.size() == 0 && file1.exists() && file2.exists() && file3.exists() && file2.isDirectory() && file3.isDirectory()){
                 LitePal.deleteAll(plqzp.class);
                 LitePal.deleteAll(plqyp.class);
                 LitePal.deleteAll(kmltest.class);
@@ -4442,7 +4472,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 editor.putBoolean("open_plq", false);
                 editor.apply();
                 return false;
-            }else if(kmltests.size() != 0 & file1.exists() & file2.exists() & file3.exists() & file2.isDirectory() & file3.isDirectory()){
+            }else if(kmltests.size() != 0 && file1.exists() && file2.exists() && file3.exists() && file2.isDirectory() && file3.isDirectory()){
                 getBitmap1();
                 return true;
             }
@@ -4499,7 +4529,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             File file6 = new File(Environment.getExternalStorageDirectory() + "/20180716/联盟街道线状地名");
             File file7 = new File(Environment.getExternalStorageDirectory() + "/20180716");
             if (dmPoints.size() == 0){
-                if (file1.exists() & file2.exists() & file3.exists() & file4.exists() & file5.isDirectory() & file6.isDirectory() & file7.isDirectory()) {
+                if (file1.exists() && file2.exists() && file3.exists() && file4.exists() && file5.isDirectory() && file6.isDirectory() && file7.isDirectory()) {
                     LitePal.deleteAll(DMLine.class);
                     LitePal.deleteAll(DMPoint.class);
                     //Log.w(TAG, "onCreate: " + DataUtil.getKML(Environment.getExternalStorageDirectory() + "/doc.kml"));
@@ -4526,7 +4556,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     editor.apply();
                     return false;
                 }
-            }else if(dmPoints.size() != 0 & file1.exists() & file2.exists() & file3.exists() & file4.exists() & file5.isDirectory() & file6.isDirectory() & file7.isDirectory()){
+            }else if(dmPoints.size() != 0 && file1.exists() && file2.exists() && file3.exists() && file4.exists() && file5.isDirectory() && file6.isDirectory() && file7.isDirectory()){
                 getDMitmap();
                 return true;
             }
@@ -4578,7 +4608,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                     else {
                         type1Checked = false;
-                        if (!type1Checked & !type2Checked & !type3Checked) poiLayerBt.setChecked(false);
+                        if (!type1Checked && !type2Checked && !type3Checked) poiLayerBt.setChecked(false);
                     }
                     showPOI = true;
                     pdfView.zoomWithAnimation(c_zoom);
@@ -4599,7 +4629,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                     else {
                         type2Checked = false;
-                        if (!type1Checked & !type2Checked & !type3Checked) poiLayerBt.setChecked(false);
+                        if (!type1Checked && !type2Checked && !type3Checked) poiLayerBt.setChecked(false);
                     }
                     showPOI = true;
                     pdfView.zoomWithAnimation(c_zoom);
@@ -4620,7 +4650,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                     else {
                         type3Checked = false;
-                        if (!type1Checked & !type2Checked & !type3Checked) poiLayerBt.setChecked(false);
+                        if (!type1Checked && !type2Checked && !type3Checked) poiLayerBt.setChecked(false);
                     }
                     showPOI = true;
                     pdfView.zoomWithAnimation(c_zoom);
@@ -4676,7 +4706,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
                     try {
-                        if (!type1Checked & !type2Checked & !type3Checked) {
+                        if (!type1Checked && !type2Checked && !type3Checked) {
                             type1_checkbox.setChecked(true);
                             type2_checkbox.setChecked(true);
                             type3_checkbox.setChecked(true);
@@ -4906,7 +4936,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 DecimalFormat df = new DecimalFormat("0.0000");
                 String str = textView.getText().toString();
                 Log.w(TAG, "onClick: " + str);
-                if (!str.equals("点击位置在区域之外") & !str.equals("在这里显示坐标值")){
+                if (!str.equals("点击位置在区域之外") && !str.equals("在这里显示坐标值")){
                 if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
                     //String[] strs = str.split(";");
                     //PointF pt = new PointF(Float.valueOf(strs[0]), Float.valueOf(strs[1]));
@@ -4998,7 +5028,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         trail_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (m_lat <= max_lat & m_lat >= min_lat & m_long <= max_long & m_long >= min_long){
+                if (m_lat <= max_lat && m_lat >= min_lat && m_long <= max_long && m_long >= min_long){
                     toolbar.setTitle("准备记录轨迹");
                 /*PointF mmm = LatLng.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
                 pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);*/
@@ -5150,8 +5180,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //定位按钮具体功能如下:
                 //Toast.makeText(MainInterface.this, "定位到当前位置功能尚未添加", Toast.LENGTH_SHORT).show();
                 locError(Double.toString(m_lat));
-                if (m_lat != 0 & m_long != 0){
-                    if (m_lat <= max_lat & m_lat >= min_lat & m_long >= min_long & m_long<= max_long){
+                if (m_lat != 0 && m_long != 0){
+                    if (m_lat <= max_lat && m_lat >= min_lat && m_long >= min_long && m_long<= max_long){
                 if (pdfView.getZoom() != 1){
                     locHere_fab.setImageResource(R.drawable.ic_location_searching);
                     pdfView.resetZoomWithAnimation();
@@ -5290,7 +5320,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //locError(Boolean.toString(poi.getPath().isEmpty()));
                         //locError(Integer.toString(poi.getPath().length()));
                         //locError(poi.getPath());
-                        if (poi.getPhotonum() != 0 & mphotos.size() != 0){
+                        if (poi.getPhotonum() != 0 && mphotos.size() != 0){
                             locError("poic = " + poi.getPoic());
                             locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
                             String path = mphotos.get(0).getPath();
@@ -5425,38 +5455,36 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     for (int ii = 0; ii < dmbzList.size(); ii++){
                         String path = dmbzList.get(ii).getIMGPATH();
                         try {
-                            if (path != null) {
-                                if (path.contains(".jpg")) {
-                                    if (!path.substring(0, path.indexOf(".jpg") + 4).contains(Environment.getExternalStorageDirectory().toString())) {
-                                        Log.w(TAG, "run: " + Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf(".jpg") + 4));
-                                        path = Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf(".jpg") + 4);
-                                    }else{
-                                        Log.w(TAG, "run: " + path.substring(0, path.indexOf(".jpg") + 4));
-                                        path = path.substring(0, path.indexOf(".jpg") + 4);
+                            if (path != null && !path.isEmpty()) {
+                                if (!path.substring(0, path.indexOf("|")).contains(Environment.getExternalStorageDirectory().toString())) {
+                                    Log.w(TAG, "run: " + Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf("|")));
+                                    path = Environment.getExternalStorageDirectory() + "/地名标志照片/" + path.substring(0, path.indexOf("|"));
+                                }else{
+                                    Log.w(TAG, "run: " + path.substring(0, path.indexOf("|")));
+                                    path = path.substring(0, path.indexOf("|"));
+                                }
+                                File file = new File(path);
+                                if (file.exists()) {
+                                    Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
+                                    int degree = DataUtil.getPicRotate(path);
+                                    if (degree != 0) {
+                                        Matrix m = new Matrix();
+                                        m.setRotate(degree); // 旋转angle度
+                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                                     }
-                                    File file = new File(path);
-                                    if (file.exists()) {
-                                        Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
-                                        int degree = DataUtil.getPicRotate(path);
-                                        if (degree != 0) {
-                                            Matrix m = new Matrix();
-                                            m.setRotate(degree); // 旋转angle度
-                                            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                                        }
-                                        bt btt = new bt(bitmap, path);
-                                        DMBZBts.add(btt);
-                                    } else {
-                                        //Resources res = MyApplication.getContext().getResources();
-                                        //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
-                                        Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                        BitmapDrawable bd = (BitmapDrawable) drawable;
-                                        Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                                        bt btt = new bt(bitmap, path);
-                                        DMBZBts.add(btt);
-                                    }
+                                    bt btt = new bt(bitmap, path);
+                                    DMBZBts.add(btt);
+                                } else {
+                                    //Resources res = MyApplication.getContext().getResources();
+                                    //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
+                                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                    BitmapDrawable bd = (BitmapDrawable) drawable;
+                                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                    bt btt = new bt(bitmap, path);
+                                    DMBZBts.add(btt);
                                 }
                             }
                         }catch (Exception e){
@@ -5494,60 +5522,40 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         String path = dmPoints.get(ii).getImgpath();
                         String id = dmPoints.get(ii).getMapid();
                         try {
-                            if (path != null) {
-                                if (path.contains(".jpg")) {
-                                    if (!path.substring(0, path.indexOf(".jpg") + 4).contains(Environment.getExternalStorageDirectory().toString())) {
-                                        Log.w(TAG, "run: " + Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path.substring(0, path.indexOf(".jpg") + 4));
-                                        path = Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path.substring(0, path.indexOf(".jpg") + 4);
-                                    }else{
-                                        Log.w(TAG, "run: " + path.substring(0, path.indexOf(".jpg") + 4));
-                                        path = path.substring(0, path.indexOf(".jpg") + 4);
-                                    }
-                                    File file = new File(path);
-                                    if (file.exists()) {
-                                        Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
-                                        int degree = DataUtil.getPicRotate(path);
-                                        if (degree != 0) {
-                                            Matrix m = new Matrix();
-                                            m.setRotate(degree); // 旋转angle度
-                                            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                                        }
-                                        bt btt = new bt(bitmap, id);
-                                        DMBts.add(btt);
+                            if (path != null && !path.isEmpty()) {
+                                Log.w(TAG, "run: lzylzylzy1");
+                                if (path.contains("|")) {
+                                    if (!path.substring(0, path.indexOf("|")).contains(Environment.getExternalStorageDirectory().toString())) {
+                                        Log.w(TAG, "run: " + Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path.substring(0, path.indexOf("|")));
+                                        path = Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path.substring(0, path.indexOf("|"));
                                     } else {
-                                        bt btt = new bt(Bitmap.createBitmap(100, 80, Bitmap.Config.ALPHA_8), id);
-                                        DMBts.add(btt);
+                                        Log.w(TAG, "run: " + path.substring(0, path.indexOf("|")));
+                                        path = path.substring(0, path.indexOf("|"));
                                     }
-                                }else if (path.contains(".JPG")){
-                                    if (!path.substring(0, path.indexOf(".JPG") + 4).contains(Environment.getExternalStorageDirectory().toString())) {
-                                        Log.w(TAG, "run: " + Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path.substring(0, path.indexOf(".JPG") + 4));
-                                        path = Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path.substring(0, path.indexOf(".JPG") + 4);
-                                    }else{
-                                        Log.w(TAG, "run: " + path.substring(0, path.indexOf(".JPG") + 4));
-                                        path = path.substring(0, path.indexOf(".JPG") + 4);
-                                    }
-                                    File file = new File(path);
-                                    if (file.exists()) {
-                                        Log.w(TAG, "run: 存在文件");
-                                        Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
-                                        int degree = DataUtil.getPicRotate(path);
-                                        if (degree != 0) {
-                                            Matrix m = new Matrix();
-                                            m.setRotate(degree); // 旋转angle度
-                                            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                                        }
-                                        bt btt = new bt(bitmap, id);
-                                        DMBts.add(btt);
-                                    } else {
-                                        //Resources res = MyApplication.getContext().getResources();
-                                        //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
-                                        bt btt = new bt(Bitmap.createBitmap(100, 80, Bitmap.Config.ALPHA_8), id);
-                                        DMBts.add(btt);
+                                }else {
+                                    if (!path.contains(Environment.getExternalStorageDirectory().toString())) {
+                                        Log.w(TAG, "run: " + Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path);
+                                        path = Environment.getExternalStorageDirectory() + "/盘龙区多媒体数据/照片/" + path;
                                     }
                                 }
+                                File file = new File(path);
+                                if (file.exists()) {
+                                    Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
+                                    int degree = DataUtil.getPicRotate(path);
+                                    if (degree != 0) {
+                                        Matrix m = new Matrix();
+                                        m.setRotate(degree); // 旋转angle度
+                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                                    }
+                                    bt btt = new bt(bitmap, id);
+                                    DMBts.add(btt);
+                                } else {
+                                    bt btt = new bt(Bitmap.createBitmap(100, 80, Bitmap.Config.ALPHA_8), id);
+                                    DMBts.add(btt);
+                                }
                             }
+                            Log.w(TAG, "run: lzylzylzy2");
                         }catch (Exception e){
                             Log.w(TAG, "run: 发生重要错误");
                         }
@@ -5590,6 +5598,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private boolean hasQueriedPoi = false;
     mPOIobj queriedPoi;
+    private boolean hasQueriedLine = false;
+    DMLine queriedLine;
     @Override
     protected void onResume() {
         super.onResume();
@@ -5630,11 +5640,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
                 queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
             }else if (poic.contains("DML")){
-                hasQueriedPoi = true;
+                hasQueriedLine = true;
                 poic = poic.replace("DML", "");
                 //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
-                List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
-                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
+                List<DMLine> dmLines = LitePal.where("mapid = ?", poic).find(DMLine.class);
+                queriedLine = dmLines.get(0);
             }
         }
         String currentProvider = LocationManager.NETWORK_PROVIDER;

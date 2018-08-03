@@ -120,13 +120,15 @@ public class photoshow extends AppCompatActivity {
         mPhotobjList.clear();
         List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
         String ImgPathTemp = dmbzList.get(0).getIMGPATH();
-        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
         Log.w(TAG, "run: " + ImgPathTemp);
         for (int k = 0; k < imgPath.length; k++){
-            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-            if (k < imgPath.length - 1)
-                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-            Log.w(TAG, "run: " + ImgPathTemp);
+            if (imgPath.length > 1) {
+                if (k < imgPath.length - 1) {
+                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                }else imgPath[k] = ImgPathTemp;
+            }else imgPath[k] = ImgPathTemp;
         }
         for (int kk = 0; kk < imgPath.length; kk++) {
             String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/";
@@ -195,13 +197,15 @@ public class photoshow extends AppCompatActivity {
         mPhotobjList.clear();
         List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
         String ImgPathTemp = dmLines.get(0).getImgpath();
-        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
         Log.w(TAG, "run: " + ImgPathTemp);
         for (int k = 0; k < imgPath.length; k++){
-            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-            if (k < imgPath.length - 1)
-                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-            Log.w(TAG, "run: " + ImgPathTemp);
+            if (imgPath.length > 1) {
+                if (k < imgPath.length - 1) {
+                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                }else imgPath[k] = ImgPathTemp;
+            }else imgPath[k] = ImgPathTemp;
         }
         for (int kk = 0; kk < imgPath.length; kk++) {
             String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
@@ -270,13 +274,15 @@ public class photoshow extends AppCompatActivity {
         mPhotobjList.clear();
         List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
         String ImgPathTemp = dmPoints.get(0).getImgpath();
-        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
         Log.w(TAG, "run: " + ImgPathTemp);
         for (int k = 0; k < imgPath.length; k++){
-            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-            if (k < imgPath.length - 1)
-                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-            Log.w(TAG, "run: " + ImgPathTemp);
+            if (imgPath.length > 1) {
+                if (k < imgPath.length - 1) {
+                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                }else imgPath[k] = ImgPathTemp;
+            }else imgPath[k] = ImgPathTemp;
         }
         for (int kk = 0; kk < imgPath.length; kk++) {
             String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
@@ -407,19 +413,24 @@ public class photoshow extends AppCompatActivity {
                             }
                             bt btt = new bt(bitmap, path);
                             bts.add(btt);
+                        } else {
+                            Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
+                            bts.add(new bt(bitmap, ""));
                         }
                     }
                 }else if (POIType == 1){
                     List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
                     if (dmbzList.size() >= 1) {
                         String ImgPathTemp = dmbzList.get(0).getIMGPATH();
-                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
                         Log.w(TAG, "run: " + ImgPathTemp);
                         for (int k = 0; k < imgPath.length; k++) {
-                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-                            if (k < imgPath.length - 1)
-                                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-                            Log.w(TAG, "run: " + ImgPathTemp);
+                            if (imgPath.length > 1) {
+                                if (k < imgPath.length - 1) {
+                                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                                }else imgPath[k] = ImgPathTemp;
+                            }else imgPath[k] = ImgPathTemp;
                         }
                         for (int kk = 0; kk < imgPath.length; kk++) {
                             String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/";
@@ -442,20 +453,11 @@ public class photoshow extends AppCompatActivity {
                                     }
                                     bts.add(new bt(bitmap, imgPath[kk]));
                                 } catch (IOException e) {
-                                    Log.w(TAG, e.toString());
-                                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                    BitmapDrawable bd = (BitmapDrawable) drawable;
-                                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                    Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
                                     bts.add(new bt(bitmap, ""));
                                 }
                             } else {
-                                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                BitmapDrawable bd = (BitmapDrawable) drawable;
-                                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
                                 bts.add(new bt(bitmap, ""));
                             }
                         }
@@ -464,13 +466,15 @@ public class photoshow extends AppCompatActivity {
                     List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
                     if (dmLines.size() >= 1) {
                         String ImgPathTemp = dmLines.get(0).getImgpath();
-                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
                         Log.w(TAG, "run: " + ImgPathTemp);
                         for (int k = 0; k < imgPath.length; k++) {
-                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-                            if (k < imgPath.length - 1)
-                                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-                            Log.w(TAG, "run: " + ImgPathTemp);
+                            if (imgPath.length > 1) {
+                                if (k < imgPath.length - 1) {
+                                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                                }else imgPath[k] = ImgPathTemp;
+                            }else imgPath[k] = ImgPathTemp;
                         }
                         for (int kk = 0; kk < imgPath.length; kk++) {
                             String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
@@ -493,20 +497,11 @@ public class photoshow extends AppCompatActivity {
                                     }
                                     bts.add(new bt(bitmap, imgPath[kk]));
                                 } catch (IOException e) {
-                                    Log.w(TAG, e.toString());
-                                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                    BitmapDrawable bd = (BitmapDrawable) drawable;
-                                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                    Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
                                     bts.add(new bt(bitmap, ""));
                                 }
                             } else {
-                                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                BitmapDrawable bd = (BitmapDrawable) drawable;
-                                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
                                 bts.add(new bt(bitmap, ""));
                             }
                         }
@@ -515,13 +510,15 @@ public class photoshow extends AppCompatActivity {
                     List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
                     if (dmPoints.size() >= 1) {
                         String ImgPathTemp = dmPoints.get(0).getImgpath();
-                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
                         Log.w(TAG, "run: " + ImgPathTemp);
                         for (int k = 0; k < imgPath.length; k++) {
-                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
-                            if (k < imgPath.length - 1)
-                                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
-                            Log.w(TAG, "run: " + ImgPathTemp);
+                            if (imgPath.length > 1) {
+                                if (k < imgPath.length - 1) {
+                                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                                }else imgPath[k] = ImgPathTemp;
+                            }else imgPath[k] = ImgPathTemp;
                         }
                         for (int kk = 0; kk < imgPath.length; kk++) {
                             String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
@@ -582,6 +579,8 @@ public class photoshow extends AppCompatActivity {
         setTitle(photoshow.this.getResources().getText(R.string.PhotoList));
         if (POIType == 0) refreshCardFromPOI();
         else if (POIType == 1) refreshCardFromDMBZ();
+        else if (POIType == 2) refreshCardFromDML();
+        else if (POIType == 3) refreshCardFromDMP();
         invalidateOptionsMenu();
     }
 
@@ -649,7 +648,7 @@ public class photoshow extends AppCompatActivity {
                 DMBZ dmbz = new DMBZ();
                 if (dmbzs.get(0).getIMGPATH() != null) {
                     String imgpath = dmbzs.get(0).getIMGPATH();
-                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmbz.setIMGPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmbz.updateAll("xh = ?", DMXH);
@@ -659,7 +658,7 @@ public class photoshow extends AppCompatActivity {
                 DMLine dmLine = new DMLine();
                 if (dmLines.get(0).getImgpath() != null) {
                     String imgpath = dmLines.get(0).getImgpath();
-                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmLine.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmLine.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmLine.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmLine.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmLine.updateAll("mapid = ?", DML);
@@ -669,7 +668,7 @@ public class photoshow extends AppCompatActivity {
                 DMPoint dmPoint = new DMPoint();
                 if (dmPoints.get(0).getImgpath() != null) {
                     String imgpath = dmPoints.get(0).getImgpath();
-                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmPoint.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmPoint.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmPoint.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmPoint.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmPoint.updateAll("mapid = ?", DMP);
@@ -710,7 +709,7 @@ public class photoshow extends AppCompatActivity {
                     DMBZ dmbz = new DMBZ();
                     if (dmbzs.get(0).getIMGPATH() != null) {
                         String imgpath = dmbzs.get(0).getIMGPATH();
-                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setIMGPATH(imgpath + "|" + imageuri);
+                        if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmbz.setIMGPATH(imgpath + "|" + imageuri);
                         else dmbz.setIMGPATH(imageuri);
                     }else dmbz.setIMGPATH(imageuri);
                     dmbz.updateAll("xh = ?", DMXH);
@@ -720,7 +719,7 @@ public class photoshow extends AppCompatActivity {
                     DMLine dmLine = new DMLine();
                     if (dmLines.get(0).getImgpath() != null) {
                         String imgpath = dmLines.get(0).getImgpath();
-                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmLine.setImgpath(imgpath + "|" + imageuri);
+                        if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmLine.setImgpath(imgpath + "|" + imageuri);
                         else dmLine.setImgpath(imageuri);
                     }else dmLine.setImgpath(imageuri);
                     dmLine.updateAll("mapid = ?", DML);
@@ -730,7 +729,7 @@ public class photoshow extends AppCompatActivity {
                     DMPoint dmPoint = new DMPoint();
                     if (dmPoints.get(0).getImgpath() != null) {
                         String imgpath = dmPoints.get(0).getImgpath();
-                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmPoint.setImgpath(imgpath + "|" + imageuri);
+                        if (DataUtil.appearNumber(imgpath, "\\|") + 1 > 0) dmPoint.setImgpath(imgpath + "|" + imageuri);
                         else dmPoint.setImgpath(imageuri);
                     }else dmPoint.setImgpath(imageuri);
                     dmPoint.updateAll("mapid = ?", DMP);
@@ -777,8 +776,8 @@ public class photoshow extends AppCompatActivity {
             Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
             for (int i = 0; i < nums.length; i++){
                 //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
-                if (DataUtil.appearNumber(path, ".jpg") > 0) {
-                    if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                if (DataUtil.appearNumber(path, "\\|") + 1 > 0) {
+                    if (DataUtil.appearNumber(path, "\\|") + 1 > 1) {
                         if (path.indexOf(nums[i]) != 0)
                             path = path.replace("|" + nums[i], "");
                         else{
@@ -795,9 +794,9 @@ public class photoshow extends AppCompatActivity {
         }else {
             List<DMBZ> pois1 = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
             String path = pois1.get(0).getIMGPATH();
-            if (DataUtil.appearNumber(path, ".jpg") > 0) {
+            if (DataUtil.appearNumber(path, "\\|") + 1 > 0) {
                 DMBZ poi = new DMBZ();
-                if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                if (DataUtil.appearNumber(path, "\\|") + 1 > 1) {
                     if (path.indexOf(deletePath) != 0)
                         poi.setIMGPATH(path.replace("|" + deletePath, ""));
                     else
@@ -819,8 +818,8 @@ public class photoshow extends AppCompatActivity {
             Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
             for (int i = 0; i < nums.length; i++){
                 //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
-                if (DataUtil.appearNumber(path, ".jpg") > 0) {
-                    if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                if (DataUtil.appearNumber(path, "\\|") + 1 > 0) {
+                    if (DataUtil.appearNumber(path, "\\|") + 1 > 1) {
                         if (path.indexOf(nums[i]) != 0)
                             path = path.replace("|" + nums[i], "");
                         else{
@@ -837,9 +836,9 @@ public class photoshow extends AppCompatActivity {
         }else {
             List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
             String path = dmPoints.get(0).getImgpath();
-            if (DataUtil.appearNumber(path, ".jpg") > 0) {
+            if (DataUtil.appearNumber(path, "\\|") + 1 > 0) {
                 DMPoint dmPoint = new DMPoint();
-                if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                if (DataUtil.appearNumber(path, "\\|") + 1 > 1) {
                     if (path.indexOf(deletePath) != 0)
                         dmPoint.setImgpath(path.replace("|" + deletePath, ""));
                     else
@@ -861,8 +860,8 @@ public class photoshow extends AppCompatActivity {
             Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
             for (int i = 0; i < nums.length; i++){
                 //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
-                if (DataUtil.appearNumber(path, ".jpg") > 0) {
-                    if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                if (DataUtil.appearNumber(path, "\\|") + 1 > 0) {
+                    if (DataUtil.appearNumber(path, "\\|") + 1 > 1) {
                         if (path.indexOf(nums[i]) != 0)
                             path = path.replace("|" + nums[i], "");
                         else{
@@ -879,9 +878,9 @@ public class photoshow extends AppCompatActivity {
         }else {
             List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
             String path = dmLines.get(0).getImgpath();
-            if (DataUtil.appearNumber(path, ".jpg") > 0) {
+            if (DataUtil.appearNumber(path, "\\|") + 1 > 0) {
                 DMLine dmLine = new DMLine();
-                if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                if (DataUtil.appearNumber(path, "\\|") + 1 > 1) {
                     if (path.indexOf(deletePath) != 0)
                         dmLine.setImgpath(path.replace("|" + deletePath, ""));
                     else
