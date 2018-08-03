@@ -116,11 +116,7 @@ public class mPhotobjAdapter extends RecyclerView.Adapter<mPhotobjAdapter.ViewHo
             }*/
             holder.PhotoImage.setImageBitmap(bitmap);
         }else {
-            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-            BitmapDrawable bd = (BitmapDrawable) drawable;
-            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
             holder.PhotoImage.setImageBitmap(bitmap);
         }
 

@@ -405,7 +405,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     };
 
-
     private String AddNormalPOI(final PointF pt1, final int num){
         List<POI> POIs = LitePal.findAll(POI.class);
         POI poi = new POI();
@@ -542,7 +541,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 locError("GoDMBZSinglePOIPage" + dmPoints.get(num).getDimingid());
                 QueryPoint = true;
                 Pointbzmc = dmPoints.get(num).getBzmc();
-                thePointId = dmPoints.get(num).getDimingid();
+                thePointId = dmPoints.get(num).getMapid();
                 //GoDMPSinglePOIPage(dmPoints.get(num).getDimingid());
                 //isQueried = true;
                 //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
@@ -2188,8 +2187,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         c_top_x = cropbox[2];
         c_top_y = cropbox[3];
     }
-
-
 
     //解析测量字符串并绘制
     private void parseAndrawMessure(String mmessure_pts, Canvas canvas){
@@ -3839,13 +3836,48 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             Cursor cursor1 = LitePal.findBySQL(sql1);
             if (cursor1.moveToFirst()) {
                 do {
-                    String xh = cursor1.getString(cursor1.getColumnIndex("xh"));
+                    String xh = "DMBZ" + cursor1.getString(cursor1.getColumnIndex("xh"));
                     String dmbzmc = cursor1.getString(cursor1.getColumnIndex("bzmc"));
                     mPOIobj mPOIobj = new mPOIobj(xh, dmbzmc);
                     pois.add(mPOIobj);
                 } while (cursor1.moveToNext());
             }
             cursor1.close();
+        }
+        if (esterEgg_dm) {
+            String sql1 = "select * from DMLine where";
+            String[] strings1 = query.split(" ");
+            for (int i = 0; i < strings1.length; i++) {
+                if (i == 0) sql1 = sql1 + " bzmc LIKE '%" + strings1[i] + "%'";
+                else sql1 = sql1 + " AND bzmc LIKE '%" + strings1[i] + "%'";
+            }
+            Cursor cursor1 = LitePal.findBySQL(sql1);
+            if (cursor1.moveToFirst()) {
+                do {
+                    String xh = "DMLine" + cursor1.getString(cursor1.getColumnIndex("mapid"));
+                    String dmbzmc = cursor1.getString(cursor1.getColumnIndex("bzmc"));
+                    mPOIobj mPOIobj = new mPOIobj(xh, dmbzmc);
+                    pois.add(mPOIobj);
+                } while (cursor1.moveToNext());
+            }
+            cursor1.close();
+
+            String sql2 = "select * from DMPoint where";
+            String[] strings2 = query.split(" ");
+            for (int i = 0; i < strings2.length; i++) {
+                if (i == 0) sql2 = sql2 + " bzmc LIKE '%" + strings2[i] + "%'";
+                else sql2 = sql2 + " AND bzmc LIKE '%" + strings2[i] + "%'";
+            }
+            Cursor cursor2 = LitePal.findBySQL(sql2);
+            if (cursor2.moveToFirst()) {
+                do {
+                    String xh = "DMPoint" + cursor2.getString(cursor2.getColumnIndex("mapid"));
+                    String dmbzmc = cursor2.getString(cursor2.getColumnIndex("bzmc"));
+                    mPOIobj mPOIobj = new mPOIobj(xh, dmbzmc);
+                    pois.add(mPOIobj);
+                } while (cursor2.moveToNext());
+            }
+            cursor2.close();
         }
         String[] items = new String[pois.size()];
         for (int i = 0; i < pois.size(); i++){
@@ -3867,9 +3899,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                     intent.putExtra("xh", pois.get(position).getM_POIC());
                     MainInterface.this.startActivity(intent);
-                }else if (esterEgg_lm){
-                    GoDMBZSinglePOIPage(pois.get(position).getM_POIC());
-                }
+                }else if (pois.get(position).getM_POIC().contains("DMBZ")) GoDMBZSinglePOIPage(pois.get(position).getM_POIC().replace("DMBZ", ""));
+                else if (pois.get(position).getM_POIC().contains("DMLine")) GoDMLSinglePOIPage(pois.get(position).getM_POIC().replace("DMLine", ""));
+                else if (pois.get(position).getM_POIC().contains("DMPoint")) GoDMPSinglePOIPage(pois.get(position).getM_POIC().replace("DMPoint", ""));
+
                 listPopupWindow.dismiss();
                 isDrawTrail = NONE_DRAW_TYPE;
                 invalidateOptionsMenu();
@@ -5592,7 +5625,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
             }else if (poic.contains("DMP")){
                 hasQueriedPoi = true;
-                poic = poic.replace("DMX", "");
+                poic = poic.replace("DMP", "");
+                //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
+                List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
+                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
+            }else if (poic.contains("DML")){
+                hasQueriedPoi = true;
+                poic = poic.replace("DML", "");
                 //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
                 List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
                 queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");

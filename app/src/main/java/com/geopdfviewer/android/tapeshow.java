@@ -44,6 +44,8 @@ public class tapeshow extends AppCompatActivity {
     Toolbar toolbar;
     private int POIType;
     private String DMXH;
+    private String DML;
+    private String DMP;
 
     private void refreshCardFromPOI(){
         mTapeobjList.clear();
@@ -169,12 +171,156 @@ public class tapeshow extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
+    private void refreshCardFromDML(){
+        mTapeobjList.clear();
+        List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+        String ImgPathTemp = dmLines.get(0).getTapepath();
+        if (ImgPathTemp != null) {
+            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".MP3")];
+            Log.w(TAG, "run: " + ImgPathTemp);
+            for (int k = 0; k < imgPath.length; k++) {
+                imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".MP3") + 4);
+                if (k < imgPath.length - 1)
+                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".MP3") + 5);
+                Log.w(TAG, "run: " + ImgPathTemp);
+            }
+            for (int kk = 0; kk < imgPath.length; kk++) {
+                String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/录音/";
+                String path;
+                if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                    path = rootpath + imgPath[kk];
+                } else {
+                    path = imgPath[kk];
+                }
+                mTapeobj mtapeobj = new mTapeobj(dmLines.get(0).getBzmc(), dmLines.get(0).getBzmc(), dmLines.get(0).getTime(), path);
+                mTapeobjList.add(mtapeobj);
+            }
+        }
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_tape);
+        layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new mTapeobjAdapter(mTapeobjList);
+        adapter.setOnItemLongClickListener(new mTapeobjAdapter.OnRecyclerItemLongListener() {
+            @Override
+            public void onItemLongClick(View view, String path) {
+                setTitle(tapeshow.this.getResources().getText(R.string.IsLongClicking));
+                deletePath = path;
+                isLongClick = 0;
+                invalidateOptionsMenu();
+                Log.w(TAG, "onItemLongClick: " + deletePath );
+            }
+        });
+        adapter.setOnItemClickListener(new mTapeobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String path, int position) {
+                mTapeobjAdapter.ViewHolder holder = new mTapeobjAdapter.ViewHolder(view);
+                if (isLongClick == 0){
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        deletePath = deletePath + "wslzy" + path;
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            String replace = "wslzy" + path;
+                            deletePath = deletePath.replace(replace, "");
+                        }else {
+                            resetView();
+                        }
+                    }
+                }else {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        MediaPlayer mediaPlayer = MediaPlayer.create(tapeshow.this, Uri.parse(path));
+                        mediaPlayer.start();
+                    }else {
+                        Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError1, Toast.LENGTH_LONG).show();
+                    }
+                }
+                Log.w(TAG, "onItemClick: " + deletePath );
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void refreshCardFromDMP(){
+        mTapeobjList.clear();
+        List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+        String ImgPathTemp = dmPoints.get(0).getTapepath();
+        if (ImgPathTemp != null) {
+            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".MP3")];
+            Log.w(TAG, "run: " + ImgPathTemp);
+            for (int k = 0; k < imgPath.length; k++) {
+                imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".MP3") + 4);
+                if (k < imgPath.length - 1)
+                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".MP3") + 5);
+                Log.w(TAG, "run: " + ImgPathTemp);
+            }
+            for (int kk = 0; kk < imgPath.length; kk++) {
+                String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/录音/";
+                String path;
+                if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                    path = rootpath + imgPath[kk];
+                } else {
+                    path = imgPath[kk];
+                }
+                mTapeobj mtapeobj = new mTapeobj(dmPoints.get(0).getBzmc(), dmPoints.get(0).getBzmc(), dmPoints.get(0).getTime(), path);
+                mTapeobjList.add(mtapeobj);
+            }
+        }
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_tape);
+        layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new mTapeobjAdapter(mTapeobjList);
+        adapter.setOnItemLongClickListener(new mTapeobjAdapter.OnRecyclerItemLongListener() {
+            @Override
+            public void onItemLongClick(View view, String path) {
+                setTitle(tapeshow.this.getResources().getText(R.string.IsLongClicking));
+                deletePath = path;
+                isLongClick = 0;
+                invalidateOptionsMenu();
+                Log.w(TAG, "onItemLongClick: " + deletePath );
+            }
+        });
+        adapter.setOnItemClickListener(new mTapeobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String path, int position) {
+                mTapeobjAdapter.ViewHolder holder = new mTapeobjAdapter.ViewHolder(view);
+                if (isLongClick == 0){
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        deletePath = deletePath + "wslzy" + path;
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            String replace = "wslzy" + path;
+                            deletePath = deletePath.replace(replace, "");
+                        }else {
+                            resetView();
+                        }
+                    }
+                }else {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        MediaPlayer mediaPlayer = MediaPlayer.create(tapeshow.this, Uri.parse(path));
+                        mediaPlayer.start();
+                    }else {
+                        Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError1, Toast.LENGTH_LONG).show();
+                    }
+                }
+                Log.w(TAG, "onItemClick: " + deletePath );
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
     private void resetView(){
         isLongClick = 1;
         setTitle(tapeshow.this.getResources().getText(R.string.TapeList));
         if (POIType == 0)
             refreshCardFromPOI();
         else if (POIType == 1) refreshCardFromDMBZ();
+        else if (POIType == 2) refreshCardFromDML();
+        else if (POIType == 3) refreshCardFromDMP();
         invalidateOptionsMenu();
     }
 
@@ -190,6 +336,8 @@ public class tapeshow extends AppCompatActivity {
         POIType = intent.getIntExtra("type", -1);
         if (POIType == 0) POIC = intent.getStringExtra("POIC");
         else if (POIType == 1) DMXH = intent.getStringExtra("DMBZ");
+        else if (POIType == 2) DML = intent.getStringExtra("DML");
+        else if (POIType == 3) DMP = intent.getStringExtra("DMP");
     }
 
     @Override
@@ -198,6 +346,8 @@ public class tapeshow extends AppCompatActivity {
         if (POIType == 0)
             refreshCardFromPOI();
         else if (POIType == 1) refreshCardFromDMBZ();
+        else if (POIType == 2) refreshCardFromDML();
+        else if (POIType == 3) refreshCardFromDMP();
     }
 
     @Override
@@ -294,12 +444,33 @@ public class tapeshow extends AppCompatActivity {
                 DMBZ dmbz = new DMBZ();
                 if (dmbzs.get(0).getTAPEPATH() != null) {
                     String imgpath = dmbzs.get(0).getTAPEPATH();
-                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmbz.setTAPEPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    if (DataUtil.appearNumber(imgpath, ".MP3") > 0) dmbz.setTAPEPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
                     else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 }else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmbz.updateAll("xh = ?", DMXH);
                 refreshCardFromDMBZ();
+            }else if (POIType == 2){
+                List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+                DMLine dmLine = new DMLine();
+                if (dmLines.get(0).getTapepath() != null) {
+                    String tapepath = dmLines.get(0).getTapepath();
+                    if (DataUtil.appearNumber(tapepath, ".MP3") > 0) dmLine.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                }else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                dmLine.updateAll("mapid = ?", DML);
+                refreshCardFromDML();
+            }else if (POIType == 3){
+                List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+                DMPoint dmPoint = new DMPoint();
+                if (dmPoints.get(0).getTapepath() != null) {
+                    String tapepath = dmPoints.get(0).getTapepath();
+                    if (DataUtil.appearNumber(tapepath, ".MP3") > 0) dmPoint.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                }else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                dmPoint.updateAll("mapid = ?", DMP);
+                refreshCardFromDMP();
             }
+
         }
     }
 
@@ -355,6 +526,90 @@ public class tapeshow extends AppCompatActivity {
                     poi.setTAPEPATH("");
                 }
                 poi.updateAll("xh = ?", DMXH);
+            }
+        }
+    }
+
+    private void parseSelectedPathToDMP(){
+        if (deletePath.contains("wslzy")){
+            String[] nums = deletePath.split("wslzy");
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + nums[0] );
+            List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+            String path = dmPoints.get(0).getTapepath();
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
+            for (int i = 0; i < nums.length; i++){
+                //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                if (DataUtil.appearNumber(path, ".MP3") > 0) {
+                    if (DataUtil.appearNumber(path, ".MP3") > 1) {
+                        if (path.indexOf(nums[i]) != 0)
+                            path = path.replace("|" + nums[i], "");
+                        else{
+                            path = path.replace(nums[i] + "|", "");
+                        }
+                    } else {
+                        path = "";
+                    }
+                }
+            }
+            DMPoint dmPoint = new DMPoint();
+            dmPoint.setTapepath(path);
+            dmPoint.updateAll("mapid = ?", DMP);
+        }else {
+            List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+            String path = dmPoints.get(0).getTapepath();
+            if (DataUtil.appearNumber(path, ".MP3") > 0) {
+                DMPoint dmPoint = new DMPoint();
+                if (DataUtil.appearNumber(path, ".MP3") > 1) {
+                    if (path.indexOf(deletePath) != 0)
+                        dmPoint.setTapepath(path.replace("|" + deletePath, ""));
+                    else
+                        dmPoint.setTapepath(path.replace(deletePath + "|", ""));
+                } else {
+                    dmPoint.setTapepath("");
+                }
+                dmPoint.updateAll("mapid = ?", DML);
+            }
+        }
+    }
+
+    private void parseSelectedPathToDML(){
+        if (deletePath.contains("wslzy")){
+            String[] nums = deletePath.split("wslzy");
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + nums[0] );
+            List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+            String path = dmLines.get(0).getTapepath();
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
+            for (int i = 0; i < nums.length; i++){
+                //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                if (DataUtil.appearNumber(path, ".MP3") > 0) {
+                    if (DataUtil.appearNumber(path, ".MP3") > 1) {
+                        if (path.indexOf(nums[i]) != 0)
+                            path = path.replace("|" + nums[i], "");
+                        else{
+                            path = path.replace(nums[i] + "|", "");
+                        }
+                    } else {
+                        path = "";
+                    }
+                }
+            }
+            DMLine poi = new DMLine();
+            poi.setTapepath(path);
+            poi.updateAll("mapid = ?", DML);
+        }else {
+            List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+            String path = dmLines.get(0).getTapepath();
+            if (DataUtil.appearNumber(path, ".MP3") > 0) {
+                DMLine dmLine = new DMLine();
+                if (DataUtil.appearNumber(path, ".MP3") > 1) {
+                    if (path.indexOf(deletePath) != 0)
+                        dmLine.setTapepath(path.replace("|" + deletePath, ""));
+                    else
+                        dmLine.setTapepath(path.replace(deletePath + "|", ""));
+                } else {
+                    dmLine.setTapepath("");
+                }
+                dmLine.updateAll("mapid = ?", DML);
             }
         }
     }

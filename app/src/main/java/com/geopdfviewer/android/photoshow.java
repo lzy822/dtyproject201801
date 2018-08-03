@@ -59,6 +59,8 @@ public class photoshow extends AppCompatActivity {
     boolean isCreateBitmap = false;
     private int POIType;
     private String DMXH;
+    private String DML;
+    private String DMP;
 
     private void refreshCardFromPOI(){
         mPhotobjList.clear();
@@ -189,6 +191,156 @@ public class photoshow extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
+    private void refreshCardFromDML(){
+        mPhotobjList.clear();
+        List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+        String ImgPathTemp = dmLines.get(0).getImgpath();
+        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+        Log.w(TAG, "run: " + ImgPathTemp);
+        for (int k = 0; k < imgPath.length; k++){
+            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
+            if (k < imgPath.length - 1)
+                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
+            Log.w(TAG, "run: " + ImgPathTemp);
+        }
+        for (int kk = 0; kk < imgPath.length; kk++) {
+            String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
+            String path;
+            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                path = rootpath + imgPath[kk];
+            } else {
+                path = imgPath[kk];
+            }
+            mPhotobj mphotobj = new mPhotobj(path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), dmLines.get(0).getTime(), path);
+            mPhotobjList.add(mphotobj);
+        }
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_photo);
+        layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new mPhotobjAdapter(mPhotobjList);
+        adapter.setOnItemLongClickListener(new mPhotobjAdapter.OnRecyclerItemLongListener() {
+            @Override
+            public void onItemLongClick(View view, String path, String time) {
+                setTitle(photoshow.this.getResources().getText(R.string.IsLongClicking));
+                //deletePath = path;
+                deletePath = path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                Log.w(TAG, "onItemLongClick: " + deletePath);
+                isLongClick = 0;
+                invalidateOptionsMenu();
+            }
+        });
+        adapter.setOnItemClickListener(new mPhotobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String path, int position, String time) {
+                mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
+                if (isLongClick == 0){
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        //deletePath = deletePath + "wslzy" + path;
+                        deletePath = deletePath + "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            //String replace = "wslzy" + path;
+                            String replace = "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                            deletePath = deletePath.replace(replace, "");
+                            if (deletePath.length() == deletePath.replace(replace, "").length()){
+                                //String replace1 = path + "wslzy";
+                                String replace1 = path + "wslzy";
+                                deletePath = deletePath.replace(replace1, "");
+                            }
+                        }else {
+                            resetView();
+                        }
+                    }
+                    Log.w(TAG, "onItemLongClick: " + deletePath);
+                }else {
+                    //Log.w(TAG, "onItemClick: " + path );
+                    if (isCreateBitmap) {
+                        Log.w(TAG, "onItemClick: " + path );
+                        showPopueWindowForPhoto(path);
+                    }
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void refreshCardFromDMP(){
+        mPhotobjList.clear();
+        List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+        String ImgPathTemp = dmPoints.get(0).getImgpath();
+        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+        Log.w(TAG, "run: " + ImgPathTemp);
+        for (int k = 0; k < imgPath.length; k++){
+            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
+            if (k < imgPath.length - 1)
+                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
+            Log.w(TAG, "run: " + ImgPathTemp);
+        }
+        for (int kk = 0; kk < imgPath.length; kk++) {
+            String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
+            String path;
+            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                path = rootpath + imgPath[kk];
+            } else {
+                path = imgPath[kk];
+            }
+            mPhotobj mphotobj = new mPhotobj(path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), dmPoints.get(0).getTime(), path);
+            mPhotobjList.add(mphotobj);
+        }
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_photo);
+        layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new mPhotobjAdapter(mPhotobjList);
+        adapter.setOnItemLongClickListener(new mPhotobjAdapter.OnRecyclerItemLongListener() {
+            @Override
+            public void onItemLongClick(View view, String path, String time) {
+                setTitle(photoshow.this.getResources().getText(R.string.IsLongClicking));
+                //deletePath = path;
+                deletePath = path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                Log.w(TAG, "onItemLongClick: " + deletePath);
+                isLongClick = 0;
+                invalidateOptionsMenu();
+            }
+        });
+        adapter.setOnItemClickListener(new mPhotobjAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String path, int position, String time) {
+                mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
+                if (isLongClick == 0){
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        //deletePath = deletePath + "wslzy" + path;
+                        deletePath = deletePath + "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            //String replace = "wslzy" + path;
+                            String replace = "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                            deletePath = deletePath.replace(replace, "");
+                            if (deletePath.length() == deletePath.replace(replace, "").length()){
+                                //String replace1 = path + "wslzy";
+                                String replace1 = path + "wslzy";
+                                deletePath = deletePath.replace(replace1, "");
+                            }
+                        }else {
+                            resetView();
+                        }
+                    }
+                    Log.w(TAG, "onItemLongClick: " + deletePath);
+                }else {
+                    //Log.w(TAG, "onItemClick: " + path );
+                    if (isCreateBitmap) {
+                        Log.w(TAG, "onItemClick: " + path );
+                        showPopueWindowForPhoto(path);
+                    }
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         //toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -227,7 +379,8 @@ public class photoshow extends AppCompatActivity {
         }
         else if (POIType == 0) {
             POIC = intent.getStringExtra("POIC");
-        }
+        }else if (POIType == 2) DML = intent.getStringExtra("DML");
+        else if (POIType == 3) DMP = intent.getStringExtra("DMP");
 
         getBitmap();
     }
@@ -307,6 +460,100 @@ public class photoshow extends AppCompatActivity {
                             }
                         }
                     }
+                }else if (POIType == 2){
+                    List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+                    if (dmLines.size() >= 1) {
+                        String ImgPathTemp = dmLines.get(0).getImgpath();
+                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+                        Log.w(TAG, "run: " + ImgPathTemp);
+                        for (int k = 0; k < imgPath.length; k++) {
+                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
+                            if (k < imgPath.length - 1)
+                                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
+                            Log.w(TAG, "run: " + ImgPathTemp);
+                        }
+                        for (int kk = 0; kk < imgPath.length; kk++) {
+                            String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
+                            String path;
+                            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                                path = rootpath + imgPath[kk];
+                            } else {
+                                path = imgPath[kk];
+                            }
+                            File file = new File(path);
+                            if (file.exists()) {
+                                try {
+                                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                                    int degree = DataUtil.getPicRotate(path);
+                                    if (degree != 0) {
+                                        Matrix m = new Matrix();
+                                        m.setRotate(degree); // 旋转angle度
+                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                                    }
+                                    bts.add(new bt(bitmap, imgPath[kk]));
+                                } catch (IOException e) {
+                                    Log.w(TAG, e.toString());
+                                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                    BitmapDrawable bd = (BitmapDrawable) drawable;
+                                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                    bts.add(new bt(bitmap, ""));
+                                }
+                            } else {
+                                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                BitmapDrawable bd = (BitmapDrawable) drawable;
+                                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                bts.add(new bt(bitmap, ""));
+                            }
+                        }
+                    }
+                }else if (POIType == 3){
+                    List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+                    if (dmPoints.size() >= 1) {
+                        String ImgPathTemp = dmPoints.get(0).getImgpath();
+                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, ".jpg")];
+                        Log.w(TAG, "run: " + ImgPathTemp);
+                        for (int k = 0; k < imgPath.length; k++) {
+                            imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf(".jpg") + 4);
+                            if (k < imgPath.length - 1)
+                                ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf(".jpg") + 5);
+                            Log.w(TAG, "run: " + ImgPathTemp);
+                        }
+                        for (int kk = 0; kk < imgPath.length; kk++) {
+                            String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
+                            String path;
+                            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                                path = rootpath + imgPath[kk];
+                            } else {
+                                path = imgPath[kk];
+                            }
+                            File file = new File(path);
+                            if (file.exists()) {
+                                try {
+                                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                                    int degree = DataUtil.getPicRotate(path);
+                                    if (degree != 0) {
+                                        Matrix m = new Matrix();
+                                        m.setRotate(degree); // 旋转angle度
+                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                                    }
+                                    bts.add(new bt(bitmap, imgPath[kk]));
+                                } catch (IOException e) {
+                                    Log.w(TAG, e.toString());
+                                    Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
+                                    bts.add(new bt(bitmap, ""));
+                                }
+                            } else {
+                                Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
+                                bts.add(new bt(bitmap, ""));
+                            }
+                        }
+                    }
                 }
                 isCreateBitmap = true;
             }
@@ -318,6 +565,8 @@ public class photoshow extends AppCompatActivity {
         super.onResume();
         if (POIType == 0) refreshCardFromPOI();
         else if (POIType == 1) refreshCardFromDMBZ();
+        else if (POIType == 2) refreshCardFromDML();
+        else if (POIType == 3) refreshCardFromDMP();
     }
 
     @Override
@@ -354,10 +603,15 @@ public class photoshow extends AppCompatActivity {
                 if (POIType == 0) {
                     parseSelectedPathToPOI();
                     refreshCardFromPOI();
-                }
-                else if (POIType == 1) {
+                } else if (POIType == 1) {
                     parseSelectedPathToDMBZ();
                     refreshCardFromDMBZ();
+                }else if (POIType == 2) {
+                    parseSelectedPathToDML();
+                    refreshCardFromDML();
+                }else if (POIType == 3) {
+                    parseSelectedPathToDMP();
+                    refreshCardFromDMP();
                 }
                 break;
             case R.id.add_pois:
@@ -400,6 +654,26 @@ public class photoshow extends AppCompatActivity {
                 }else dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
                 dmbz.updateAll("xh = ?", DMXH);
                 refreshCardFromDMBZ();
+            }else if (POIType == 2){
+                List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+                DMLine dmLine = new DMLine();
+                if (dmLines.get(0).getImgpath() != null) {
+                    String imgpath = dmLines.get(0).getImgpath();
+                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmLine.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    else dmLine.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                }else dmLine.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                dmLine.updateAll("mapid = ?", DML);
+                refreshCardFromDML();
+            }else if (POIType == 3){
+                List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+                DMPoint dmPoint = new DMPoint();
+                if (dmPoints.get(0).getImgpath() != null) {
+                    String imgpath = dmPoints.get(0).getImgpath();
+                    if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmPoint.setImgpath(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    else dmPoint.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                }else dmPoint.setImgpath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                dmPoint.updateAll("mapid = ?", DMP);
+                refreshCardFromDMP();
             }
             getBitmap();
         }
@@ -441,6 +715,26 @@ public class photoshow extends AppCompatActivity {
                     }else dmbz.setIMGPATH(imageuri);
                     dmbz.updateAll("xh = ?", DMXH);
                     refreshCardFromDMBZ();
+                }else if (POIType == 2){
+                    List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+                    DMLine dmLine = new DMLine();
+                    if (dmLines.get(0).getImgpath() != null) {
+                        String imgpath = dmLines.get(0).getImgpath();
+                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmLine.setImgpath(imgpath + "|" + imageuri);
+                        else dmLine.setImgpath(imageuri);
+                    }else dmLine.setImgpath(imageuri);
+                    dmLine.updateAll("mapid = ?", DML);
+                    refreshCardFromDML();
+                }else if (POIType == 3){
+                    List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+                    DMPoint dmPoint = new DMPoint();
+                    if (dmPoints.get(0).getImgpath() != null) {
+                        String imgpath = dmPoints.get(0).getImgpath();
+                        if (DataUtil.appearNumber(imgpath, ".jpg") > 0) dmPoint.setImgpath(imgpath + "|" + imageuri);
+                        else dmPoint.setImgpath(imageuri);
+                    }else dmPoint.setImgpath(imageuri);
+                    dmPoint.updateAll("mapid = ?", DMP);
+                    refreshCardFromDMP();
                 }
                 getBitmap();
             }else {
@@ -512,6 +806,90 @@ public class photoshow extends AppCompatActivity {
                     poi.setIMGPATH("");
                 }
                 poi.updateAll("xh = ?", DMXH);
+            }
+        }
+    }
+
+    private void parseSelectedPathToDMP(){
+        if (deletePath.contains("wslzy")){
+            String[] nums = deletePath.split("wslzy");
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + nums[0] );
+            List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+            String path = dmPoints.get(0).getImgpath();
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
+            for (int i = 0; i < nums.length; i++){
+                //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                if (DataUtil.appearNumber(path, ".jpg") > 0) {
+                    if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                        if (path.indexOf(nums[i]) != 0)
+                            path = path.replace("|" + nums[i], "");
+                        else{
+                            path = path.replace(nums[i] + "|", "");
+                        }
+                    } else {
+                        path = "";
+                    }
+                }
+            }
+            DMPoint dmPoint = new DMPoint();
+            dmPoint.setImgpath(path);
+            dmPoint.updateAll("mapid = ?", DMP);
+        }else {
+            List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+            String path = dmPoints.get(0).getImgpath();
+            if (DataUtil.appearNumber(path, ".jpg") > 0) {
+                DMPoint dmPoint = new DMPoint();
+                if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                    if (path.indexOf(deletePath) != 0)
+                        dmPoint.setImgpath(path.replace("|" + deletePath, ""));
+                    else
+                        dmPoint.setImgpath(path.replace(deletePath + "|", ""));
+                } else {
+                    dmPoint.setImgpath("");
+                }
+                dmPoint.updateAll("mapid = ?", DML);
+            }
+        }
+    }
+
+    private void parseSelectedPathToDML(){
+        if (deletePath.contains("wslzy")){
+            String[] nums = deletePath.split("wslzy");
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + nums[0] );
+            List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+            String path = dmLines.get(0).getImgpath();
+            Log.w(TAG, "parseSelectedPathToDMBZ: " + path);
+            for (int i = 0; i < nums.length; i++){
+                //LitePal.deleteAll(MPHOTO.class, "poic = ? and path = ?", POIC, nums[i]);
+                if (DataUtil.appearNumber(path, ".jpg") > 0) {
+                    if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                        if (path.indexOf(nums[i]) != 0)
+                            path = path.replace("|" + nums[i], "");
+                        else{
+                            path = path.replace(nums[i] + "|", "");
+                        }
+                    } else {
+                        path = "";
+                    }
+                }
+            }
+            DMLine poi = new DMLine();
+            poi.setImgpath(path);
+            poi.updateAll("mapid = ?", DML);
+        }else {
+            List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+            String path = dmLines.get(0).getImgpath();
+            if (DataUtil.appearNumber(path, ".jpg") > 0) {
+                DMLine dmLine = new DMLine();
+                if (DataUtil.appearNumber(path, ".jpg") > 1) {
+                    if (path.indexOf(deletePath) != 0)
+                        dmLine.setImgpath(path.replace("|" + deletePath, ""));
+                    else
+                        dmLine.setImgpath(path.replace(deletePath + "|", ""));
+                } else {
+                    dmLine.setImgpath("");
+                }
+                dmLine.updateAll("mapid = ?", DML);
             }
         }
     }
