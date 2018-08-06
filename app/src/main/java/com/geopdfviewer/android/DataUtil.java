@@ -1690,9 +1690,31 @@ public class DataUtil {
         sb = sb.append("SZDW").append(";");
         sb = sb.append("SCCJ").append(";");
         sb = sb.append("GG").append(";");
+        sb = sb.append("IMGPATH").append(";");
         sb = sb.append("x").append(";");
-        sb = sb.append("y").append(";");
-        sb = sb.append("IMGPATH").append("\n");
+        sb = sb.append("y").append("\n");
+        return sb;
+    }
+
+    public static StringBuffer makeTxtHeadDMP(StringBuffer sb){
+        sb = sb.append("xh").append(";");
+        sb = sb.append("qydm").append(";");
+        sb = sb.append("lbdm").append(";");
+        sb = sb.append("bzmc").append(";");
+        sb = sb.append("cym").append(";");
+        sb = sb.append("jc").append(";");
+        sb = sb.append("bm").append(";");
+        sb = sb.append("dfyz").append(";");
+        sb = sb.append("zt").append(";");
+        sb = sb.append("dmll").append(";");
+        sb = sb.append("dmhy").append(";");
+        sb = sb.append("lsyg").append(";");
+        sb = sb.append("dlstms").append(";");
+        sb = sb.append("zlly").append(";");
+        sb = sb.append("lat").append(";");
+        sb = sb.append("lng").append(";");
+        sb = sb.append("tapepath").append(";");
+        sb = sb.append("imgpath").append("\n");
         return sb;
     }
 
@@ -1739,13 +1761,31 @@ public class DataUtil {
             Log.w(TAG, "makeTxt: " + pois.size());
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
-            sb = makeTxtHead1(sb);
+            sb = makeTxtHeadDMP(sb);
             for (int i = 0; i < size_POI; i++) {
                 //属性表内容
                 sb.append(pois.get(i).getXH()).append(";").append(pois.get(i).getDY()).append(";").append(pois.get(i).getMC()).append(";").append(pois.get(i).getBZMC()).append(";").append(pois.get(i).getXZQMC()).append(";").append(pois.get(i).getXZQDM()).append(";").append(pois.get(i).getSZDW()).append(";").append(pois.get(i).getSCCJ()).append(";").append(pois.get(i).getGG()).append(";").append(pois.get(i).getIMGPATH()).append(";").append(pois.get(i).getLng()).append(";");
                 sb.append(pois.get(i).getLat()).append("\n");
             }
-            makeFile1(sb);
+            makeFileDMP(sb);
+        }catch (Exception e){
+            Log.w(TAG, e.toString());
+        }
+    }
+
+    public static void makeTxtDMP(){
+        try {
+            final List<DMPoint> pois = LitePal.findAll(DMPoint.class);
+            Log.w(TAG, "makeTxt: " + pois.size());
+            StringBuffer sb = new StringBuffer();
+            int size_POI = pois.size();
+            sb = makeTxtHeadDMP(sb);
+            for (int i = 0; i < size_POI; i++) {
+                //属性表内容
+                sb.append(pois.get(i).getXh()).append(";").append(pois.get(i).getQydm()).append(";").append(pois.get(i).getLbdm()).append(";").append(pois.get(i).getBzmc()).append(";").append(pois.get(i).getCym()).append(";").append(pois.get(i).getJc()).append(";").append(pois.get(i).getBm()).append(";").append(pois.get(i).getDfyz()).append(";").append(pois.get(i).getZt()).append(";").append(pois.get(i).getDmll()).append(";").append(pois.get(i).getDmhy()).append(";").append(pois.get(i).getLsyg()).append(";").append(pois.get(i).getDlstms()).append(";").append(pois.get(i).getZlly()).append(";").append(pois.get(i).getLat()).append(";").append(pois.get(i).getLng()).append(";").append(pois.get(i).getTapepath());
+                sb.append(pois.get(i).getImgpath()).append("\n");
+            }
+            makeFileDMP(sb);
         }catch (Exception e){
             Log.w(TAG, e.toString());
         }
@@ -1774,6 +1814,22 @@ public class DataUtil {
         }
         String outputPath = Long.toString(System.currentTimeMillis());
         File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", "DMBZ" + outputPath + ".txt");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        } catch (IOException e) {
+            Log.w(TAG, e.toString());
+        }
+    }
+
+    public static void makeFileDMP(StringBuffer sb){
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()) {
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", "DMP" + outputPath + ".txt");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1990,6 +2046,4 @@ public class DataUtil {
         getDMLJGX(Environment.getExternalStorageDirectory().toString() + DMLJGXPath);
         getDMXX(Environment.getExternalStorageDirectory().toString() + DMXXPath);
     }
-
-
 }

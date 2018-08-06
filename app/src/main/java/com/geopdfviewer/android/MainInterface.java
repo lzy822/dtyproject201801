@@ -182,6 +182,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     public static final int POI_DRAW_TYPE = 2;
     public static final int TRAIL_DRAW_TYPE = 1;
     public static final int NONE_DRAW_TYPE = 0;
+    public static final int LINE_DRAW_TYPE = 3;
 
     //记录当前使用者放缩情况
     private int isZoom = ZOOM_NONE;
@@ -385,6 +386,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     String[] strings;
     List<Trail> trails;
     SimpleDateFormat simpleDateFormat1;
+    //记录当前绘制的线要素
+    String drawLineFeature = "";
+    //记录当前记录的所有线要素列表
+    List<String> LineFeatures = new ArrayList<>();
 
     private SensorEventListener listener = new SensorEventListener() {
         @Override
@@ -679,6 +684,31 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 startActivity(intent);*/
 
             }
+
+            //记录线要素
+            if(isDrawType == LINE_DRAW_TYPE){
+                // TODO : 编辑添加线要素添加逻辑
+                whiteBlank_fab.setVisibility(View.GONE);
+                PointF ptf = getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY()));
+                Log.w(TAG, "onTaplzylzylzy: " + centerPointLoc.x);
+                if (drawLineFeature.isEmpty()){
+                    if (showMode == CENTERMODE){
+                        drawLineFeature = Float.toString(centerPointLoc.y) + "," + Float.toString(centerPointLoc.x) + ",0";
+                    }else {
+                        drawLineFeature = Float.toString(ptf.y) + "," + Float.toString(ptf.x) + ",0";
+                    }
+                }else {
+                    if (showMode == CENTERMODE){
+                        drawLineFeature = drawLineFeature + " " + Float.toString(centerPointLoc.y) + "," + Float.toString(centerPointLoc.x) + ",0";
+                    }else {
+                        drawLineFeature = drawLineFeature + " " + Float.toString(ptf.y) + "," + Float.toString(ptf.x) + ",0";
+                    }
+                }
+
+                Log.w(TAG, "onTaplzylzylzy: " + drawLineFeature);
+            }
+            ///////////////////
+
             if (isMessure) {
                 locError("messure_pts" + messure_pts);
                 poinum_messure++;
@@ -1016,6 +1046,28 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return false;
     }
 
+    private void drawLineFromLineString(final String mapid, final String line, final boolean isTL, boolean colorChange, Canvas canvas, Paint paint, Paint paint1){
+        String[] strings = line.split(" ");
+        for (int n = 0; n < strings.length - 1; n++){
+            String[] ptx1 = strings[n].split(",");
+            String[] ptx2 = strings[n + 1].split(",");
+            PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            if (isTL) {
+                if (colorChange) {
+                    paint.setColor(Color.WHITE);
+                } else paint.setColor(Color.BLACK);
+                colorChange = !colorChange;
+            }
+            if (hasQueriedLine && queriedLine.getMapid().equals(mapid))
+                canvas.drawLine(pointF.x, pointF.y, pointF1.x, pointF1.y, paint1);
+            else
+                canvas.drawLine(pointF.x, pointF.y, pointF1.x, pointF1.y, paint);
+            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
+            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
+        }
+    }
+
     private void drawDM(Canvas canvas){
         int ptnum = dmPoints.size();
         int linenum = dmLines.size();
@@ -1028,6 +1080,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 paintk.setStrokeWidth(0.15f);
                 paintk.setColor(Color.BLACK);
                 paintk.setStyle(Paint.Style.STROKE);*/
+
+            Paint paint1 = new Paint();
+            paint1.setStrokeWidth(10);
+            paint1.setStyle(Paint.Style.FILL);
+            paint1.setColor(Color.rgb(255, 0, 255));
             Paint paint = new Paint();
             paint.setStrokeWidth(10);
             paint.setStyle(Paint.Style.FILL);
@@ -1053,22 +1110,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             for (int k = 0; k < linenum1; k++){
                 //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
                 //String[] strings = mline.split(" ");
-                String[] strings = lines.get(k).split(" ");
-                for (int n = 0; n < strings.length - 1; n++){
-                    String[] ptx1 = strings[n].split(",");
-                    String[] ptx2 = strings[n + 1].split(",");
-                    PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    if (isTL) {
-                        if (colorChange) {
-                            paint.setColor(Color.WHITE);
-                        } else paint.setColor(Color.BLACK);
-                        colorChange = !colorChange;
-                    }
-                    canvas.drawLine(pointF.x, pointF.y, pointF1.x, pointF1.y, paint);
-                    //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
-                    //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
-                }
+                drawLineFromLineString(dmLines.get(j).getMapid(), lines.get(k), isTL, colorChange, canvas, paint, paint1);
             }
         }
         ///////////////////////
@@ -1922,6 +1964,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }*/
         }
+        if (isDrawType == LINE_DRAW_TYPE && ( LineFeatures.size() > 0 || !drawLineFeature.isEmpty())){
+            for (int i = 0; i < LineFeatures.size(); i++) {
+                drawLineFromLineString("", LineFeatures.get(i), false, false, canvas, paint9, paint2);
+            }
+            String mdrawLineFeature = drawLineFeature;
+            if (showMode == CENTERMODE){
+                mdrawLineFeature = mdrawLineFeature + " " + centerPointLoc.y + "," + centerPointLoc.x + ",0";
+            }
+            if (!drawLineFeature.isEmpty()) drawLineFromLineString("", mdrawLineFeature, false, false, canvas, paint9, paint2);
+        }
         if (isAutoTrans && (isZoom == ZOOM_IN || c_zoom == 10)){
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
@@ -2102,36 +2154,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             ptSpecial.setStyle(Paint.Style.FILL);
             canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
             canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
-        }
-        if (hasQueriedLine) {
-            int linenum = dmLines.size();
-            //显示线状要素
-            for (int j = 0; j < linenum; j++){
-                List<String> lines = queriedLine.getMultiline();
-                int linenum1 = lines.size();
-                /*Paint paintk = new Paint();
-                paintk.setStrokeWidth(0.15f);
-                paintk.setColor(Color.BLACK);
-                paintk.setStyle(Paint.Style.STROKE);*/
-                Paint paint = new Paint();
-                paint.setStrokeWidth(10);
-                paint.setStyle(Paint.Style.FILL);
-                paint.setColor(Color.rgb(255, 0, 255));
-                for (int kk = 0; kk < linenum1; kk++){
-                    //String mline = lineUtil.getExternalPolygon(lines.get(kk), 0.001);
-                    //String[] strings = mline.split(" ");
-                    String[] strings = lines.get(kk).split(" ");
-                    for (int n = 0; n < strings.length - 1; n++){
-                        String[] ptx1 = strings[n].split(",");
-                        String[] ptx2 = strings[n + 1].split(",");
-                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx2[1]), Float.valueOf(ptx2[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        canvas.drawLine(pointF.x, pointF.y, pointF1.x, pointF1.y, paint);
-                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
-                        //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
-                    }
-                }
-            }
         }
         if (isMessure) drawMessureLine(canvas);
     }
@@ -4762,105 +4784,96 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }else {
                     toolbar.setTitle("0.00米 , " + "0.00米");
                 }*/
-                distanceSum = 0;
-                poinum_messure = 0;
-                messure_pts = "";
-                switch (distancesLatLngs.size()){
-                    case 0:
-                        distancesLatLngs.add(distanceLatLngs);
-                        break;
-                    case 1:
-                        distancesLatLngs.add(distanceLatLngs1);
-                        break;
-                    case 2:
-                        distancesLatLngs.add(distanceLatLngs2);
-                        break;
-                    default:
-                        Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
-                        break;
+                if (isDrawType != LINE_DRAW_TYPE) {
+                    ////测量
+                    distanceSum = 0;
+                    poinum_messure = 0;
+                    messure_pts = "";
+                    switch (distancesLatLngs.size()) {
+                        case 0:
+                            distancesLatLngs.add(distanceLatLngs);
+                            break;
+                        case 1:
+                            distancesLatLngs.add(distanceLatLngs1);
+                            break;
+                        case 2:
+                            distancesLatLngs.add(distanceLatLngs2);
+                            break;
+                        default:
+                            Toast.makeText(MainInterface.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }else {
+                    ////////////////////
+                    /////记录线要素
+                    // TODO ： 设计并完成添加线要素逻辑
+
+                    String lineFeature = drawLineFeature;
+                    drawLineFeature = "";
+                    LineFeatures.add(lineFeature);
                 }
+                ////////////////////////
                 return true;
             }
         });
         cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                distanceSum = 0;
-                distancesLatLngs.clear();
-                distanceLatLngs.clear();
-                distanceLatLngs1.clear();
-                distanceLatLngs2.clear();
-                if (showMode == CENTERMODE) isQuery = true;
-                else isQuery = false;
-                centerPointModeBt.setVisibility(View.VISIBLE);
-                isMessure = false;
-                poinum_messure = 0;
-                messure_pts = "";
-                delete_messure_fab.setVisibility(View.GONE);
-                backpt_messure_fab.setVisibility(View.GONE);
-                cancel_messure_fab.setVisibility(View.GONE);
-                whiteBlank_fab.setVisibility(View.VISIBLE);
-                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                    toolbar.setTitle("轨迹记录中");
-                }else toolbar.setTitle(pdfFileName);
+                if (isDrawType != LINE_DRAW_TYPE) {
+                    /////////////////
+                    distanceSum = 0;
+                    distancesLatLngs.clear();
+                    distanceLatLngs.clear();
+                    distanceLatLngs1.clear();
+                    distanceLatLngs2.clear();
+                    if (showMode == CENTERMODE) isQuery = true;
+                    else isQuery = false;
+                    centerPointModeBt.setVisibility(View.VISIBLE);
+                    isMessure = false;
+                    poinum_messure = 0;
+                    messure_pts = "";
+                    delete_messure_fab.setVisibility(View.GONE);
+                    backpt_messure_fab.setVisibility(View.GONE);
+                    cancel_messure_fab.setVisibility(View.GONE);
+                    whiteBlank_fab.setVisibility(View.VISIBLE);
+                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("轨迹记录中");
+                    } else toolbar.setTitle(pdfFileName);
+                }else {
+                    ////////////////////
+                    /////记录线要素
+                    if (!drawLineFeature.isEmpty()) {
+                        String lineFeature = drawLineFeature;
+                        drawLineFeature = "";
+                        LineFeatures.add(lineFeature);
+                    }
+                    delete_messure_fab.setVisibility(View.GONE);
+                    backpt_messure_fab.setVisibility(View.GONE);
+                    cancel_messure_fab.setVisibility(View.GONE);
+                    isDrawType = NONE_DRAW_TYPE;
+                    String time = String.valueOf(System.currentTimeMillis());
+                    DMLine dmLine = new DMLine();
+                    dmLine.setXh(Integer.toString(dmLines.size() + 1));
+                    dmLine.setMapid(time);
+                    dmLine.setDimingid(time);
+                    dmLine.setMultiline(LineFeatures);
+                    dmLine.save();
+                    LineFeatures.clear();
+                    dmLines = LitePal.findAll(DMLine.class);
+                    GoDMLSinglePOIPage(time);
+                }
                 pdfView.zoomWithAnimation(c_zoom);
+                ////////////////////////
             }
         });
         delete_messure_fab = (FloatingActionButton) findViewById(R.id.delete_messure);
         delete_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                distanceSum = 0;
-                switch (distancesLatLngs.size()){
-                    case 0:
-                        distanceLatLngs.clear();
-                        break;
-                    case 1:
-                        distanceLatLngs1.clear();
-                        distancesLatLngs.remove(0);
-                        break;
-                    case 2:
-                        distanceLatLngs2.clear();
-                        distancesLatLngs.remove(1);
-                        break;
-                    default:
-                        distanceLatLngs2.clear();
-                        distancesLatLngs.remove(2);
-                        break;
-                }
-                messure_pts = "";
-                poinum_messure = 0;
-                if (isDrawTrail == TRAIL_DRAW_TYPE){
-                    toolbar.setTitle("正在测量(轨迹记录中)");
-                }else toolbar.setTitle("正在测量");
-                pdfView.zoomWithAnimation(c_zoom);
-            }
-        });
-        backpt_messure_fab = (FloatingActionButton) findViewById(R.id.backpts_messure);
-        backpt_messure_fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (poinum_messure > 1) {
-                //if (distancesLatLngs.get(distancesLatLngs.size() - 1).size() > 1) {
-                    switch (distancesLatLngs.size()){
-                        case 0:
-                            distanceLatLngs.remove(distanceLatLngs.size() - 1);
-                            break;
-                        case 1:
-                            distanceLatLngs1.remove(distanceLatLngs1.size() - 1);
-                            break;
-                        case 2:
-                            distanceLatLngs2.remove(distanceLatLngs2.size() - 1);
-                            break;
-                        default:
-                            break;
-                    }
-                    messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
-                    messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
-                    poinum_messure--;
-                    pdfView.zoomWithAnimation(c_zoom);
-                }else {
-                    switch (distancesLatLngs.size()){
+                if (isDrawType != LINE_DRAW_TYPE) {
+                    ////////////////////////////////////
+                    distanceSum = 0;
+                    switch (distancesLatLngs.size()) {
                         case 0:
                             distanceLatLngs.clear();
                             break;
@@ -4877,11 +4890,85 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             distancesLatLngs.remove(2);
                             break;
                     }
-                    distanceSum = 0;
                     messure_pts = "";
                     poinum_messure = 0;
-                    pdfView.zoomWithAnimation(c_zoom);
+                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在测量(轨迹记录中)");
+                    } else toolbar.setTitle("正在测量");
+                }else {
+                    ////////////////////
+                    /////记录线要素
+                    if (drawLineFeature.isEmpty() && LineFeatures.size() != 0){
+                        drawLineFeature = LineFeatures.get(LineFeatures.size() - 1);
+                        LineFeatures.remove(LineFeatures.size() - 1);
+                    }else
+                        drawLineFeature = "";
+                    ////////////////////////
                 }
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        backpt_messure_fab = (FloatingActionButton) findViewById(R.id.backpts_messure);
+        backpt_messure_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isDrawType != LINE_DRAW_TYPE) {
+                    ///////////////////////////
+                    if (poinum_messure > 1) {
+                        //if (distancesLatLngs.get(distancesLatLngs.size() - 1).size() > 1) {
+                        switch (distancesLatLngs.size()) {
+                            case 0:
+                                distanceLatLngs.remove(distanceLatLngs.size() - 1);
+                                break;
+                            case 1:
+                                distanceLatLngs1.remove(distanceLatLngs1.size() - 1);
+                                break;
+                            case 2:
+                                distanceLatLngs2.remove(distanceLatLngs2.size() - 1);
+                                break;
+                            default:
+                                break;
+                        }
+                        messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                        messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                        poinum_messure--;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    } else {
+                        switch (distancesLatLngs.size()) {
+                            case 0:
+                                distanceLatLngs.clear();
+                                break;
+                            case 1:
+                                distanceLatLngs1.clear();
+                                distancesLatLngs.remove(0);
+                                break;
+                            case 2:
+                                distanceLatLngs2.clear();
+                                distancesLatLngs.remove(1);
+                                break;
+                            default:
+                                distanceLatLngs2.clear();
+                                distancesLatLngs.remove(2);
+                                break;
+                        }
+                        distanceSum = 0;
+                        messure_pts = "";
+                        poinum_messure = 0;
+                    }
+                }else {
+                    ////////////////////
+                    /////记录线要素
+                    if (drawLineFeature.isEmpty() && LineFeatures.size() != 0){
+                        drawLineFeature = LineFeatures.get(LineFeatures.size() - 1);
+                        LineFeatures.remove(LineFeatures.size() - 1);
+                    }else {
+                        if (DataUtil.appearNumber(drawLineFeature, " ") > 0)
+                            drawLineFeature = drawLineFeature.substring(0, drawLineFeature.lastIndexOf(" "));
+                        else drawLineFeature = "";
+                    }
+                    ////////////////////////
+                }
+                pdfView.zoomWithAnimation(c_zoom);
             }
         });
         //初始化白板要素List
@@ -5112,26 +5199,67 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         addPoi_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                poiLayerBt.setChecked(true);
-                showPOI = true;
-                //pdfView.resetZoomWithAnimation();
-                pdfView.zoomWithAnimation(c_zoom);
-                if (isDrawType == POI_DRAW_TYPE){
-                    isDrawType = NONE_DRAW_TYPE;
-                    if (isDrawTrail == TRAIL_DRAW_TYPE){
-                        toolbar.setTitle("正在记录轨迹");
-                    }else toolbar.setTitle(pdfFileName);
-                    if (showMode == CENTERMODE) isQuery = true;
-                    else isQuery = false;
-                    pdfView.zoomWithAnimation(c_zoom);
-                }else {
-                    isDrawType = POI_DRAW_TYPE;
-                    isQuery = false;
-                    if (isDrawTrail == TRAIL_DRAW_TYPE){
-                        toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
-                    }else toolbar.setTitle("正在插放兴趣点");
-                    isMessureType = MESSURE_NONE_TYPE;
-                }
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                dialog.setTitle("提示");
+                dialog.setMessage("需要添加什么要素?");
+                dialog.setCancelable(false);
+                dialog.setPositiveButton("点要素", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        poiLayerBt.setChecked(true);
+                        showPOI = true;
+                        //pdfView.resetZoomWithAnimation();
+                        pdfView.zoomWithAnimation(c_zoom);
+                        if (isDrawType == POI_DRAW_TYPE){
+                            isDrawType = NONE_DRAW_TYPE;
+                            if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                toolbar.setTitle("正在记录轨迹");
+                            }else toolbar.setTitle(pdfFileName);
+                            if (showMode == CENTERMODE) isQuery = true;
+                            else isQuery = false;
+                            pdfView.zoomWithAnimation(c_zoom);
+                        }else {
+                            isDrawType = POI_DRAW_TYPE;
+                            isQuery = false;
+                            if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                            }else toolbar.setTitle("正在插放兴趣点");
+                            isMessureType = MESSURE_NONE_TYPE;
+                        }
+                    }
+                });
+                dialog.setNegativeButton("线要素(地名类型,需打开地名功能)", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        backpt_messure_fab.setVisibility(View.VISIBLE);
+                        cancel_messure_fab.setVisibility(View.VISIBLE);
+                        delete_messure_fab.setVisibility(View.VISIBLE);
+                        poiLayerBt.setChecked(false);
+                        showPOI = false;
+                        pdfView.zoomWithAnimation(c_zoom);
+                        if (isDrawType == LINE_DRAW_TYPE){
+                            isDrawType = NONE_DRAW_TYPE;
+                            if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                toolbar.setTitle("正在记录轨迹");
+                            }else toolbar.setTitle(pdfFileName);
+                            if (showMode == CENTERMODE) isQuery = true;
+                            else isQuery = false;
+                            pdfView.zoomWithAnimation(c_zoom);
+                        }else {
+                            isDrawType = LINE_DRAW_TYPE;
+                            drawLineFeature = "";
+                            LineFeatures.clear();
+                            isQuery = false;
+                            if (isDrawTrail == TRAIL_DRAW_TYPE){
+                                toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                            }else toolbar.setTitle("正在插放兴趣点");
+                            isMessureType = MESSURE_NONE_TYPE;
+                        }
+                    }
+                });
+                dialog.show();
+
+
             }
         });
         query_poi_imgbt.setOnClickListener(new View.OnClickListener() {
@@ -5603,6 +5731,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     @Override
     protected void onResume() {
         super.onResume();
+        dmLines = LitePal.findAll(DMLine.class);
         SharedPreferences pref = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE);
         String poic = pref.getString("poic", "");
         SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
