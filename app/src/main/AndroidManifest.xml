@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
+        android:hardwareAccelerated="true"
         android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,10 +22,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:hardwareAccelerated="true"
             android:name=".MainInterface"
             android:label="@string/app_showname"
             android:screenOrientation="portrait" />
         <activity
+            android:hardwareAccelerated="true"
             android:name=".select_page"
             android:label="图志"
             android:launchMode="singleTask" />
@@ -32,14 +35,18 @@
             android:name=".info_page"
             android:label="地理信息显示页面" />
         <activity
+            android:hardwareAccelerated="true"
             android:name=".singlepoi"
             android:label="单个POI点信息"
             android:screenOrientation="portrait" />
         <activity
+            android:hardwareAccelerated="true"
             android:name=".pois"
             android:label="所有POI信息" />
-        <activity android:name=".photoshow" />
-        <activity android:name=".tapeshow" />
+        <activity android:name=".photoshow"
+            android:hardwareAccelerated="true" />
+        <activity android:name=".tapeshow"
+            android:hardwareAccelerated="true" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

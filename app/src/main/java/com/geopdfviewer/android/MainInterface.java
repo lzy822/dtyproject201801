@@ -15,6 +15,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
@@ -1068,6 +1069,34 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
+    private void drawLineFromLineString1(final String mapid, final String line, final boolean isTL, boolean colorChange, Canvas canvas, Paint paint, Paint paint1){
+        String[] strings = line.split(" ");
+        List<PointF> pointFS = new ArrayList<>();
+        for (int n = 0; n < strings.length; n++){
+            String[] ptx1 = strings[n].split(",");
+            PointF pointF = LatLng.getPixLocFromGeoL(new PointF(Float.valueOf(ptx1[1]), Float.valueOf(ptx1[0])), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            pointFS.add(pointF);
+            }
+            //Douglas douglas = new Douglas(pointFS);
+            //pointFS = douglas.douglasPeucker();
+        for (int n = 0; n < pointFS.size() - 1; n++){
+            PointF pointF = LatLng.getPixLocFromGeoL(pointFS.get(n), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            PointF pointF1 = LatLng.getPixLocFromGeoL(pointFS.get(n + 1), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            if (isTL) {
+                if (colorChange) {
+                    paint.setColor(Color.WHITE);
+                } else paint.setColor(Color.BLACK);
+                colorChange = !colorChange;
+            }
+            if (hasQueriedLine && queriedLine.getMapid().equals(mapid))
+                canvas.drawLine(pointF.x, pointF.y, pointF1.x, pointF1.y, paint1);
+            else
+                canvas.drawLine(pointF.x, pointF.y, pointF1.x, pointF1.y, paint);
+            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paint);
+            //canvas.drawRoundRect(pointF.y>pointF1.y?pointF1.y:pointF.y, pointF.x>pointF1.x?pointF.x:pointF1.x, pointF.y>pointF1.y?pointF.y:pointF1.y, pointF.x>pointF1.x?pointF1.x:pointF.x, 0.5f,  0.5f, paintk);
+        }
+    }
+
     private void drawDM(Canvas canvas){
         int ptnum = dmPoints.size();
         int linenum = dmLines.size();
@@ -1083,11 +1112,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
             Paint paint1 = new Paint();
             paint1.setStrokeWidth(10);
-            paint1.setStyle(Paint.Style.FILL);
+            paint1.setStyle(Paint.Style.STROKE);
             paint1.setColor(Color.rgb(255, 0, 255));
             Paint paint = new Paint();
             paint.setStrokeWidth(10);
-            paint.setStyle(Paint.Style.FILL);
+            paint.setStyle(Paint.Style.STROKE);
             if (dmLines.get(j).getLbdm().substring(0,3).contains("121"))
                 paint.setColor(Color.rgb(201, 233, 254));
             else if (dmLines.get(j).getLbdm().substring(0,3).contains("232"))

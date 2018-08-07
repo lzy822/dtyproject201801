@@ -1502,15 +1502,37 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
-        Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
-
-        String str = "asdf.jpg|asdfad.jpg";
+        //Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
+        /*Point point0 = new Point(1, 4);
+        Point point1 = new Point(2, 3);
+        Point point2 = new Point(4, 2);
+        Point point3 = new Point(6, 6);
+        Point point4 = new Point(7, 7);
+        Point point5 = new Point(8, 6);
+        Point point6 = new Point(9, 5);
+        Point point7 = new Point(10, 10);
+        List<Point> list = new ArrayList<>();
+        list.add(point0);
+        list.add(point1);
+        list.add(point2);
+        list.add(point3);
+        list.add(point4);
+        list.add(point5);
+        list.add(point6);
+        list.add(point7);
+        Douglas douglas = new Douglas(list);
+        List<Point> points = douglas.douglasPeucker();
+        for (int i = 0; i < points.size(); i++) {
+            Log.w(TAG, "(" + points.get(i).getX() + ","
+                    + points.get(i).getY() + ")");
+        }*/
+        /*String str = "asdf.jpg|asdfad.jpg";
         String str1 = "asdf.jpg";
         Log.w(TAG, "onCreate: " + str);
         Log.w(TAG, "onCreate: " + str.indexOf("|"));
         Log.w(TAG, "onCreate: " + str.contains("|"));
         Log.w(TAG, "onCreate: " + str1.contains("|"));
-        Log.w(TAG, "onCreate: " + DataUtil.appearNumber(str, "\\|"));
+        Log.w(TAG, "onCreate: " + DataUtil.appearNumber(str, "\\|"));*/
         ///////获取地名数据
         /*LitePal.deleteAll(DMLine.class);
         LitePal.deleteAll(DMPoint.class);
