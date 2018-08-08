@@ -7,6 +7,42 @@ public class Lines_WhiteBlank extends LitePalSupport {
     private String lines;
     private int color;
     private int mmid;
+    private float maxlat;
+    private float maxlng;
+    private float minlat;
+    private float minlng;
+
+    public float getMaxlat() {
+        return maxlat;
+    }
+
+    public void setMaxlat(float maxlat) {
+        this.maxlat = maxlat;
+    }
+
+    public float getMaxlng() {
+        return maxlng;
+    }
+
+    public void setMaxlng(float maxlng) {
+        this.maxlng = maxlng;
+    }
+
+    public float getMinlat() {
+        return minlat;
+    }
+
+    public void setMinlat(float minlat) {
+        this.minlat = minlat;
+    }
+
+    public float getMinlng() {
+        return minlng;
+    }
+
+    public void setMinlng(float minlng) {
+        this.minlng = minlng;
+    }
 
     public String getIc() {
         return ic;

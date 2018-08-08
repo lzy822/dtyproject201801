@@ -1074,6 +1074,8 @@ public class DataUtil {
             float maxlng = 0;
             float minlat = 0;
             float minlng = 0;
+            float lat = 0;
+            float lng = 0;
             int linenum = 0;
             while((line = bufferedReader.readLine()) != null) {
                 if (line.contains("<table")) readingTable++;
@@ -1119,7 +1121,7 @@ public class DataUtil {
                         READ_TYPE = NONE_TYPE;
                         linenum = 0;
                         coordinate = null;
-                        maxlat = minlat = maxlng = minlng = 0;
+                        maxlat = minlat = maxlng = minlng = lat = lng = 0;
                         ///////////////////////
                     }
                     /*if (line.contains("</Point>")){
@@ -1140,17 +1142,12 @@ public class DataUtil {
                                 String[] strings = coordinate.split(" ");
                                 for (int kk = 0; kk < strings.length; kk++){
                                     String[] strings1 = strings[kk].split(",");
-                                    if (kk > 0){
-                                        float lat = Float.valueOf(strings1[1]);
-                                        float lng = Float.valueOf(strings1[0]);
+                                        lat = Float.valueOf(strings1[1]);
+                                        lng = Float.valueOf(strings1[0]);
                                         if (lat > maxlat) maxlat = lat;
                                         else if (lat < minlat) minlat = lat;
                                         else if (lng > maxlng) maxlat = lng;
                                         else if (lng < minlng) maxlat = lng;
-                                    }else {
-                                        maxlat = minlat = Float.valueOf(strings1[1]);
-                                        maxlng = minlng = Float.valueOf(strings1[0]);
-                                    }
                                 }
                             }
                             else Log.w(TAG, "重要错误");
@@ -1852,8 +1849,10 @@ public class DataUtil {
         }
         return arr;
     }
-    public static String readtxt(String path) {//按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
-//        String result = "";
+
+    public static String readtxt(String path) {
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
         StringBuffer txtContent = new StringBuffer();
         File file = new File(path);
         try {
@@ -1949,8 +1948,6 @@ public class DataUtil {
         }
     }
 
-
-
     public static void getDMXX(String path){
         String str = DataUtil.readtxt(Environment.getExternalStorageDirectory().toString() + "/20180716/地名信息.txt");
         str = str.replace("地名信息", "");
@@ -2045,5 +2042,49 @@ public class DataUtil {
         getKML3(Environment.getExternalStorageDirectory().toString() + LineKmlPath);
         getDMLJGX(Environment.getExternalStorageDirectory().toString() + DMLJGXPath);
         getDMXX(Environment.getExternalStorageDirectory().toString() + DMXXPath);
+    }
+
+    public static void getSpatialIndex(){
+        List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
+        for (int i = 0; i < lines_whiteBlanks.size(); i++) {
+            Log.w(TAG, "getSpatialIndex1: " + lines_whiteBlanks.get(i).getLines());
+            float[] spatialIndex = getSpatialIndex(lines_whiteBlanks.get(i).getLines());
+            Lines_WhiteBlank l = new Lines_WhiteBlank();
+            l.setMaxlat(spatialIndex[0]);
+            l.setMinlat(spatialIndex[1]);
+            l.setMaxlng(spatialIndex[2]);
+            l.setMinlng(spatialIndex[3]);
+            l.updateAll("mmid = ?", Integer.toString(lines_whiteBlanks.get(i).getMmid()));
+        }
+        List<Trail> trails = LitePal.findAll(Trail.class);
+        for (int i = 0; i < trails.size(); i++) {
+            Log.w(TAG, "getSpatialIndex2: " + trails.get(i).getPath());
+            float[] spatialIndex = getSpatialIndex(trails.get(i).getPath());
+            Trail l = new Trail();
+            l.setMaxlat(spatialIndex[0]);
+            l.setMinlat(spatialIndex[1]);
+            l.setMaxlng(spatialIndex[2]);
+            l.setMinlng(spatialIndex[3]);
+            l.updateAll("name = ?", trails.get(i).getName());
+        }
+    }
+    public static float[] getSpatialIndex(String line){
+        String[] strings = line.split(" ");
+        float maxlat = 0;
+        float minlat = 0;
+        float maxlng = 0;
+        float minlng = 0;
+        for (int i = 0; i < strings.length; i = i + 2){
+            float temp = Float.valueOf(strings[i]);
+            if (temp > maxlat) maxlat = temp;
+            else if (temp < minlat) minlat = temp;
+        }
+        for (int i = 1; i < strings.length; i = i + 2){
+            float temp = Float.valueOf(strings[i]);
+            if (temp > maxlng) maxlng = temp;
+            else if (temp < minlng) minlng = temp;
+        }
+        float[] spatialIndex = {maxlat, minlat, maxlng, minlng};
+        return spatialIndex;
     }
 }

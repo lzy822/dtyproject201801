@@ -15,6 +15,42 @@ public class Trail extends LitePalSupport {
     private String path;
     private String starttime;
     private String endtime;
+    private float maxlat;
+    private float maxlng;
+    private float minlat;
+    private float minlng;
+
+    public float getMaxlat() {
+        return maxlat;
+    }
+
+    public void setMaxlat(float maxlat) {
+        this.maxlat = maxlat;
+    }
+
+    public float getMaxlng() {
+        return maxlng;
+    }
+
+    public void setMaxlng(float maxlng) {
+        this.maxlng = maxlng;
+    }
+
+    public float getMinlat() {
+        return minlat;
+    }
+
+    public void setMinlat(float minlat) {
+        this.minlat = minlat;
+    }
+
+    public float getMinlng() {
+        return minlng;
+    }
+
+    public void setMinlng(float minlng) {
+        this.minlng = minlng;
+    }
 
     public String getStarttime() {
         return starttime;

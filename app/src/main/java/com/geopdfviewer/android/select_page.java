@@ -1502,6 +1502,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+        //DataUtil.getSpatialIndex();
+        LitePal.deleteAll(Trail.class);
         //Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
         /*Point point0 = new Point(1, 4);
         Point point1 = new Point(2, 3);

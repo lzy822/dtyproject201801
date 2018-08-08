@@ -1136,11 +1136,17 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             else if (dmLines.get(j).getLbdm().substring(0,3).contains("244"))
                 paint.setColor(Color.BLACK);
             boolean colorChange = false;
-            for (int k = 0; k < linenum1; k++){
-                //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
-                //String[] strings = mline.split(" ");
-                drawLineFromLineString(dmLines.get(j).getMapid(), lines.get(k), isTL, colorChange, canvas, paint, paint1);
-            }
+            float maxlat = dmLines.get(j).getMaxlat();
+            float minlat = dmLines.get(j).getMinlat();
+            float maxlng = dmLines.get(j).getMaxlng();
+            float minlng = dmLines.get(j).getMinlng();
+            if ((maxlat <= max_lat && maxlat >= min_lat) || (maxlng <= max_long && maxlng >= min_long) || (minlat >= min_lat && minlat <= max_lat) || (minlng <= max_long && minlng >= min_long) || (maxlat >= max_lat && minlat <= min_lat) || (maxlng >= max_long && minlng <= min_long)) {
+                for (int k = 0; k < linenum1; k++) {
+                    //String mline = lineUtil.getExternalPolygon(lines.get(k), 0.001);
+                    //String[] strings = mline.split(" ");
+                    drawLineFromLineString(dmLines.get(j).getMapid(), lines.get(k), isTL, colorChange, canvas, paint, paint1);
+                }
+            }else Log.w(TAG, "drawDM: " + dmLines.get(j).getBzmc() + "; " + dmLines.get(j).getMinlng() + "; " + dmLines.get(j).getMaxlng() + "; " + dmLines.get(j).getMinlat() + "; " + dmLines.get(j).getMaxlat());
         }
         ///////////////////////
         List<PointF> showpts = new ArrayList<>();
@@ -3730,6 +3736,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         lines.setColor(color_Whiteblank);
                         lines.setLines(whiteBlankPt);
                         lines.setMmid(size);
+                        float[] spatialIndex = DataUtil.getSpatialIndex(whiteBlankPt);
+                        lines.setMaxlat(spatialIndex[0]);
+                        lines.setMinlat(spatialIndex[1]);
+                        lines.setMaxlng(spatialIndex[2]);
+                        lines.setMinlng(spatialIndex[3]);
                         lines.save();
                         break;
                 }

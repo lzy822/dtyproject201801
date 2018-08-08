@@ -116,6 +116,11 @@ public class RecordTrail extends Service {
         trail.setIc(m_ic);
         trail.setName("路径" + Integer.toString(trails.size() + 1));
         trail.setPath(m_cTrail);
+        float[] spatialIndex = DataUtil.getSpatialIndex(m_cTrail);
+        trail.setMaxlat(spatialIndex[0]);
+        trail.setMinlat(spatialIndex[1]);
+        trail.setMaxlng(spatialIndex[2]);
+        trail.setMinlng(spatialIndex[3]);
         trail.save();
     }
 
