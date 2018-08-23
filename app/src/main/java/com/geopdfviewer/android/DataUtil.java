@@ -398,6 +398,7 @@ public class DataUtil {
         return str;
 
     }
+
     public static String findNamefromSample(String str){
         str = str.substring(4, str.indexOf("."));
         return str;
