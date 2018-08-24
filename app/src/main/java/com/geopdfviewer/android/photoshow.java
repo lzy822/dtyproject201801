@@ -197,26 +197,28 @@ public class photoshow extends AppCompatActivity {
         mPhotobjList.clear();
         List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
         String ImgPathTemp = dmLines.get(0).getImgpath();
-        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
-        Log.w(TAG, "run: " + ImgPathTemp);
-        for (int k = 0; k < imgPath.length; k++){
-            if (imgPath.length > 1) {
-                if (k < imgPath.length - 1) {
-                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
-                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
-                }else imgPath[k] = ImgPathTemp;
-            }else imgPath[k] = ImgPathTemp;
-        }
-        for (int kk = 0; kk < imgPath.length; kk++) {
-            String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
-            String path;
-            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
-                path = rootpath + imgPath[kk];
-            } else {
-                path = imgPath[kk];
+        if (ImgPathTemp != null) {
+            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
+            Log.w(TAG, "run: " + ImgPathTemp);
+            for (int k = 0; k < imgPath.length; k++) {
+                if (imgPath.length > 1) {
+                    if (k < imgPath.length - 1) {
+                        imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                        ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                    } else imgPath[k] = ImgPathTemp;
+                } else imgPath[k] = ImgPathTemp;
             }
-            mPhotobj mphotobj = new mPhotobj(path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), dmLines.get(0).getTime(), path);
-            mPhotobjList.add(mphotobj);
+            for (int kk = 0; kk < imgPath.length; kk++) {
+                String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
+                String path;
+                if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                    path = rootpath + imgPath[kk];
+                } else {
+                    path = imgPath[kk];
+                }
+                mPhotobj mphotobj = new mPhotobj(path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", ""), dmLines.get(0).getTime(), path);
+                mPhotobjList.add(mphotobj);
+            }
         }
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_photo);
         layoutManager = new GridLayoutManager(this,1);
@@ -419,142 +421,71 @@ public class photoshow extends AppCompatActivity {
                         }
                     }
                 }else if (POIType == 1){
-                    List<DMBZ> dmbzList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
-                    if (dmbzList.size() >= 1) {
-                        String ImgPathTemp = dmbzList.get(0).getIMGPATH();
-                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
-                        Log.w(TAG, "run: " + ImgPathTemp);
-                        for (int k = 0; k < imgPath.length; k++) {
-                            if (imgPath.length > 1) {
-                                if (k < imgPath.length - 1) {
-                                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
-                                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
-                                }else imgPath[k] = ImgPathTemp;
-                            }else imgPath[k] = ImgPathTemp;
-                        }
-                        for (int kk = 0; kk < imgPath.length; kk++) {
-                            String rootpath = Environment.getExternalStorageDirectory().toString() + "/地名标志照片/";
-                            String path;
-                            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
-                                path = rootpath + imgPath[kk];
-                            } else {
-                                path = imgPath[kk];
-                            }
-                            File file = new File(path);
-                            if (file.exists()) {
-                                try {
-                                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
-                                    int degree = DataUtil.getPicRotate(path);
-                                    if (degree != 0) {
-                                        Matrix m = new Matrix();
-                                        m.setRotate(degree); // 旋转angle度
-                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                                    }
-                                    bts.add(new bt(bitmap, imgPath[kk]));
-                                } catch (IOException e) {
-                                    Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
-                                    bts.add(new bt(bitmap, ""));
-                                }
-                            } else {
-                                Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
-                                bts.add(new bt(bitmap, ""));
-                            }
-                        }
+                    List<DMBZ> dmList = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                    if (dmList.size() >= 1) {
+                        String ImgPathTemp = dmList.get(0).getIMGPATH();
+                        openImg(ImgPathTemp);
                     }
                 }else if (POIType == 2){
-                    List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
-                    if (dmLines.size() >= 1) {
-                        String ImgPathTemp = dmLines.get(0).getImgpath();
-                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
-                        Log.w(TAG, "run: " + ImgPathTemp);
-                        for (int k = 0; k < imgPath.length; k++) {
-                            if (imgPath.length > 1) {
-                                if (k < imgPath.length - 1) {
-                                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
-                                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
-                                }else imgPath[k] = ImgPathTemp;
-                            }else imgPath[k] = ImgPathTemp;
-                        }
-                        for (int kk = 0; kk < imgPath.length; kk++) {
-                            String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
-                            String path;
-                            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
-                                path = rootpath + imgPath[kk];
-                            } else {
-                                path = imgPath[kk];
-                            }
-                            File file = new File(path);
-                            if (file.exists()) {
-                                try {
-                                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
-                                    int degree = DataUtil.getPicRotate(path);
-                                    if (degree != 0) {
-                                        Matrix m = new Matrix();
-                                        m.setRotate(degree); // 旋转angle度
-                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                                    }
-                                    bts.add(new bt(bitmap, imgPath[kk]));
-                                } catch (IOException e) {
-                                    Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
-                                    bts.add(new bt(bitmap, ""));
-                                }
-                            } else {
-                                Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
-                                bts.add(new bt(bitmap, ""));
-                            }
-                        }
+                    List<DMLine> dmList = LitePal.where("mapid = ?", DML).find(DMLine.class);
+                    if (dmList.size() >= 1) {
+                        String ImgPathTemp = dmList.get(0).getImgpath();
+                        openImg(ImgPathTemp);
                     }
                 }else if (POIType == 3){
-                    List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
-                    if (dmPoints.size() >= 1) {
-                        String ImgPathTemp = dmPoints.get(0).getImgpath();
-                        String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
-                        Log.w(TAG, "run: " + ImgPathTemp);
-                        for (int k = 0; k < imgPath.length; k++) {
-                            if (imgPath.length > 1) {
-                                if (k < imgPath.length - 1) {
-                                    imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
-                                    ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
-                                }else imgPath[k] = ImgPathTemp;
-                            }else imgPath[k] = ImgPathTemp;
-                        }
-                        for (int kk = 0; kk < imgPath.length; kk++) {
-                            String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
-                            String path;
-                            if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
-                                path = rootpath + imgPath[kk];
-                            } else {
-                                path = imgPath[kk];
-                            }
-                            File file = new File(path);
-                            if (file.exists()) {
-                                try {
-                                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
-                                    int degree = DataUtil.getPicRotate(path);
-                                    if (degree != 0) {
-                                        Matrix m = new Matrix();
-                                        m.setRotate(degree); // 旋转angle度
-                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                                    }
-                                    bts.add(new bt(bitmap, imgPath[kk]));
-                                } catch (IOException e) {
-                                    Log.w(TAG, e.toString());
-                                    Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
-                                    bts.add(new bt(bitmap, ""));
-                                }
-                            } else {
-                                Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
-                                bts.add(new bt(bitmap, ""));
-                            }
-                        }
+                    List<DMPoint> dmList = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+                    if (dmList.size() >= 1) {
+                        String ImgPathTemp = dmList.get(0).getImgpath();
+                        openImg(ImgPathTemp);
                     }
                 }
                 isCreateBitmap = true;
             }
         }).start();
+    }
+
+    private void openImg(String ImgPathTemp){
+        if (ImgPathTemp != null) {
+            String[] imgPath = new String[DataUtil.appearNumber(ImgPathTemp, "\\|") + 1];
+            Log.w(TAG, "run: " + ImgPathTemp);
+            for (int k = 0; k < imgPath.length; k++) {
+                if (imgPath.length > 1) {
+                    if (k < imgPath.length - 1) {
+                        imgPath[k] = ImgPathTemp.substring(0, ImgPathTemp.indexOf("|"));
+                        ImgPathTemp = ImgPathTemp.substring(ImgPathTemp.indexOf("|") + 1);
+                    } else imgPath[k] = ImgPathTemp;
+                } else imgPath[k] = ImgPathTemp;
+            }
+            for (int kk = 0; kk < imgPath.length; kk++) {
+                String rootpath = Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/";
+                String path;
+                if (!imgPath[kk].contains(Environment.getExternalStorageDirectory().toString())) {
+                    path = rootpath + imgPath[kk];
+                } else {
+                    path = imgPath[kk];
+                }
+                File file = new File(path);
+                if (file.exists()) {
+                    try {
+                        Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                        int degree = DataUtil.getPicRotate(path);
+                        if (degree != 0) {
+                            Matrix m = new Matrix();
+                            m.setRotate(degree); // 旋转angle度
+                            Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                        }
+                        bts.add(new bt(bitmap, imgPath[kk]));
+                    } catch (IOException e) {
+                        Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
+                        bts.add(new bt(bitmap, ""));
+                    }
+                } else {
+                    Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
+                    bts.add(new bt(bitmap, ""));
+                }
+            }
+        }
     }
 
     @Override

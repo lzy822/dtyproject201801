@@ -2190,7 +2190,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
             canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
         }
-        if (isMessure) drawMessureLine(canvas);
+        if (isMessure && isMessureType == MESSURE_DISTANCE_TYPE) drawMessureLine(canvas);
     }
 
     @Override
