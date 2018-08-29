@@ -639,7 +639,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         CreatePOI = true;
                         POIType = 2;
                         //if (!esterEgg_lm) {
-                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
+                        GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
                         //}
                         pdfView.zoomWithAnimation(c_zoom);
                         POIType = -1;
@@ -3040,7 +3040,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
         final Date date = new Date(System.currentTimeMillis());
         CreatePOI = true;
-        POIType = 2;
+        POIType = num;
         final List<POI> POIs = LitePal.where("type = ?", strings[num]).find(POI.class);
         int size = POIs.size();
         if (size > 0) {
@@ -3076,7 +3076,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     public void onClick(DialogInterface dialog, int which) {
                         long time = System.currentTimeMillis();
                         String poic = "POI" + String.valueOf(time);
-                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                        DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
                         DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
                         getBitmap();
                         updateMapPage(poic, num);
@@ -3086,7 +3086,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             } else {
                 long time = System.currentTimeMillis();
                 String poic = "POI" + String.valueOf(time);
-                DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+                DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
                 DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
                 getBitmap();
                 updateMapPage(poic, num);
@@ -3094,7 +3094,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         } else {
             long time = System.currentTimeMillis();
             String poic = "POI" + String.valueOf(time);
-            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date));
+            DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
             DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
             getBitmap();
             updateMapPage(poic, num);

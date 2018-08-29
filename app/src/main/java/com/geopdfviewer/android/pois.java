@@ -34,6 +34,14 @@ public class pois extends AppCompatActivity {
     double min_lat, max_lat, min_long, max_long;
     private SQLiteOpenHelper dbhelper;
 
+    private void GoNormalSinglePOIPage(String poic){
+        Log.w(TAG, "updateMapPage: 0");
+        Intent intent = new Intent(pois.this, singlepoi.class);
+        intent.putExtra("POIC", poic);
+        intent.putExtra("type", 0);
+        startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,9 +124,10 @@ public class pois extends AppCompatActivity {
                     }
                     //holder.cardView.setCardBackgroundColor(Color.GRAY);
                 }else {
-                    Intent intent = new Intent(pois.this, singlepoi.class);
+                    /*Intent intent = new Intent(pois.this, singlepoi.class);
                     intent.putExtra("POIC", poi.getM_POIC());
-                    pois.this.startActivity(intent);
+                    pois.this.startActivity(intent);*/
+                    GoNormalSinglePOIPage(poi.getM_POIC());
                 }
             }
         });

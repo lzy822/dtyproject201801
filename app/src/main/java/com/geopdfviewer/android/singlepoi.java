@@ -692,7 +692,7 @@ public class singlepoi extends AppCompatActivity {
         if (photos.size() != 0) {
             poi1.setPhotonum(photos.size());
             final ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
-            imageView.setVisibility(View.VISIBLE);
+            /*imageView.setVisibility(View.VISIBLE);
             String path = photos.get(0).getPath();
             File file = new File(path);
             try {
@@ -716,7 +716,7 @@ public class singlepoi extends AppCompatActivity {
                 }
             }catch (IOException e){
                 Log.w(TAG, e.toString());
-            }
+            }*/
             if (photos.size() >= 1) {
                 imageView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
@@ -1050,8 +1050,8 @@ public class singlepoi extends AppCompatActivity {
                 for (int i = 0; i < photos.size(); i++) {
                     String path = photos.get(i).getPath();
                     File file = new File(path);
-                        if (file.exists()) {
-                            try {
+                    if (file.exists()) {
+                        try {
                             Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
                             int degree = DataUtil.getPicRotate(path);
                             if (degree != 0) {
@@ -1060,15 +1060,31 @@ public class singlepoi extends AppCompatActivity {
                                 Log.w(TAG, "showPopueWindowForPhoto: " + degree);
                                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                             }
-                                bms.add(new bt(bitmap,  path));
-                            } catch (IOException e) {
-                                Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
-                                bms.add(new bt(bitmap, ""));
-                            }
-                        } else {
+                            bms.add(new bt(bitmap,  path));
+                        } catch (IOException e) {
                             Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
                             bms.add(new bt(bitmap, ""));
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    final ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+                                    imageView.setVisibility(View.VISIBLE);
+                                    imageView.setImageBitmap(bms.get(0).getM_bm());
+                                }
+                            });
                         }
+                    } else {
+                        Bitmap bitmap = Bitmap.createBitmap(80, 120, Bitmap.Config.ALPHA_8);
+                        bms.add(new bt(bitmap, ""));
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            final ImageView imageView = (ImageView) findViewById(R.id.photo_image_singlepoi);
+                            imageView.setVisibility(View.VISIBLE);
+                            imageView.setImageBitmap(bms.get(0).getM_bm());
+                        }
+                    });
                 }
 
                 Log.w(TAG, "getBitmap: " + bms.size());

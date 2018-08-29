@@ -361,6 +361,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     locError("mselectedpos: " + mselectedpos);
                 }else {
+                    Log.w(TAG, "onItemClick: " + map.getM_name());
                     Intent intent = new Intent(select_page.this, MainInterface.class);
                     intent.putExtra("num", map.getM_num());
                     select_page.this.startActivity(intent);
@@ -1503,7 +1504,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
         //DataUtil.getSpatialIndex();
-        LitePal.deleteAll(Trail.class);
+        //LitePal.deleteAll(Trail.class);
         //Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
         /*Point point0 = new Point(1, 4);
         Point point1 = new Point(2, 3);
@@ -1833,7 +1834,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 in = getAssets().open(SAMPLE_FILE);
                 //bmPath = createThumbnails(name, filePath, SAMPLE_TYPE);
                 //locError(getAssets().open("image/cangyuan.jpg").toString());
-                //bmPath = getAssets().open("image/cangyuan.jpg").toString();
+                bmPath = getAssets().open("image/cangyuan.jpg").toString();
             }
             else {
                 in = new FileInputStream(file);
