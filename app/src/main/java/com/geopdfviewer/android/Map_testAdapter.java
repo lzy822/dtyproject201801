@@ -116,52 +116,56 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map_test map = mMapList.get(position);
-        DecimalFormat df = new DecimalFormat("0.0");
-        SharedPreferences pref1 = mContext.getSharedPreferences("latlong", MODE_PRIVATE);
-        String mlatlong = pref1.getString("mlatlong", "");
-        if (!mlatlong.isEmpty()){
-        String[] latandlong;
-        latandlong = mlatlong.split(",");
-        Log.w(TAG, "onBindViewHolder: " + mlatlong );
-        double m_lat = Double.valueOf(latandlong[0]);
-        double m_long = Double.valueOf(latandlong[1]);
-        //String[] latandlong1;
-        //latandlong1 = map.getM_center_latlong().split(",");
-        //double the_lat = Double.valueOf(latandlong1[0]);
-        //double the_long = Double.valueOf(latandlong1[1]);
-            double distance;
-            if (!map.getM_GPTS().isEmpty()){
-         distance = getDistanceWithMap(map.getM_GPTS(), m_lat, m_long) / 1000;
-            }else distance = 0;
-        if (distance != 0) {
-            holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
-        } else holder.MapName.setText(map.getM_name() + "\n" + "在地图上 ");
-        }else holder.MapName.setText(map.getM_name());
+        if (!map.getM_name().equals("图志简介")){
+            DecimalFormat df = new DecimalFormat("0.0");
+            SharedPreferences pref1 = mContext.getSharedPreferences("latlong", MODE_PRIVATE);
+            String mlatlong = pref1.getString("mlatlong", "");
+            if (!mlatlong.isEmpty()) {
+                String[] latandlong;
+                latandlong = mlatlong.split(",");
+                Log.w(TAG, "onBindViewHolder: " + mlatlong);
+                double m_lat = Double.valueOf(latandlong[0]);
+                double m_long = Double.valueOf(latandlong[1]);
+                //String[] latandlong1;
+                //latandlong1 = map.getM_center_latlong().split(",");
+                //double the_lat = Double.valueOf(latandlong1[0]);
+                //double the_long = Double.valueOf(latandlong1[1]);
+                double distance;
+                if (!map.getM_GPTS().isEmpty()) {
+                    distance = getDistanceWithMap(map.getM_GPTS(), m_lat, m_long) / 1000;
+                } else distance = 0;
+                if (distance != 0) {
+                    holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
+                } else holder.MapName.setText(map.getM_name() + "\n" + "在地图上 ");
+            } else holder.MapName.setText(map.getM_name());
         /*holder.MapName.setText(map.getM_name() + "\n" + "距中心: " + df.format(algorithm(m_long, m_lat, the_long, the_lat) / 1000) + "公里"
                 + "\n" + "在地图上 ");*/
-        String ImgUri = map.getM_imguri();
-        if (ImgUri != ""){
-            //Toast.makeText(mContext, map.getM_imguri(), Toast.LENGTH_SHORT).show();
-            File file = new File(ImgUri);
-            if (file.exists()) holder.MapImage.setImageURI(Uri.parse(ImgUri));
-            else {
-                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                BitmapDrawable bd = (BitmapDrawable) drawable;
-                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                holder.MapImage.setImageBitmap(bitmap);
+            String ImgUri = map.getM_imguri();
+            if (ImgUri != "") {
+                //Toast.makeText(mContext, map.getM_imguri(), Toast.LENGTH_SHORT).show();
+                File file = new File(ImgUri);
+                if (file.exists()) holder.MapImage.setImageURI(Uri.parse(ImgUri));
+                else {
+                    Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                    BitmapDrawable bd = (BitmapDrawable) drawable;
+                    Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                            ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                    holder.MapImage.setImageBitmap(bitmap);
+                }
+            } else {
+                //holder.MapImage.setImageResource(R.drawable.ic_android_black);
+
             }
         }else {
-            //holder.MapImage.setImageResource(R.drawable.ic_android_black);
             try {
-                Bitmap bmp = BitmapFactory.decodeStream(mContext.getAssets().open("image/cangyuan.jpg"));
+                Bitmap bmp = BitmapFactory.decodeStream(mContext.getAssets().open("image/图志简介.jpg"));
                 holder.MapImage.setImageBitmap(bmp);
-            }catch (IOException e){
+                holder.MapName.setText("图志简介");
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
     }
 
     private Double getDistanceWithMap(String GPTS, double lat, double longi){

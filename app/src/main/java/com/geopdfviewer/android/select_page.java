@@ -87,7 +87,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     public static final int URI_TYPE = 2;
     private final String DEF_DIR =  Environment.getExternalStorageDirectory().toString() + "/tencent/TIMfile_recv/";
 
-    public static final String SAMPLE_FILE = "dt/cangyuan.dt";
+    public static final String SAMPLE_FILE = "dt/图志简介.dt";
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     public static final String LOC_DELETE_ITEM = "map_num";
@@ -362,9 +362,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     locError("mselectedpos: " + mselectedpos);
                 }else {
                     Log.w(TAG, "onItemClick: " + map.getM_name());
-                    Intent intent = new Intent(select_page.this, MainInterface.class);
-                    intent.putExtra("num", map.getM_num());
-                    select_page.this.startActivity(intent);
+                    if (!map.getM_name().equals("图志简介")) {
+                        Intent intent = new Intent(select_page.this, MainInterface.class);
+                        intent.putExtra("num", map.getM_num());
+                        select_page.this.startActivity(intent);
+                    }else {
+                        Intent intent = new Intent(select_page.this, MainInterface.class);
+                        intent.putExtra("num", -1);
+                        select_page.this.startActivity(intent);
+                    }
                 }
             }
         });
@@ -1832,9 +1838,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         try {
             if (Type == SAMPLE_TYPE){
                 in = getAssets().open(SAMPLE_FILE);
-                //bmPath = createThumbnails(name, filePath, SAMPLE_TYPE);
-                //locError(getAssets().open("image/cangyuan.jpg").toString());
-                bmPath = getAssets().open("image/cangyuan.jpg").toString();
             }
             else {
                 in = new FileInputStream(file);
@@ -1989,16 +1992,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String[] strings = new String[]{m_name, filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
             return strings;
         } else {
-            m_GPTS = DataUtil.rubberCoordinate(m_MediaBox, m_BBox, m_GPTS);
+            //m_GPTS = DataUtil.rubberCoordinate(m_MediaBox, m_BBox, m_GPTS);
             //saveGeoInfo("Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name);
-            String[] strings = new String[]{"Demo", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
+            String[] strings = new String[]{"图志简介", filePath, m_WKT, m_BBox, m_GPTS, bmPath, m_MediaBox, m_CropBox, m_name};
             return strings;
         }
     }
 
     private void manageGeoInfo(String filePath, int Type, String uri, String name, boolean type){
-        String[] strings = getGeoInfo(filePath, Type, uri, name, type);
-        saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
+        if (!filePath.isEmpty()) {
+            String[] strings = getGeoInfo(filePath, Type, uri, name, type);
+            saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
+        }else {
+            try {
+                String[] strings = new String[]{"图志简介", "", "", "", "", getAssets().open("image/图志简介.jpg").toString(), "", "", "图志简介"};
+                saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
+            }catch (Exception e){
+
+            }
+        }
     }
 
 
