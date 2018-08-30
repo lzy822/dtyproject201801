@@ -303,7 +303,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             map_tests[j - 1] = mapTest;
             map_testList.add(map_tests[j - 1]);
         }
-        refreshRecycler();
+        //refreshRecycler();
 
 
     }
@@ -361,14 +361,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     locError("mselectedpos: " + mselectedpos);
                 }else {
-                    Log.w(TAG, "onItemClick: " + map.getM_name());
-                    if (!map.getM_name().equals("图志简介")) {
+                    if (isFileExist(map.getM_uri()) || map.getM_name().equals("图志简介")) {
+                        Log.w(TAG, "onItemClick: " + map.getM_name());
                         Intent intent = new Intent(select_page.this, MainInterface.class);
-                        intent.putExtra("num", map.getM_num());
-                        select_page.this.startActivity(intent);
-                    }else {
-                        Intent intent = new Intent(select_page.this, MainInterface.class);
-                        intent.putExtra("num", -1);
+                        if (!map.getM_name().equals("图志简介")) {
+                            intent.putExtra("num", map.getM_num());
+                        } else {
+                            intent.putExtra("num", -1);
+                        }
                         select_page.this.startActivity(intent);
                     }
                 }
@@ -385,6 +385,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 addbt.setHideAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.hide_to_bottom));
             }
         }, 300);*/
+    }
+
+    private boolean isFileExist(String filepath){
+        File file = new File(filepath);
+        return file.exists();
     }
 
     //获取当前坐标位置
@@ -530,6 +535,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             editor1.apply();
         }
         initMap();
+        refreshRecycler();
 
 
     }
@@ -590,6 +596,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         /*Intent intent = getIntent();
         int loc_delete = intent.getIntExtra(LOC_DELETE_ITEM, 0);
         locError(Integer.toString(loc_delete));*/
+    }
+
+    private void initVariable(){
+        setSimpleVariable();
+        setNum_pdf();
+    }
+
+    private void setSimpleVariable(){
+        selectedNum = 0;
+        isLongClick = 1;
     }
 
     public void setNum_pdf(){
@@ -1509,6 +1525,18 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
+
+        doSpecificOperation();
+        //获取定位信息
+        getLocation();
+        //初始化界面一
+        Log.w(TAG, "onCreate: " );
+        initPage();
+
+
+    }
+
+    private void doSpecificOperation(){
         //DataUtil.getSpatialIndex();
         //LitePal.deleteAll(Trail.class);
         //Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
@@ -1550,11 +1578,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.w(TAG, "onCreate: " + str1);
         Log.w(TAG, "onCreate: " + str1.replace("\"", ""));*/
         ///////
+    }
+
+    private void initWidget(){
+        //声明ToolBar
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
         floatingActionsMenu.setClosedOnTouchOutside(true);
-        setTitle(select_page.this.getResources().getText(R.string.MapList));
-        //获取定位信息
-        getLocation();
         //locError("deviceId : " + getIMEI());
         //addMap_selectpage按钮事件编辑
         addbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addMap_selectpage);
@@ -1764,41 +1795,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 floatingActionsMenu.close(false);
             }
         });
-        //初始化界面一
-        Log.w(TAG, "onCreate: " );
-        if (num_pdf != 0){
-            isLongClick = 1;
-            selectedNum = 0;
-            refreshRecycler();
-        }else initPage();
-
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.w(TAG, "onResume: " );
-        //声明ToolBar
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        /*if (num_pdf != 0){
-        isLongClick = 1;
-        selectedNum = 0;
-        refreshRecycler();
-        }*/
         refreshRecycler();
     }
 
     public void initPage(){
+        initWidget();
+        initVariable();
         //获取卡片数目
-        setNum_pdf();
         if (num_pdf == 0) {
             initDemo();
-        }
+        }else
+            initMap();
         //Log.w(TAG, Integer.toString(num_pdf) );
         //初始化
-        initMap();
     }
 
     public void initDemo(){

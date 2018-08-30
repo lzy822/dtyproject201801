@@ -5297,66 +5297,88 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         addPoi_imgbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
-                dialog.setTitle("提示");
-                dialog.setMessage("需要添加什么要素?");
-                dialog.setCancelable(false);
-                dialog.setPositiveButton("点要素", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        poiLayerBt.setChecked(true);
-                        showPOI = true;
-                        //pdfView.resetZoomWithAnimation();
-                        pdfView.zoomWithAnimation(c_zoom);
-                        if (isDrawType == POI_DRAW_TYPE){
-                            isDrawType = NONE_DRAW_TYPE;
-                            if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                toolbar.setTitle("正在记录轨迹");
-                            }else toolbar.setTitle(pdfFileName);
-                            if (showMode == CENTERMODE) isQuery = true;
-                            else isQuery = false;
+                if (esterEgg_dm) {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                    dialog.setTitle("提示");
+                    dialog.setMessage("需要添加什么要素?");
+                    dialog.setCancelable(false);
+                    dialog.setPositiveButton("点要素", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            poiLayerBt.setChecked(true);
+                            showPOI = true;
+                            //pdfView.resetZoomWithAnimation();
                             pdfView.zoomWithAnimation(c_zoom);
-                        }else {
-                            isDrawType = POI_DRAW_TYPE;
-                            isQuery = false;
-                            if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
-                            }else toolbar.setTitle("正在插放兴趣点");
-                            isMessureType = MESSURE_NONE_TYPE;
+                            if (isDrawType == POI_DRAW_TYPE) {
+                                isDrawType = NONE_DRAW_TYPE;
+                                if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在记录轨迹");
+                                } else toolbar.setTitle(pdfFileName);
+                                if (showMode == CENTERMODE) isQuery = true;
+                                else isQuery = false;
+                                pdfView.zoomWithAnimation(c_zoom);
+                            } else {
+                                isDrawType = POI_DRAW_TYPE;
+                                isQuery = false;
+                                if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                                } else toolbar.setTitle("正在插放兴趣点");
+                                isMessureType = MESSURE_NONE_TYPE;
+                            }
                         }
-                    }
-                });
-                dialog.setNegativeButton("线要素(地名类型,需打开地名功能)", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        backpt_messure_fab.setVisibility(View.VISIBLE);
-                        cancel_messure_fab.setVisibility(View.VISIBLE);
-                        delete_messure_fab.setVisibility(View.VISIBLE);
-                        poiLayerBt.setChecked(false);
-                        showPOI = false;
-                        pdfView.zoomWithAnimation(c_zoom);
-                        if (isDrawType == LINE_DRAW_TYPE){
-                            isDrawType = NONE_DRAW_TYPE;
-                            if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                toolbar.setTitle("正在记录轨迹");
-                            }else toolbar.setTitle(pdfFileName);
-                            if (showMode == CENTERMODE) isQuery = true;
-                            else isQuery = false;
+                    });
+                    dialog.setNegativeButton("线要素(地名类型,需打开地名功能)", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            backpt_messure_fab.setVisibility(View.VISIBLE);
+                            cancel_messure_fab.setVisibility(View.VISIBLE);
+                            delete_messure_fab.setVisibility(View.VISIBLE);
+                            poiLayerBt.setChecked(false);
+                            showPOI = false;
                             pdfView.zoomWithAnimation(c_zoom);
-                        }else {
-                            isDrawType = LINE_DRAW_TYPE;
-                            drawLineFeature = "";
-                            LineFeatures.clear();
-                            isQuery = false;
-                            if (isDrawTrail == TRAIL_DRAW_TYPE){
-                                toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
-                            }else toolbar.setTitle("正在插放兴趣点");
-                            isMessureType = MESSURE_NONE_TYPE;
+                            if (isDrawType == LINE_DRAW_TYPE) {
+                                isDrawType = NONE_DRAW_TYPE;
+                                if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在记录轨迹");
+                                } else toolbar.setTitle(pdfFileName);
+                                if (showMode == CENTERMODE) isQuery = true;
+                                else isQuery = false;
+                                pdfView.zoomWithAnimation(c_zoom);
+                            } else {
+                                isDrawType = LINE_DRAW_TYPE;
+                                drawLineFeature = "";
+                                LineFeatures.clear();
+                                isQuery = false;
+                                if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                                } else toolbar.setTitle("正在插放兴趣点");
+                                isMessureType = MESSURE_NONE_TYPE;
+                            }
                         }
+                    });
+                    dialog.show();
+                }else {
+                    poiLayerBt.setChecked(true);
+                    showPOI = true;
+                    //pdfView.resetZoomWithAnimation();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    if (isDrawType == POI_DRAW_TYPE) {
+                        isDrawType = NONE_DRAW_TYPE;
+                        if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                            toolbar.setTitle("正在记录轨迹");
+                        } else toolbar.setTitle(pdfFileName);
+                        if (showMode == CENTERMODE) isQuery = true;
+                        else isQuery = false;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    } else {
+                        isDrawType = POI_DRAW_TYPE;
+                        isQuery = false;
+                        if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                            toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                        } else toolbar.setTitle("正在插放兴趣点");
+                        isMessureType = MESSURE_NONE_TYPE;
                     }
-                });
-                dialog.show();
-
+                }
 
             }
         });

@@ -1728,6 +1728,7 @@ public class singlepoi extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Point pt = new Point(LatLng.wgs84togcj02(m_lng, m_lat));
+                        Log.w(TAG, "onClick: " + m_lng + ", " + m_lat);
                         try {
                             if (CheckApkExist.checkTencentMapExist(MyApplication.getContext())) {
                                 Intent intent = new Intent();
