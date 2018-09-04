@@ -2020,7 +2020,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
         }else {
             try {
-                String[] strings = new String[]{"图志简介", "", "", "", "", getAssets().open("image/图志简介.jpg").toString(), "", "", "图志简介"};
+                String[] strings = new String[]{"图志简介", "", "", "", "", getAssets().open("image/图志简介1.jpg").toString(), "", "", "图志简介"};
                 saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
             }catch (Exception e){
 

@@ -175,7 +175,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             }
         }else {
             try {
-                Bitmap bmp = BitmapFactory.decodeStream(mContext.getAssets().open("image/图志简介.jpg"));
+                Bitmap bmp = BitmapFactory.decodeStream(mContext.getAssets().open("image/图志简介1.jpg"));
                 holder.MapImage.setImageBitmap(bmp);
                 holder.MapName.setText("图志简介");
             } catch (IOException e) {
