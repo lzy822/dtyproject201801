@@ -2088,4 +2088,18 @@ public class DataUtil {
         float[] spatialIndex = {maxlat, minlat, maxlng, minlng};
         return spatialIndex;
     }
+
+    public static String renamePath(String path){
+        File file = new File(path);
+        path = path.substring(0, path.lastIndexOf(".")) + ".dt";
+        file.renameTo(new File(path));
+        return path;
+    }
+
+    public static String renamePath1(String path){
+        File file = new File(path);
+        path = path.substring(0, path.lastIndexOf(".")) + ".pdf";
+        file.renameTo(new File(path));
+        return path;
+    }
 }

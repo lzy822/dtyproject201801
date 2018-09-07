@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.geopdfviewer.android">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -30,7 +31,8 @@
             android:hardwareAccelerated="true"
             android:name=".select_page"
             android:label="图志"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask" >
+        </activity>
         <activity
             android:name=".info_page"
             android:label="地理信息显示页面" />
@@ -68,6 +70,16 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter tools:ignore="AppLinkUrlError">
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/pdf"/>
+
             </intent-filter>
         </activity>
         <activity android:name=".plqpoishow" />

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Environment;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -52,7 +53,21 @@ public class register extends AppCompatActivity {
         if (isLicense){
             if (DataUtil.verifyDate(endDate)){
                 Log.w(TAG, "endDate: " +  endDate);
+                Intent intent1 = getIntent();
+                String action = intent1.getAction();
+                String path = null;
+                if (intent1.ACTION_VIEW.equals(action)) {
+                    Uri uri = intent1.getData();
+                    path = DataUtil.renamePath(DataUtil.getRealPathFromUriForAudio(register.this, uri));
+                    SharedPreferences.Editor editor = getSharedPreferences("simpledata", MODE_PRIVATE).edit();
+                    editor.putString("path", path);
+                    editor.apply();
+                    //Log.w(TAG, "verifyLisenceStatus: " + path);
+                    //Log.w(TAG, "verifyLisenceStatus: " + DataUtil.renamePath(path));
+                }
+                //Log.w(TAG, "verifyLisenceStatus: " + path);
                 Intent intent = new Intent(register.this, select_page.class);
+                //intent.putExtra("test22", path);
                 startActivity(intent);
                 this.finish();
                 return true;
