@@ -119,9 +119,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     //声明bts1容器
     List<bt> bts1;
 
-
-
-
     private   String WKT = "";
     private   String uri = "";
     private   String GPTS = "";
@@ -392,6 +389,27 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     String drawLineFeature = "";
     //记录当前记录的所有线要素列表
     List<String> LineFeatures = new ArrayList<>();
+
+    List<DMBZ> dmbzList;
+    //声明中心点的位置坐标
+    PointF centerPointLoc;
+
+    static final int SHOW_LOCATION = 1;
+    static final int SHOW_NO_LOCATION = -1;
+
+    private boolean hasBitmap = false;
+    private boolean hasBitmap1 = false;
+    private boolean isCreateBitmap1 = false;
+
+    List<bt> DMBZBts = new ArrayList<>();
+    private boolean hasDMBZBitmap = false;
+    List<bt> DMBts = new ArrayList<>();
+    private boolean hasDMBitmap = false;
+
+    private boolean hasQueriedPoi = false;
+    mPOIobj queriedPoi;
+    private boolean hasQueriedLine = false;
+    DMLine queriedLine;
 
     private SensorEventListener listener = new SensorEventListener() {
         @Override
@@ -2094,7 +2112,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     getInfo(thenum);
                     manageInfo();
                     toolbar.setTitle(pdfFileName);
-                    getBitmap();
+                    getNormalBitmap();
                     pdfView.recycle();
                     displayFromFile(uri);
                     isAutoTrans = false;
@@ -2174,7 +2192,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     getInfo(thenum);
                     manageInfo();
                     toolbar.setTitle(pdfFileName);
-                    getBitmap();
+                    getNormalBitmap();
                     pdfView.recycle();
                     displayFromFile(uri);
                     isAutoTrans = false;
@@ -3034,7 +3052,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
-
     private void AddPhoto(final Uri uri, final float[] latandlong, final int num){
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.DateAndTime).toString());
         final Date date = new Date(System.currentTimeMillis());
@@ -3066,7 +3083,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         poi.setPhotonum(POIs.get(theNum).getPhotonum() + 1);
                         locError("holly :" + poi.updateAll("poic = ?", POIs.get(theNum).getPoic()));
                         DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
-                        getBitmap();
+                        getNormalBitmap();
                         updateMapPage(POIs.get(theNum).getPoic(), num);
                     }
                 });
@@ -3077,7 +3094,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         String poic = "POI" + String.valueOf(time);
                         DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
                         DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
-                        getBitmap();
+                        getNormalBitmap();
                         updateMapPage(poic, num);
                     }
                 });
@@ -3087,7 +3104,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 String poic = "POI" + String.valueOf(time);
                 DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
                 DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
-                getBitmap();
+                getNormalBitmap();
                 updateMapPage(poic, num);
             }
         } else {
@@ -3095,7 +3112,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             String poic = "POI" + String.valueOf(time);
             DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), latandlong[0], latandlong[1], simpleDateFormat.format(date), num);
             DataUtil.addPhotoToDB(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri), ic, poic, simpleDateFormat.format(date));
-            getBitmap();
+            getNormalBitmap();
             updateMapPage(poic, num);
         }
         pdfView.zoomWithAnimation(c_zoom);
@@ -3198,7 +3215,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         poi.updateAll("poic = ?", POIs.get(theNum).getPoic());
                         Date date = new Date(time);
                         DataUtil.addPhotoToDB(imageuri, ic, POIs.get(theNum).getPoic(), simpleDateFormat.format(date));
-                        getBitmap();
+                        getNormalBitmap();
                         updateMapPage(POIs.get(theNum).getPoic(), num);
                     }
                 });
@@ -3213,7 +3230,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date), num);
                         }
                         DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
-                        getBitmap();
+                        getNormalBitmap();
                         updateMapPage(poic, num);
                     }
                 });
@@ -3228,7 +3245,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date), num);
                 }
                 DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
-                getBitmap();
+                getNormalBitmap();
                 updateMapPage(poic, num);
             }
         } else {
@@ -3239,169 +3256,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 DataUtil.addPOI(ic, poic, "图片POI" + String.valueOf(POIs.size() + 1), (float) m_lat, (float) m_long, simpleDateFormat.format(date), num);
             }
             DataUtil.addPhotoToDB(imageuri, ic, poic, simpleDateFormat.format(date));
-            getBitmap();
+            getNormalBitmap();
             updateMapPage(poic, num);
-        }
-    }
-
-    //获取文件管理器的返回信息
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
-            theNum = 0;
-            final Uri uri = data.getData();
-            Log.w(TAG, "onActivityResult: " + DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
-            final float[] latandlong = new float[2];
-            try {
-                ExifInterface exifInterface = new ExifInterface(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                exifInterface.getLatLong(latandlong);
-                locError("ADDPHOTO" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                if (latandlong[0] != 0) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
-                    builder.setTitle("提示");
-                    builder.setMessage("请选择你要添加的图层");
-                    builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 0);
-                        }
-                    });
-                    builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 1);
-                            else {
-                                dmbzList = LitePal.findAll(DMBZ.class);
-                                int size = dmbzList.size();
-                                DMBZ dmbz = new DMBZ();
-                                dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
-                                dmbz.setLat(latandlong[0]);
-                                dmbz.setLng(latandlong[1]);
-                                dmbz.setXH(String.valueOf(size + 1));
-                                dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
-                                dmbz.save();
-                                getDMBZBitmap();
-                                pdfView.zoomWithAnimation(c_zoom);
-                            }
-                        }
-                    });
-                    builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 2);
-                        }
-                    });
-                    builder.show();
-                }else Toast.makeText(MainInterface.this, R.string.LocError1, Toast.LENGTH_LONG).show();
-                }catch(IOException e){
-                    e.printStackTrace();
-                }
-        }
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE) {
-            final Uri uri = data.getData();
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
-            builder.setTitle("提示");
-            builder.setMessage("请选择你要添加的图层");
-            builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (!esterEgg_lm) AddTape(uri,0);
-                }
-            });
-            builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (!esterEgg_lm) AddTape(uri,1);
-                    else {
-                        dmbzList = LitePal.findAll(DMBZ.class);
-                        int size = dmbzList.size();
-                        DMBZ dmbz = new DMBZ();
-                        dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
-                        dmbz.setLat((float) m_lat);
-                        dmbz.setLng((float)m_long);
-                        dmbz.setXH(String.valueOf(size + 1));
-                        dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
-                        dmbz.save();
-                        getDMBZBitmap();
-                        pdfView.zoomWithAnimation(c_zoom);
-                    }
-                }
-            });
-            builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (!esterEgg_lm) AddTape(uri,2);
-                }
-            });
-            builder.show();
-        }
-        if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
-            theNum = 0;
-            final String imageuri;
-            if (Build.VERSION.SDK_INT >= 24) {
-                imageuri = DataUtil.getRealPath(imageUri.toString());
-            } else {
-                imageuri = imageUri.toString().substring(7);
-            }
-            File file = new File(imageuri);
-            if (file.exists()) {
-                locError("imageUri : " + imageuri.toString());
-                final float[] latandlong = new float[2];
-                try {
-                    MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
-                    // 最后通知图库更新
-                    MainInterface.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
-                    ExifInterface exifInterface = new ExifInterface(imageuri);
-                    exifInterface.getLatLong(latandlong);
-                    locError("see here" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
-                    //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
-                    builder.setTitle("提示");
-                    builder.setMessage("请选择你要添加的图层");
-                    builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 0);
-                        }
-                    });
-                    builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 1);
-                            else {
-                                dmbzList = LitePal.findAll(DMBZ.class);
-                                int size = dmbzList.size();
-                                DMBZ dmbz = new DMBZ();
-                                dmbz.setLat(latandlong[0]);
-                                dmbz.setLng(latandlong[1]);
-                                dmbz.setIMGPATH(imageuri);
-                                dmbz.setXH(String.valueOf(size + 1));
-                                dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
-                                dmbz.save();
-                                getDMBZBitmap();
-                                pdfView.zoomWithAnimation(c_zoom);
-                            }
-                        }
-                    });
-                    builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 2);
-                        }
-                    });
-                    builder.show();
-
-                } catch (Exception e) {
-                    Log.w(TAG, e.toString());
-                }
-            } else {
-                file.delete();
-                Toast.makeText(MainInterface.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
-            }
-            locError(imageUri.toString());
-                //String imageuri = getRealPathFromUriForPhoto(this, imageUri);
-
         }
     }
 
@@ -3795,11 +3651,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         });
     }
 
-    List<DMBZ> dmbzList;
-
-    public void showListPopupWindow(View view, String query) {
-        final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
-        query = query.trim();
+    private void controlSpecificFunction(String query){
         if (query.equals("kqbz")){
             SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
             editor.putBoolean("open_plq", true);
@@ -3860,6 +3712,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             pdfView.zoomWithAnimation(c_zoom);
             Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void showListPopupWindow(View view, String query) {
+        final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        query = query.trim();
+        controlSpecificFunction(query);
         String sql = "select * from POI where";
         String[] strings = query.split(" ");
         for (int i = 0; i < strings.length; i++){
@@ -4060,8 +3918,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //
         //cs_top = pdfView.getCurrentYOffset()
     }
-    //声明中心点的位置坐标
-    PointF centerPointLoc;
 
     //屏幕坐标位置到经纬度转化
     private PointF getGeoLocFromPixL0(PointF pt){
@@ -4103,9 +3959,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return pt;
         //
     }
-
-    static final int SHOW_LOCATION = 1;
-    static final int SHOW_NO_LOCATION = -1;
     //屏幕坐标位置到经纬度转化
     private PointF getGeoLocFromPixL(final PointF pt){
         //textView = (TextView) findViewById(R.id.txt);
@@ -4304,14 +4157,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        //super.onBackPressed();
-        if (isDrawTrail == TRAIL_DRAW_TYPE){
-            popBackWindow("Back");
-        }else super.onBackPressed();
-    }
-
     //退出提醒弹窗
     public void popBackWindow(String str)
     {
@@ -4372,141 +4217,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             backAlert.show();
         }
     }
-
-
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        if (FILE_TYPE == FILE_FILE_TYPE) {
-            switch (isDrawTrail) {
-                case TRAIL_DRAW_TYPE:
-                    toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
-                    menu.findItem(R.id.back).setVisible(false);
-                    menu.findItem(R.id.queryPOI).setVisible(true);
-                    menu.findItem(R.id.action_search).setVisible(false);
-                    //menu.findItem(R.id.queryLatLng).setVisible(false);
-                    break;
-                case NONE_DRAW_TYPE:
-                    toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    menu.findItem(R.id.back).setVisible(true);
-                    menu.findItem(R.id.queryPOI).setVisible(true);
-                    menu.findItem(R.id.action_search).setVisible(false);
-                    menu.findItem(R.id.queryLatLng).setVisible(true);
-                    break;
-                case SEARCH_DEMO:
-                    toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    menu.findItem(R.id.back).setVisible(true);
-                    menu.findItem(R.id.queryPOI).setVisible(false);
-                    menu.findItem(R.id.queryLatLng).setVisible(false);
-                    menu.findItem(R.id.action_search).setVisible(true);
-                    if (esterEgg_redline) {
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
-                        dialog.setTitle("提示");
-                        dialog.setMessage("需要进行什么查询?");
-                        dialog.setCancelable(false);
-                        dialog.setPositiveButton("生态保护红线查询", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                queryMode = RED_LINE_QUERY;
-                            }
-                        });
-                        dialog.setNegativeButton("简单查询", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                queryMode = POI_QUERY;
-                            }
-                        });
-                        dialog.show();
-                    } else queryMode = POI_QUERY;
-                    SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-                    searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-                    // Assumes current activity is the searchable activity
-                    searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-                    searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-                    searchView.setSubmitButtonEnabled(true);
-                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                        @Override
-                        public boolean onQueryTextSubmit(String query) {
-                            if (queryMode == RED_LINE_QUERY) {
-                                try {
-                                    String[] str = query.split(";");
-                                    if (!str[0].contains("°")) {
-                                        float[] ptss = new float[2];
-                                        for (int i = 0; i < str.length; i++) {
-                                            ptss[i] = Float.valueOf(str[i]);
-                                        }
-                                        LatLng lt = new LatLng(ptss[0], ptss[1]);
-                                        int sizee = patchsForLatLng.size();
-                                        boolean In = false;
-                                        for (int a = 0; a < sizee; a++) {
-                                            if (LatLng.PtInPolygon(lt, patchsForLatLng.get(a))) {
-                                                In = true;
-                                                break;
-                                            }
-                                        }
-                                        if (In)
-                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.InRedLine), Toast.LENGTH_LONG).show();
-                                        else
-                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.NoInRedLine), Toast.LENGTH_LONG).show();
-                                        return true;
-                                    } else {
-                                        float[] ptss = new float[2];
-                                        for (int i = 0; i < str.length; i++) {
-                                            ptss[i] = (float) getDFromDFM(str[i]);
-                                        }
-                                        LatLng lt = new LatLng(ptss[0], ptss[1]);
-                                        int sizee = patchsForLatLng.size();
-                                        boolean In = false;
-                                        for (int a = 0; a < sizee; a++) {
-                                            if (LatLng.PtInPolygon(lt, patchsForLatLng.get(a))) {
-                                                In = true;
-                                                break;
-                                            }
-                                        }
-                                        if (In)
-                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.InRedLine), Toast.LENGTH_LONG).show();
-                                        else
-                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.NoInRedLine), Toast.LENGTH_LONG).show();
-                                        return true;
-                                    }
-                                } catch (Exception e) {
-                                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.RedLineError), Toast.LENGTH_LONG).show();
-                                    return true;
-                                }
-                            } else {
-                                showListPopupWindow(searchView, query);
-                                //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
-                                return true;
-                            }
-                        }
-
-                        @Override
-                        public boolean onQueryTextChange(String newText) {
-                            return true;
-                        }
-                    });
-            }
-        }else {
-            menu.findItem(R.id.queryPOI).setVisible(false);
-            menu.findItem(R.id.queryLatLng).setVisible(false);
-            menu.findItem(R.id.action_search).setVisible(false);
-        }
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        //pdfView = (PDFView) findViewById(R.id.pdfView);
-        //locError(Integer.toString(pdfView.getLeft()));
-        //locError(Integer.toString(pdfView.getRight()));
-        //locError(Integer.toString(pdfView.getTop()));
-        //locError(Integer.toString(pdfView.getBottom()));
-        //locError(Integer.toString(pdfView.getHeight()));
-        //locError(Integer.toString(pdfView.getMeasuredHeight()));
-    }
-
-
 
     private boolean getEsterEgg_plq(){
         if (esterEgg_plq) {
@@ -4748,22 +4458,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         getEsterEgg_dm();
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_interface);
-
-        int num = receiveInfo();
-        if (num != -1) {
-            doSpecificOperation();
-            initWidget();
-            initVariable(num);
-            displayFromFile(uri);
-        }else {
-            showLeaflets();
-        }
-    }
-
     private void showLeaflets(){
         forbiddenWidget();
         FILE_TYPE = ASSET_FILE_TYPE;
@@ -4797,6 +4491,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         //LitePal.deleteAll(DMBZ.class);
         //DataUtil.getKML1(Environment.getExternalStorageDirectory().toString() + "/doc.kml");
         //LitePal.deleteAll(DMBZ.class);
+        Sampler.getInstance().init(MainInterface.this, 100);
+        Sampler.getInstance().start();
         updateDBFormOldToNow();
         initEsterEgg();
     }
@@ -5619,11 +5315,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }
     }
 
-    private boolean hasBitmap = false;
-    private boolean hasBitmap1 = false;
-    private boolean isCreateBitmap1 = false;
-
-    public void getBitmap(){
+    public void getNormalBitmap(){
         ////////////////////////缓存Bitmap//////////////////////////////
         bts = new ArrayList<bt>();
         new Thread(new Runnable() {
@@ -5756,11 +5448,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }).start();
         //////////////////////////////////////////////////////////////////
     }
-
-    List<bt> DMBZBts = new ArrayList<>();
-    private boolean hasDMBZBitmap = false;
-    List<bt> DMBts = new ArrayList<>();
-    private boolean hasDMBitmap = false;
 
     public void getDMBZBitmap(){
         ////////////////////////缓存Bitmap//////////////////////////////
@@ -5917,145 +5604,91 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Log.w(TAG, "updateDB: " );
     }
 
-    private boolean hasQueriedPoi = false;
-    mPOIobj queriedPoi;
-    private boolean hasQueriedLine = false;
-    DMLine queriedLine;
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (FILE_TYPE == FILE_FILE_TYPE) {
-            dmLines = LitePal.findAll(DMLine.class);
-            SharedPreferences pref = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE);
-            String poic = pref.getString("poic", "");
-            SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
-            editor.putString("poic", "");
-            editor.apply();
-            Log.w(TAG, "onResume: " + poic);
-            if (!poic.isEmpty()) {
-                if (poic.contains("POI")) {
-                    hasQueriedPoi = true;
-                    Cursor cursor = LitePal.findBySQL("select * from POI where poic = ?", poic);
-                    if (cursor.moveToFirst()) {
-                        do {
-                            String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                            String time = cursor.getString(cursor.getColumnIndex("time"));
-                            String name = cursor.getString(cursor.getColumnIndex("name"));
-                            String description = cursor.getString(cursor.getColumnIndex("description"));
-                            int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
-                            int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
-                            float x = cursor.getFloat(cursor.getColumnIndex("x"));
-                            float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                            queriedPoi = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
-                        } while (cursor.moveToNext());
-                    }
-                    cursor.close();
-                } else if (poic.contains("DMBZ")) {
-                    hasQueriedPoi = true;
-                    poic = poic.replace("DMBZ", "");
-                    //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
-                    List<DMBZ> dmbzList = LitePal.where("xh = ?", poic).find(DMBZ.class);
-                    queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
-                } else if (poic.contains("DMP")) {
-                    hasQueriedPoi = true;
-                    poic = poic.replace("DMP", "");
-                    //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
-                    List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
-                    queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
-                } else if (poic.contains("DML")) {
-                    hasQueriedLine = true;
-                    poic = poic.replace("DML", "");
-                    //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
-                    List<DMLine> dmLines = LitePal.where("mapid = ?", poic).find(DMLine.class);
-                    queriedLine = dmLines.get(0);
+    private void receiveQueryForMap(){
+        dmLines = LitePal.findAll(DMLine.class);
+        SharedPreferences pref = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE);
+        String poic = pref.getString("poic", "");
+        SharedPreferences.Editor editor = getSharedPreferences("update_query_attr_to_map", MODE_PRIVATE).edit();
+        editor.putString("poic", "");
+        editor.apply();
+        Log.w(TAG, "onResume: " + poic);
+        if (!poic.isEmpty()) {
+            if (poic.contains("POI")) {
+                hasQueriedPoi = true;
+                Cursor cursor = LitePal.findBySQL("select * from POI where poic = ?", poic);
+                if (cursor.moveToFirst()) {
+                    do {
+                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                        String time = cursor.getString(cursor.getColumnIndex("time"));
+                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                        String description = cursor.getString(cursor.getColumnIndex("description"));
+                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                        queriedPoi = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                    } while (cursor.moveToNext());
                 }
+                cursor.close();
+            } else if (poic.contains("DMBZ")) {
+                hasQueriedPoi = true;
+                poic = poic.replace("DMBZ", "");
+                //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
+                List<DMBZ> dmbzList = LitePal.where("xh = ?", poic).find(DMBZ.class);
+                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
+            } else if (poic.contains("DMP")) {
+                hasQueriedPoi = true;
+                poic = poic.replace("DMP", "");
+                //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
+                List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
+                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
+            } else if (poic.contains("DML")) {
+                hasQueriedLine = true;
+                poic = poic.replace("DML", "");
+                //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
+                List<DMLine> dmLines = LitePal.where("mapid = ?", poic).find(DMLine.class);
+                queriedLine = dmLines.get(0);
             }
-            String currentProvider = LocationManager.NETWORK_PROVIDER;
-            getScreen();
-            if (isDrawTrail == TRAIL_DRAW_TYPE) {
-                toolbar.setTitle("正在记录轨迹");
-            } else toolbar.setTitle(pdfFileName);
-            if (showMode == CENTERMODE) {
-                centerPoint.setVisibility(View.VISIBLE);
-                isQuery = true;
-                locError("中心点模式");
-                resumePage();
-                query_poi_imgbt.setVisibility(View.INVISIBLE);
-            } else {
-                locError("不是中心点模式");
-                resumePage();
-                centerPoint.setVisibility(View.INVISIBLE);
-                isQuery = false;
-                query_poi_imgbt.setVisibility(View.VISIBLE);
-            }
-
-            ////////////////////////缓存Bitmap//////////////////////////////
-            getBitmap();
-            getDMBZBitmap();
-            getDMitmap();
-        /*bts = new ArrayList<bt>();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                bts.clear();
-                List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" +  "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-                if (pois.size() > 0){
-                    for (POI poi : pois){
-                        //PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
-                        //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                        //locError(Boolean.toString(poi.getPath().isEmpty()));
-                        //locError(Integer.toString(poi.getPath().length()));
-                        //locError(poi.getPath());
-                        if (poi.getPhotonum() == 0){
-                            if (poi.getTapenum() == 0){
-                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint);
-                            } else {
-                                //canvas.drawCircle(pt2.x, pt2.y - 70, 35, paint3);
-                            }
-                        }else {
-                            List<MPHOTO> mphotos = LitePal.where("POIC = ?", poi.getPoic()).find(MPHOTO.class);
-                            locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
-                            bt btt = new bt(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), mphotos.get(0).getPath());
-                            bts.add(btt);
-                        }
-                    }
-                }
-                locError("需要显示的缩略图数量2 : " + Integer.toString(bts.size()));
-                isCreateBitmap = true;
-            }
-        }).start();*/
-            //////////////////////////////////////////////////////////////////
-            //注册传感器监听器
-            Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-            sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI);
         }
     }
 
-    private void resumePage(){
+    private void resumeVariableAndSurface(){
+        resumeVariable();
+        resumeSurface();
+    }
+
+    private void resumeSurface(){
+        if (isDrawTrail == TRAIL_DRAW_TYPE) {
+            toolbar.setTitle("正在记录轨迹");
+        } else toolbar.setTitle(pdfFileName);
+    }
+
+    private void resumeVariable(){
+        if (showMode == CENTERMODE) {
+            centerPoint.setVisibility(View.VISIBLE);
+            isQuery = true;
+            locError("中心点模式");
+            query_poi_imgbt.setVisibility(View.INVISIBLE);
+        } else {
+            locError("不是中心点模式");
+            centerPoint.setVisibility(View.INVISIBLE);
+            isQuery = false;
+            query_poi_imgbt.setVisibility(View.VISIBLE);
+        }
         isDrawType = NONE_DRAW_TYPE;
         isMessureType = MESSURE_NONE_TYPE;
     }
 
-    @Override
-    protected void onPause() {
-        if (FILE_TYPE == FILE_FILE_TYPE) {
-            sensorManager.unregisterListener(listener);
-        }
-        super.onPause();
+    private void registerSensor(){
+        //注册传感器监听器
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI);
     }
 
-    @Override
-    protected void onDestroy() {
-        if (FILE_TYPE == FILE_FILE_TYPE) {
-            try {
-                locationManager.removeUpdates(locationListener);
-            } catch (SecurityException e) {
-            }
-        }
-        /*if (isDrawTrail == TRAIL_DRAW_TYPE){
-            popBackWindow("Destroy");
-        }else super.onDestroy();*/
-        super.onDestroy();
+    private void getBitmap(){
+        getNormalBitmap();
+        getDMBZBitmap();
+        getDMitmap();
     }
 
     private void takePhoto(){
@@ -6102,7 +5735,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     //获取当前屏幕的参数
-    private void getScreen(){
+    private void getScreenParameter(){
         WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(dm);
@@ -6113,17 +5746,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         int screenHeight = (int) (screen_height / density);
 
         //Log.d(TAG, Float.toString(screen_width) + "^" + Float.toString(screen_height) + "^" + Float.toString(screenWidth) + "^" + Float.toString(screenHeight));
-    }
-
-    //加载当前菜单
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.maintoolbar, menu);
-        menu.findItem(R.id.queryPOI).setVisible(true);
-        menu.findItem(R.id.queryLatLng).setVisible(true);
-        menu.findItem(R.id.info).setVisible(false);
-        menu.findItem(R.id.action_search).setVisible(false);
-        return true;
     }
 
     //开始记录轨迹
@@ -6148,6 +5770,196 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             //textView.setText("GPS没有开启");
             return false;
         }
+    }
+
+    public double getMetric() {
+        DisplayMetrics metric = getResources().getDisplayMetrics();
+        return metric.density;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_interface);
+
+        int num = receiveInfo();
+        if (num != -1) {
+            doSpecificOperation();
+            initWidget();
+            initVariable(num);
+            displayFromFile(uri);
+        }else {
+            showLeaflets();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (FILE_TYPE == FILE_FILE_TYPE) {
+            receiveQueryForMap();
+            getScreenParameter();
+            resumeVariableAndSurface();
+            getBitmap();
+            registerSensor();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if (FILE_TYPE == FILE_FILE_TYPE) {
+            sensorManager.unregisterListener(listener);
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (FILE_TYPE == FILE_FILE_TYPE) {
+            try {
+                locationManager.removeUpdates(locationListener);
+            } catch (SecurityException e) {
+            }
+        }
+        /*if (isDrawTrail == TRAIL_DRAW_TYPE){
+            popBackWindow("Destroy");
+        }else super.onDestroy();*/
+        super.onDestroy();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (FILE_TYPE == FILE_FILE_TYPE) {
+            switch (isDrawTrail) {
+                case TRAIL_DRAW_TYPE:
+                    toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
+                    menu.findItem(R.id.back).setVisible(false);
+                    menu.findItem(R.id.queryPOI).setVisible(true);
+                    menu.findItem(R.id.action_search).setVisible(false);
+                    //menu.findItem(R.id.queryLatLng).setVisible(false);
+                    break;
+                case NONE_DRAW_TYPE:
+                    toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                    menu.findItem(R.id.back).setVisible(true);
+                    menu.findItem(R.id.queryPOI).setVisible(true);
+                    menu.findItem(R.id.action_search).setVisible(false);
+                    menu.findItem(R.id.queryLatLng).setVisible(true);
+                    break;
+                case SEARCH_DEMO:
+                    toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                    menu.findItem(R.id.back).setVisible(true);
+                    menu.findItem(R.id.queryPOI).setVisible(false);
+                    menu.findItem(R.id.queryLatLng).setVisible(false);
+                    menu.findItem(R.id.action_search).setVisible(true);
+                    if (esterEgg_redline) {
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                        dialog.setTitle("提示");
+                        dialog.setMessage("需要进行什么查询?");
+                        dialog.setCancelable(false);
+                        dialog.setPositiveButton("生态保护红线查询", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                queryMode = RED_LINE_QUERY;
+                            }
+                        });
+                        dialog.setNegativeButton("简单查询", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                queryMode = POI_QUERY;
+                            }
+                        });
+                        dialog.show();
+                    } else queryMode = POI_QUERY;
+                    SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+                    searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+                    // Assumes current activity is the searchable activity
+                    searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+                    searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+                    searchView.setSubmitButtonEnabled(true);
+                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                        @Override
+                        public boolean onQueryTextSubmit(String query) {
+                            if (queryMode == RED_LINE_QUERY) {
+                                try {
+                                    String[] str = query.split(";");
+                                    if (!str[0].contains("°")) {
+                                        float[] ptss = new float[2];
+                                        for (int i = 0; i < str.length; i++) {
+                                            ptss[i] = Float.valueOf(str[i]);
+                                        }
+                                        LatLng lt = new LatLng(ptss[0], ptss[1]);
+                                        int sizee = patchsForLatLng.size();
+                                        boolean In = false;
+                                        for (int a = 0; a < sizee; a++) {
+                                            if (LatLng.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                                In = true;
+                                                break;
+                                            }
+                                        }
+                                        if (In)
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.InRedLine), Toast.LENGTH_LONG).show();
+                                        else
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.NoInRedLine), Toast.LENGTH_LONG).show();
+                                        return true;
+                                    } else {
+                                        float[] ptss = new float[2];
+                                        for (int i = 0; i < str.length; i++) {
+                                            ptss[i] = (float) getDFromDFM(str[i]);
+                                        }
+                                        LatLng lt = new LatLng(ptss[0], ptss[1]);
+                                        int sizee = patchsForLatLng.size();
+                                        boolean In = false;
+                                        for (int a = 0; a < sizee; a++) {
+                                            if (LatLng.PtInPolygon(lt, patchsForLatLng.get(a))) {
+                                                In = true;
+                                                break;
+                                            }
+                                        }
+                                        if (In)
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.InRedLine), Toast.LENGTH_LONG).show();
+                                        else
+                                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.NoInRedLine), Toast.LENGTH_LONG).show();
+                                        return true;
+                                    }
+                                } catch (Exception e) {
+                                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.RedLineError), Toast.LENGTH_LONG).show();
+                                    return true;
+                                }
+                            } else {
+                                showListPopupWindow(searchView, query);
+                                //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
+                                return true;
+                            }
+                        }
+
+                        @Override
+                        public boolean onQueryTextChange(String newText) {
+                            return true;
+                        }
+                    });
+            }
+        }else {
+            menu.findItem(R.id.queryPOI).setVisible(false);
+            menu.findItem(R.id.queryLatLng).setVisible(false);
+            menu.findItem(R.id.action_search).setVisible(false);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    //加载当前菜单
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.maintoolbar, menu);
+        menu.findItem(R.id.queryPOI).setVisible(true);
+        menu.findItem(R.id.queryLatLng).setVisible(true);
+        menu.findItem(R.id.info).setVisible(false);
+        menu.findItem(R.id.action_search).setVisible(false);
+        return true;
     }
 
     //菜单栏按钮监控
@@ -6184,9 +5996,173 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return true;
     }
 
-    public double getMetric() {
-        DisplayMetrics metric = getResources().getDisplayMetrics();
-        return metric.density;
+    //获取文件管理器的返回信息
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
+            theNum = 0;
+            final Uri uri = data.getData();
+            Log.w(TAG, "onActivityResult: " + DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
+            final float[] latandlong = new float[2];
+            try {
+                ExifInterface exifInterface = new ExifInterface(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                exifInterface.getLatLong(latandlong);
+                locError("ADDPHOTO" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                if (latandlong[0] != 0) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
+                    builder.setTitle("提示");
+                    builder.setMessage("请选择你要添加的图层");
+                    builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 0);
+                        }
+                    });
+                    builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 1);
+                            else {
+                                dmbzList = LitePal.findAll(DMBZ.class);
+                                int size = dmbzList.size();
+                                DMBZ dmbz = new DMBZ();
+                                dmbz.setIMGPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
+                                dmbz.setLat(latandlong[0]);
+                                dmbz.setLng(latandlong[1]);
+                                dmbz.setXH(String.valueOf(size + 1));
+                                dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
+                                dmbz.save();
+                                getDMBZBitmap();
+                                pdfView.zoomWithAnimation(c_zoom);
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!esterEgg_lm) AddPhoto(uri, latandlong, 2);
+                        }
+                    });
+                    builder.show();
+                }else Toast.makeText(MainInterface.this, R.string.LocError1, Toast.LENGTH_LONG).show();
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE) {
+            final Uri uri = data.getData();
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
+            builder.setTitle("提示");
+            builder.setMessage("请选择你要添加的图层");
+            builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (!esterEgg_lm) AddTape(uri,0);
+                }
+            });
+            builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (!esterEgg_lm) AddTape(uri,1);
+                    else {
+                        dmbzList = LitePal.findAll(DMBZ.class);
+                        int size = dmbzList.size();
+                        DMBZ dmbz = new DMBZ();
+                        dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
+                        dmbz.setLat((float) m_lat);
+                        dmbz.setLng((float)m_long);
+                        dmbz.setXH(String.valueOf(size + 1));
+                        dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
+                        dmbz.save();
+                        getDMBZBitmap();
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }
+                }
+            });
+            builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (!esterEgg_lm) AddTape(uri,2);
+                }
+            });
+            builder.show();
+        }
+        if (resultCode == RESULT_OK && requestCode == TAKE_PHOTO) {
+            theNum = 0;
+            final String imageuri;
+            if (Build.VERSION.SDK_INT >= 24) {
+                imageuri = DataUtil.getRealPath(imageUri.toString());
+            } else {
+                imageuri = imageUri.toString().substring(7);
+            }
+            File file = new File(imageuri);
+            if (file.exists()) {
+                locError("imageUri : " + imageuri.toString());
+                final float[] latandlong = new float[2];
+                try {
+                    MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
+                    // 最后通知图库更新
+                    MainInterface.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + imageuri)));
+                    ExifInterface exifInterface = new ExifInterface(imageuri);
+                    exifInterface.getLatLong(latandlong);
+                    locError("see here" + String.valueOf(latandlong[0]) + "%" + String.valueOf(latandlong[1]));
+                    //List<POI> POIs = LitePal.where("ic = ?", ic).find(POI.class);
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
+                    builder.setTitle("提示");
+                    builder.setMessage("请选择你要添加的图层");
+                    builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 0);
+                        }
+                    });
+                    builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 1);
+                            else {
+                                dmbzList = LitePal.findAll(DMBZ.class);
+                                int size = dmbzList.size();
+                                DMBZ dmbz = new DMBZ();
+                                dmbz.setLat(latandlong[0]);
+                                dmbz.setLng(latandlong[1]);
+                                dmbz.setIMGPATH(imageuri);
+                                dmbz.setXH(String.valueOf(size + 1));
+                                dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
+                                dmbz.save();
+                                getDMBZBitmap();
+                                pdfView.zoomWithAnimation(c_zoom);
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 2);
+                        }
+                    });
+                    builder.show();
+
+                } catch (Exception e) {
+                    Log.w(TAG, e.toString());
+                }
+            } else {
+                file.delete();
+                Toast.makeText(MainInterface.this, R.string.TakePhotoError, Toast.LENGTH_LONG).show();
+            }
+            locError(imageUri.toString());
+            //String imageuri = getRealPathFromUriForPhoto(this, imageUri);
+
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        if (isDrawTrail == TRAIL_DRAW_TYPE){
+            popBackWindow("Back");
+        }else super.onBackPressed();
     }
 }
 

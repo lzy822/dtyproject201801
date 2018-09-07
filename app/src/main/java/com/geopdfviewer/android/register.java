@@ -102,8 +102,8 @@ public class register extends AppCompatActivity {
             String[] permissions = permissionList.toArray(new String[permissionList.size()]);
             ActivityCompat.requestPermissions(register.this, permissions, 118);
         }else {
-            //getLocation();
-            //initPage();
+            initRootDirectory();
+            initWidget();
         }
     }
 
@@ -119,15 +119,10 @@ public class register extends AppCompatActivity {
                             finish();
                             return;
                         }else {
-                            File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi");
-                            if (!file.exists() && !file.isDirectory()){
-                                file.mkdirs();
-                            }
-                            final String imei = getIMEI();
-                            textView.setText("请求码: " + imei + "(长按复制)");
+                            initRootDirectory();
+                            initWidget();
                         }
                     }
-
                 }
                 break;
             default:
@@ -148,12 +143,7 @@ public class register extends AppCompatActivity {
         return deviceId;
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
-        //申请动态权限
-        requestAuthority();
+    private void initWidget(){
         tb = (Toolbar) findViewById(R.id.toolbar6) ;
         setSupportActionBar(tb);
         getSupportActionBar().setTitle("授权页面");
@@ -191,8 +181,21 @@ public class register extends AppCompatActivity {
                 }
             });
         }
-        /*Intent intent = new Intent(register.this, select_page.class);
-        startActivity(intent);*/
+    }
+
+    private void initRootDirectory(){
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+        //申请动态权限
+        requestAuthority();
     }
 
     @Override
