@@ -421,7 +421,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
             degree = event.values[0];
-            locError("predegree: " + Float.toString(predegree) + " degree: " + Float.toString(degree));
+            //locError("predegree: " + Float.toString(predegree) + " degree: " + Float.toString(degree));
         }
 
         @Override
@@ -453,13 +453,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         return mpoic;
     }
 
-    private void queryDMPOI(final PointF pt1){
+    private String[] queryDMLine(final PointF pt1){
         String theLineId = "";
         String Linebzmc = "";
         boolean QueryLine = false;
-        String thePointId = "";
-        String Pointbzmc = "";
-        boolean QueryPoint = false;
         if (dmLines.size() > 0) {
             Log.w(TAG, "onTap!!!!!!!!!!!: " + dmLines.size());
             int linenum = dmLines.size();
@@ -485,15 +482,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         //PointF theTouchPt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         Point pointF = new Point(Double.valueOf(ptx1[1]), Double.valueOf(ptx1[0]));
                         Point pointF1 = new Point(Double.valueOf(ptx2[1]), Double.valueOf(ptx2[0]));
-                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF);
-                        //Log.w(TAG, "onTap!!!!!!!!!!!: " + pointF1);
                         PointF theTouchPt = pt1;
                         if (deltas == 0) {
                             //deltas = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.x, pointF.y, pointF1.x, pointF1.y), theTouchPt);
                             double thedis = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
                             if (thedis <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) && thedis >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
                                 deltas = thedis;
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
                                 theLineId = dmLines.get(j).getMapid();
                                 Linebzmc = dmLines.get(j).getBzmc();
                             } else {
@@ -504,18 +498,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             double delta1 = lineUtil.getDistance(lineUtil.getLineNormalEquation(pointF.getX(), pointF.getY(), pointF1.getX(), pointF1.getY()), theTouchPt);
                             if (delta1 <= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF, pt1) : lineUtil.getDistance1(pointF1, pt1)) && delta1 >= (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1))) {
                                 //deltas = delta1;
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
                                 //theId = dmLines.get(j).getBzmc();
                             } else
                                 delta1 = (lineUtil.getDistance1(pointF, pt1) >= lineUtil.getDistance1(pointF1, pt1) ? lineUtil.getDistance1(pointF1, pt1) : lineUtil.getDistance1(pointF, pt1));
-                            //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
                             if (delta1 < deltas) {
                                 deltas = delta1;
                                 theLineId = dmLines.get(j).getMapid();
                                 Linebzmc = dmLines.get(j).getBzmc();
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + pt1.toString());
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + deltas);
-                                //Log.w(TAG, "onTap!!!!!!!!!!!: " + theId);
                             }
                             calnum++;
                         }
@@ -524,15 +513,19 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }
             }
-            Log.w(TAG, "onTap!!!!!!!!!!!: " + calnum);
             if (deltas < 0.000005) {
-                Log.w(TAG, "onTap!!!!!!!!!!!: " + theLineId);
                 // TODO : 设计并完成查询语句
                 //GoDMLSinglePOIPage(theLineId);
                 QueryLine = true;
             }
         }
+        return new String[]{theLineId, Linebzmc};
+    }
 
+    private String[] queryDMPoint(final PointF pt1){
+        String thePointId = "";
+        String Pointbzmc = "";
+        boolean QueryPoint = false;
         int n = 0;
         int num = 0;
         if (dmPoints.size() > 0) {
@@ -558,7 +551,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
             locError("numspecial : " + Integer.toString(num));
             locError("deltaspecial : " + Float.toString(delta));
-            if (delta < 35 || num != 0) {
+            if (delta < 35) {
                         /*Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                         Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
                         intent.putExtra("xh", kmltests.get(num).getXh());
@@ -571,22 +564,33 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //isQueried = true;
                 //Toast.makeText(MainInterface.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
                 //locError(Integer.toString(kmltests.get(num).getPhotonum()));
-            } else locError("没有正常查询");
+            } else {
+                locError("没有正常查询");
+            }
         }
+        return new String[]{thePointId, Pointbzmc};
+    }
 
+    private boolean queryDM(final PointF pt1){
+        String[] line = queryDMLine(pt1);
+        String[] point = queryDMPoint(pt1);
+        boolean QueryPoint = false;
+        boolean QueryLine = false;
+        if (!line[0].isEmpty()) QueryLine = true;
+        if (!point[0].isEmpty()) QueryPoint = true;
         if (QueryPoint && QueryLine){
-            final String lineId = theLineId;
-            final String pointId = thePointId;
+            final String lineId = line[0];
+            final String pointId = point[0];
             AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
             builder.setTitle("提示");
             builder.setMessage("请选择你编辑的要素");
-            builder.setPositiveButton(Linebzmc + "(线要素)", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(line[1] + "(线要素)", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     GoDMLSinglePOIPage(lineId);
                 }
             });
-            builder.setNegativeButton(Pointbzmc + "(点要素)", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton(point[1] + "(点要素)", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     GoDMPSinglePOIPage(pointId);
@@ -594,9 +598,90 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             });
             builder.show();
         }else {
-            if (QueryPoint) GoDMPSinglePOIPage(thePointId);
-            else if (QueryLine) GoDMLSinglePOIPage(theLineId);
+            if (QueryPoint) GoDMPSinglePOIPage(point[0]);
+            else if (QueryLine) GoDMLSinglePOIPage(line[0]);
         }
+        if (QueryLine || QueryPoint)
+            return true;
+        else
+            return false;
+    }
+
+    private String addDMBZPoi(final PointF pt1){
+        dmbzList = LitePal.findAll(DMBZ.class);
+        int size = dmbzList.size();
+        Log.w(TAG, "dmbzList: " + size);
+        DMBZ dmbz = new DMBZ();
+        if (showMode == NOCENTERMODE) {
+            dmbz.setLat(pt1.x);
+            dmbz.setLng(pt1.y);
+        } else {
+            dmbz.setLat(centerPointLoc.x);
+            dmbz.setLng(centerPointLoc.y);
+        }
+        dmbz.setXH(String.valueOf(size + 1));
+        dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
+        dmbz.save();
+        dmbzList = LitePal.findAll(DMBZ.class);
+        return dmbz.getXH();
+    }
+
+    public String queryNormalPoi(final MotionEvent e){
+        List<mPOIobj> pois = new ArrayList<>();
+        Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+        if (cursor.moveToFirst()) {
+            do {
+                String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                String time = cursor.getString(cursor.getColumnIndex("time"));
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                String description = cursor.getString(cursor.getColumnIndex("description"));
+                int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                pois.add(mPOIobj);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        locError("size : " + Integer.toString(pois.size()));
+        int n = 0;
+        int num = 0;
+        if (pois.size() > 0) {
+            mPOIobj poii = pois.get(0);
+            PointF pointF1 = new PointF(poii.getM_X(), poii.getM_Y());
+            pointF1 = LatLng.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            pointF1 = new PointF(pointF1.x, pointF1.y - 70);
+            //pointF = getGeoLocFromPixL(pointF);
+            PointF pointF = getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY()));
+            Log.w(TAG, "mpointF1 tap: " + pointF.x + ";" + pointF.y);
+            PointF pt9 = LatLng.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            locError("pt1 : " + pt9.toString());
+            float delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
+            for (mPOIobj poi : pois) {
+                PointF mpointF1 = new PointF(poi.getM_X(), poi.getM_Y());
+                Log.w(TAG, "mpointF1 queried: " + mpointF1.x + ";" + mpointF1.y);
+                mpointF1 = LatLng.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                mpointF1 = new PointF(mpointF1.x, mpointF1.y - 70);
+                if (Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < delta && Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < 35) {
+                    //locError("mpointF : " + mpointF1.toString());
+                    delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
+                    num = n;
+                }
+                locError("n : " + Integer.toString(n));
+                n++;
+            }
+            locError("num : " + Integer.toString(num));
+            locError("delta : " + Float.toString(delta));
+            if (delta < 35 || num != 0) {
+                locError("起飞 : " + Float.toString(delta));
+                return pois.get(num).getM_POIC();
+                //locError(Integer.toString(pois.get(num).getPhotonum()));
+            } else {
+                locError("没有正常查询");
+                return "";
+            }
+        }else return "";
     }
 
     @Override
@@ -609,7 +694,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
                 builder.setTitle("提示");
                 builder.setMessage("请选择你要添加的图层");
-                builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
+                builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
@@ -617,50 +702,35 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         if (!esterEgg_lm) {
                             GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                         }
-                        pdfView.zoomWithAnimation(c_zoom);
+                        pdfView.resetZoomWithAnimation();
                         POIType = -1;
                         CreatePOI = false;
                     }
                 });
-                builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 1;
                         if (!esterEgg_lm) {
-                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                         }else {
-                            dmbzList = LitePal.findAll(DMBZ.class);
-                            int size = dmbzList.size();
-                            Log.w(TAG, "dmbzList: " + size);
-                            DMBZ dmbz = new DMBZ();
-                            if (showMode == NOCENTERMODE) {
-                                dmbz.setLat(pt1.x);
-                                dmbz.setLng(pt1.y);
-                            } else {
-                                dmbz.setLat(centerPointLoc.x);
-                                dmbz.setLng(centerPointLoc.y);
-                            }
-                            dmbz.setXH(String.valueOf(size + 1));
-                            dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
-                            dmbz.save();
-                            dmbzList = LitePal.findAll(DMBZ.class);
-                            GoDMBZSinglePOIPage(dmbz.getXH());
+                            GoDMBZSinglePOIPage(addDMBZPoi(pt1));
                         }
-                        //pdfView.zoomWithAnimation(c_zoom);
+                        pdfView.resetZoomWithAnimation();
                         POIType = -1;
                         CreatePOI = false;
                     }
                 });
-                builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 2;
-                        //if (!esterEgg_lm) {
-                        GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
-                        //}
-                        pdfView.zoomWithAnimation(c_zoom);
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
+                        }
+                        pdfView.resetZoomWithAnimation();
                         POIType = -1;
                         CreatePOI = false;
                     }
@@ -860,9 +930,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 //distanceLatLngs.add(distanceLatLng);
             }
             boolean isQueried = false;
-            if (isQuery && ( esterEgg_plq || esterEgg_lm || esterEgg_dm)){
+            if (isQuery && isDrawType == NONE_DRAW_TYPE){
                 Log.w(TAG, "onTapspecial : ");
-                if (esterEgg_plq) {
+                if (esterEgg_plq){
                     int n = 0;
                     int num = 0;
                     if (kmltests.size() > 0) {
@@ -938,63 +1008,16 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }
 
-                if (esterEgg_dm) {
+                if (esterEgg_dm && !isQueried) {
                     PointF dmPt = getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY()));
-                    queryDMPOI(dmPt);
+                    isQueried = queryDM(dmPt);
                 }
+
+                if (!isQueried)
+                    GoNormalSinglePOIPage(queryNormalPoi(e));
             }
 
             if (isQuery && isDrawType == NONE_DRAW_TYPE && !isQueried) {
-                Log.w(TAG, "onTap: ");
-                List<mPOIobj> pois = new ArrayList<>();
-                Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
-                if (cursor.moveToFirst()) {
-                    do {
-                        String POIC = cursor.getString(cursor.getColumnIndex("poic"));
-                        String time = cursor.getString(cursor.getColumnIndex("time"));
-                        String name = cursor.getString(cursor.getColumnIndex("name"));
-                        String description = cursor.getString(cursor.getColumnIndex("description"));
-                        int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
-                        int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
-                        float x = cursor.getFloat(cursor.getColumnIndex("x"));
-                        float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                        mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
-                        pois.add(mPOIobj);
-                    } while (cursor.moveToNext());
-                }
-                cursor.close();
-                locError("size : " + Integer.toString(pois.size()));
-                int n = 0;
-                int num = 0;
-                if (pois.size() > 0) {
-                    mPOIobj poii = pois.get(0);
-                    PointF pointF1 = new PointF(poii.getM_X(), poii.getM_Y());
-                    pointF1 = LatLng.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    pointF1 = new PointF(pointF1.x, pointF1.y - 70);
-                    //pointF = getGeoLocFromPixL(pointF);
-                    PointF pt9 = LatLng.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    locError("pt1 : " + pt9.toString());
-                    float delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
-                    for (mPOIobj poi : pois) {
-                        PointF mpointF1 = new PointF(poi.getM_X(), poi.getM_Y());
-                        mpointF1 = LatLng.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        mpointF1 = new PointF(mpointF1.x, mpointF1.y - 70);
-                        if (Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < delta && Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < 35) {
-                            locError("mpointF : " + mpointF1.toString());
-                            delta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
-                            num = n;
-                        }
-                        locError("n : " + Integer.toString(n));
-                        n++;
-                    }
-                    locError("num : " + Integer.toString(num));
-                    locError("delta : " + Float.toString(delta));
-                    if (delta < 35 || num != 0) {
-                        locError("起飞 : " + Float.toString(delta));
-                        GoNormalSinglePOIPage(pois.get(num).getM_POIC());
-                        //locError(Integer.toString(pois.get(num).getPhotonum()));
-                    } else locError("没有正常查询");
-                }
             }
         }
         return true;
@@ -2210,6 +2233,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
         }
         if (isMessure && isMessureType == MESSURE_DISTANCE_TYPE) drawMessureLine(canvas);
+        drawQueriedPOI(canvas);
+    }
+
+    private void drawQueriedPOI(Canvas canvas){
     }
 
     @Override
@@ -3274,10 +3301,12 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private void GoNormalSinglePOIPage(String poic){
         Log.w(TAG, "updateMapPage: 0");
-        Intent intent = new Intent(MainInterface.this, singlepoi.class);
-        intent.putExtra("POIC", poic);
-        intent.putExtra("type", 0);
-        startActivity(intent);
+        if (!poic.isEmpty()) {
+            Intent intent = new Intent(MainInterface.this, singlepoi.class);
+            intent.putExtra("POIC", poic);
+            intent.putExtra("type", 0);
+            startActivity(intent);
+        }
     }
 
     private void GoDMBZSinglePOIPage(String XH){
@@ -3979,6 +4008,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         } else {
             xxxx = pt.x - (screen_width - viewer_width);
             yyyy = pt.y - (screen_height - viewer_height);
+            Log.w(TAG, "getGeoLocFromPixL: " + screen_height + ";" + viewer_height);
             pt.x = (float)(max_lat - ( yyyy - pdfView.getCurrentYOffset()) / current_pageheight * ( max_lat - min_lat));
             pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
             locLatForTap = pt.x;
@@ -4374,7 +4404,82 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void initCheckbox(){
+        trailLayerBt = (CheckBox) findViewById(R.id.trailLayer);
+        whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer);
+        centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
+        poiLayerBt = (CheckBox) findViewById(R.id.poiLayer);
         type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
+        type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
+        type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
+        trailLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    showTrail = true;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }else {
+                    showTrail = false;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        whiteBlankLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    isWhiteBlank = true;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }else {
+                    isWhiteBlank = false;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        centerPointModeBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    showMode = CENTERMODE;
+                    centerPoint.setVisibility(View.VISIBLE);
+                    isQuery = true;
+                    isDrawType = NONE_DRAW_TYPE;
+                    locError("中心点模式");
+                    isMessureType = MESSURE_NONE_TYPE;
+                    query_poi_imgbt.setVisibility(View.INVISIBLE);
+                }else {
+                    locError("不是中心点模式");
+                    showMode = NOCENTERMODE;
+                    centerPoint.setVisibility(View.INVISIBLE);
+                    isQuery = false;
+                    query_poi_imgbt.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        //图层控制按钮初始化
+        poiLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    try {
+                        if (!type1Checked && !type2Checked && !type3Checked) {
+                            type1_checkbox.setChecked(true);
+                            type2_checkbox.setChecked(true);
+                            type3_checkbox.setChecked(true);
+                        }
+                    }catch (Exception e){
+                        Log.w(TAG, e.toString());
+                    }
+                }else {
+                    try {
+                        type1_checkbox.setChecked(false);
+                        type2_checkbox.setChecked(false);
+                        type3_checkbox.setChecked(false);
+                    }catch (Exception e){
+                        Log.w(TAG, e.toString());
+                    }
+                }
+            }
+        });
         type1_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -4395,7 +4500,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
         });
-        type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
         type2_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -4416,7 +4520,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
         });
-        type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
         type3_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -4438,7 +4541,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         });
         //
-        strings = getResources().getStringArray(R.array.Type);
         type1_checkbox.setText(strings[0]);
         type2_checkbox.setText(strings[1]);
         type3_checkbox.setText(strings[2]);
@@ -4498,6 +4600,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void initOtherVariable(){
+        strings = getResources().getStringArray(R.array.Type);
         trails = LitePal.findAll(Trail.class);
         simpleDateFormat1 = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.Date).toString());
         //初始化白板要素List
@@ -4549,83 +4652,46 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         color_Whiteblank = Color.RED;
     }
 
+    private void forbiddenWidgetForQuery(){
+        locHere_fab.setVisibility(View.GONE);
+        whiteBlank_fab.setVisibility(View.GONE);
+        whiteBlankLayerBt.setVisibility(View.GONE);
+        floatingActionsMenu.setVisibility(View.GONE);
+        addPoi_imgbt.setVisibility(View.GONE);
+    }
+
+    private void showWidgetForQuery(){
+        locHere_fab.setVisibility(View.VISIBLE);
+        whiteBlank_fab.setVisibility(View.VISIBLE);
+        whiteBlankLayerBt.setVisibility(View.VISIBLE);
+        floatingActionsMenu.setVisibility(View.VISIBLE);
+        addPoi_imgbt.setVisibility(View.VISIBLE);
+    }
+
+    private void forbiddenCheckboxForQuery(){
+        trailLayerBt.setVisibility(View.GONE);
+        whiteBlankLayerBt.setVisibility(View.GONE);
+        centerPointModeBt.setVisibility(View.GONE);
+        poiLayerBt.setVisibility(View.GONE);
+        type1_checkbox.setVisibility(View.GONE);
+        type2_checkbox.setVisibility(View.GONE);
+        type3_checkbox.setVisibility(View.GONE);
+    }
+
+    private void showCheckboxForQuery(){
+        trailLayerBt.setVisibility(View.VISIBLE);
+        whiteBlankLayerBt.setVisibility(View.VISIBLE);
+        centerPointModeBt.setVisibility(View.VISIBLE);
+        poiLayerBt.setVisibility(View.VISIBLE);
+        type1_checkbox.setVisibility(View.VISIBLE);
+        type2_checkbox.setVisibility(View.VISIBLE);
+        type3_checkbox.setVisibility(View.VISIBLE);
+    }
+
     private void initWidget(){
         initCheckbox();
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
-        centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
-        centerPointModeBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    showMode = CENTERMODE;
-                    centerPoint.setVisibility(View.VISIBLE);
-                    isQuery = true;
-                    isDrawType = NONE_DRAW_TYPE;
-                    locError("中心点模式");
-                    isMessureType = MESSURE_NONE_TYPE;
-                    query_poi_imgbt.setVisibility(View.INVISIBLE);
-                }else {
-                    locError("不是中心点模式");
-                    showMode = NOCENTERMODE;
-                    centerPoint.setVisibility(View.INVISIBLE);
-                    isQuery = false;
-                    query_poi_imgbt.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-        //图层控制按钮初始化
-        poiLayerBt = (CheckBox) findViewById(R.id.poiLayer);
-        poiLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    try {
-                        if (!type1Checked && !type2Checked && !type3Checked) {
-                            type1_checkbox.setChecked(true);
-                            type2_checkbox.setChecked(true);
-                            type3_checkbox.setChecked(true);
-                        }
-                    }catch (Exception e){
-                        Log.w(TAG, e.toString());
-                    }
-                }else {
-                    try {
-                        type1_checkbox.setChecked(false);
-                        type2_checkbox.setChecked(false);
-                        type3_checkbox.setChecked(false);
-                    }catch (Exception e){
-                        Log.w(TAG, e.toString());
-                    }
-                }
-            }
-        });
-        trailLayerBt = (CheckBox) findViewById(R.id.trailLayer);
-        trailLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    showTrail = true;
-                    pdfView.zoomWithAnimation(c_zoom);
-                }else {
-                    showTrail = false;
-                    pdfView.zoomWithAnimation(c_zoom);
-                }
-            }
-        });
-        whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer) ;
-        whiteBlankLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    isWhiteBlank = true;
-                    pdfView.zoomWithAnimation(c_zoom);
-                }else {
-                    isWhiteBlank = false;
-                    pdfView.zoomWithAnimation(c_zoom);
-                }
-            }
-        });
         //初始化测量相关按钮
         cancel_messure_fab = (FloatingActionButton) findViewById(R.id.cancel_messure);
         cancel_messure_fab.setOnLongClickListener(new View.OnLongClickListener() {
@@ -5741,6 +5807,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         wm.getDefaultDisplay().getMetrics(dm);
         screen_width = dm.widthPixels;
         screen_height = dm.heightPixels;
+        //screen_height = 2960;
         float density = dm.density;
         int screenWidth = (int) (screen_width / density);
         int screenHeight = (int) (screen_height / density);
@@ -5782,11 +5849,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
 
+
+
         int num = receiveInfo();
         if (num != -1) {
             doSpecificOperation();
-            initWidget();
             initVariable(num);
+            initWidget();
             displayFromFile(uri);
         }else {
             showLeaflets();
