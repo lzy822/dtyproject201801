@@ -1583,6 +1583,48 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.w(TAG, "onCreate: " + str1);
         Log.w(TAG, "onCreate: " + str1.replace("\"", ""));*/
         ///////
+        //nitIconBitmap(addIconDataset());
+    }
+
+    private List<IconDataset> addIconDataset(){
+        List<IconDataset> iconDatasets1 = LitePal.findAll(IconDataset.class);
+        File file = new File(Environment.getExternalStorageDirectory().toString() + "/原图");
+        if (file.isDirectory() && iconDatasets1.size()!= 0) {
+            File[] subFiles = file.listFiles();
+            for (int i = 0; i < subFiles.length; i++) {
+                String name = subFiles[i].getName();
+                IconDataset iconDataset = new IconDataset();
+                iconDataset.setName(name.substring(0, name.lastIndexOf(".")));
+                iconDataset.setPath(subFiles[i].getAbsolutePath());
+                iconDataset.save();
+            }
+            List<IconDataset> iconDatasets = LitePal.findAll(IconDataset.class);
+            for (int i = 0; i < iconDatasets.size(); i++) {
+                Log.w(TAG, "addIconDataset: " + iconDatasets.get(i).getName());
+            }
+            return iconDatasets;
+        }else return iconDatasets1;
+    }
+
+    List<bt> IconBitmaps;
+    private void initIconBitmap(final List<IconDataset> iconDatasets){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                IconBitmaps = new ArrayList<>();
+                for (int i = 0; i < iconDatasets.size(); i++){
+                    String path = iconDatasets.get(i).getPath();
+                    Bitmap bitmap = DataUtil.getImageThumbnail(path, 80, 80);
+                    IconBitmaps.add(new bt(bitmap, path));
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(select_page.this, "done", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }).start();
     }
 
     private void initWidget(){

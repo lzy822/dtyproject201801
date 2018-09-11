@@ -8,6 +8,13 @@ public class bt {
     private String poic;
     private int rotate;
 
+
+    /**
+     *
+     * @param m_bm
+     * @param m_path
+     * @param rotate
+     */
     public bt(Bitmap m_bm, String m_path, int rotate) {
         this.m_bm = m_bm;
         this.m_path = m_path;

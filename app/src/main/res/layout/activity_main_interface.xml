@@ -193,6 +193,41 @@
         android:scaleType="fitStart"
         android:src="@drawable/ic_brush_black_24dp"
         fab:fab_size="mini" />
+    <com.github.clans.fab.FloatingActionButton
+    android:id="@+id/icon_plus"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+    android:adjustViewBounds="false"
+    android:scaleType="fitStart"
+    android:src="@drawable/ic_add"
+    android:visibility="gone"
+    fab:fab_size="mini" />
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/icon_minus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/icon_plus"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_remove_black_24dp"
+        android:visibility="gone"
+        fab:fab_size="mini" />
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/icon_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/icon_plus"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_done_black_24dp"
+        android:visibility="gone"
+        fab:fab_size="mini" />
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/backpts_messure"
