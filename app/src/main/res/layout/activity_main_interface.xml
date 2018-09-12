@@ -207,6 +207,30 @@
         fab:fab_size="mini" />
 
     <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/icon_choose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/icon_minus"
+        android:layout_toStartOf="@+id/icon_shift"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_insert_photo_black_24dp"
+        android:visibility="gone"
+        fab:fab_size="mini" />
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/icon_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/icon_ok"
+        android:layout_toEndOf="@+id/icon_shift"
+        android:adjustViewBounds="false"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_delete"
+        android:visibility="gone"
+        fab:fab_size="mini" />
+
+    <com.github.clans.fab.FloatingActionButton
         android:id="@+id/icon_shift"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

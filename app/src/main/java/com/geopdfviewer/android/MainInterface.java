@@ -42,7 +42,10 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.ListPopupWindow;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -2355,30 +2358,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     private int WidthAndHeight = 80;
     private void drawQueriedMPOI(Canvas canvas){
         if (QueriedIconPoiNum != -1 && !IconShift) {
-            List<MPOI> mpois = LitePal.findAll(MPOI.class);
+            MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
             for (int j = 0; j < IconBitmaps.size(); j++) {
-                if (mpois.get(QueriedIconPoiNum).getWidth() == 80) {
-                    if (IconBitmaps.get(j).getM_path().equals(mpois.get(QueriedIconPoiNum).getImgPath())) {
-                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpois.get(QueriedIconPoiNum).getLat(), mpois.get(QueriedIconPoiNum).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        //if (WidthAndHeight == mpois.get(QueriedIconPoiNum).getWidth())
+                if (WidthAndHeight == 80) {
+                    if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath())) {
+                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //if (WidthAndHeight == mpoi.getWidth())
                             canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
                         /*else {
                             if (IconBitmaps.size() > iconBitmapNum)
                                 IconBitmaps.remove(iconBitmapNum);
-                            IconBitmaps.add(new bt(DataUtil.getImageThumbnail(mpois.get(QueriedIconPoiNum).getImgPath(), WidthAndHeight, WidthAndHeight), mpois.get(QueriedIconPoiNum).getImgPath() + Integer.toString(WidthAndHeight)));
+                            IconBitmaps.add(new bt(DataUtil.getImageThumbnail(mpoi.getImgPath(), WidthAndHeight, WidthAndHeight), mpoi.getImgPath() + Integer.toString(WidthAndHeight)));
                             canvas.drawBitmap(IconBitmaps.get(iconBitmapNum).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
                         }*/
                         canvas.drawRect((float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), (float) (pointF.x + (WidthAndHeight / 2)), (float) (pointF.y + (WidthAndHeight / 2)), paint9);
                     }
                 }else {
-                    if (IconBitmaps.get(j).getM_path().equals(mpois.get(QueriedIconPoiNum).getImgPath() + "," + Integer.toString(WidthAndHeight))) {
-                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpois.get(QueriedIconPoiNum).getLat(), mpois.get(QueriedIconPoiNum).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        //if (WidthAndHeight == mpois.get(QueriedIconPoiNum).getWidth())
+                    if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString(WidthAndHeight))) {
+                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //if (WidthAndHeight == mpoi.getWidth())
                             canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
                         /*else {
                             if (IconBitmaps.size() > iconBitmapNum)
                                 IconBitmaps.remove(iconBitmapNum);
-                            IconBitmaps.add(new bt(DataUtil.getImageThumbnail(mpois.get(QueriedIconPoiNum).getImgPath(), WidthAndHeight, WidthAndHeight), mpois.get(QueriedIconPoiNum).getImgPath() + Integer.toString(WidthAndHeight)));
+                            IconBitmaps.add(new bt(DataUtil.getImageThumbnail(mpoi.getImgPath(), WidthAndHeight, WidthAndHeight), mpoi.getImgPath() + Integer.toString(WidthAndHeight)));
                             canvas.drawBitmap(IconBitmaps.get(iconBitmapNum).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
                         }*/
                         canvas.drawRect((float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), (float) (pointF.x + (WidthAndHeight / 2)), (float) (pointF.y + (WidthAndHeight / 2)), paint9);
@@ -4743,13 +4746,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         Sampler.getInstance().start();
         updateDBFormOldToNow();
         initEsterEgg();
+        //LitePal.deleteAll(IconDataset.class);
         initIconBitmap(addIconDataset());
     }
 
     private List<IconDataset> addIconDataset(){
         List<IconDataset> iconDatasets1 = LitePal.findAll(IconDataset.class);
         File file = new File(Environment.getExternalStorageDirectory().toString() + "/原图");
-        if (file.isDirectory() && iconDatasets1.size()!= 0) {
+        if (file.isDirectory() && iconDatasets1.size() == 0) {
             File[] subFiles = file.listFiles();
             for (int i = 0; i < subFiles.length; i++) {
                 String name = subFiles[i].getName();
@@ -4764,6 +4768,58 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
             return iconDatasets;
         }else return iconDatasets1;
+    }
+
+    private void showPopueWindowForIcon(){
+        final View popView = View.inflate(this, R.layout.popupwindow_iconchoose,null);
+        RecyclerView recyclerView1 = (RecyclerView) popView.findViewById(R.id.iconchoose_recycler_view);
+        GridLayoutManager layoutManager1 = new GridLayoutManager(popView.getContext(),1);
+        layoutManager1.setOrientation(OrientationHelper.HORIZONTAL);
+        recyclerView1.setLayoutManager(layoutManager1);
+        //xzqTreeAdapter adapter1 = new xzqTreeAdapter(DataUtil.bubbleSort(LitePal.findAll(xzq.class)));
+        List<IconDataset> iconDatasets = LitePal.findAll(IconDataset.class);
+        final IconDatasetAdapter adapter1 = new IconDatasetAdapter(iconDatasets);
+        //获取屏幕宽高
+        final int weight = getResources().getDisplayMetrics().widthPixels;
+        //final int height = getResources().getDisplayMetrics().heightPixels;
+        final int height = 300;
+
+        final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
+        adapter1.setOnItemClickListener(new IconDatasetAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String iconPath, int position) {
+                MPOI mpoi = new MPOI();
+                mpoi.setImgPath(iconPath);
+                mpoi.updateAll("num = ?", Integer.toString(QueriedIconPoiNum));
+                if (WidthAndHeight != 80){
+                    Bitmap bitmap = DataUtil.getImageThumbnail(iconPath, WidthAndHeight, WidthAndHeight);
+                    IconBitmaps.add(new bt(bitmap, iconPath + "," + Integer.toString(WidthAndHeight)));
+                }
+                popupWindow.dismiss();
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        recyclerView1.setAdapter(adapter1);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(true);
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow OnTouchListener
+
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 1f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.TOP,0,400);
     }
 
     private List<bt> IconBitmaps;
@@ -4792,6 +4848,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
                         Log.w(TAG, "run: " + IconBitmaps.size());
                         iconBitmapNum = IconBitmaps.size();
+                        //pdfView.zoomWithAnimation(c_zoom);
                     }
                 });
             }
@@ -4953,10 +5010,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
         FloatingActionButton iconok = (FloatingActionButton) findViewById(R.id.icon_ok);
         FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
+        FloatingActionButton iconchoose = (FloatingActionButton) findViewById(R.id.icon_choose);
+        FloatingActionButton icondelete = (FloatingActionButton) findViewById(R.id.icon_delete);
         iconplus.setVisibility(View.VISIBLE);
         iconminus.setVisibility(View.VISIBLE);
         iconok.setVisibility(View.VISIBLE);
         iconshift.setVisibility(View.VISIBLE);
+        iconchoose.setVisibility(View.VISIBLE);
+        icondelete.setVisibility(View.VISIBLE);
         iconplus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -4988,11 +5049,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     mpoi.setHeight(WidthAndHeight);
                     mpoi.updateAll("num = ?", Integer.toString(QueriedIconPoiNum));
                     removeBufferIconBitmapForOK(LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0));
-                    QueriedIconPoiNum = -1;
-                    pdfView.zoomWithAnimation(c_zoom);
-                    forbiddenQueriedWidget();
-                    showCheckboxForQuery();
-                    showWidgetForQuery();
+                    resetQueriedIcon();
                 }else {
                     showQueriedWidgetForShift();
                     IconShift = false;
@@ -5030,6 +5087,27 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
             }
         });
+        iconchoose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopueWindowForIcon();
+            }
+        });
+        icondelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LitePal.deleteAll(MPOI.class, "num = ? ", Integer.toString(QueriedIconPoiNum));
+                resetQueriedIcon();
+            }
+        });
+    }
+
+    private void resetQueriedIcon(){
+        QueriedIconPoiNum = -1;
+        pdfView.zoomWithAnimation(c_zoom);
+        forbiddenQueriedWidget();
+        showCheckboxForQuery();
+        showWidgetForQuery();
     }
 
     private void forbiddenQueriedWidget(){
@@ -5037,28 +5115,40 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
         FloatingActionButton iconok = (FloatingActionButton) findViewById(R.id.icon_ok);
         FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
+        FloatingActionButton iconchosse = (FloatingActionButton) findViewById(R.id.icon_choose);
+        FloatingActionButton icondelete = (FloatingActionButton) findViewById(R.id.icon_delete);
         iconplus.setVisibility(View.GONE);
         iconminus.setVisibility(View.GONE);
         iconok.setVisibility(View.GONE);
         iconshift.setVisibility(View.GONE);
+        iconchosse.setVisibility(View.GONE);
+        icondelete.setVisibility(View.GONE);
     }
 
     private void showQueriedWidgetForShift(){
         FloatingActionButton iconplus = (FloatingActionButton) findViewById(R.id.icon_plus);
         FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
         FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
+        FloatingActionButton iconchoose = (FloatingActionButton) findViewById(R.id.icon_choose);
+        FloatingActionButton icondelete = (FloatingActionButton) findViewById(R.id.icon_delete);
         iconplus.setVisibility(View.VISIBLE);
         iconminus.setVisibility(View.VISIBLE);
         iconshift.setVisibility(View.VISIBLE);
+        iconchoose.setVisibility(View.VISIBLE);
+        icondelete.setVisibility(View.VISIBLE);
     }
 
     private void forbiddenQueriedWidgetForShift(){
         FloatingActionButton iconplus = (FloatingActionButton) findViewById(R.id.icon_plus);
         FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
         FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
+        FloatingActionButton iconchoose = (FloatingActionButton) findViewById(R.id.icon_choose);
+        FloatingActionButton icondelete = (FloatingActionButton) findViewById(R.id.icon_delete);
         iconplus.setVisibility(View.GONE);
         iconminus.setVisibility(View.GONE);
         iconshift.setVisibility(View.GONE);
+        iconchoose.setVisibility(View.GONE);
+        icondelete.setVisibility(View.GONE);
     }
 
     private void forbiddenCheckboxForQuery(){

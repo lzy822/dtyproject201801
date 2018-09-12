@@ -1584,6 +1584,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.w(TAG, "onCreate: " + str1.replace("\"", ""));*/
         ///////
         //nitIconBitmap(addIconDataset());
+        //LitePal.deleteAll(IconDataset.class);
     }
 
     private List<IconDataset> addIconDataset(){
