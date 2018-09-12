@@ -91,6 +91,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -699,7 +700,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }else return "";
     }
 
-    private int QueriedIconPoiNum;
+    private int QueriedIconPoiNum = -1;
     public int queryIconPoi(final MotionEvent e){
         int n = 0;
         int num = 0;
@@ -727,7 +728,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             locError("IconQuerynum : " + Integer.toString(num));
             locError("IconQuerydelta : " + Float.toString(mdelta));
             if (mdelta < 50 || num != 0) {
-                QueriedIconPoiNum = pois.get(num).getNum();
+                WidthAndHeight = (int)pois.get(num).getWidth();
+                removeBufferIconBitmapForProgress();
+                bufferIconBitmapMinus(pois.get(num));
+                bufferIconBitmapPlus(pois.get(num));
                 pdfView.zoomWithAnimation(c_zoom);
                 forbiddenCheckboxForQuery();
                 forbiddenWidgetForQuery();
@@ -1094,7 +1098,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         isQueried = true;
                     }else {
                         Log.w(TAG, "IconQuery: ");
-                        QueriedIconNum = queryIconPoi(e);
+                        QueriedIconPoiNum = queryIconPoi(e);
                     }
                 }
             }
@@ -2319,18 +2323,30 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         drawQueriedMPOI(canvas);
     }
 
-    private int QueriedIconNum = -1;
+    private void drawSubMPOI(Canvas canvas, MPOI mpoi){
+        for (int j = 0; j < IconBitmaps.size(); j++) {
+            if (mpoi.getWidth() == 80) {
+                if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath())) {
+                    PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (mpoi.getWidth() / 2)), (float) (pointF.y - (mpoi.getHeight() / 2)), paint9);
+                    break;
+                }
+            } else {
+                if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString((int) mpoi.getWidth()))) {
+                    PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (mpoi.getWidth() / 2)), (float) (pointF.y - (mpoi.getHeight() / 2)), paint9);
+                    break;
+                }
+            }
+        }
+    }
     private void drawMPOI(Canvas canvas){
         List<MPOI> mpois = LitePal.findAll(MPOI.class);
         for (int i = 0; i < mpois.size(); i++){
-            for (int j = 0; j < IconBitmaps.size(); j++){
-                if (IconBitmaps.get(j).getM_path().equals(mpois.get(i).getImgPath())){
-                    PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpois.get(i).getLat(), mpois.get(i).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float)(pointF.x - (mpois.get(i).getWidth() / 2)), (float)(pointF.y - (mpois.get(i).getHeight() / 2)), paint9);
-                }else if (IconBitmaps.get(j).getM_path().contains(",") && IconBitmaps.get(j).getM_path().substring(0, IconBitmaps.get(j).getM_path().lastIndexOf(",")).equals(mpois.get(i).getImgPath()) && IconBitmaps.get(j).getM_path().substring(IconBitmaps.get(j).getM_path().lastIndexOf(",") + 1).equals(Integer.toString((int)mpois.get(i).getWidth()))){
-                    PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpois.get(i).getLat(), mpois.get(i).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float)(pointF.x - (mpois.get(i).getWidth() / 2)), (float)(pointF.y - (mpois.get(i).getHeight() / 2)), paint9);
-                }
+            if (QueriedIconPoiNum == -1) {
+                drawSubMPOI(canvas, mpois.get(i));
+            }else if (i != QueriedIconPoiNum){
+                drawSubMPOI(canvas, mpois.get(i));
             }
         }
     }
@@ -2338,21 +2354,37 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private int WidthAndHeight = 80;
     private void drawQueriedMPOI(Canvas canvas){
-        if (QueriedIconNum != -1) {
+        if (QueriedIconPoiNum != -1 && !IconShift) {
             List<MPOI> mpois = LitePal.findAll(MPOI.class);
             for (int j = 0; j < IconBitmaps.size(); j++) {
-                if (IconBitmaps.get(j).getM_path().equals(mpois.get(QueriedIconNum).getImgPath())) {
-                    PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpois.get(QueriedIconNum).getLat(), mpois.get(QueriedIconNum).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    if (WidthAndHeight == 80)
-                        canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
-                    else {
-                        if (IconBitmaps.size() > iconBitmapNum)
-                            IconBitmaps.remove(iconBitmapNum);
-                        IconBitmaps.add(new bt(DataUtil.getImageThumbnail(mpois.get(QueriedIconNum).getImgPath(), WidthAndHeight, WidthAndHeight), mpois.get(QueriedIconNum).getImgPath() + Integer.toString(WidthAndHeight)));
-                        canvas.drawBitmap(IconBitmaps.get(iconBitmapNum).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
+                if (mpois.get(QueriedIconPoiNum).getWidth() == 80) {
+                    if (IconBitmaps.get(j).getM_path().equals(mpois.get(QueriedIconPoiNum).getImgPath())) {
+                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpois.get(QueriedIconPoiNum).getLat(), mpois.get(QueriedIconPoiNum).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //if (WidthAndHeight == mpois.get(QueriedIconPoiNum).getWidth())
+                            canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
+                        /*else {
+                            if (IconBitmaps.size() > iconBitmapNum)
+                                IconBitmaps.remove(iconBitmapNum);
+                            IconBitmaps.add(new bt(DataUtil.getImageThumbnail(mpois.get(QueriedIconPoiNum).getImgPath(), WidthAndHeight, WidthAndHeight), mpois.get(QueriedIconPoiNum).getImgPath() + Integer.toString(WidthAndHeight)));
+                            canvas.drawBitmap(IconBitmaps.get(iconBitmapNum).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
+                        }*/
+                        canvas.drawRect((float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), (float) (pointF.x + (WidthAndHeight / 2)), (float) (pointF.y + (WidthAndHeight / 2)), paint9);
                     }
-                    canvas.drawRect((float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), (float) (pointF.x + (WidthAndHeight / 2)), (float) (pointF.y + (WidthAndHeight / 2)), paint9);
+                }else {
+                    if (IconBitmaps.get(j).getM_path().equals(mpois.get(QueriedIconPoiNum).getImgPath() + "," + Integer.toString(WidthAndHeight))) {
+                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpois.get(QueriedIconPoiNum).getLat(), mpois.get(QueriedIconPoiNum).getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        //if (WidthAndHeight == mpois.get(QueriedIconPoiNum).getWidth())
+                            canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
+                        /*else {
+                            if (IconBitmaps.size() > iconBitmapNum)
+                                IconBitmaps.remove(iconBitmapNum);
+                            IconBitmaps.add(new bt(DataUtil.getImageThumbnail(mpois.get(QueriedIconPoiNum).getImgPath(), WidthAndHeight, WidthAndHeight), mpois.get(QueriedIconPoiNum).getImgPath() + Integer.toString(WidthAndHeight)));
+                            canvas.drawBitmap(IconBitmaps.get(iconBitmapNum).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
+                        }*/
+                        canvas.drawRect((float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), (float) (pointF.x + (WidthAndHeight / 2)), (float) (pointF.y + (WidthAndHeight / 2)), paint9);
+                    }
                 }
+
             }
         }
     }
@@ -4748,15 +4780,95 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 List<MPOI> mpois = LitePal.findAll(MPOI.class);
                 for (int i = 0; i < mpois.size(); i++){
-                    String path = mpois.get(i).getImgPath();
-                    Bitmap bitmap = DataUtil.getImageThumbnail(path, (int)mpois.get(i).getWidth(), (int)mpois.get(i).getHeight());
-                    IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getWidth())));
+                    if (mpois.get(i).getWidth() != 80 && mpois.get(i).getImgPath() != null) {
+                        String path = mpois.get(i).getImgPath();
+                        Bitmap bitmap = DataUtil.getImageThumbnail(path, (int) mpois.get(i).getWidth(), (int) mpois.get(i).getHeight());
+                        IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getWidth())));
+                    }
                 }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        Log.w(TAG, "run: " + IconBitmaps.size());
                         iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void bufferIconBitmapPlus(final MPOI mpoi){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.w(TAG, "run: " + mpoi.getImgPath());
+                Bitmap bitmap1 = DataUtil.getImageThumbnail(mpoi.getImgPath(), WidthAndHeight + 5, WidthAndHeight + 5);
+                IconBitmaps.add(new bt(bitmap1, mpoi.getImgPath() + "," + Integer.toString(WidthAndHeight + 5)));
+                Log.w(TAG, "run: " + IconBitmaps.get(IconBitmaps.size() - 1).getM_path());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void bufferIconBitmapMinus(final MPOI mpoi){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bitmap = DataUtil.getImageThumbnail(mpoi.getImgPath(), WidthAndHeight - 5, WidthAndHeight - 5);
+                IconBitmaps.add(new bt(bitmap, mpoi.getImgPath() + "," + Integer.toString(WidthAndHeight - 5)));
+                Log.w(TAG, "run: " + IconBitmaps.get(IconBitmaps.size() - 1).getM_path());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void removeBufferIconBitmapForProgress(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < IconBitmaps.size(); i++){
+                    if (i >= iconBitmapNum && IconBitmaps.get(i).getM_path().contains(",") && (!IconBitmaps.get(i).getM_path().contains(Integer.toString(WidthAndHeight - 5)) && !IconBitmaps.get(i).getM_path().contains(Integer.toString(WidthAndHeight + 5)) && !IconBitmaps.get(i).getM_path().contains(Integer.toString(WidthAndHeight)))){
+                        IconBitmaps.remove(i);
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void removeBufferIconBitmapForOK(final MPOI mpoi){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < IconBitmaps.size(); i++){
+                    if (i >= iconBitmapNum && IconBitmaps.get(i).getM_path().contains(",") && !IconBitmaps.get(i).getM_path().contains(Integer.toString((int) mpoi.getWidth()))){
+                        IconBitmaps.remove(i);
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
                     }
                 });
             }
@@ -4817,6 +4929,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void forbiddenWidgetForQuery(){
+        centerPoint.setVisibility(View.GONE);
         locHere_fab.setVisibility(View.GONE);
         whiteBlank_fab.setVisibility(View.GONE);
         whiteBlankLayerBt.setVisibility(View.GONE);
@@ -4825,6 +4938,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void showWidgetForQuery(){
+        centerPoint.setImageResource(R.drawable.ic_center_focus_weak_black_24dp);
+        centerPoint.setVisibility(View.VISIBLE);
         locHere_fab.setVisibility(View.VISIBLE);
         whiteBlank_fab.setVisibility(View.VISIBLE);
         whiteBlankLayerBt.setVisibility(View.VISIBLE);
@@ -4832,17 +4947,24 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         addPoi_imgbt.setVisibility(View.VISIBLE);
     }
 
+    private boolean IconShift = false;
     private void showQueriedWidget(){
         FloatingActionButton iconplus = (FloatingActionButton) findViewById(R.id.icon_plus);
         FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
         FloatingActionButton iconok = (FloatingActionButton) findViewById(R.id.icon_ok);
+        FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
         iconplus.setVisibility(View.VISIBLE);
         iconminus.setVisibility(View.VISIBLE);
         iconok.setVisibility(View.VISIBLE);
+        iconshift.setVisibility(View.VISIBLE);
         iconplus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 WidthAndHeight = WidthAndHeight + 5;
+                MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                removeBufferIconBitmapForProgress();
+                bufferIconBitmapMinus(mpoi);
+                bufferIconBitmapPlus(mpoi);
                 pdfView.zoomWithAnimation(c_zoom);
             }
         });
@@ -4850,19 +4972,62 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 WidthAndHeight = WidthAndHeight - 5;
+                MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                removeBufferIconBitmapForProgress();
+                bufferIconBitmapMinus(mpoi);
+                bufferIconBitmapPlus(mpoi);
                 pdfView.zoomWithAnimation(c_zoom);
             }
         });
         iconok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MPOI mpoi = new MPOI();
-                mpoi.setWidth(WidthAndHeight);
-                mpoi.setHeight(WidthAndHeight);
-                mpoi.update(QueriedIconPoiNum);
-                forbiddenQueriedWidget();
-                showCheckboxForQuery();
-                showWidgetForQuery();
+                if (!IconShift) {
+                    MPOI mpoi = new MPOI();
+                    mpoi.setWidth(WidthAndHeight);
+                    mpoi.setHeight(WidthAndHeight);
+                    mpoi.updateAll("num = ?", Integer.toString(QueriedIconPoiNum));
+                    removeBufferIconBitmapForOK(LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0));
+                    QueriedIconPoiNum = -1;
+                    pdfView.zoomWithAnimation(c_zoom);
+                    forbiddenQueriedWidget();
+                    showCheckboxForQuery();
+                    showWidgetForQuery();
+                }else {
+                    showQueriedWidgetForShift();
+                    IconShift = false;
+                    MPOI mpoi = new MPOI();
+                    mpoi.setLat(centerPointLoc.x);
+                    mpoi.setLng(centerPointLoc.y);
+                    mpoi.updateAll("num = ?", Integer.toString(QueriedIconPoiNum));
+                    centerPoint.setVisibility(View.GONE);
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        iconshift.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                IconShift = !IconShift;
+                if (IconShift) {
+                    forbiddenQueriedWidgetForShift();
+                    MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                    for (int i = 0; i < IconBitmaps.size(); i++) {
+                        if (mpoi.getWidth() != 80) {
+                            if (IconBitmaps.get(i).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString((int) mpoi.getWidth()))) {
+                                centerPoint.setImageBitmap(IconBitmaps.get(i).getM_bm());
+                                break;
+                            }
+                        }else {
+                            if (IconBitmaps.get(i).getM_path().equals(mpoi.getImgPath())) {
+                                centerPoint.setImageBitmap(IconBitmaps.get(i).getM_bm());
+                                break;
+                            }
+                        }
+                    }
+                    centerPoint.setVisibility(View.VISIBLE);
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
             }
         });
     }
@@ -4871,9 +5036,29 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         FloatingActionButton iconplus = (FloatingActionButton) findViewById(R.id.icon_plus);
         FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
         FloatingActionButton iconok = (FloatingActionButton) findViewById(R.id.icon_ok);
+        FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
         iconplus.setVisibility(View.GONE);
         iconminus.setVisibility(View.GONE);
         iconok.setVisibility(View.GONE);
+        iconshift.setVisibility(View.GONE);
+    }
+
+    private void showQueriedWidgetForShift(){
+        FloatingActionButton iconplus = (FloatingActionButton) findViewById(R.id.icon_plus);
+        FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
+        FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
+        iconplus.setVisibility(View.VISIBLE);
+        iconminus.setVisibility(View.VISIBLE);
+        iconshift.setVisibility(View.VISIBLE);
+    }
+
+    private void forbiddenQueriedWidgetForShift(){
+        FloatingActionButton iconplus = (FloatingActionButton) findViewById(R.id.icon_plus);
+        FloatingActionButton iconminus = (FloatingActionButton) findViewById(R.id.icon_minus);
+        FloatingActionButton iconshift = (FloatingActionButton) findViewById(R.id.icon_shift);
+        iconplus.setVisibility(View.GONE);
+        iconminus.setVisibility(View.GONE);
+        iconshift.setVisibility(View.GONE);
     }
 
     private void forbiddenCheckboxForQuery(){
@@ -6058,7 +6243,6 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         setContentView(R.layout.activity_main_interface);
 
 
-
         int num = receiveInfo();
         if (num != -1) {
             doSpecificOperation();
@@ -6289,13 +6473,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
                     builder.setTitle("提示");
                     builder.setMessage("请选择你要添加的图层");
-                    builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
+                    builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddPhoto(uri, latandlong, 0);
                         }
                     });
-                    builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddPhoto(uri, latandlong, 1);
@@ -6314,7 +6498,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                     });
-                    builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddPhoto(uri, latandlong, 2);
@@ -6331,13 +6515,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
             builder.setTitle("提示");
             builder.setMessage("请选择你要添加的图层");
-            builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (!esterEgg_lm) AddTape(uri,0);
                 }
             });
-            builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (!esterEgg_lm) AddTape(uri,1);
@@ -6356,7 +6540,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     }
                 }
             });
-            builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (!esterEgg_lm) AddTape(uri,2);
@@ -6388,13 +6572,13 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
                     builder.setTitle("提示");
                     builder.setMessage("请选择你要添加的图层");
-                    builder.setPositiveButton("地名", new DialogInterface.OnClickListener() {
+                    builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 0);
                         }
                     });
-                    builder.setNeutralButton("地名标志", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 1);
@@ -6413,7 +6597,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             }
                         }
                     });
-                    builder.setNegativeButton("门牌管理", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 2);
