@@ -461,8 +461,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private void AddIconPOI(final PointF pt1){
         MPOI poi = new MPOI();
-        poi.setNum(LitePal.findAll(MPOI.class).size());
-        poi.setImgPath(IconBitmaps.get(1).getM_path());
+        poi.setNum(System.currentTimeMillis());
+        poi.setImgPath(IconBitmaps.get(0).getM_path());
         if (showMode == NOCENTERMODE) {
             poi.setLat(pt1.x);
             poi.setLng(pt1.y);
@@ -703,8 +703,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         }else return "";
     }
 
-    private int QueriedIconPoiNum = -1;
-    public int queryIconPoi(final MotionEvent e){
+    private long QueriedIconPoiNum = -1;
+    public long queryIconPoi(final MotionEvent e){
         int n = 0;
         int num = 0;
         List<MPOI> pois = LitePal.findAll(MPOI.class);
@@ -731,7 +731,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             locError("IconQuerynum : " + Integer.toString(num));
             locError("IconQuerydelta : " + Float.toString(mdelta));
             if (mdelta < 50 || num != 0) {
-                WidthAndHeight = (int)pois.get(num).getWidth();
+                //WidthAndHeight = (int)pois.get(num).getWidth();
+                IconHeight = (int)pois.get(num).getHeight();
+                IconWidth = (int)pois.get(num).getWidth();
                 removeBufferIconBitmapForProgress();
                 bufferIconBitmapMinus(pois.get(num));
                 bufferIconBitmapPlus(pois.get(num));
@@ -762,8 +764,9 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 builder1.setNegativeButton("标志点", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        AddIconPOI(pt1);
-                        pdfView.zoomWithAnimation(c_zoom);
+                        showPopueWindowForIconAdd(pt1);
+                        //AddIconPOI(pt1);
+                        //pdfView.zoomWithAnimation(c_zoom);
                     }
                 });
                 builder1.setPositiveButton("普通兴趣点", new DialogInterface.OnClickListener() {
@@ -1099,14 +1102,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     if (!poic.isEmpty()) {
                         GoNormalSinglePOIPage(poic);
                         isQueried = true;
-                    }else {
-                        Log.w(TAG, "IconQuery: ");
-                        QueriedIconPoiNum = queryIconPoi(e);
                     }
                 }
-            }
-
-            if (isQuery && isDrawType == NONE_DRAW_TYPE && !isQueried) {
+                if (!isQueried && QueriedIconPoiNum == -1){
+                    Log.w(TAG, "IconQuery: ");
+                    QueriedIconPoiNum = queryIconPoi(e);
+                    if (QueriedIconPoiNum != -1)
+                        isQueried = true;
+                }
             }
         }
         return true;
@@ -2348,7 +2351,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         for (int i = 0; i < mpois.size(); i++){
             if (QueriedIconPoiNum == -1) {
                 drawSubMPOI(canvas, mpois.get(i));
-            }else if (i != QueriedIconPoiNum){
+            }else if (mpois.get(i).getNum() != QueriedIconPoiNum){
                 drawSubMPOI(canvas, mpois.get(i));
             }
         }
@@ -2356,9 +2359,11 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
 
     private int WidthAndHeight = 80;
-    private void drawQueriedMPOI(Canvas canvas){
+    private int IconWidth;
+    private int IconHeight;
+    private void drawQueriedMPOI1(Canvas canvas){
         if (QueriedIconPoiNum != -1 && !IconShift) {
-            MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+            MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
             for (int j = 0; j < IconBitmaps.size(); j++) {
                 if (WidthAndHeight == 80) {
                     if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath())) {
@@ -2385,6 +2390,27 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                             canvas.drawBitmap(IconBitmaps.get(iconBitmapNum).getM_bm(), (float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), paint9);
                         }*/
                         canvas.drawRect((float) (pointF.x - (WidthAndHeight / 2)), (float) (pointF.y - (WidthAndHeight / 2)), (float) (pointF.x + (WidthAndHeight / 2)), (float) (pointF.y + (WidthAndHeight / 2)), paint9);
+                    }
+                }
+
+            }
+        }
+    }
+    private void drawQueriedMPOI(Canvas canvas){
+        if (QueriedIconPoiNum != -1 && !IconShift) {
+            MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+            for (int j = 0; j < IconBitmaps.size(); j++) {
+                if (IconHeight == 80) {
+                    if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath())) {
+                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (IconWidth / 2)), (float) (pointF.y - (IconHeight / 2)), paint9);
+                        canvas.drawRect((float) (pointF.x - (IconWidth / 2)), (float) (pointF.y - (IconHeight / 2)), (float) (pointF.x + (IconWidth / 2)), (float) (pointF.y + (IconHeight / 2)), paint9);
+                    }
+                }else {
+                    if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString(IconWidth))) {
+                        PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (IconWidth / 2)), (float) (pointF.y - (IconHeight / 2)), paint9);
+                        canvas.drawRect((float) (pointF.x - (IconWidth / 2)), (float) (pointF.y - (IconHeight / 2)), (float) (pointF.x + (IconWidth / 2)), (float) (pointF.y + (IconHeight / 2)), paint9);
                     }
                 }
 
@@ -3077,6 +3103,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         toolbar.setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfView.setBackgroundColor(Color.WHITE);
+        pdfView.setMidZoom(10);
+        pdfView.setMaxZoom(20);
         final File file = new File(filePath);
         pdfView.fromFile(file)
                 .password("123123123")
@@ -4084,21 +4112,25 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         locError(Float.toString(cs_top) + "%" + Float.toString(cs_bottom) + "%" + Float.toString(cs_left) + "%" + Float.toString(cs_right));
         //
 
+        centerPointLoc = new PointF((cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2);
         if (showMode == CENTERMODE) {
-            centerPointLoc = new PointF((cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2);
             locLatForTap = centerPointLoc.x;
             locLongForTap = centerPointLoc.y;
-            DecimalFormat df = new DecimalFormat("0.0000");
-            if (isCoordinateType == COORDINATE_DEFAULT_TYPE) {
-                textView.setText(df.format(centerPointLoc.x) + ";" + df.format(centerPointLoc.y));
-            } else if (isCoordinateType == COORDINATE_BLH_TYPE) {
-                textView.setText(Integer.toString((int) centerPointLoc.x) + "°" + Integer.toString((int) ((centerPointLoc.x - (int) centerPointLoc.x) * 60)) + "′" + Integer.toString((int) (((centerPointLoc.x - (int) centerPointLoc.x) * 60 - (int) ((centerPointLoc.x - (int) centerPointLoc.x) * 60)) * 60)) + "″;" + Integer.toString((int) centerPointLoc.y) + "°" + Integer.toString((int) ((centerPointLoc.y - (int) centerPointLoc.y) * 60)) + "′" + Integer.toString((int) (((centerPointLoc.y - (int) centerPointLoc.y) * 60 - (int) ((centerPointLoc.y - (int) centerPointLoc.y) * 60)) * 60)) + "″");
-            } else {
-                textView.setText(df.format(centerPointLoc.x) + ";" + df.format(centerPointLoc.y));
-            }
+            showLocationText();
         }
         //
         //cs_top = pdfView.getCurrentYOffset()
+    }
+
+    private void showLocationText(){
+        DecimalFormat df = new DecimalFormat("0.0000");
+        if (isCoordinateType == COORDINATE_DEFAULT_TYPE) {
+            textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
+        } else if (isCoordinateType == COORDINATE_BLH_TYPE) {
+            textView.setText(Integer.toString((int) locLatForTap) + "°" + Integer.toString((int) ((locLatForTap - (int) locLatForTap) * 60)) + "′" + Integer.toString((int) (((locLatForTap - (int) locLatForTap) * 60 - (int) ((locLatForTap - (int) locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int) locLongForTap) + "°" + Integer.toString((int) ((locLongForTap - (int) locLongForTap) * 60)) + "′" + Integer.toString((int) (((locLongForTap - (int) locLongForTap) * 60 - (int) ((locLongForTap - (int) locLongForTap) * 60)) * 60)) + "″");
+        } else {
+            textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
+        }
     }
 
     //屏幕坐标位置到经纬度转化
@@ -4115,11 +4147,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 pt.y = (float)(( xxxx) / current_pagewidth * ( max_long - min_long) + min_long);
                 locLatForTap = pt.x;
                 locLongForTap = pt.y;
-                if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
-                    textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
-                }else if (isCoordinateType == COORDINATE_BLH_TYPE){
-                    textView.setText(Integer.toString((int)locLatForTap) + "°" + Integer.toString((int)(( locLatForTap - (int)locLatForTap) * 60)) + "′" + Integer.toString((int)((( locLatForTap - (int)locLatForTap) * 60 - (int)(( locLatForTap - (int)locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int)locLongForTap) + "°" + Integer.toString((int)(( locLongForTap - (int)locLongForTap) * 60)) + "′" + Integer.toString((int)((( locLongForTap - (int)locLongForTap) * 60 - (int)(( locLongForTap - (int)locLongForTap) * 60)) * 60)) + "″");
-                }else textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
+                showLocationText();
             } else {
                 textView.setText("点击位置在区域之外");
             }
@@ -4130,13 +4158,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             pt.y = (float)(( xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * ( max_long - min_long) + min_long);
             locLatForTap = pt.x;
             locLongForTap = pt.y;
-            if (isCoordinateType == COORDINATE_DEFAULT_TYPE){
-                textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
-            }else if (isCoordinateType == COORDINATE_BLH_TYPE){
-                textView.setText(Integer.toString((int)locLatForTap) + "°" + Integer.toString((int)(( locLatForTap - (int)locLatForTap) * 60)) + "′" + Integer.toString((int)((( locLatForTap - (int)locLatForTap) * 60 - (int)(( locLatForTap - (int)locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int)locLongForTap) + "°" + Integer.toString((int)(( locLongForTap - (int)locLongForTap) * 60)) + "′" + Integer.toString((int)((( locLongForTap - (int)locLongForTap) * 60 - (int)(( locLongForTap - (int)locLongForTap) * 60)) * 60)) + "″");
-            }else {
-                textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
-            }
+            showLocationText();
         }
         return pt;
         //
@@ -4790,7 +4812,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onItemClick(View view, String iconPath, int position) {
                 MPOI mpoi = new MPOI();
                 mpoi.setImgPath(iconPath);
-                mpoi.updateAll("num = ?", Integer.toString(QueriedIconPoiNum));
+                mpoi.updateAll("num = ?", Long.toString(QueriedIconPoiNum));
                 if (WidthAndHeight != 80){
                     Bitmap bitmap = DataUtil.getImageThumbnail(iconPath, WidthAndHeight, WidthAndHeight);
                     IconBitmaps.add(new bt(bitmap, iconPath + "," + Integer.toString(WidthAndHeight)));
@@ -4822,6 +4844,62 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         popupWindow.showAtLocation(popView, Gravity.TOP,0,400);
     }
 
+    private void showPopueWindowForIconAdd(final PointF pt1){
+        final View popView = View.inflate(this, R.layout.popupwindow_iconchoose,null);
+        RecyclerView recyclerView1 = (RecyclerView) popView.findViewById(R.id.iconchoose_recycler_view);
+        GridLayoutManager layoutManager1 = new GridLayoutManager(popView.getContext(),1);
+        layoutManager1.setOrientation(OrientationHelper.HORIZONTAL);
+        recyclerView1.setLayoutManager(layoutManager1);
+        //xzqTreeAdapter adapter1 = new xzqTreeAdapter(DataUtil.bubbleSort(LitePal.findAll(xzq.class)));
+        List<IconDataset> iconDatasets = LitePal.findAll(IconDataset.class);
+        final IconDatasetAdapter adapter1 = new IconDatasetAdapter(iconDatasets);
+        //获取屏幕宽高
+        final int weight = getResources().getDisplayMetrics().widthPixels;
+        //final int height = getResources().getDisplayMetrics().heightPixels;
+        final int height = 300;
+
+        final PopupWindow popupWindow = new PopupWindow(popView, weight ,height);
+        adapter1.setOnItemClickListener(new IconDatasetAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String iconPath, int position) {
+                MPOI poi = new MPOI();
+                poi.setNum(System.currentTimeMillis());
+                poi.setImgPath(iconPath);
+                if (showMode == NOCENTERMODE) {
+                    poi.setLat(pt1.x);
+                    poi.setLng(pt1.y);
+                } else {
+                    poi.setLat(centerPointLoc.x);
+                    poi.setLng(centerPointLoc.y);
+                }
+                poi.setHeight(80);
+                poi.setWidth(80);
+                poi.save();
+                popupWindow.dismiss();
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        recyclerView1.setAdapter(adapter1);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow OnTouchListener
+
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 1f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.TOP,0,400);
+    }
+
     private List<bt> IconBitmaps;
     private int iconBitmapNum;
     private void initIconBitmap(final List<IconDataset> iconDatasets){
@@ -4831,15 +4909,18 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 IconBitmaps = new ArrayList<>();
                 for (int i = 0; i < iconDatasets.size(); i++){
                     String path = iconDatasets.get(i).getPath();
-                    Bitmap bitmap = DataUtil.getImageThumbnail(path, 80, 80);
+                    //Bitmap bitmap = DataUtil.getImageThumbnail(path, 80, 80);
+                    Bitmap bitmap = DataUtil.getImageThumbnailForOrigin(path, 80);
                     IconBitmaps.add(new bt(bitmap, path));
                 }
                 List<MPOI> mpois = LitePal.findAll(MPOI.class);
                 for (int i = 0; i < mpois.size(); i++){
                     if (mpois.get(i).getWidth() != 80 && mpois.get(i).getImgPath() != null) {
                         String path = mpois.get(i).getImgPath();
-                        Bitmap bitmap = DataUtil.getImageThumbnail(path, (int) mpois.get(i).getWidth(), (int) mpois.get(i).getHeight());
-                        IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getWidth())));
+                        //Bitmap bitmap = DataUtil.getImageThumbnail(path, (int) mpois.get(i).getWidth(), (int) mpois.get(i).getHeight());
+                        //IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getWidth())));
+                        Bitmap bitmap = DataUtil.getImageThumbnailForOrigin(path, (int) mpois.get(i).getHeight());
+                        IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getHeight())));
                     }
                 }
                 runOnUiThread(new Runnable() {
@@ -4854,7 +4935,40 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();
     }
-    private void bufferIconBitmapPlus(final MPOI mpoi){
+    private void initIconBitmap1(final List<IconDataset> iconDatasets){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                IconBitmaps = new ArrayList<>();
+                for (int i = 0; i < iconDatasets.size(); i++){
+                    String path = iconDatasets.get(i).getPath();
+                    //Bitmap bitmap = DataUtil.getImageThumbnail(path, 80, 80);
+                    Bitmap bitmap = DataUtil.getImageThumbnailForOrigin(path, 80);
+                    IconBitmaps.add(new bt(bitmap, path));
+                }
+                List<MPOI> mpois = LitePal.findAll(MPOI.class);
+                for (int i = 0; i < mpois.size(); i++){
+                    if (mpois.get(i).getWidth() != 80 && mpois.get(i).getImgPath() != null) {
+                        String path = mpois.get(i).getImgPath();
+                        //Bitmap bitmap = DataUtil.getImageThumbnail(path, (int) mpois.get(i).getWidth(), (int) mpois.get(i).getHeight());
+                        //IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getWidth())));
+                        Bitmap bitmap = DataUtil.getImageThumbnailForOrigin(path, (int) mpois.get(i).getHeight());
+                        IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getHeight())));
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        Log.w(TAG, "run: " + IconBitmaps.size());
+                        iconBitmapNum = IconBitmaps.size();
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }
+                });
+            }
+        }).start();
+    }
+    private void bufferIconBitmapPlus1(final MPOI mpoi){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -4873,7 +4987,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();
     }
-    private void bufferIconBitmapMinus(final MPOI mpoi){
+    private void bufferIconBitmapMinus1(final MPOI mpoi){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -4891,7 +5005,44 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();
     }
-    private void removeBufferIconBitmapForProgress(){
+    private void bufferIconBitmapPlus(final MPOI mpoi){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.w(TAG, "run: " + mpoi.getImgPath());
+                Bitmap bitmap1 = DataUtil.getImageThumbnail(mpoi.getImgPath(), IconWidth + 5, IconHeight + 5);
+                IconBitmaps.add(new bt(bitmap1, mpoi.getImgPath() + "," + Integer.toString(IconHeight + 5)));
+                Log.w(TAG, "run: " + IconBitmaps.get(IconBitmaps.size() - 1).getM_path());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void bufferIconBitmapMinus(final MPOI mpoi){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bitmap = DataUtil.getImageThumbnail(mpoi.getImgPath(), IconWidth - 5, IconHeight - 5);
+                IconBitmaps.add(new bt(bitmap, mpoi.getImgPath() + "," + Integer.toString(IconHeight - 5)));
+                Log.w(TAG, "run: " + IconBitmaps.get(IconBitmaps.size() - 1).getM_path());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void removeBufferIconBitmapForProgress1(){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -4911,12 +5062,52 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             }
         }).start();
     }
-    private void removeBufferIconBitmapForOK(final MPOI mpoi){
+    private void removeBufferIconBitmapForProgress(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < IconBitmaps.size(); i++){
+                    if (i >= iconBitmapNum && IconBitmaps.get(i).getM_path().contains(",") && (!IconBitmaps.get(i).getM_path().contains(Integer.toString(IconHeight - 5)) && !IconBitmaps.get(i).getM_path().contains(Integer.toString(IconHeight + 5)) && !IconBitmaps.get(i).getM_path().contains(Integer.toString(IconHeight)))){
+                        IconBitmaps.remove(i);
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void removeBufferIconBitmapForOK1(final MPOI mpoi){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 for (int i = 0; i < IconBitmaps.size(); i++){
                     if (i >= iconBitmapNum && IconBitmaps.get(i).getM_path().contains(",") && !IconBitmaps.get(i).getM_path().contains(Integer.toString((int) mpoi.getWidth()))){
+                        IconBitmaps.remove(i);
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Log.w(TAG, "run: " + IconBitmaps.size());
+                        //iconBitmapNum = IconBitmaps.size();
+                    }
+                });
+            }
+        }).start();
+    }
+    private void removeBufferIconBitmapForOK(final MPOI mpoi){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < IconBitmaps.size(); i++){
+                    if (i >= iconBitmapNum && IconBitmaps.get(i).getM_path().contains(",") && !IconBitmaps.get(i).getM_path().contains(Integer.toString((int) mpoi.getHeight()))){
                         IconBitmaps.remove(i);
                     }
                 }
@@ -4986,6 +5177,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void forbiddenWidgetForQuery(){
+        trail_imgbt.setVisibility(View.INVISIBLE);
+        autoTrans_imgbt.setVisibility(View.INVISIBLE);
         centerPoint.setVisibility(View.GONE);
         locHere_fab.setVisibility(View.GONE);
         whiteBlank_fab.setVisibility(View.GONE);
@@ -4995,6 +5188,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
     }
 
     private void showWidgetForQuery(){
+        autoTrans_imgbt.setVisibility(View.VISIBLE);
+        trail_imgbt.setVisibility(View.VISIBLE);
         centerPoint.setImageResource(R.drawable.ic_center_focus_weak_black_24dp);
         centerPoint.setVisibility(View.VISIBLE);
         locHere_fab.setVisibility(View.VISIBLE);
@@ -5021,8 +5216,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         iconplus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WidthAndHeight = WidthAndHeight + 5;
-                MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                //WidthAndHeight = WidthAndHeight + 5;
+                IconHeight = IconHeight + 5;
+                IconWidth = IconWidth + 5;
+                MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
                 removeBufferIconBitmapForProgress();
                 bufferIconBitmapMinus(mpoi);
                 bufferIconBitmapPlus(mpoi);
@@ -5032,8 +5229,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         iconminus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WidthAndHeight = WidthAndHeight - 5;
-                MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                //WidthAndHeight = WidthAndHeight - 5;
+                IconHeight = IconHeight - 5;
+                IconWidth = IconWidth - 5;
+                MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
                 removeBufferIconBitmapForProgress();
                 bufferIconBitmapMinus(mpoi);
                 bufferIconBitmapPlus(mpoi);
@@ -5045,18 +5244,27 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             public void onClick(View v) {
                 if (!IconShift) {
                     MPOI mpoi = new MPOI();
-                    mpoi.setWidth(WidthAndHeight);
-                    mpoi.setHeight(WidthAndHeight);
-                    mpoi.updateAll("num = ?", Integer.toString(QueriedIconPoiNum));
-                    removeBufferIconBitmapForOK(LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0));
+                    //mpoi.setWidth(WidthAndHeight);
+                    //mpoi.setHeight(WidthAndHeight);
+                    mpoi.setWidth(IconWidth);
+                    mpoi.setHeight(IconHeight);
+                    mpoi.updateAll("num = ?", Long.toString(QueriedIconPoiNum));
+                    removeBufferIconBitmapForOK(LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0));
+                    /*try {
+                        plusIconBitmapNum(QueriedIconPoiNum);
+                    }catch (Exception e){
+                        Log.w(TAG, e.toString());
+                    }*/
+                    initIconBitmap1(LitePal.findAll(IconDataset.class));
                     resetQueriedIcon();
+                    //pdfView.zoomWithAnimation(c_zoom);
                 }else {
                     showQueriedWidgetForShift();
                     IconShift = false;
                     MPOI mpoi = new MPOI();
                     mpoi.setLat(centerPointLoc.x);
                     mpoi.setLng(centerPointLoc.y);
-                    mpoi.updateAll("num = ?", Integer.toString(QueriedIconPoiNum));
+                    mpoi.updateAll("num = ?", Long.toString(QueriedIconPoiNum));
                     centerPoint.setVisibility(View.GONE);
                     pdfView.zoomWithAnimation(c_zoom);
                 }
@@ -5065,10 +5273,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         iconshift.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IconShift = !IconShift;
+                IconShift = true;
                 if (IconShift) {
                     forbiddenQueriedWidgetForShift();
-                    MPOI mpoi = LitePal.where("num = ?", Integer.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                    MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
                     for (int i = 0; i < IconBitmaps.size(); i++) {
                         if (mpoi.getWidth() != 80) {
                             if (IconBitmaps.get(i).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString((int) mpoi.getWidth()))) {
@@ -5096,10 +5304,39 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         icondelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LitePal.deleteAll(MPOI.class, "num = ? ", Integer.toString(QueriedIconPoiNum));
-                resetQueriedIcon();
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
+                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LitePal.deleteAll(MPOI.class, "num = ? ", Long.toString(QueriedIconPoiNum));
+                        resetQueriedIcon();
+                    }
+                });
+                builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                builder.setMessage("确定要删除该标志吗?");
+                builder.setTitle("提示");
+                builder.show();
             }
         });
+    }
+
+    private void plusIconBitmapNum(long num) throws Exception{
+        List<MPOI> mpois = LitePal.where("num = ?", Long.toString(num)).find(MPOI.class);
+        if (mpois.size() != 0) {
+            MPOI mpoi = mpois.get(0);
+            for (int i = 0; i < IconBitmaps.size(); i++){
+                if (IconBitmaps.get(i).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString(WidthAndHeight)) && i >= iconBitmapNum){
+                    Log.w(TAG, "plusIconBitmapNum: " + i + ";" + iconBitmapNum);
+                    iconBitmapNum++;
+                    Log.w(TAG, "plusIconBitmapNum: " + i + ";" + iconBitmapNum);
+                    break;
+                }
+            }
+        }else throw new Exception("唯一标识符出错");
     }
 
     private void resetQueriedIcon(){

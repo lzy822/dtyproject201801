@@ -3,18 +3,18 @@ package com.geopdfviewer.android;
 import org.litepal.crud.LitePalSupport;
 
 public class MPOI extends LitePalSupport {
-    private int num;
+    private long num;
     private float lat;
     private float lng;
     private String ImgPath;
     private double width;
     private double height;
 
-    public int getNum() {
+    public long getNum() {
         return num;
     }
 
-    public void setNum(int num) {
+    public void setNum(long num) {
         this.num = num;
     }
 

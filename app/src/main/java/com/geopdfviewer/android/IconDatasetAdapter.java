@@ -117,7 +117,7 @@ public class IconDatasetAdapter extends RecyclerView.Adapter<IconDatasetAdapter.
         IconDataset iconDataset = iconDatasets.get(position);
         File file = new File(iconDataset.getPath());
         if (file.exists()) {
-            Bitmap bitmap = DataUtil.getImageThumbnail(iconDataset.getPath(), 200, 200);
+            Bitmap bitmap = DataUtil.getImageThumbnailForOrigin(iconDataset.getPath(), 200);
             //holder.Icon.setImageURI(Uri.fromFile(file));
             holder.Icon.setImageBitmap(bitmap);
         }else{

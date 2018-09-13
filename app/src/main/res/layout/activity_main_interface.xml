@@ -19,12 +19,17 @@
         fab:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
     <LinearLayout
         android:id="@+id/MainInterfaceToolBar"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="top"
+        android:layout_gravity="top|center_horizontal"
         android:translationZ="10dp"
         android:elevation="10dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center">
         <ImageButton
             android:id="@+id/startTrail"
             android:layout_width="wrap_content"
@@ -74,7 +79,7 @@
             android:layout_gravity="end"
             android:background="@drawable/ic_close_black_24dp"
             />
-
+        </LinearLayout>
     </LinearLayout>
     <RelativeLayout
         android:layout_width="match_parent"
@@ -195,14 +200,14 @@
         fab:fab_size="mini" />
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/icon_plus"
+        android:id="@+id/icon_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:adjustViewBounds="false"
         android:scaleType="fitStart"
-        android:src="@drawable/ic_add"
+        android:src="@drawable/ic_done_black_24dp"
         android:visibility="gone"
         fab:fab_size="mini" />
 
@@ -247,7 +252,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@+id/icon_plus"
+        android:layout_toStartOf="@+id/icon_ok"
         android:adjustViewBounds="false"
         android:scaleType="fitStart"
         android:src="@drawable/ic_remove_black_24dp"
@@ -255,14 +260,14 @@
         fab:fab_size="mini" />
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/icon_ok"
+        android:id="@+id/icon_plus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/icon_plus"
+        android:layout_toEndOf="@+id/icon_ok"
         android:adjustViewBounds="false"
         android:scaleType="fitStart"
-        android:src="@drawable/ic_done_black_24dp"
+        android:src="@drawable/ic_add"
         android:visibility="gone"
         fab:fab_size="mini" />
 
