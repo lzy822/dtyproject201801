@@ -622,6 +622,22 @@ public class DataUtil {
         return bitmap;
     }
 
+    //获取图片缩略图
+    public static int[] getWHForOrigin(String imagePath, int height) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        // 获取这个图片的宽和高，注意此处的bitmap为null
+        //bitmap = BitmapFactory.decodeFile(imagePath, null);
+        //double time = bitmap.getHeight() / bitmap.getWidth();
+
+        bitmap = BitmapFactory.decodeFile(imagePath, options);
+        double h = options.outHeight;
+        double w = options.outWidth;
+        double time = h / w;
+        return new int[]{(int) (height / time), height};
+    }
+
 
 
     public static int getPicRotate(String path) {

@@ -20,6 +20,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -1555,6 +1556,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+        Log.w(TAG, "onLayerDrawn: " + pdfView.getZoom());
         Log.w(TAG, "zoomCenteredTo: " + current_pageheight + "; " + current_pagewidth);
         current_pageheight = pageHeight;
         current_pagewidth = pageWidth;
@@ -2331,14 +2333,14 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
 
     private void drawSubMPOI(Canvas canvas, MPOI mpoi){
         for (int j = 0; j < IconBitmaps.size(); j++) {
-            if (mpoi.getWidth() == 80) {
+            if (mpoi.getHeight() == 80) {
                 if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath())) {
                     PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (mpoi.getWidth() / 2)), (float) (pointF.y - (mpoi.getHeight() / 2)), paint9);
                     break;
                 }
             } else {
-                if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString((int) mpoi.getWidth()))) {
+                if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString((int) mpoi.getHeight()))) {
                     PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                     canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (mpoi.getWidth() / 2)), (float) (pointF.y - (mpoi.getHeight() / 2)), paint9);
                     break;
@@ -2407,7 +2409,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                         canvas.drawRect((float) (pointF.x - (IconWidth / 2)), (float) (pointF.y - (IconHeight / 2)), (float) (pointF.x + (IconWidth / 2)), (float) (pointF.y + (IconHeight / 2)), paint9);
                     }
                 }else {
-                    if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString(IconWidth))) {
+                    if (IconBitmaps.get(j).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString(IconHeight))) {
+                        Log.w(TAG, "drawQueriedMPOI: " + IconWidth + ";" + IconHeight);
                         PointF pointF = LatLng.getPixLocFromGeoL(new PointF(mpoi.getLat(), mpoi.getLng()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         canvas.drawBitmap(IconBitmaps.get(j).getM_bm(), (float) (pointF.x - (IconWidth / 2)), (float) (pointF.y - (IconHeight / 2)), paint9);
                         canvas.drawRect((float) (pointF.x - (IconWidth / 2)), (float) (pointF.y - (IconHeight / 2)), (float) (pointF.x + (IconWidth / 2)), (float) (pointF.y + (IconHeight / 2)), paint9);
@@ -4872,8 +4875,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     poi.setLat(centerPointLoc.x);
                     poi.setLng(centerPointLoc.y);
                 }
-                poi.setHeight(80);
-                poi.setWidth(80);
+                int[] whs = DataUtil.getWHForOrigin(iconPath, 80);
+                poi.setHeight(whs[1]);
+                poi.setWidth(whs[0]);
+                Log.w(TAG, "onItemClick: " + whs[0] + ";" + whs[1]);
                 poi.save();
                 popupWindow.dismiss();
                 pdfView.zoomWithAnimation(c_zoom);
@@ -4915,7 +4920,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 List<MPOI> mpois = LitePal.findAll(MPOI.class);
                 for (int i = 0; i < mpois.size(); i++){
-                    if (mpois.get(i).getWidth() != 80 && mpois.get(i).getImgPath() != null) {
+                    //if (mpois.get(i).getWidth() != 80 && mpois.get(i).getImgPath() != null) {
+                    if (mpois.get(i).getHeight() != 80 && mpois.get(i).getImgPath() != null) {
                         String path = mpois.get(i).getImgPath();
                         //Bitmap bitmap = DataUtil.getImageThumbnail(path, (int) mpois.get(i).getWidth(), (int) mpois.get(i).getHeight());
                         //IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getWidth())));
@@ -4948,7 +4954,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                 }
                 List<MPOI> mpois = LitePal.findAll(MPOI.class);
                 for (int i = 0; i < mpois.size(); i++){
-                    if (mpois.get(i).getWidth() != 80 && mpois.get(i).getImgPath() != null) {
+                    //if (mpois.get(i).getWidth() != 80 && mpois.get(i).getImgPath() != null) {
+                    if (mpois.get(i).getHeight() != 80 && mpois.get(i).getImgPath() != null) {
                         String path = mpois.get(i).getImgPath();
                         //Bitmap bitmap = DataUtil.getImageThumbnail(path, (int) mpois.get(i).getWidth(), (int) mpois.get(i).getHeight());
                         //IconBitmaps.add(new bt(bitmap, path + "," + Integer.toString((int) mpois.get(i).getWidth())));
@@ -5010,7 +5017,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void run() {
                 Log.w(TAG, "run: " + mpoi.getImgPath());
-                Bitmap bitmap1 = DataUtil.getImageThumbnail(mpoi.getImgPath(), IconWidth + 5, IconHeight + 5);
+                Bitmap bitmap1 = DataUtil.getImageThumbnailForOrigin(mpoi.getImgPath(), IconHeight + 5);
                 IconBitmaps.add(new bt(bitmap1, mpoi.getImgPath() + "," + Integer.toString(IconHeight + 5)));
                 Log.w(TAG, "run: " + IconBitmaps.get(IconBitmaps.size() - 1).getM_path());
                 runOnUiThread(new Runnable() {
@@ -5028,7 +5035,7 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Bitmap bitmap = DataUtil.getImageThumbnail(mpoi.getImgPath(), IconWidth - 5, IconHeight - 5);
+                Bitmap bitmap = DataUtil.getImageThumbnailForOrigin(mpoi.getImgPath(), IconHeight - 5);
                 IconBitmaps.add(new bt(bitmap, mpoi.getImgPath() + "," + Integer.toString(IconHeight - 5)));
                 Log.w(TAG, "run: " + IconBitmaps.get(IconBitmaps.size() - 1).getM_path());
                 runOnUiThread(new Runnable() {
@@ -5217,9 +5224,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //WidthAndHeight = WidthAndHeight + 5;
-                IconHeight = IconHeight + 5;
-                IconWidth = IconWidth + 5;
                 MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                IconHeight = IconHeight + 5;
+                int[] whs = DataUtil.getWHForOrigin(mpoi.getImgPath(), IconHeight);
+                IconWidth = whs[0];
                 removeBufferIconBitmapForProgress();
                 bufferIconBitmapMinus(mpoi);
                 bufferIconBitmapPlus(mpoi);
@@ -5230,9 +5238,10 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
             @Override
             public void onClick(View v) {
                 //WidthAndHeight = WidthAndHeight - 5;
-                IconHeight = IconHeight - 5;
-                IconWidth = IconWidth - 5;
                 MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
+                IconHeight = IconHeight - 5;
+                int[] whs = DataUtil.getWHForOrigin(mpoi.getImgPath(), IconHeight);
+                IconWidth = whs[0];
                 removeBufferIconBitmapForProgress();
                 bufferIconBitmapMinus(mpoi);
                 bufferIconBitmapPlus(mpoi);
@@ -5278,8 +5287,8 @@ public class MainInterface extends AppCompatActivity  implements OnPageChangeLis
                     forbiddenQueriedWidgetForShift();
                     MPOI mpoi = LitePal.where("num = ?", Long.toString(QueriedIconPoiNum)).find(MPOI.class).get(0);
                     for (int i = 0; i < IconBitmaps.size(); i++) {
-                        if (mpoi.getWidth() != 80) {
-                            if (IconBitmaps.get(i).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString((int) mpoi.getWidth()))) {
+                        if (mpoi.getHeight() != 80) {
+                            if (IconBitmaps.get(i).getM_path().equals(mpoi.getImgPath() + "," + Integer.toString((int) mpoi.getHeight()))) {
                                 centerPoint.setImageBitmap(IconBitmaps.get(i).getM_bm());
                                 break;
                             }
