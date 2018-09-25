@@ -5,30 +5,30 @@
         android:id="@+id/back_andupdate"
         android:icon="@drawable/ic_arrow_back"
         android:title="@string/BackAndUpdate"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
     <item
         android:id="@+id/deletepoi"
         android:icon="@drawable/ic_delete"
         android:title="@string/DeletePOI"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
     <item
         android:id="@+id/query_poi_map"
         android:icon="@drawable/ic_my_location"
         android:title="@string/Loc"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
     <item
         android:id="@+id/back_pois"
         android:icon="@drawable/ic_arrow_back"
         android:title="@string/Back"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
     <item
         android:id="@+id/restore_pois"
         android:icon="@drawable/ic_arrow_back"
         android:title="@string/RestorePOI"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
     <item
         android:id="@+id/add_pois"
         android:icon="@drawable/ic_add"
         android:title="@string/Add"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
 </menu>
