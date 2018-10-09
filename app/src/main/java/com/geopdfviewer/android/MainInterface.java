@@ -104,6 +104,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.IllegalFormatCodePointException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -2167,59 +2168,60 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     String str = "n_" + j + "_";
                     String Muri = pref2.getString(str + "uri", "");
                     String MGPTS = pref2.getString(str + "GPTS", "");
-                    String[] GPTString = MGPTS.split(" ");
-                    float[] GPTSs = new float[GPTString.length];
-                    for (int i = 0; i < GPTString.length; i++) {
-                        GPTSs[i] = Float.valueOf(GPTString[i]);
-                    }
-                    float lat_axis, long_axis;
-                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                    for (int i = 0; i < GPTSs.length; i = i + 2) {
-                        if (GPTSs[i] < lat_axis) {
-                            if (GPTSs[i + 1] < long_axis) {
-                                pt_lb.x = GPTSs[i];
-                                pt_lb.y = GPTSs[i + 1];
+                    if (MGPTS != null && !MGPTS.isEmpty()) {
+                        String[] GPTString = MGPTS.split(" ");
+                        float[] GPTSs = new float[GPTString.length];
+                        for (int i = 0; i < GPTString.length; i++) {
+                            GPTSs[i] = Float.valueOf(GPTString[i]);
+                        }
+                        float lat_axis, long_axis;
+                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                        for (int i = 0; i < GPTSs.length; i = i + 2) {
+                            if (GPTSs[i] < lat_axis) {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lb.x = GPTSs[i];
+                                    pt_lb.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rb.x = GPTSs[i];
+                                    pt_rb.y = GPTSs[i + 1];
+                                }
                             } else {
-                                pt_rb.x = GPTSs[i];
-                                pt_rb.y = GPTSs[i + 1];
-                            }
-                        } else {
-                            if (GPTSs[i + 1] < long_axis) {
-                                pt_lt.x = GPTSs[i];
-                                pt_lt.y = GPTSs[i + 1];
-                            } else {
-                                pt_rt.x = GPTSs[i];
-                                pt_rt.y = GPTSs[i + 1];
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lt.x = GPTSs[i];
+                                    pt_lt.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rt.x = GPTSs[i];
+                                    pt_rt.y = GPTSs[i + 1];
+                                }
                             }
                         }
-                    }
-                    locError("see here");
-                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-                    locError("see here");
-                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                    if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
-                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                        locError("find delta1: " + Float.toString(thedelta1));
-                        locError("find delta: " + Float.toString(thedelta));
-                        locError("find num: " + Integer.toString(j));
-                        if (j != num_map) {
-                            if (thedelta == 0) {
-                                thedelta = thedelta1;
-                                thenum = j;
+                        locError("see here");
+                        //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                        //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                        locError("see here");
+                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                        if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
+                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                            locError("find delta1: " + Float.toString(thedelta1));
+                            locError("find delta: " + Float.toString(thedelta));
+                            locError("find num: " + Integer.toString(j));
+                            if (j != num_map) {
+                                if (thedelta == 0) {
+                                    thedelta = thedelta1;
+                                    thenum = j;
+                                }
+                                if (thedelta1 < thedelta) {
+                                    locError("change!!!");
+                                    thedelta = thedelta1;
+                                    thenum = j;
+                                }
                             }
-                            if (thedelta1 < thedelta) {
-                                locError("change!!!");
-                                thedelta = thedelta1;
-                                thenum = j;
-                            }
-                        }
-                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+                            locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
                                         /*num_map1 = num_map;
                                         getInfo(j);
                                         toolbar.setTitle(pdfFileName);
@@ -2227,6 +2229,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                         displayFromFile(uri);
                                         isAutoTrans = false;
                                         autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
+                        }
                     }
                 }
                 double deltaK_trans;
@@ -2261,53 +2264,57 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     String str = "n_" + j + "_";
                     String Muri = pref2.getString(str + "uri", "");
                     String MGPTS = pref2.getString(str + "GPTS", "");
-                    String[] GPTString = MGPTS.split(" ");
-                    float[] GPTSs = new float[GPTString.length];
-                    for (int i = 0; i < GPTString.length; i++) {
-                        GPTSs[i] = Float.valueOf(GPTString[i]);
-                    }
-                    float lat_axis, long_axis;
-                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                    for (int i = 0; i < GPTSs.length; i = i + 2) {
-                        if (GPTSs[i] < lat_axis) {
-                            if (GPTSs[i + 1] < long_axis) {
-                                pt_lb.x = GPTSs[i];
-                                pt_lb.y = GPTSs[i + 1];
+                    if (MGPTS != null && !MGPTS.isEmpty()) {
+                        Log.w(TAG, "GPTS: " + MGPTS);
+                        String[] GPTString = MGPTS.split(" ");
+                        float[] GPTSs = new float[GPTString.length];
+                        for (int i = 0; i < GPTString.length; i++) {
+                            if (MGPTS != null && !MGPTS.isEmpty())
+                                GPTSs[i] = Float.valueOf(GPTString[i]);
+                        }
+                        float lat_axis, long_axis;
+                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                        for (int i = 0; i < GPTSs.length; i = i + 2) {
+                            if (GPTSs[i] < lat_axis) {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lb.x = GPTSs[i];
+                                    pt_lb.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rb.x = GPTSs[i];
+                                    pt_rb.y = GPTSs[i + 1];
+                                }
                             } else {
-                                pt_rb.x = GPTSs[i];
-                                pt_rb.y = GPTSs[i + 1];
-                            }
-                        } else {
-                            if (GPTSs[i + 1] < long_axis) {
-                                pt_lt.x = GPTSs[i];
-                                pt_lt.y = GPTSs[i + 1];
-                            } else {
-                                pt_rt.x = GPTSs[i];
-                                pt_rt.y = GPTSs[i + 1];
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lt.x = GPTSs[i];
+                                    pt_lt.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rt.x = GPTSs[i];
+                                    pt_rt.y = GPTSs[i + 1];
+                                }
                             }
                         }
-                    }
-                    locError("see here");
-                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-                    locError("see here");
-                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                    if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
-                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                        if (thedelta == 0) {
-                            thedelta = thedelta1;
-                            thenum = j;
-                        } else if (thedelta1 < thedelta) {
-                            thedelta = thedelta1;
-                            thenum = j;
-                        }
-                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+                        locError("see here");
+                        //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                        //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                        locError("see here");
+                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                        if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
+                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                            if (thedelta == 0) {
+                                thedelta = thedelta1;
+                                thenum = j;
+                            } else if (thedelta1 < thedelta) {
+                                thedelta = thedelta1;
+                                thenum = j;
+                            }
+                            locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
 
+                        }
                     }
                 }
                 double deltaK_trans;
@@ -2343,6 +2350,20 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         if (isMessure && isMessureType == MESSURE_DISTANCE_TYPE) drawMessureLine(canvas);
         drawMPOI(canvas);
         drawQueriedMPOI(canvas);
+
+        /*if (mmpoints != null && !mmpoints.isEmpty()){
+            for (int i = 0; i < mmpoints.size() - 1; i++){
+                if (i != mmpoints.size() - 1) {
+                    PointF pointF0 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i).getY(), (float) mmpoints.get(i).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i + 1).getY(), (float) mmpoints.get(i + 1).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawLine(pointF0.x, pointF0.y, pointF1.x, pointF1.y, paint9);
+                }else {
+                    PointF pointF0 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i).getY(), (float) mmpoints.get(i).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(0).getY(), (float) mmpoints.get(0).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    canvas.drawLine(pointF0.x, pointF0.y, pointF1.x, pointF1.y, paint8);
+                }
+            }
+        }*/
     }
 
     private void drawSubMPOI(Canvas canvas, MPOI mpoi) {
@@ -4811,6 +4832,24 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         initEsterEgg();
         //LitePal.deleteAll(IconDataset.class);
         initIconBitmap(addIconDataset());
+        /*
+        PointCollection points = new PointCollection(SpatialReferences.getWgs84());
+        for (int i = 0; i < 10; i++){
+            com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(i, i, SpatialReferences.getWgs84());
+            points.add(point);
+        }
+        Polyline polyline = new Polyline(points);
+        Log.w(TAG, "doSpecificOperation: " + polyline.toJson());
+        Log.w(TAG, "doSpecificOperation: " + polyline.toString());
+        Polygon polygon = GeometryEngine.buffer(polyline, 1);
+        int i = 0;
+        for (Iterator<com.esri.arcgisruntime.geometry.Point> iter = polygon.toPolyline().getParts().getPartsAsPoints().iterator(); iter.hasNext();) {
+            i++;
+            Log.w(TAG, "doSpecificOperation: " + iter.next());
+        }
+        Log.w(TAG, "doSpecificOperation: " + i);
+        */
+
     }
 
     private List<IconDataset> addIconDataset() {
@@ -5466,6 +5505,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         type3_checkbox.setVisibility(View.VISIBLE);
     }
 
+    List<com.esri.arcgisruntime.geometry.Point> mmpoints;
+
     private void initWidget() {
         initCheckbox();
         //中心点图标初始化
@@ -5491,8 +5532,31 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(distanceLatLngs.get(i).getLongitude(), distanceLatLngs.get(i).getLatitude(), SpatialReference.create(4490));
                         pointCollection.add(point);
                     }
-                    Polygon polygon = new Polygon(pointCollection);
-                    Log.w(TAG, "onLongClick: " + GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC));
+                    Polyline polyline = new Polyline(pointCollection);
+                    Polygon polygon = GeometryEngine.buffer(polyline, 0.0005);
+                    mmpoints = new ArrayList<>();
+                    int mnum = 0;
+                    for (Iterator<com.esri.arcgisruntime.geometry.Point> iter = polygon.toPolyline().getParts().getPartsAsPoints().iterator(); iter.hasNext();) {
+                        mmpoints.add(iter.next());
+                        mnum++;
+                    }
+                    /*
+                    Polygon polygon1 = (Polygon) GeometryEngine.simplify(polygon);
+                    int mnum1 = 0;
+                    for (Iterator<com.esri.arcgisruntime.geometry.Point> iter = polygon1.toPolyline().getParts().getPartsAsPoints().iterator(); iter.hasNext();) {
+                        //mmpoints.add(iter.next());
+                        mnum1++;
+                    }
+                    Polygon polygon2 = (Polygon) GeometryEngine.generalize(polygon, 0.0001, true);
+                    int mnum2 = 0;
+                    for (Iterator<com.esri.arcgisruntime.geometry.Point> iter = polygon2.toPolyline().getParts().getPartsAsPoints().iterator(); iter.hasNext();) {
+                        //mmpoints.add(iter.next());
+                        mnum2++;
+                    }*/
+                    pdfView.zoomWithAnimation(c_zoom);
+                    Log.w(TAG, "onLongClick: origin: " + mnum);
+                    /*Log.w(TAG, "onLongClick: mid: " + mnum1);
+                    Log.w(TAG, "onLongClick: end: " + mnum2);*/
                     switch (distancesLatLngs.size()) {
                         case 0:
                             distancesLatLngs.add(distanceLatLngs);

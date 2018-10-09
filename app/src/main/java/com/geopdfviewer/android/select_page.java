@@ -1585,6 +1585,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         ///////
         //nitIconBitmap(addIconDataset());
         //LitePal.deleteAll(IconDataset.class);
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        Log.d("TAG", "Max memory is " + maxMemory + "KB");
     }
 
     private List<IconDataset> addIconDataset(){
