@@ -694,7 +694,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             dialog.setTitle("请选择解析类型");
             dialog.setMessage("如果距离值显示有误， 请删除地图后， 选择另一类型再进行添加。");
             dialog.setCancelable(false);
-            dialog.setPositiveButton("类型一", new DialogInterface.OnClickListener() {
+            dialog.setPositiveButton("地理框架一", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (path.contains(".dt")) {
@@ -764,7 +764,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
                 }
             });
-            dialog.setNegativeButton("类型二", new DialogInterface.OnClickListener() {
+            dialog.setNegativeButton("地理框架二", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
@@ -1584,7 +1584,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.w(TAG, "onCreate: " + str1.replace("\"", ""));*/
         ///////
         //nitIconBitmap(addIconDataset());
-        //LitePal.deleteAll(IconDataset.class);
+        LitePal.deleteAll(IconDataset.class);
+        addIconDataset();
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         Log.d("TAG", "Max memory is " + maxMemory + "KB");
     }
@@ -1592,20 +1593,35 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private List<IconDataset> addIconDataset(){
         List<IconDataset> iconDatasets1 = LitePal.findAll(IconDataset.class);
         File file = new File(Environment.getExternalStorageDirectory().toString() + "/原图");
-        if (file.isDirectory() && iconDatasets1.size()!= 0) {
-            File[] subFiles = file.listFiles();
-            for (int i = 0; i < subFiles.length; i++) {
-                String name = subFiles[i].getName();
-                IconDataset iconDataset = new IconDataset();
-                iconDataset.setName(name.substring(0, name.lastIndexOf(".")));
-                iconDataset.setPath(subFiles[i].getAbsolutePath());
-                iconDataset.save();
+        if (file.isDirectory() && file.list().length > 0) {
+            if (iconDatasets1.size() == 0) {
+                File[] subFiles = file.listFiles();
+                for (int i = 0; i < subFiles.length; i++) {
+                    String name = subFiles[i].getName();
+                    IconDataset iconDataset = new IconDataset();
+                    iconDataset.setName(name.substring(0, name.lastIndexOf(".")));
+                    iconDataset.setPath(subFiles[i].getAbsolutePath());
+                    iconDataset.save();
+                }
+                List<IconDataset> iconDatasets = LitePal.findAll(IconDataset.class);
+                /*for (int i = 0; i < iconDatasets.size(); i++) {
+                    Log.w(TAG, "addIconDataset: " + iconDatasets.get(i).getName());
+                }*/
+                return iconDatasets;
+            }else {
+                File[] subFiles = file.listFiles();
+                for (int i = 0; i < subFiles.length; i++) {
+                    String name = subFiles[i].getName();
+                    if (LitePal.where("name = ?", name).find(IconDataset.class).size() == 0) {
+                        IconDataset iconDataset = new IconDataset();
+                        iconDataset.setName(name.substring(0, name.lastIndexOf(".")));
+                        iconDataset.setPath(subFiles[i].getAbsolutePath());
+                        iconDataset.save();
+                    }
+                }
+                List<IconDataset> iconDatasets = LitePal.findAll(IconDataset.class);
+                return iconDatasets;
             }
-            List<IconDataset> iconDatasets = LitePal.findAll(IconDataset.class);
-            for (int i = 0; i < iconDatasets.size(); i++) {
-                Log.w(TAG, "addIconDataset: " + iconDatasets.get(i).getName());
-            }
-            return iconDatasets;
         }else return iconDatasets1;
     }
 

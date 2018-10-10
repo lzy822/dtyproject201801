@@ -2351,7 +2351,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         drawMPOI(canvas);
         drawQueriedMPOI(canvas);
 
-        /*if (mmpoints != null && !mmpoints.isEmpty()){
+        if (mmpoints != null && !mmpoints.isEmpty()){
             for (int i = 0; i < mmpoints.size() - 1; i++){
                 if (i != mmpoints.size() - 1) {
                     PointF pointF0 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i).getY(), (float) mmpoints.get(i).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -2363,7 +2363,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     canvas.drawLine(pointF0.x, pointF0.y, pointF1.x, pointF1.y, paint8);
                 }
             }
-        }*/
+        }
     }
 
     private void drawSubMPOI(Canvas canvas, MPOI mpoi) {
@@ -5552,7 +5552,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     for (Iterator<com.esri.arcgisruntime.geometry.Point> iter = polygon2.toPolyline().getParts().getPartsAsPoints().iterator(); iter.hasNext();) {
                         //mmpoints.add(iter.next());
                         mnum2++;
-                    }*/
+                    }
+                    */
                     pdfView.zoomWithAnimation(c_zoom);
                     Log.w(TAG, "onLongClick: origin: " + mnum);
                     /*Log.w(TAG, "onLongClick: mid: " + mnum1);
@@ -5596,6 +5597,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             public void onClick(View v) {
                 if (isDrawType != LINE_DRAW_TYPE) {
                     /////////////////
+                    mmpoints.clear();
                     distanceSum = 0;
                     distancesLatLngs.clear();
                     distanceLatLngs.clear();
