@@ -1592,7 +1592,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-        Log.w(TAG, "onLayerDrawn: " + pdfView.getZoom());
+        Log.w(TAG, "zoomCenteredTo: " + pdfView.getZoom());
         Log.w(TAG, "zoomCenteredTo: " + current_pageheight + "; " + current_pagewidth);
         current_pageheight = pageHeight;
         current_pagewidth = pageWidth;

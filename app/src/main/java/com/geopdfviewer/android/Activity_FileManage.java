@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Activity_FileManage extends AppCompatActivity {
+
     private static final String TAG = "Activity_FileManage";
     private List<FileManage> fileManages = new ArrayList<>();
     private FileManageAdapter adapter;
@@ -47,18 +48,23 @@ public class Activity_FileManage extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch(item.getItemId()) {
                     case R.id.back_filemanage:
-                        fileManages.clear();
-                        fileManage = fileManage.SelectLast();
-                        String RootPath = fileManage.getRootPath();
-                        String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
-                        for (int i = 0; i < strings.length; i++){
-                            if (!strings[i].contains(".dt")) fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", ".dt"));
-                            else {
-                                fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", 1));
+                        if (!fileManage.getRootPath().equals(Environment.getExternalStorageDirectory().toString())) {
+                            fileManages.clear();
+                            fileManage = fileManage.SelectLast();
+                            String RootPath = fileManage.getRootPath();
+                            String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
+                            for (int i = 0; i < strings.length; i++) {
+                                if (!strings[i].contains(".dt"))
+                                    fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", ".dt"));
+                                else {
+                                    fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", 1));
+                                }
                             }
+                            toolbar.setTitle(RootPath.replace(DeviceRootPath, "文件管理器"));
+                            refreshRecycler();
+                        }else {
+                            Activity_FileManage.this.finish();
                         }
-                        toolbar.setTitle(RootPath.replace(DeviceRootPath, "文件管理器"));
-                        refreshRecycler();
                 }
                 return true;
             }
