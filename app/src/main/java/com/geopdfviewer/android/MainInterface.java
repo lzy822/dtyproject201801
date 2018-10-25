@@ -5597,7 +5597,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             public void onClick(View v) {
                 if (isDrawType != LINE_DRAW_TYPE) {
                     /////////////////
-                    mmpoints.clear();
+                    if (mmpoints != null)
+                        mmpoints.clear();
                     distanceSum = 0;
                     distancesLatLngs.clear();
                     distanceLatLngs.clear();
