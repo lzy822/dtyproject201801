@@ -108,7 +108,7 @@ public class photoshow extends AppCompatActivity {
                         }
                     }
                 }else {
-                    //Log.w(TAG, "onItemClick: " + path );
+                    Log.w(TAG, "onItemClick: " + path );
                     if (isCreateBitmap) showPopueWindowForPhoto(path);
                 }
             }

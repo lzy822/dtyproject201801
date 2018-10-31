@@ -1292,7 +1292,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             if ((dmPoints.get(i).getLng() < cs_right && dmPoints.get(i).getLng() > cs_left && dmPoints.get(i).getLat() < cs_top && dmPoints.get(i).getLat() > cs_bottom)) {
                 //canvas.drawRect(new RectF(pt.x - 5, pt.y - 38, pt.x + 5, pt.y), paint2);
                 //canvas.drawCircle(pt.x, pt.y - 70, 35, paint);
-                if (c_zoom != 10) {
+                if (c_zoom != 20) {
                     if (showpts.size() == 0) {
                         showpts.add(pt);
                         canvas.drawRect(new RectF(pt.x - 5, pt.y - 38, pt.x + 5, pt.y), paint2);
@@ -1739,7 +1739,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 if (strings[0].equals(pois.get(i).getType()) && type1Checked) {
                     if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (c_zoom != 10) {
+                        if (c_zoom != 20) {
                             if (showpts.size() == 0) {
                                 showpts.add(pt3);
                                 canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
@@ -1795,7 +1795,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
                                         }
                                     } else {
-                                        List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                        //List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
                                         if (pois.get(i).getTapenum() == 0) {
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
                                             //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
@@ -1857,7 +1857,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 } else if (strings[1].equals(pois.get(i).getType()) && type2Checked) {
                     if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (c_zoom != 10) {
+                        if (c_zoom != 20) {
                             if (showpts.size() == 0) {
                                 showpts.add(pt3);
                                 canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
@@ -1975,7 +1975,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 } else if (strings[2].equals(pois.get(i).getType()) && type3Checked) {
                     if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
                         PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (c_zoom != 10) {
+                        if (c_zoom != 20) {
                             if (showpts.size() == 0) {
                                 showpts.add(pt3);
                                 canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
@@ -2908,7 +2908,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 Log.w(TAG, "drawPLQData: ");
                 if ((kmltests.get(i).getLongi() < cs_right && kmltests.get(i).getLongi() > cs_left && kmltests.get(i).getLat() < cs_top && kmltests.get(i).getLat() > cs_bottom)) {
                     PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(kmltests.get(i).getLat(), kmltests.get(i).getLongi()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    if (c_zoom != 10) {
+                    if (c_zoom != 20) {
                         if (showpts.size() == 0) {
                             showpts.add(pt2);
                             canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
@@ -6278,11 +6278,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                         Log.w(TAG, "showPopueWindowForPhoto: " + degree);
                                         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                                     }
+                                    Log.w(TAG, "imageUri: " + path);
                                     bt btt = new bt(bitmap, path);
                                     btt.setPoic(poi.getPoic());
                                     bts.add(btt);
                                 }
                             } else {
+                                Log.w(TAG, "imageUriWithWrongPath: " + path);
                                 //Resources res = MyApplication.getContext().getResources();
                                 //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
                                 Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
@@ -7047,13 +7049,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 0);
+                            if (!esterEgg_lm) AddTakePhoto(imageuri, latandlong, 0);
                         }
                     });
                     builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 1);
+                            if (!esterEgg_lm) AddTakePhoto(imageuri, latandlong, 1);
                             else {
                                 dmbzList = LitePal.findAll(DMBZ.class);
                                 int size = dmbzList.size();
@@ -7072,7 +7074,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (!esterEgg_lm) AddTakePhoto(uri, latandlong, 2);
+                            if (!esterEgg_lm) AddTakePhoto(imageuri, latandlong, 2);
                         }
                     });
                     builder.show();
