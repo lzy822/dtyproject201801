@@ -38,9 +38,10 @@ public class LatLng {
     public static PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight, double deltaLong, double deltaLat, double min_long, double min_lat){
         double y_ratio = ((pt.x - min_lat) / deltaLat);
         double x_ratio = ((pt.y - min_long) / deltaLong);
-        pt.x = (float) ( x_ratio * pageWidth);
-        pt.y = (float) ( (1 - y_ratio) * pageHeight);
-        return pt;
+        PointF ptt = new PointF();
+        ptt.x = (float) ( x_ratio * pageWidth);
+        ptt.y = (float) ( (1 - y_ratio) * pageHeight);
+        return ptt;
     }
 
     public static boolean PtInPolygon(LatLng point, List<LatLng> APoints) {

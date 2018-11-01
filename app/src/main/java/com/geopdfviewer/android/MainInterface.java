@@ -896,6 +896,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             ///////////////////
 
             if (isMessure) {
+                MessureChanged = true;
                 locError("messure_pts" + messure_pts);
                 poinum_messure++;
                 if (poinum_messure == 1) {
@@ -2625,49 +2626,54 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 } else if (isMessureType == MESSURE_AREA_TYPE) {
                     //canvas.drawLines(mpts, paint6);
                     //canvas.drawLine(mpts[0], mpts[1], mpts[mpts.length - 2], mpts[mpts.length - 1], paint6);
-                    drawNormalPath(canvas);
 
                 }
             } else {
                 mpts = new float[pts.length];
             }
+            drawNormalPath(canvas);
             DecimalFormat df1 = new DecimalFormat("0.00");
             //locError(Double.toString(distanceSum));
-            if (isMessureType == MESSURE_DISTANCE_TYPE) {
+            if (MessureChanged) {
+                if (isMessureType == MESSURE_DISTANCE_TYPE) {
                 /*if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米(轨迹记录中)");
                 }else {
                     toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米");
                 }*/
-                //setTitle(df1.format(distanceSum) + "米");
-            } else if (isMessureType == MESSURE_AREA_TYPE) {
-                double area = 0;
+                    //setTitle(df1.format(distanceSum) + "米");
+                } else if (isMessureType == MESSURE_AREA_TYPE) {
                 /*for (int i = 0; i < mpts.length - 3; i = i + 2) {
                     area = area + (mpts[i] * mpts[i + 3] - mpts[i + 2] * mpts[i + 1]);
                 }
                 area = area - (mpts[0] * mpts[mpts.length - 1] - mpts[1] * mpts[mpts.length - 2]);
                 area = Math.abs((area) / 2) / c_zoom / c_zoom;
                 area = area * LatLng.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2 + (max_long - min_long) / (viewer_width - 2 * k_w), (max_lat + min_lat) / 2) * LatLng.algorithm((max_long + min_long) / 2, (max_lat + min_lat) / 2, (max_long + min_long) / 2, (max_lat + min_lat) / 2 + (max_lat - min_lat) / (viewer_height - 2 * k_h));*/
-                //area = area / 1.0965f;
-                //setTitle(df1.format(area) + "平方米");
-                PointCollection pointCollection = new PointCollection(SpatialReference.create(4490));
-                for (int i = 0; i < distanceLatLngs.size(); i++){
-                    com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(distanceLatLngs.get(i).getLongitude(), distanceLatLngs.get(i).getLatitude(), SpatialReference.create(4490));
-                    pointCollection.add(point);
-                }
+                    //area = area / 1.0965f;
+                    //setTitle(df1.format(area) + "平方米");
+                    PointCollection pointCollection = new PointCollection(SpatialReference.create(4490));
+                    for (int i = 0; i < distanceLatLngs.size(); i++) {
+                        com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(distanceLatLngs.get(i).getLongitude(), distanceLatLngs.get(i).getLatitude(), SpatialReference.create(4490));
+                        pointCollection.add(point);
+                    }
                 /*if (showMode == CENTERMODE){
                     com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(centerPointLoc.y, centerPointLoc.x, SpatialReference.create(4490));
                     pointCollection.add(point);
                 }*/
-                if (pointCollection.size() > 2){
-                    Polygon polygon = new Polygon(pointCollection);
-                    area = GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC);
+                    if (pointCollection.size() > 2) {
+                        Polygon polygon = new Polygon(pointCollection);
+                        area = GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC);
+                        com.esri.arcgisruntime.geometry.Point point = GeometryEngine.labelPoint(polygon);
+                        CenterPtMessuredArea = new PointF((float)point.getY(), (float)point.getX());
+                    }
+                    //Log.w(TAG, "onLongClick: " + GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC));
+                    if (isDrawTrail == TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle(df1.format(area) + "平方公里(轨迹记录中)");
+                    } else toolbar.setTitle(df1.format(area) + "平方公里");
                 }
-                //Log.w(TAG, "onLongClick: " + GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC));
-                if (isDrawTrail == TRAIL_DRAW_TYPE) {
-                    toolbar.setTitle(df1.format(area) + "平方公里(轨迹记录中)");
-                } else toolbar.setTitle(df1.format(area) + "平方公里");
+                MessureChanged = false;
             }
+
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
@@ -2683,20 +2689,30 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         }
     }
 
+    private double area = 0;
+    private boolean MessureChanged;
+    private PointF CenterPtMessuredArea = new PointF();
+
     private void drawNormalPath(Canvas canvas){
         Path path = new Path();
         int size = distanceLatLngs.size();
         for (int kk = 0; kk < size; kk++){
             PointF pt0 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLngs.get(kk).getLatitude(), distanceLatLngs.get(kk).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            canvas.drawCircle(pt0.x, pt0.y, 10, paint3);
             if (kk == 0){
                 path.moveTo(pt0.x, pt0.y);
             }else {
                 path.lineTo(pt0.x, pt0.y);
-                if (kk == size - 1 && size > 2){
-                    PointF pt1 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLngs.get(0).getLatitude(), distanceLatLngs.get(0).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    path.lineTo(pt1.x, pt1.y);
-                }
             }
+        }
+        if (size >= 2) {
+            if (showMode == CENTERMODE) {
+                Log.w(TAG, "drawNormalPath: " + centerPointLoc.x + centerPointLoc.y);
+                PointF pt2 = LatLng.getPixLocFromGeoL(centerPointLoc, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                path.lineTo(pt2.x, pt2.y);
+            }
+            PointF pt1 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLngs.get(0).getLatitude(), distanceLatLngs.get(0).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            path.lineTo(pt1.x, pt1.y);
         }
         Paint fillPaint = new Paint();
         /*if (distanceLatLngs.size() > 2)
@@ -2705,17 +2721,34 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             fillPaint.setStyle(Paint.Style.STROKE);*/
         fillPaint.setColor(Color.YELLOW);
         fillPaint.setAlpha(128);
-        if (size > 2){
+        Log.w(TAG, "drawNormalPath: " + size);
+        if (size >= 2){
+            Log.w(TAG, "drawNormalPath22: ");
             fillPaint.setStyle(Paint.Style.FILL_AND_STROKE);
             canvas.drawPath(path, fillPaint);
+            PointF centerPt = LatLng.getPixLocFromGeoL(CenterPtMessuredArea, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            if (size >= 3) {
+                DecimalFormat df1 = new DecimalFormat("0.00");
+                Paint paint0 = new Paint();
+                paint0.setColor(Color.RED);  //设置画笔颜色
+                paint0.setStrokeWidth(5);//设置画笔宽度
+                paint0.setTextSize(55);
+                paint0.setStyle(Paint.Style.FILL);
+                String text0 = df1.format(area);
+                String text1 = "平方公里";
+                canvas.drawText(text0 + text1, centerPt.x - (text1.length() / 2 * 55 + text0.length() / 4 * 55), centerPt.y + 27, paint0);
+            }
+        }/*else if (size == 1){
+            Log.w(TAG, "drawNormalPath11: ");
+            PointF pt0 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLngs.get(0).getLatitude(), distanceLatLngs.get(0).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            canvas.drawCircle(pt0.x, pt0.y, 10, paint3);
         }else if (size == 2){
             Log.w(TAG, "drawNormalPath: ");
-            fillPaint.setStyle(Paint.Style.STROKE);
             PointF pt0 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLngs.get(0).getLatitude(), distanceLatLngs.get(0).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             PointF pt1 = LatLng.getPixLocFromGeoL(new PointF(distanceLatLngs.get(1).getLatitude(), distanceLatLngs.get(1).getLongitude()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             canvas.drawLine(pt0.x, pt0.y, pt1.x, pt1.y, paint6);
             //drawCenterModePath(canvas);
-        }
+        }*/
     }
 
     private void drawCenterModePath(Canvas canvas){
@@ -5294,6 +5327,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void initOtherVariable() {
+        MessureChanged = false;
         strings = getResources().getStringArray(R.array.Type);
         trails = LitePal.findAll(Trail.class);
         simpleDateFormat1 = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.Date).toString());
@@ -5329,8 +5363,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         paint6 = new Paint();
         paint6.setStrokeWidth(10);
         paint6.setStyle(Paint.Style.STROKE);
-        paint6.setAlpha(127);
         paint6.setColor(Color.YELLOW);
+        paint6.setAlpha(127);
         paint8 = new Paint();
         paint8.setStrokeWidth(10);
         paint8.setStyle(Paint.Style.STROKE);
@@ -5592,6 +5626,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         cancel_messure_fab.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                MessureChanged = true;
                 /*toolbar.setTitle("");
                 if (isDrawTrail == TRAIL_DRAW_TYPE){
                     toolbar.setTitle("0.00米 , " + "0.00米(轨迹记录中)");
@@ -5671,6 +5706,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                area = 0;
+                CenterPtMessuredArea = new PointF();
+                MessureChanged = true;
                 if (isDrawType != LINE_DRAW_TYPE) {
                     /////////////////
                     if (mmpoints != null)
@@ -5724,6 +5762,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         delete_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MessureChanged = true;
                 if (isDrawType != LINE_DRAW_TYPE) {
                     ////////////////////////////////////
                     distanceSum = 0;
@@ -5766,6 +5805,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         backpt_messure_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MessureChanged = true;
                 if (isDrawType != LINE_DRAW_TYPE) {
                     ///////////////////////////
                     if (poinum_messure > 1) {
@@ -6683,6 +6723,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             isQuery = false;
             query_poi_imgbt.setVisibility(View.VISIBLE);
         }
+        MessureChanged = false;
         isDrawType = NONE_DRAW_TYPE;
         isMessureType = MESSURE_NONE_TYPE;
     }
