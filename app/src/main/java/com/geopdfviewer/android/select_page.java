@@ -1588,6 +1588,20 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         addIconDataset();
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         Log.d("TAG", "Max memory is " + maxMemory + "KB");
+
+        String str = "2345";
+        switch (str.substring(0,2)){
+            case "k1":
+                Log.w(TAG, "doSpecificOperation: " + "k1");
+                break;
+            case "23":
+                Log.w(TAG, "doSpecificOperation: " + "23");
+                break;
+            default:
+                Log.w(TAG, "doSpecificOperation: " + "qq");
+                break;
+        }
+
     }
 
     private List<IconDataset> addIconDataset(){

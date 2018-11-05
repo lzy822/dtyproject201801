@@ -7,12 +7,12 @@ import android.view.WindowManager;
 
 public class RenderUtil {
     //设置当前地图切换查询的容许误差值
-    public static double getDeltaKforTrans(float page_width, double max_long, double min_long, Activity activity, int type){
+    public static double getDeltaKforTrans(float page_width, double max_long, double min_long, Activity activity, TuzhiEnum type){
         WindowManager wm = activity.getWindowManager();
         DisplayMetrics outMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(outMetrics);
         int deviceWidth = outMetrics.widthPixels;
-        if (type == 2) return (max_long - min_long) / page_width * deviceWidth * 1;
+        if (type == TuzhiEnum.ZOOM_IN) return (max_long - min_long) / page_width * deviceWidth * 1;
         else return (max_long - min_long) * 24;
     }
 

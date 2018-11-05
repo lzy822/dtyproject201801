@@ -113,13 +113,15 @@ import java.util.TimerTask;
 public class MainInterface extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener, OnDrawListener, OnTapListener {
     private static final String TAG = "MainInterface";
-    public static int FILE_TYPE = EnumClass.NONE_FILE_TYPE;
+    public static TuzhiEnum FILE_TYPE = TuzhiEnum.NONE_FILE_TYPE;
     Integer pageNumber = 0;
     public String content;
     String pdfFileName;
     PDFView pdfView;
     TextView textView;
     TextView scaleShow;
+
+
 
     //声明bts容器
     List<bt> bts;
@@ -184,10 +186,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private boolean showTrail = false;
 
     //记录当前绘图类型
-    private int isDrawType = EnumClass.NONE_DRAW_TYPE;
+    private TuzhiEnum isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
 
     //记录当前使用者放缩情况
-    private int isZoom = EnumClass.ZOOM_NONE;
+    private TuzhiEnum isZoom = TuzhiEnum.ZOOM_NONE;
 
     //点面判断 测试面数据
     private List<LatLng> latLngs_1;
@@ -261,9 +263,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     com.github.clans.fab.FloatingActionMenu floatingActionsMenu;
 
-    private int isMessureType = EnumClass.MESSURE_NONE_TYPE;
+    private TuzhiEnum isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
 
-    private int isCoordinateType = EnumClass.COORDINATE_DEFAULT_TYPE;
+    private TuzhiEnum isCoordinateType = TuzhiEnum.COORDINATE_DEFAULT_TYPE;
 
     //记录是否需要详细地址信息
     private boolean isFullLocation = false;
@@ -272,7 +274,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     float verx = 0;
 
     //记录是否开始绘制轨迹
-    private int isDrawTrail = EnumClass.NONE_DRAW_TYPE;
+    private TuzhiEnum isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
 
     //记录点选的坐标位置
     private float locLatForTap, locLongForTap;
@@ -288,7 +290,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     DecimalFormat scale_df;
 
     //记录当前显示模式
-    private int showMode = EnumClass.CENTERMODE;
+    private TuzhiEnum showMode = TuzhiEnum.CENTERMODE;
 
 
     private boolean esterEgg_lm = false;
@@ -331,7 +333,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private String whiteBlankPt = "";
     //记录当前List<geometry_WhiteBlank>
     private List<geometry_WhiteBlank> geometry_whiteBlanks;
-    private int queryMode = 0;
+    private TuzhiEnum queryMode;
 
     SearchView searchView;
     //记录是否可以看缩略图
@@ -410,7 +412,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         POI poi = new POI();
         poi.setName("POI" + String.valueOf(POIs.size() + 1));
         poi.setIc(ic);
-        if (showMode == EnumClass.NOCENTERMODE) {
+        if (showMode == TuzhiEnum.NOCENTERMODE) {
             poi.setX(pt1.x);
             poi.setY(pt1.y);
         } else {
@@ -432,7 +434,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         MPOI poi = new MPOI();
         poi.setNum(System.currentTimeMillis());
         poi.setImgPath(IconBitmaps.get(0).getM_path());
-        if (showMode == EnumClass.NOCENTERMODE) {
+        if (showMode == TuzhiEnum.NOCENTERMODE) {
             poi.setLat(pt1.x);
             poi.setLng(pt1.y);
         } else {
@@ -602,7 +604,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         int size = dmbzList.size();
         Log.w(TAG, "dmbzList: " + size);
         DMBZ dmbz = new DMBZ();
-        if (showMode == EnumClass.NOCENTERMODE) {
+        if (showMode == TuzhiEnum.NOCENTERMODE) {
             dmbz.setLat(pt1.x);
             dmbz.setLng(pt1.y);
         } else {
@@ -727,7 +729,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         final PointF pt1 = getGeoLocFromPixL(pt);
         showLocationText(pt1);
         if (pt1.x != 0) {
-            if (isDrawType == EnumClass.POI_DRAW_TYPE && !isQuery) {
+            if (isDrawType == TuzhiEnum.POI_DRAW_TYPE && !isQuery) {
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(MainInterface.this);
                 builder1.setTitle("提示");
                 builder1.setMessage("请选择你要添加的兴趣点种类");
@@ -795,7 +797,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     POI poi = new POI();
                     poi.setName("POI" + String.valueOf(POIs.size() + 1));
                     poi.setIc(ic);
-                    if (showMode == EnumClass.NOCENTERMODE) {
+                    if (showMode == TuzhiEnum.NOCENTERMODE) {
                         poi.setX(pt1.x);
                         poi.setY(pt1.y);
                     } else {
@@ -830,19 +832,19 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
 
             //记录线要素
-            if (isDrawType == EnumClass.LINE_DRAW_TYPE) {
+            if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE) {
                 // TODO : 编辑添加线要素添加逻辑
                 whiteBlank_fab.setVisibility(View.GONE);
                 PointF ptf = getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY()));
                 Log.w(TAG, "onTaplzylzylzy: " + centerPointLoc.x);
                 if (drawLineFeature.isEmpty()) {
-                    if (showMode == EnumClass.CENTERMODE) {
+                    if (showMode == TuzhiEnum.CENTERMODE) {
                         drawLineFeature = Float.toString(centerPointLoc.y) + "," + Float.toString(centerPointLoc.x) + ",0";
                     } else {
                         drawLineFeature = Float.toString(ptf.y) + "," + Float.toString(ptf.x) + ",0";
                     }
                 } else {
-                    if (showMode == EnumClass.CENTERMODE) {
+                    if (showMode == TuzhiEnum.CENTERMODE) {
                         drawLineFeature = drawLineFeature + " " + Float.toString(centerPointLoc.y) + "," + Float.toString(centerPointLoc.x) + ",0";
                     } else {
                         drawLineFeature = drawLineFeature + " " + Float.toString(ptf.y) + "," + Float.toString(ptf.x) + ",0";
@@ -858,17 +860,17 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 locError("messure_pts" + messure_pts);
                 poinum_messure++;
                 if (poinum_messure == 1) {
-                    if (showMode == EnumClass.NOCENTERMODE) {
+                    if (showMode == TuzhiEnum.NOCENTERMODE) {
                         messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
                     } else {
                         messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
                     }
                     //setTitle("正在测量");
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle("正在测量(轨迹记录中)");
                     } else toolbar.setTitle("正在测量");
                 } else if (poinum_messure == 2) {
-                    if (showMode == EnumClass.NOCENTERMODE) {
+                    if (showMode == TuzhiEnum.NOCENTERMODE) {
                         messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
                     } else {
                         messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
@@ -877,7 +879,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     pdfView.zoomWithAnimation(c_zoom);
                     //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                 } else {
-                    if (showMode == EnumClass.NOCENTERMODE) {
+                    if (showMode == TuzhiEnum.NOCENTERMODE) {
                         messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
                     } else {
                         messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
@@ -885,7 +887,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     //setTitle("正在测量");
                     pdfView.zoomWithAnimation(c_zoom);
                 }
-                if (showMode == EnumClass.NOCENTERMODE) {
+                if (showMode == TuzhiEnum.NOCENTERMODE) {
                     switch (distancesLatLngs.size()) {
                         case 0:
                             int size = distanceLatLngs.size();
@@ -970,7 +972,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 //distanceLatLngs.add(distanceLatLng);
             }
             boolean isQueried = false;
-            if (isQuery && isDrawType == EnumClass.NONE_DRAW_TYPE) {
+            if (isQuery && isDrawType == TuzhiEnum.NONE_DRAW_TYPE) {
                 Log.w(TAG, "onTapspecial : ");
                 if (esterEgg_plq) {
                     int n = 0;
@@ -1206,10 +1208,40 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             paint1.setStrokeWidth(10);
             paint1.setStyle(Paint.Style.STROKE);
             paint1.setColor(Color.rgb(255, 0, 255));
+
             Paint paint = new Paint();
             paint.setStrokeWidth(10);
             paint.setStyle(Paint.Style.STROKE);
-            if (dmLines.get(j).getLbdm().substring(0, 3).contains("121"))
+            switch (dmLines.get(j).getLbdm().substring(0, 3)){
+                case "121":
+                    paint.setColor(Color.rgb(201, 233, 254));
+                    break;
+                case "232":
+                    paint.setColor(Color.rgb(255, 127, 63));
+                    break;
+                case "233":
+                    paint.setColor(Color.BLACK);
+                    isTL = true;
+                    break;
+                case "235":
+                    paint.setColor(Color.rgb(255, 255, 0));
+                    break;
+                case "236":
+                    paint.setColor(Color.BLACK);
+                    break;
+                case "239":
+                    paint.setColor(Color.rgb(231, 120, 23));
+                    break;
+                case "243":
+                    paint.setColor(Color.rgb(201, 233, 254));
+                    break;
+                case "244":
+                    paint.setColor(Color.BLACK);
+                    break;
+
+
+            }
+            /*if (dmLines.get(j).getLbdm().substring(0, 3).contains("121"))
                 paint.setColor(Color.rgb(201, 233, 254));
             else if (dmLines.get(j).getLbdm().substring(0, 3).contains("232"))
                 paint.setColor(Color.rgb(255, 127, 63));
@@ -1225,7 +1257,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             else if (dmLines.get(j).getLbdm().substring(0, 3).contains("243"))
                 paint.setColor(Color.rgb(201, 233, 254));
             else if (dmLines.get(j).getLbdm().substring(0, 3).contains("244"))
-                paint.setColor(Color.BLACK);
+                paint.setColor(Color.BLACK);*/
             boolean colorChange = false;
             float maxlat = dmLines.get(j).getMaxlat();
             float minlat = dmLines.get(j).getMinlat();
@@ -1585,12 +1617,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             c_zoom = pdfView.getZoom();
             if ((c_zoom - c_zoom1) > 0) {
                 locError("zoom: " + Float.toString(c_zoom - c_zoom1));
-                isZoom = EnumClass.ZOOM_IN;
+                isZoom = TuzhiEnum.ZOOM_IN;
             } else if ((c_zoom - c_zoom1) < 0) {
                 locError("zoom: " + Float.toString(c_zoom - c_zoom1));
-                isZoom = EnumClass.ZOOM_OUT;
+                isZoom = TuzhiEnum.ZOOM_OUT;
             }
-        } else isZoom = EnumClass.ZOOM_NONE;
+        } else isZoom = TuzhiEnum.ZOOM_NONE;
         locError("zoom: " + Float.toString(c_zoom));
         getCurrentScreenLoc();
         ImageView imageView = (ImageView) findViewById(R.id.myscale);
@@ -1613,14 +1645,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             drawDM(canvas);
         }
 
-        if (isMessure && showMode == EnumClass.CENTERMODE) {
+        if (isMessure && showMode == TuzhiEnum.CENTERMODE) {
             String messure_pts1 = messure_pts;
             locError("messure_pts1" + messure_pts1);
             int poinum_messure1 = poinum_messure + 1;
             //poinum_messure++;
             if (poinum_messure1 == 1) {
                 messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                     toolbar.setTitle("正在测量(轨迹记录中)");
                 } else toolbar.setTitle("正在测量");
             } else if (poinum_messure1 == 2) {
@@ -1637,7 +1669,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             parseAndrawMessure(messure_pts1, canvas);
 
         }
-        if (isMessure && showMode == EnumClass.NOCENTERMODE) {
+        if (isMessure && showMode == TuzhiEnum.NOCENTERMODE) {
             parseAndrawMessure(messure_pts, canvas);
         }
 
@@ -1675,11 +1707,11 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             parseAndrawLinesforWhiteBlank(canvas);
             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
         }
-        if (showMode == EnumClass.CENTERMODE && esterEgg_redline) {
+        if (showMode == TuzhiEnum.CENTERMODE && esterEgg_redline) {
             managePatchsData();
             drawDemoArea(canvas);
         }
-        if (isDrawType == EnumClass.POI_DRAW_TYPE || showPOI) {
+        if (isDrawType == TuzhiEnum.POI_DRAW_TYPE || showPOI) {
             if (esterEgg_plq) drawPLQData(canvas);
             //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
             if (type2Checked && esterEgg_lm) {
@@ -2100,18 +2132,18 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
             }*/
         }
-        if (isDrawType == EnumClass.LINE_DRAW_TYPE && (LineFeatures.size() > 0 || !drawLineFeature.isEmpty())) {
+        if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE && (LineFeatures.size() > 0 || !drawLineFeature.isEmpty())) {
             for (int i = 0; i < LineFeatures.size(); i++) {
                 drawLineFromLineString("", LineFeatures.get(i), false, false, canvas, paint9, paint2);
             }
             String mdrawLineFeature = drawLineFeature;
-            if (showMode == EnumClass.CENTERMODE) {
+            if (showMode == TuzhiEnum.CENTERMODE) {
                 mdrawLineFeature = mdrawLineFeature + " " + centerPointLoc.y + "," + centerPointLoc.x + ",0";
             }
             if (!drawLineFeature.isEmpty())
                 drawLineFromLineString("", mdrawLineFeature, false, false, canvas, paint9, paint2);
         }
-        if (isAutoTrans && (isZoom == EnumClass.ZOOM_IN || c_zoom == 10)) {
+        if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
             if (size != 0) {
@@ -2187,7 +2219,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     }
                 }
                 double deltaK_trans;
-                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, EnumClass.ZOOM_IN);
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
                 locError("deltaK_trans: " + Double.toString(deltaK_trans));
                 if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
                     geometry_whiteBlanks.clear();
@@ -2207,7 +2239,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
             } else
                 Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-        } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == EnumClass.ZOOM_OUT) {
+        } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
             if (size != 0) {
@@ -2272,7 +2304,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     }
                 }
                 double deltaK_trans;
-                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, EnumClass.ZOOM_OUT);
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
                 locError("deltaK_trans: " + Double.toString(deltaK_trans));
                 if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
                     geometry_whiteBlanks.clear();
@@ -2301,7 +2333,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
             canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
         }
-        if (isMessure && isMessureType == EnumClass.MESSURE_DISTANCE_TYPE) drawMessureLine(canvas);
+        if (isMessure && isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE) drawMessureLine(canvas);
         drawMPOI(canvas);
         drawQueriedMPOI(canvas);
 
@@ -2573,9 +2605,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                 locError(mmessure_pts);
                 locError("mpts : " + Integer.toString(mpts.length));
-                if (isMessureType == EnumClass.MESSURE_DISTANCE_TYPE) {
+                if (isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE) {
                     canvas.drawLines(mpts, paint6);
-                } else if (isMessureType == EnumClass.MESSURE_AREA_TYPE) {
+                } else if (isMessureType == TuzhiEnum.MESSURE_AREA_TYPE) {
                     //canvas.drawLines(mpts, paint6);
                     //canvas.drawLine(mpts[0], mpts[1], mpts[mpts.length - 2], mpts[mpts.length - 1], paint6);
 
@@ -2583,20 +2615,20 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             } else {
                 mpts = new float[pts.length];
             }
-            if (isMessureType == EnumClass.MESSURE_AREA_TYPE) {
+            if (isMessureType == TuzhiEnum.MESSURE_AREA_TYPE) {
                 drawNormalPath(canvas);
             }
             DecimalFormat df1 = new DecimalFormat("0.00");
             //locError(Double.toString(distanceSum));
             if (MessureChanged) {
-                if (isMessureType == EnumClass.MESSURE_DISTANCE_TYPE) {
-                /*if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE){
+                if (isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE) {
+                /*if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE){
                     toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米(轨迹记录中)");
                 }else {
                     toolbar.setTitle(df1.format(distanceSum) + "米 , " + df1.format(distanceCurrent) + "米");
                 }*/
                     //setTitle(df1.format(distanceSum) + "米");
-                } else if (isMessureType == EnumClass.MESSURE_AREA_TYPE) {
+                } else if (isMessureType == TuzhiEnum.MESSURE_AREA_TYPE) {
                 /*for (int i = 0; i < mpts.length - 3; i = i + 2) {
                     area = area + (mpts[i] * mpts[i + 3] - mpts[i + 2] * mpts[i + 1]);
                 }
@@ -2610,7 +2642,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(distanceLatLngs.get(i).getLongitude(), distanceLatLngs.get(i).getLatitude(), SpatialReference.create(4490));
                         pointCollection.add(point);
                     }
-                /*if (showMode == EnumClass.CENTERMODE){
+                /*if (showMode == TuzhiEnum.CENTERMODE){
                     com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(centerPointLoc.y, centerPointLoc.x, SpatialReference.create(4490));
                     pointCollection.add(point);
                 }*/
@@ -2621,7 +2653,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         CenterPtMessuredArea = new PointF((float)point.getY(), (float)point.getX());
                     }
                     //Log.w(TAG, "onLongClick: " + GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC));
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle(df1.format(area) + "平方公里(轨迹记录中)");
                     } else toolbar.setTitle(df1.format(area) + "平方公里");
                 }
@@ -2660,7 +2692,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
         }
         if (size >= 2) {
-            if (showMode == EnumClass.CENTERMODE) {
+            if (showMode == TuzhiEnum.CENTERMODE) {
                 Log.w(TAG, "drawNormalPath: " + centerPointLoc.x + centerPointLoc.y);
                 PointF pt2 = LatLng.getPixLocFromGeoL(centerPointLoc, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                 path.lineTo(pt2.x, pt2.y);
@@ -3720,17 +3752,17 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 backpt_messure_fab.setVisibility(View.VISIBLE);
                 cancel_messure_fab.setVisibility(View.VISIBLE);
                 whiteBlank_fab.setVisibility(View.GONE);
-                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                     toolbar.setTitle("正在测量(轨迹记录中)");
                 } else toolbar.setTitle("正在测量");
                 isQuery = false;
-                isDrawType = EnumClass.NONE_DRAW_TYPE;
+                isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
                 isLocate = 0;
                 isLocateEnd = true;
                 poiLayerBt.setChecked(false);
                 showPOI = false;
                 isMessure = true;
-                isMessureType = EnumClass.MESSURE_DISTANCE_TYPE;
+                isMessureType = TuzhiEnum.MESSURE_DISTANCE_TYPE;
                 poinum_messure = 0;
             }
         });
@@ -3745,17 +3777,17 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 cancel_messure_fab.setVisibility(View.VISIBLE);
                 whiteBlank_fab.setVisibility(View.GONE);
                 //Toast.makeText(MainInterface.this, "暂时没有添加面积测算功能",Toast.LENGTH_SHORT).show();
-                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                     toolbar.setTitle("正在测量(轨迹记录中)");
                 } else toolbar.setTitle("正在测量");
                 isQuery = false;
-                isDrawType = EnumClass.NONE_DRAW_TYPE;
+                isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
                 isLocate = 0;
                 isLocateEnd = true;
                 poiLayerBt.setChecked(false);
                 showPOI = false;
                 isMessure = true;
-                isMessureType = EnumClass.MESSURE_AREA_TYPE;
+                isMessureType = TuzhiEnum.MESSURE_AREA_TYPE;
                 poinum_messure = 0;
             }
         });
@@ -3967,7 +3999,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 whiteBlank_fab.setVisibility(View.VISIBLE);
                 isOpenWhiteBlank = false;
                 whiteBlank_fab.setImageResource(R.drawable.ic_brush_black_24dp);
-                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                     toolbar.setTitle("轨迹记录中");
                 } else toolbar.setTitle(pdfFileName);
             }
@@ -4180,7 +4212,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     GoDMPSinglePOIPage(pois.get(position).getM_POIC().replace("DMPoint", ""));
 
                 listPopupWindow.dismiss();
-                isDrawTrail = EnumClass.NONE_DRAW_TYPE;
+                isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                 invalidateOptionsMenu();
             }
         });
@@ -4230,7 +4262,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         //
 
         centerPointLoc = new PointF((cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2);
-        if (showMode == EnumClass.CENTERMODE) {
+        if (showMode == TuzhiEnum.CENTERMODE) {
             locLatForTap = centerPointLoc.x;
             locLongForTap = centerPointLoc.y;
             showLocationText();
@@ -4241,9 +4273,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private void showLocationText() {
         DecimalFormat df = new DecimalFormat("0.0000");
-        if (isCoordinateType == EnumClass.COORDINATE_DEFAULT_TYPE) {
+        if (isCoordinateType == TuzhiEnum.COORDINATE_DEFAULT_TYPE) {
             textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
-        } else if (isCoordinateType == EnumClass.COORDINATE_BLH_TYPE) {
+        } else if (isCoordinateType == TuzhiEnum.COORDINATE_BLH_TYPE) {
             textView.setText(Integer.toString((int) locLatForTap) + "°" + Integer.toString((int) ((locLatForTap - (int) locLatForTap) * 60)) + "′" + Integer.toString((int) (((locLatForTap - (int) locLatForTap) * 60 - (int) ((locLatForTap - (int) locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int) locLongForTap) + "°" + Integer.toString((int) ((locLongForTap - (int) locLongForTap) * 60)) + "′" + Integer.toString((int) (((locLongForTap - (int) locLongForTap) * 60 - (int) ((locLongForTap - (int) locLongForTap) * 60)) * 60)) + "″");
         } else {
             textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
@@ -4314,9 +4346,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private boolean showLocationText(PointF pt) {
         if (pt.x != 0) {
             DecimalFormat df = new DecimalFormat("0.0000");
-            if (isCoordinateType == EnumClass.COORDINATE_DEFAULT_TYPE) {
+            if (isCoordinateType == TuzhiEnum.COORDINATE_DEFAULT_TYPE) {
                 textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
-            } else if (isCoordinateType == EnumClass.COORDINATE_BLH_TYPE) {
+            } else if (isCoordinateType == TuzhiEnum.COORDINATE_BLH_TYPE) {
                 textView.setText(Integer.toString((int) locLatForTap) + "°" + Integer.toString((int) ((locLatForTap - (int) locLatForTap) * 60)) + "′" + Integer.toString((int) (((locLatForTap - (int) locLatForTap) * 60 - (int) ((locLatForTap - (int) locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int) locLongForTap) + "°" + Integer.toString((int) ((locLongForTap - (int) locLongForTap) * 60)) + "′" + Integer.toString((int) (((locLongForTap - (int) locLongForTap) * 60 - (int) ((locLongForTap - (int) locLongForTap) * 60)) * 60)) + "″");
             } else {
                 textView.setText(df.format(locLatForTap) + ";" + df.format(locLongForTap));
@@ -4493,8 +4525,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             backAlert.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    isDrawType = EnumClass.NONE_DRAW_TYPE;
-                    isDrawTrail = EnumClass.NONE_DRAW_TYPE;
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                     isLocateEnd = true;
                     recordTrail(last_x, last_y);
                     locError(m_cTrail);
@@ -4735,16 +4767,16 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    showMode = EnumClass.CENTERMODE;
+                    showMode = TuzhiEnum.CENTERMODE;
                     centerPoint.setVisibility(View.VISIBLE);
                     isQuery = true;
-                    isDrawType = EnumClass.NONE_DRAW_TYPE;
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
                     locError("中心点模式");
-                    isMessureType = EnumClass.MESSURE_NONE_TYPE;
+                    isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                     query_poi_imgbt.setVisibility(View.INVISIBLE);
                 } else {
                     locError("不是中心点模式");
-                    showMode = EnumClass.NOCENTERMODE;
+                    showMode = TuzhiEnum.NOCENTERMODE;
                     centerPoint.setVisibility(View.INVISIBLE);
                     isQuery = false;
                     query_poi_imgbt.setVisibility(View.VISIBLE);
@@ -4858,7 +4890,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private void showLeaflets() {
         forbiddenWidget();
-        FILE_TYPE = EnumClass.ASSET_FILE_TYPE;
+        FILE_TYPE = TuzhiEnum.ASSET_FILE_TYPE;
         displayFromAsset("图志简介");
     }
 
@@ -4878,7 +4910,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         num_map1 = m_num;
         File m_file = new File(uri);
         if (uri != null && !uri.isEmpty() && m_file.exists()) {
-            FILE_TYPE = EnumClass.FILE_FILE_TYPE;
+            FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
         }
     }
 
@@ -5008,7 +5040,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 MPOI poi = new MPOI();
                 poi.setNum(System.currentTimeMillis());
                 poi.setImgPath(iconPath);
-                if (showMode == EnumClass.NOCENTERMODE) {
+                if (showMode == TuzhiEnum.NOCENTERMODE) {
                     poi.setLat(pt1.x);
                     poi.setLng(pt1.y);
                 } else {
@@ -5290,47 +5322,58 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         getWhiteBlankData();
         //初始化比例尺格式信息
         scale_df = new DecimalFormat("0.0");
+
         paint = new Paint();
         paint.setColor(Color.RED);
         paint.setStrokeWidth((float) 3.0);
         paint.setStyle(Paint.Style.FILL);
+
         paint1 = new Paint();
         paint1.setColor(Color.GREEN);
         paint1.setStrokeWidth((float) 2.0);
         paint1.setStyle(Paint.Style.FILL);
+
         paint2 = new Paint();
         paint2.setColor(Color.BLACK);
         paint2.setStrokeWidth((float) 2.0);
         paint2.setStyle(Paint.Style.FILL);
+
         paint3 = new Paint();
         paint3.setColor(Color.BLUE);
         paint3.setStrokeWidth((float) 2.0);
         paint3.setStyle(Paint.Style.FILL);
+
         paint4 = new Paint();
         paint4.setColor(Color.YELLOW);
         paint4.setStrokeWidth((float) 2.0);
         paint4.setStyle(Paint.Style.FILL);
+
         paint5 = new Paint();
         paint5.setColor(Color.rgb(123, 175, 212));
         paint5.setStrokeWidth((float) 2.0);
         paint5.setStyle(Paint.Style.FILL);
+
         paint6 = new Paint();
         paint6.setStrokeWidth(10);
         paint6.setStyle(Paint.Style.STROKE);
         paint6.setColor(Color.YELLOW);
         paint6.setAlpha(127);
+
         paint8 = new Paint();
         paint8.setStrokeWidth(10);
         paint8.setStyle(Paint.Style.STROKE);
         paint8.setColor(Color.BLUE);
+
         paint9 = new Paint();
         paint9.setStrokeWidth(10);
         paint9.setStyle(Paint.Style.STROKE);
         paint9.setColor(Color.RED);
+
         paint10 = new Paint();
         paint10.setStrokeWidth(10);
         paint10.setStyle(Paint.Style.STROKE);
         paint10.setColor(Color.GREEN);
+
         color_Whiteblank = Color.RED;
     }
 
@@ -5582,12 +5625,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             public boolean onLongClick(View v) {
                 MessureChanged = true;
                 /*toolbar.setTitle("");
-                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE){
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE){
                     toolbar.setTitle("0.00米 , " + "0.00米(轨迹记录中)");
                 }else {
                     toolbar.setTitle("0.00米 , " + "0.00米");
                 }*/
-                if (isDrawType != EnumClass.LINE_DRAW_TYPE) {
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
                     ////测量
                     distanceSum = 0;
                     poinum_messure = 0;
@@ -5663,7 +5706,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 area = 0;
                 CenterPtMessuredArea = new PointF();
                 MessureChanged = true;
-                if (isDrawType != EnumClass.LINE_DRAW_TYPE) {
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
                     /////////////////
                     if (mmpoints != null)
                         mmpoints.clear();
@@ -5672,7 +5715,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     distanceLatLngs.clear();
                     distanceLatLngs1.clear();
                     distanceLatLngs2.clear();
-                    if (showMode == EnumClass.CENTERMODE) isQuery = true;
+                    if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
                     else isQuery = false;
                     centerPointModeBt.setVisibility(View.VISIBLE);
                     isMessure = false;
@@ -5682,7 +5725,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     backpt_messure_fab.setVisibility(View.GONE);
                     cancel_messure_fab.setVisibility(View.GONE);
                     whiteBlank_fab.setVisibility(View.VISIBLE);
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle("轨迹记录中");
                     } else toolbar.setTitle(pdfFileName);
                 } else {
@@ -5696,7 +5739,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     delete_messure_fab.setVisibility(View.GONE);
                     backpt_messure_fab.setVisibility(View.GONE);
                     cancel_messure_fab.setVisibility(View.GONE);
-                    isDrawType = EnumClass.NONE_DRAW_TYPE;
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
                     String time = String.valueOf(System.currentTimeMillis());
                     DMLine dmLine = new DMLine();
                     dmLine.setXh(Integer.toString(dmLines.size() + 1));
@@ -5717,7 +5760,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             @Override
             public void onClick(View v) {
                 MessureChanged = true;
-                if (isDrawType != EnumClass.LINE_DRAW_TYPE) {
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
                     ////////////////////////////////////
                     distanceSum = 0;
                     switch (distancesLatLngs.size()) {
@@ -5739,7 +5782,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     }
                     messure_pts = "";
                     poinum_messure = 0;
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle("正在测量(轨迹记录中)");
                     } else toolbar.setTitle("正在测量");
                 } else {
@@ -5760,7 +5803,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             @Override
             public void onClick(View v) {
                 MessureChanged = true;
-                if (isDrawType != EnumClass.LINE_DRAW_TYPE) {
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
                     ///////////////////////////
                     if (poinum_messure > 1) {
                         //if (distancesLatLngs.get(distancesLatLngs.size() - 1).size() > 1) {
@@ -5828,7 +5871,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 if (!isOpenWhiteBlank) {
                     isOpenWhiteBlank = true;
                     //whiteBlank_fab.setImageResource(R.drawable.ic_cancel_black_24dp);
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle("正在进行白板绘图(轨迹记录中)");
                     } else toolbar.setTitle("正在进行白板绘图");
                     showPopueWindowForWhiteblank();
@@ -5868,18 +5911,18 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 String str = textView.getText().toString();
                 Log.w(TAG, "onClick: " + str);
                 if (!str.equals("点击位置在区域之外") && !str.equals("在这里显示坐标值")) {
-                    if (isCoordinateType == EnumClass.COORDINATE_DEFAULT_TYPE) {
+                    if (isCoordinateType == TuzhiEnum.COORDINATE_DEFAULT_TYPE) {
                         //String[] strs = str.split(";");
                         //PointF pt = new PointF(Float.valueOf(strs[0]), Float.valueOf(strs[1]));
                         textView.setText(Integer.toString((int) locLatForTap) + "°" + Integer.toString((int) ((locLatForTap - (int) locLatForTap) * 60)) + "′" + Integer.toString((int) (((locLatForTap - (int) locLatForTap) * 60 - (int) ((locLatForTap - (int) locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int) locLongForTap) + "°" + Integer.toString((int) ((locLongForTap - (int) locLongForTap) * 60)) + "′" + Integer.toString((int) (((locLongForTap - (int) locLongForTap) * 60 - (int) ((locLongForTap - (int) locLongForTap) * 60)) * 60)) + "″");
-                        isCoordinateType = EnumClass.COORDINATE_BLH_TYPE;
+                        isCoordinateType = TuzhiEnum.COORDINATE_BLH_TYPE;
                         locError(Integer.toString(textView.getHeight()));
-                    } else if (isCoordinateType == EnumClass.COORDINATE_BLH_TYPE) {
+                    } else if (isCoordinateType == TuzhiEnum.COORDINATE_BLH_TYPE) {
                         //String[] strs = str.split(";");
                         //locError(strs[0] + "还有: " + strs[1]);
                         //PointF pt = new PointF(Float.valueOf(strs[0].substring(0, strs[0].indexOf("°"))) + (Float.valueOf(strs[0].substring(strs[0].indexOf("°") + 1, strs[0].indexOf("′"))) / 60) + (Float.valueOf(strs[0].substring(strs[0].indexOf("′") + 1, strs[0].indexOf("″"))) / 3600), Float.valueOf(strs[1].substring(0, strs[1].indexOf("°"))) + (Float.valueOf(strs[1].substring(strs[1].indexOf("°") + 1, strs[1].indexOf("′"))) / 60) + (Float.valueOf(strs[1].substring(strs[1].indexOf("′") + 1, strs[1].indexOf("″"))) / 3600));
                         textView.setText(df.format(locLatForTap) + "; " + df.format(locLongForTap));
-                        isCoordinateType = EnumClass.COORDINATE_DEFAULT_TYPE;
+                        isCoordinateType = TuzhiEnum.COORDINATE_DEFAULT_TYPE;
                         locError(Integer.toString(textView.getHeight()));
                     }
                 }
@@ -5937,8 +5980,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             @Override
             public void onClick(View v) {
                 toolbar.setTitle("正在记录轨迹");
-                isDrawType = EnumClass.TRAIL_DRAW_TYPE;
-                isDrawTrail = EnumClass.TRAIL_DRAW_TYPE;
+                isDrawType = TuzhiEnum.TRAIL_DRAW_TYPE;
+                isDrawTrail = TuzhiEnum.TRAIL_DRAW_TYPE;
                 //isQuery = false;
                 m_cTrail = "";
                 isLocateEnd = false;
@@ -5958,9 +6001,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             @Override
             public void onClick(View v) {
                 toolbar.setTitle(pdfFileName);
-                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
-                    isDrawType = EnumClass.NONE_DRAW_TYPE;
-                    isDrawTrail = EnumClass.NONE_DRAW_TYPE;
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                     isLocateEnd = true;
                     recordTrail(last_x, last_y);
                     locError(m_cTrail);
@@ -5975,7 +6018,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     trail.save();*/
                     trails = LitePal.findAll(Trail.class);
                     locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
-                    if (showMode == EnumClass.CENTERMODE) isQuery = true;
+                    if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
                     else isQuery = false;
                 } else {
                     Toast.makeText(MainInterface.this, R.string.OpenTrailError, Toast.LENGTH_SHORT).show();
@@ -6001,21 +6044,21 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             showPOI = true;
                             //pdfView.resetZoomWithAnimation();
                             pdfView.zoomWithAnimation(c_zoom);
-                            if (isDrawType == EnumClass.POI_DRAW_TYPE) {
-                                isDrawType = EnumClass.NONE_DRAW_TYPE;
-                                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                            if (isDrawType == TuzhiEnum.POI_DRAW_TYPE) {
+                                isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                                     toolbar.setTitle("正在记录轨迹");
                                 } else toolbar.setTitle(pdfFileName);
-                                if (showMode == EnumClass.CENTERMODE) isQuery = true;
+                                if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
                                 else isQuery = false;
                                 pdfView.zoomWithAnimation(c_zoom);
                             } else {
-                                isDrawType = EnumClass.POI_DRAW_TYPE;
+                                isDrawType = TuzhiEnum.POI_DRAW_TYPE;
                                 isQuery = false;
-                                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                                     toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
                                 } else toolbar.setTitle("正在插放兴趣点");
-                                isMessureType = EnumClass.MESSURE_NONE_TYPE;
+                                isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                             }
                         }
                     });
@@ -6028,23 +6071,23 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             poiLayerBt.setChecked(false);
                             showPOI = false;
                             pdfView.zoomWithAnimation(c_zoom);
-                            if (isDrawType == EnumClass.LINE_DRAW_TYPE) {
-                                isDrawType = EnumClass.NONE_DRAW_TYPE;
-                                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                            if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE) {
+                                isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                                     toolbar.setTitle("正在记录轨迹");
                                 } else toolbar.setTitle(pdfFileName);
-                                if (showMode == EnumClass.CENTERMODE) isQuery = true;
+                                if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
                                 else isQuery = false;
                                 pdfView.zoomWithAnimation(c_zoom);
                             } else {
-                                isDrawType = EnumClass.LINE_DRAW_TYPE;
+                                isDrawType = TuzhiEnum.LINE_DRAW_TYPE;
                                 drawLineFeature = "";
                                 LineFeatures.clear();
                                 isQuery = false;
-                                if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                                     toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
                                 } else toolbar.setTitle("正在插放兴趣点");
-                                isMessureType = EnumClass.MESSURE_NONE_TYPE;
+                                isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                             }
                         }
                     });
@@ -6054,21 +6097,21 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     showPOI = true;
                     //pdfView.resetZoomWithAnimation();
                     pdfView.zoomWithAnimation(c_zoom);
-                    if (isDrawType == EnumClass.POI_DRAW_TYPE) {
-                        isDrawType = EnumClass.NONE_DRAW_TYPE;
-                        if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawType == TuzhiEnum.POI_DRAW_TYPE) {
+                        isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                             toolbar.setTitle("正在记录轨迹");
                         } else toolbar.setTitle(pdfFileName);
-                        if (showMode == EnumClass.CENTERMODE) isQuery = true;
+                        if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
                         else isQuery = false;
                         pdfView.zoomWithAnimation(c_zoom);
                     } else {
-                        isDrawType = EnumClass.POI_DRAW_TYPE;
+                        isDrawType = TuzhiEnum.POI_DRAW_TYPE;
                         isQuery = false;
-                        if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                             toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
                         } else toolbar.setTitle("正在插放兴趣点");
-                        isMessureType = EnumClass.MESSURE_NONE_TYPE;
+                        isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                     }
                 }
 
@@ -6081,15 +6124,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 showPOI = true;
                 pdfView.zoomWithAnimation(c_zoom);
                 if (!isQuery) {
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle("正在查询(轨迹记录中)");
                     } else toolbar.setTitle("正在查询");
                     isQuery = true;
-                    isDrawType = EnumClass.NONE_DRAW_TYPE;
-                    isMessureType = EnumClass.MESSURE_NONE_TYPE;
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                 } else {
                     isQuery = false;
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle("正在记录轨迹");
                     } else toolbar.setTitle(pdfFileName);
                 }
@@ -6104,7 +6147,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 //pickFile();
                 floatingActionsMenu.close(false);
                 showPopueWindowForPhoto();
-                isMessureType = EnumClass.MESSURE_NONE_TYPE;
+                isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
             }
         });
         locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
@@ -6188,7 +6231,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     showTrail = true;
                     pdfView.resetZoomWithAnimation();
                     isMessure = false;
-                    if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                         toolbar.setTitle("正在记录轨迹");
                     } else toolbar.setTitle(pdfFileName);
                     if (!isFullLocation) {
@@ -6657,13 +6700,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void resumeSurface() {
-        if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
             toolbar.setTitle("正在记录轨迹");
         } else toolbar.setTitle(pdfFileName);
     }
 
     private void resumeVariable() {
-        if (showMode == EnumClass.CENTERMODE) {
+        if (showMode == TuzhiEnum.CENTERMODE) {
             centerPoint.setVisibility(View.VISIBLE);
             isQuery = true;
             locError("中心点模式");
@@ -6675,8 +6718,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             query_poi_imgbt.setVisibility(View.VISIBLE);
         }
         MessureChanged = false;
-        isDrawType = EnumClass.NONE_DRAW_TYPE;
-        isMessureType = EnumClass.MESSURE_NONE_TYPE;
+        isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+        isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
     }
 
     private void registerSensor() {
@@ -6798,7 +6841,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     @Override
     protected void onResume() {
         super.onResume();
-        if (FILE_TYPE == EnumClass.FILE_FILE_TYPE) {
+        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             receiveQueryForMap();
             getScreenParameter();
             resumeVariableAndSurface();
@@ -6809,7 +6852,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     @Override
     protected void onPause() {
-        if (FILE_TYPE == EnumClass.FILE_FILE_TYPE) {
+        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             sensorManager.unregisterListener(listener);
         }
         super.onPause();
@@ -6817,13 +6860,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     @Override
     protected void onDestroy() {
-        if (FILE_TYPE == EnumClass.FILE_FILE_TYPE) {
+        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             try {
                 locationManager.removeUpdates(locationListener);
             } catch (SecurityException e) {
             }
         }
-        /*if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE){
+        /*if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE){
             popBackWindow("Destroy");
         }else super.onDestroy();*/
         super.onDestroy();
@@ -6836,23 +6879,23 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (FILE_TYPE == EnumClass.FILE_FILE_TYPE) {
+        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             switch (isDrawTrail) {
-                case EnumClass.TRAIL_DRAW_TYPE:
+                case TRAIL_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
                     menu.findItem(R.id.back).setVisible(false);
                     menu.findItem(R.id.queryPOI).setVisible(true);
                     menu.findItem(R.id.action_search).setVisible(false);
                     //menu.findItem(R.id.queryLatLng).setVisible(false);
                     break;
-                case EnumClass.NONE_DRAW_TYPE:
+                case NONE_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
                     menu.findItem(R.id.back).setVisible(true);
                     menu.findItem(R.id.queryPOI).setVisible(true);
                     menu.findItem(R.id.action_search).setVisible(false);
                     menu.findItem(R.id.queryLatLng).setVisible(true);
                     break;
-                case EnumClass.SEARCH_DEMO:
+                case SEARCH_DEMO:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
                     menu.findItem(R.id.back).setVisible(true);
                     menu.findItem(R.id.queryPOI).setVisible(false);
@@ -6866,17 +6909,17 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         dialog.setPositiveButton("生态保护红线查询", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                queryMode = EnumClass.RED_LINE_QUERY;
+                                queryMode = TuzhiEnum.RED_LINE_QUERY;
                             }
                         });
                         dialog.setNegativeButton("简单查询", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                queryMode = EnumClass.POI_QUERY;
+                                queryMode = TuzhiEnum.POI_QUERY;
                             }
                         });
                         dialog.show();
-                    } else queryMode = EnumClass.POI_QUERY;
+                    } else queryMode = TuzhiEnum.POI_QUERY;
                     SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                     searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
                     // Assumes current activity is the searchable activity
@@ -6886,7 +6929,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                         @Override
                         public boolean onQueryTextSubmit(String query) {
-                            if (queryMode == EnumClass.RED_LINE_QUERY) {
+                            if (queryMode == TuzhiEnum.RED_LINE_QUERY) {
                                 try {
                                     String[] str = query.split(";");
                                     if (!str[0].contains("°")) {
@@ -6969,9 +7012,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.back:
-                if (isDrawTrail != EnumClass.SEARCH_DEMO) this.finish();
+                if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
                 else {
-                    isDrawTrail = EnumClass.NONE_DRAW_TYPE;
+                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                     invalidateOptionsMenu();
                 }
                 break;
@@ -6981,7 +7024,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 startActivity(intent);*/
                 break;
             case R.id.queryLatLng:
-                isDrawTrail = EnumClass.SEARCH_DEMO;
+                isDrawTrail = TuzhiEnum.SEARCH_DEMO;
                 invalidateOptionsMenu();
                 break;
             case R.id.queryPOI:
@@ -7163,7 +7206,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
-        if (isDrawTrail == EnumClass.TRAIL_DRAW_TYPE) {
+        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
             popBackWindow("Back");
         } else super.onBackPressed();
     }
