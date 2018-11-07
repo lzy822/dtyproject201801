@@ -167,7 +167,7 @@ public class DataUtil {
         boolean isDrift = false;
         String[] LPTSStrings = LPTS.split(" ");
         //locError(Integer.toString(LPTSStrings.length));
-        for (int i = 0; i < LPTSStrings.length; i++){
+        for (int i = 0; i < LPTSStrings.length; ++i){
             //locError(LPTSStrings[i]);
             if (Float.valueOf(LPTSStrings[i]) != 0 && Float.valueOf(LPTSStrings[i]) != 1){
                 isDrift = true;
@@ -186,11 +186,11 @@ public class DataUtil {
         float[] MediaBoxs = new float[MediaBoxString.length];
         float[] BBoxs = new float[BBoxString.length];
         float[] GPTSs = new float[GPTSString.length];
-        for (int i = 0; i < MediaBoxString.length; i++) {
+        for (int i = 0; i < MediaBoxString.length; ++i) {
             MediaBoxs[i] = Float.valueOf(MediaBoxString[i]);
             //locError("MediaBoxs : " + MediaBoxs[i]);
         }
-        for (int i = 0; i < BBoxString.length; i++) {
+        for (int i = 0; i < BBoxString.length; ++i) {
             BBoxs[i] = Float.valueOf(BBoxString[i]);
             //locError("BBoxs : " + Float.toString(BBoxs[i]));
         }
@@ -207,7 +207,7 @@ public class DataUtil {
             BBoxs[3] = del;
         }
         //
-        for (int i = 0; i < GPTSString.length; i++) {
+        for (int i = 0; i < GPTSString.length; ++i) {
             GPTSs[i] = Float.valueOf(GPTSString[i]);
         }
 
@@ -280,10 +280,10 @@ public class DataUtil {
             //将String 数组转换为 Float 数组
             float[] GPTSs = new float[GPTSStrings.length];
             float[] LPTSs = new float[LPTSStrings.length];
-            for (int i = 0; i < LPTSStrings.length; i++) {
+            for (int i = 0; i < LPTSStrings.length; ++i) {
                 LPTSs[i] = Float.valueOf(LPTSStrings[i]);
             }
-            for (int i = 0; i < GPTSStrings.length; i++) {
+            for (int i = 0; i < GPTSStrings.length; ++i) {
                 GPTSs[i] = Float.valueOf(GPTSStrings[i]);
             }
             //
@@ -317,7 +317,7 @@ public class DataUtil {
             //
             //构建LPTS 矩形
             //预处理LPTS
-            for (int i = 0; i < LPTSs.length; i++){
+            for (int i = 0; i < LPTSs.length; ++i){
                 LPTSs[i] = Float.valueOf(df.format(LPTSs[i]));
             }
             //
@@ -387,7 +387,7 @@ public class DataUtil {
             String configPath = uri.toString();
             configPath = URLDecoder.decode(configPath, "utf-8");
             str = configPath;
-            for (int i = 1; i <= num; i++){
+            for (int i = 1; i <= num; ++i){
                 str = str.substring(str.indexOf("/") + 1);
             }
             str = str.substring(0, str.length() - 3);
@@ -483,7 +483,7 @@ public class DataUtil {
     public static double[] getGPTS(String GPTS) {
         String[] GPTString = GPTS.split(" ");
         float[] GPTSs = new float[GPTString.length];
-        for (int i = 0; i < GPTString.length; i++) {
+        for (int i = 0; i < GPTString.length; ++i) {
             GPTSs[i] = Float.valueOf(GPTString[i]);
         }
         float lat_axis, long_axis;
@@ -666,7 +666,7 @@ public class DataUtil {
 
     public static boolean PtInPolygon(LatLng point, List<LatLng> APoints) {
         int nCross = 0;
-        for (int i = 0; i < APoints.size(); i++)   {
+        for (int i = 0; i < APoints.size(); ++i)   {
             LatLng p1 = APoints.get(i);
             LatLng p2 = APoints.get((i + 1) % APoints.size());
             // 求解 y=p.y 与 p1p2 的交点
@@ -740,7 +740,7 @@ public class DataUtil {
                             kmltest kmltest = new kmltest();
                             DMBZ dmbz = new DMBZ();
                             int size = keyAndValues.size();
-                            for (int i = 0; i < size; i++){
+                            for (int i = 0; i < size; ++i){
                                 if (keyAndValues.get(i).getKey().equals("序号")) {
                                     kmltest.setXh(keyAndValues.get(i).getValue());
                                     dmbz.setXH(keyAndValues.get(i).getValue());
@@ -828,7 +828,7 @@ public class DataUtil {
                                 zps[4] = str.substring(0, str.indexOf(".jpg") + 4);
                             }*/
                             String str = kmltest.getZp();
-                            for (int kk = 0; kk < jpgTime; kk++){
+                            for (int kk = 0; kk < jpgTime; ++kk){
                                 zps[kk] = str.substring(0, str.indexOf(".jpg") + 4);
                                 if (kk != jpgTime - 1) str = str.substring(0, str.indexOf(".jpg") + 5);
                             }
@@ -932,7 +932,7 @@ public class DataUtil {
 
                             DMBZ dmbz = new DMBZ();
                             int size = keyAndValues.size();
-                            for (int i = 0; i < size; i++){
+                            for (int i = 0; i < size; ++i){
                                 if (keyAndValues.get(i).getKey().equals("序号")) {
                                     dmbz.setXH(keyAndValues.get(i).getValue());
                                 }
@@ -1042,7 +1042,7 @@ public class DataUtil {
 
                             DMPoint d = new DMPoint();
                             int size = keyAndValues.size();
-                            for (int i = 0; i < size; i++){
+                            for (int i = 0; i < size; ++i){
                                 if (keyAndValues.get(i).getKey().equals("FID")) {
                                     d.setXh(keyAndValues.get(i).getValue());
                                 }
@@ -1138,7 +1138,7 @@ public class DataUtil {
                         //重要信息入库
                         DMLine d = new DMLine();
                         int size = keyAndValues.size();
-                        for (int i = 0; i < size; i++){
+                        for (int i = 0; i < size; ++i){
                             if (keyAndValues.get(i).getKey().equals("FID")) {
                                 d.setXh(keyAndValues.get(i).getValue());
                             }
@@ -1186,7 +1186,7 @@ public class DataUtil {
                             if (coordinate != null) {
                                 multiLines.add(coordinate);
                                 String[] strings = coordinate.split(" ");
-                                for (int kk = 0; kk < strings.length; kk++){
+                                for (int kk = 0; kk < strings.length; ++kk){
                                     String[] strings1 = strings[kk].split(",");
                                         lat = Float.valueOf(strings1[1]);
                                         lng = Float.valueOf(strings1[0]);
@@ -1401,7 +1401,7 @@ public class DataUtil {
         StringBuffer sb = new StringBuffer();
         int size_POI = pois.size();
         makeKMLHead(sb, "POI");
-        for (int i = 0; i < size_POI; i++){
+        for (int i = 0; i < size_POI; ++i){
             sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
             sb.append("      ").append("<name>").append(pois.get(i).getPoic()).append("</name>").append("\n");
             sb.append("      ").append("<Snippet></Snippet>").append("\n");
@@ -1474,7 +1474,7 @@ public class DataUtil {
             sb.append("\n");
             List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
             String photoStr = "";
-            for (int j = 0; j < mphotos.size(); j++){
+            for (int j = 0; j < mphotos.size(); ++j){
                 if (j == 0){
                     photoStr = mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/"), mphotos.get(j).getPath().length());
                 }else photoStr = photoStr + "|" + mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/") + 1, mphotos.get(j).getPath().length());
@@ -1501,7 +1501,7 @@ public class DataUtil {
             sb.append("\n");
             List<MTAPE> mtapes = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
             String tapeStr = "";
-            for (int j = 0; j < mtapes.size(); j++){
+            for (int j = 0; j < mtapes.size(); ++j){
                 if (j == 0){
                     tapeStr = mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/"), mtapes.get(j).getPath().length());
                 }else tapeStr = tapeStr + "|" + mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
@@ -1571,7 +1571,7 @@ public class DataUtil {
         StringBuffer sb = new StringBuffer();
         int size_mtape = mtapes.size();
         makeKMLHead(sb, "MTAPE");
-        for (int i = 0; i < size_mtape; i++){
+        for (int i = 0; i < size_mtape; ++i){
             sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
             sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
             sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
@@ -1601,7 +1601,7 @@ public class DataUtil {
         StringBuffer sb = new StringBuffer();
         int size_mphoto = mphotos.size();
         makeKMLHead(sb, "MPHOTO");
-        for (int i = 0; i < size_mphoto; i++){
+        for (int i = 0; i < size_mphoto; ++i){
             sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
             sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
             sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
@@ -1631,7 +1631,7 @@ public class DataUtil {
         StringBuffer sb = new StringBuffer();
         int size_trail = trails.size();
         makeKMLHead(sb, "Trail");
-        for (int i = 0; i < size_trail; i++){
+        for (int i = 0; i < size_trail; ++i){
             sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
             sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
             sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
@@ -1660,7 +1660,7 @@ public class DataUtil {
         StringBuffer sb = new StringBuffer();
         int size_whiteBlanks = whiteBlanks.size();
         makeKMLHead(sb, "WhiteBlank");
-        for (int i = 0; i < size_whiteBlanks; i++){
+        for (int i = 0; i < size_whiteBlanks; ++i){
             sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
             sb.append("      ").append("<name>").append(whiteBlanks.get(i).getIc()).append("</name>").append("\n");
             sb.append("      ").append("<Snippet></Snippet>").append("\n");
@@ -1675,7 +1675,7 @@ public class DataUtil {
             String[] lines_str = whiteBlanks.get(i).getLines().split(" ");
             float[] lats = new float[lines_str.length / 2];
             float[] lngs = new float[lines_str.length / 2];
-            for (int k = 0; k < lines_str.length; k++){
+            for (int k = 0; k < lines_str.length; ++k){
                 if (k == 0 || (k % 2 == 0)) {
                     lats[k / 2] = Float.valueOf(lines_str[k]);
                 }
@@ -1684,7 +1684,7 @@ public class DataUtil {
                 }
             }
             StringBuffer str = new StringBuffer();
-            for (int k = 0; k < lngs.length; k++) {
+            for (int k = 0; k < lngs.length; ++k) {
                 str.append(" ").append(Float.toString(lngs[k])).append(",").append(Float.toString(lats[k])).append(",").append("0");
             }
             sb.append("          ").append("<coordinates>").append(str).append("</coordinates>").append("\n");
@@ -1768,12 +1768,12 @@ public class DataUtil {
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
             sb = makeTxtHead(sb);
-            for (int i = 0; i < size_POI; i++) {
+            for (int i = 0; i < size_POI; ++i) {
                 //属性表内容
                 sb.append(pois.get(i).getIc()).append(";").append(pois.get(i).getName()).append(";").append(pois.get(i).getPoic()).append(";");
                 List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
                 String photoStr = "";
-                for (int j = 0; j < mphotos.size(); j++) {
+                for (int j = 0; j < mphotos.size(); ++j) {
                     if (j == 0) {
                         photoStr = mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/") + 1, mphotos.get(j).getPath().length());
                     } else
@@ -1783,7 +1783,7 @@ public class DataUtil {
                 sb.append(photoStr).append(";");
                 List<MTAPE> mtapes = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
                 String tapeStr = "";
-                for (int j = 0; j < mtapes.size(); j++) {
+                for (int j = 0; j < mtapes.size(); ++j) {
                     if (j == 0) {
                         tapeStr = mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
                     } else
@@ -1805,7 +1805,7 @@ public class DataUtil {
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
             sb = makeTxtHeadDMP(sb);
-            for (int i = 0; i < size_POI; i++) {
+            for (int i = 0; i < size_POI; ++i) {
                 //属性表内容
                 sb.append(pois.get(i).getXH()).append(";").append(pois.get(i).getDY()).append(";").append(pois.get(i).getMC()).append(";").append(pois.get(i).getBZMC()).append(";").append(pois.get(i).getXZQMC()).append(";").append(pois.get(i).getXZQDM()).append(";").append(pois.get(i).getSZDW()).append(";").append(pois.get(i).getSCCJ()).append(";").append(pois.get(i).getGG()).append(";").append(pois.get(i).getIMGPATH()).append(";").append(pois.get(i).getLng()).append(";");
                 sb.append(pois.get(i).getLat()).append("\n");
@@ -1823,7 +1823,7 @@ public class DataUtil {
             StringBuffer sb = new StringBuffer();
             int size_POI = pois.size();
             sb = makeTxtHeadDMP(sb);
-            for (int i = 0; i < size_POI; i++) {
+            for (int i = 0; i < size_POI; ++i) {
                 //属性表内容
                 sb.append(pois.get(i).getXh()).append(";").append(pois.get(i).getQydm()).append(";").append(pois.get(i).getLbdm()).append(";").append(pois.get(i).getBzmc()).append(";").append(pois.get(i).getCym()).append(";").append(pois.get(i).getJc()).append(";").append(pois.get(i).getBm()).append(";").append(pois.get(i).getDfyz()).append(";").append(pois.get(i).getZt()).append(";").append(pois.get(i).getDmll()).append(";").append(pois.get(i).getDmhy()).append(";").append(pois.get(i).getLsyg()).append(";").append(pois.get(i).getDlstms()).append(";").append(pois.get(i).getZlly()).append(";").append(pois.get(i).getLat()).append(";").append(pois.get(i).getLng()).append(";").append(pois.get(i).getTapepath());
                 sb.append(pois.get(i).getImgpath()).append("\n");
@@ -1884,8 +1884,8 @@ public class DataUtil {
 
     public static String[] bubbleSort(String[] arr) {
         int len = arr.length;
-        for (int i = 0; i < len - 1; i++) {
-            for (int j = 0; j < len - 1 - i; j++) {
+        for (int i = 0; i < len - 1; ++i) {
+            for (int j = 0; j < len - 1 - i; ++j) {
                 if (arr[j].toUpperCase().charAt(0) > arr[j + 1].toUpperCase().charAt(0)) {        // 相邻元素两两对比
                     String temp = arr[j+1];        // 元素交换
                     arr[j+1] = arr[j];
@@ -1951,11 +1951,11 @@ public class DataUtil {
         String DiMingId = null;
         String MapId = null;
         long num = 0;
-        for (int i = 0; i < size; i++){
+        for (int i = 0; i < size; ++i){
             if (strings[i].contains("{")) {
                 strings[i] = strings[i].substring(strings[i].indexOf("{") + 1);
                 str0s = strings[i].split(",");
-                for (int j = 0; j < str0s.length; j++){
+                for (int j = 0; j < str0s.length; ++j){
                     str1s = str0s[j].split("\\:");
                     //Log.w(TAG, "getDMLJGX: " + str1s.length);
                     if (str1s.length == 2) {
@@ -2019,11 +2019,11 @@ public class DataUtil {
         String id = null;
         String[] strings = str.split("\\}");
         int size = strings.length;
-        for (int i = 0; i < size; i++){
+        for (int i = 0; i < size; ++i){
             if (strings[i].contains("{")) {
                 strings[i] = strings[i].substring(strings[i].indexOf("{") + 1);
                 String[] strings1 = strings[i].split(",");
-                for (int j = 0; j < strings1.length; j++){
+                for (int j = 0; j < strings1.length; ++j){
                     String[] strings2 = strings1[j].split("\\:");
                     if (strings2.length == 2){
                         if (strings2[0].contains("BieMing")) bm = strings2[1].replace("\"", "");
@@ -2092,7 +2092,7 @@ public class DataUtil {
 
     public static void getSpatialIndex(){
         List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
-        for (int i = 0; i < lines_whiteBlanks.size(); i++) {
+        for (int i = 0; i < lines_whiteBlanks.size(); ++i) {
             Log.w(TAG, "getSpatialIndex1: " + lines_whiteBlanks.get(i).getLines());
             float[] spatialIndex = getSpatialIndex(lines_whiteBlanks.get(i).getLines());
             Lines_WhiteBlank l = new Lines_WhiteBlank();
@@ -2103,7 +2103,7 @@ public class DataUtil {
             l.updateAll("mmid = ?", Integer.toString(lines_whiteBlanks.get(i).getMmid()));
         }
         List<Trail> trails = LitePal.findAll(Trail.class);
-        for (int i = 0; i < trails.size(); i++) {
+        for (int i = 0; i < trails.size(); ++i) {
             Log.w(TAG, "getSpatialIndex2: " + trails.get(i).getPath());
             float[] spatialIndex = getSpatialIndex(trails.get(i).getPath());
             Trail l = new Trail();

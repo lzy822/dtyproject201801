@@ -189,7 +189,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private void parseSelectedpos(){
         if (mselectedpos.contains(" ")){
             String[] nums = mselectedpos.split(" ");
-            for (int i = 0; i < nums.length; i++){
+            for (int i = 0; i < nums.length; ++i){
                 deleteData(Integer.valueOf(nums[i]));
             }
         }else {
@@ -278,14 +278,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
         map_tests[num_pdf - 1] = mapTest;
         map_testList.clear();
-        for (int i = 0; i < num_pdf; i++) {
+        for (int i = 0; i < num_pdf; ++i) {
             map_testList.add(map_tests[i]);
         }
     }
 
     public void initMap() {
         map_testList.clear();
-        for (int j = 1; j <= num_pdf; j++) {
+        for (int j = 1; j <= num_pdf; ++j) {
             //locError(Integer.toString(j));
             SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
             String str = "n_" + j + "_";
@@ -479,7 +479,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     public void deleteData(int selectedNum){
         map_testList.clear();
         boolean deleted = false;
-        for (int j = 1; j <= num_pdf; j++) {
+        for (int j = 1; j <= num_pdf; ++j) {
             if (j != selectedNum){
             locError(Integer.toString(j));
             SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
@@ -520,7 +520,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         editor.apply();
         SharedPreferences.Editor editor1 = getSharedPreferences("data", MODE_PRIVATE).edit();
         editor1.clear().commit();
-        for (int j = 1; j <= num_pdf; j++) {
+        for (int j = 1; j <= num_pdf; ++j) {
             String str = "n_" + Integer.toString(j) + "_";
             editor1.putInt(str + "num", j);
             editor1.putString(str + "name", map_tests[j - 1].getM_name());
@@ -658,7 +658,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         int size = pref1.getInt("num", num_pdf);
         SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
         boolean isSameName = false;
-        for (int i = 1; i <= size; i++){
+        for (int i = 1; i <= size; ++i){
             String str = "n_" + Integer.toString(i) + "_";
             if (pref2.getString(str + "name", "").equals(name)) {
                 isSameName = true;
@@ -1109,7 +1109,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                     File[] ffs = ff.listFiles();
                                     int size1 = ffs.length;
-                                    for (int i = 0; i < size1; i++){
+                                    for (int i = 0; i < size1; ++i){
                                         if (ffs[i].toString().contains(".dtdb")){
                                             addToDataBase(ffs[i].toString());
                                             locError(ffs[i].toString());
@@ -1179,7 +1179,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                     File[] ffs = ff.listFiles();
                                     int size1 = ffs.length;
-                                    for (int i = 0; i < size1; i++){
+                                    for (int i = 0; i < size1; ++i){
                                         if (ffs[i].toString().contains(".dtdb")){
                                             addToDataBase(ffs[i].toString());
                                             locError(ffs[i].toString());
@@ -1267,7 +1267,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 }
                                 File[] ffs = ff.listFiles();
                                 int size1 = ffs.length;
-                                for (int i = 0; i < size1; i++){
+                                for (int i = 0; i < size1; ++i){
                                     if (ffs[i].toString().contains(".dtdb")){
                                         Log.e(TAG, "the cup of life: ");
                                         addToDataBase(ffs[i].toString());
@@ -1542,6 +1542,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private void doSpecificOperation(){
+        Log.w(TAG, "doSpecificOperation: " + 2.0e-6 * 100000000.1);
         //DataUtil.getSpatialIndex();
         //LitePal.deleteAll(Trail.class);
         //Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
@@ -1564,7 +1565,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         list.add(point7);
         Douglas douglas = new Douglas(list);
         List<Point> points = douglas.douglasPeucker();
-        for (int i = 0; i < points.size(); i++) {
+        for (int i = 0; i < points.size(); ++i) {
             Log.w(TAG, "(" + points.get(i).getX() + ","
                     + points.get(i).getY() + ")");
         }*/
@@ -1610,7 +1611,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (file.isDirectory() && file.list().length > 0) {
             if (iconDatasets1.size() == 0) {
                 File[] subFiles = file.listFiles();
-                for (int i = 0; i < subFiles.length; i++) {
+                for (int i = 0; i < subFiles.length; ++i) {
                     String name = subFiles[i].getName();
                     IconDataset iconDataset = new IconDataset();
                     iconDataset.setName(name.substring(0, name.lastIndexOf(".")));
@@ -1618,13 +1619,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     iconDataset.save();
                 }
                 List<IconDataset> iconDatasets = LitePal.findAll(IconDataset.class);
-                /*for (int i = 0; i < iconDatasets.size(); i++) {
+                /*for (int i = 0; i < iconDatasets.size(); ++i) {
                     Log.w(TAG, "addIconDataset: " + iconDatasets.get(i).getName());
                 }*/
                 return iconDatasets;
             }else {
                 File[] subFiles = file.listFiles();
-                for (int i = 0; i < subFiles.length; i++) {
+                for (int i = 0; i < subFiles.length; ++i) {
                     String name = subFiles[i].getName();
                     if (LitePal.where("name = ?", name).find(IconDataset.class).size() == 0) {
                         IconDataset iconDataset = new IconDataset();
@@ -1645,7 +1646,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void run() {
                 IconBitmaps = new ArrayList<>();
-                for (int i = 0; i < iconDatasets.size(); i++){
+                for (int i = 0; i < iconDatasets.size(); ++i){
                     String path = iconDatasets.get(i).getPath();
                     Bitmap bitmap = DataUtil.getImageThumbnail(path, 80, 80);
                     IconBitmaps.add(new bt(bitmap, path));
@@ -1708,13 +1709,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         List<POI> pois = LitePal.findAll(POI.class);
                         List<String> types = new ArrayList<>();
                         Log.w(TAG, "runlzy: " + pois.size());
-                        for (int i = 0; i < pois.size(); i++){
+                        for (int i = 0; i < pois.size(); ++i){
                             String temp = pois.get(i).getType();
                             Log.w(TAG, "runlzy: " + temp);
                             if (temp != null) {
                                 if (!temp.isEmpty()) {
                                     if (types.size() > 0) {
-                                        for (int j = 0; j < types.size(); j++) {
+                                        for (int j = 0; j < types.size(); ++j) {
                                             if (temp.equals(types.get(j))) break;
                                             else {
                                                 if (j == types.size() - 1) types.add(temp);
@@ -1728,7 +1729,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         DataUtil.makeKML();
                         Log.w(TAG, "runlzy: " + types.size());
                         if (types.size() > 0) {
-                            for (int i = 0; i < types.size(); i++) {
+                            for (int i = 0; i < types.size(); ++i) {
                                 DataUtil.makeTxt(types.get(i));
                             }
                         }else DataUtil.makeTxt("");
@@ -1738,7 +1739,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         StringBuffer sb = new StringBuffer();
                         int size_POI = pois.size();
                         sb = sb.append("<POI>").append("\n");
-                        for (int i = 0; i < size_POI; i++){
+                        for (int i = 0; i < size_POI; ++i){
                             sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
                             sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
                             sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
@@ -1755,7 +1756,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         List<Trail> trails = LitePal.findAll(Trail.class);
                         int size_trail = trails.size();
                         sb = sb.append("<Trail>").append("\n");
-                        for (int i = 0; i < size_trail; i++){
+                        for (int i = 0; i < size_trail; ++i){
                             sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
                             sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
                             sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
@@ -1767,7 +1768,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
                         int size_mphoto = mphotos.size();
                         sb = sb.append("<MPHOTO>").append("\n");
-                        for (int i = 0; i < size_mphoto; i++){
+                        for (int i = 0; i < size_mphoto; ++i){
                             sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
                             sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
                             sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
@@ -1780,7 +1781,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
                         int size_mtape = mtapes.size();
                         sb = sb.append("<MTAPE>").append("\n");
-                        for (int i = 0; i < size_mtape; i++){
+                        for (int i = 0; i < size_mtape; ++i){
                             sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
                             sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
                             sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
@@ -1793,7 +1794,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
                         int size_lines_whiteBlank = lines_whiteBlanks.size();
                         sb = sb.append("<Lines_WhiteBlank>").append("\n");
-                        for (int i = 0; i < size_lines_whiteBlank; i++){
+                        for (int i = 0; i < size_lines_whiteBlank; ++i){
                             sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
                             sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
                             sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
@@ -1827,11 +1828,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             zipOut.setComment("test");
                             int size = files.size();
                             Log.w(TAG, "run: " + size);
-                            for (int i = 0; i < size; i++){
+                            for (int i = 0; i < size; ++i){
                                 Log.w(TAG, "run: " + i);
                                 Log.w(TAG, "run: " + files.get(i).getPath());
                                 boolean isOK = false;
-                                for (int k = 0; k < i; k++) {
+                                for (int k = 0; k < i; ++k) {
                                     if (files.get(i).getPath().equals(files.get(k).getPath())) break;
                                     if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
                                 }
