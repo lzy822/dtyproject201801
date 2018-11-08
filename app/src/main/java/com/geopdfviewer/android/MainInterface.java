@@ -618,7 +618,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         return dmbz.getXH();
     }
 
-    public String queryNormalPoi(final MotionEvent e) {
+    public String queryNormalPoi(final PointF pt1) {
         List<mPOIobj> pois = new ArrayList<>();
         Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
         if (cursor.moveToFirst()) {
@@ -645,7 +645,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             pointF1 = LatLng.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             pointF1 = new PointF(pointF1.x, pointF1.y - 70);
             //pointF = getGeoLocFromPixL(pointF);
-            final PointF pt9 = LatLng.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            final PointF pt9 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             locError("pt1 : " + pt9.toString());
             float mdelta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
             for (mPOIobj poi : pois) {
@@ -676,7 +676,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private long QueriedIconPoiNum = -1;
 
-    public long queryIconPoi(final MotionEvent e) {
+    public long queryIconPoi(final PointF pt1) {
         int n = 0;
         int num = 0;
         List<MPOI> pois = LitePal.findAll(MPOI.class);
@@ -685,7 +685,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             PointF pointF1 = new PointF(poii.getLat(), poii.getLng());
             pointF1 = LatLng.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             //pointF = getGeoLocFromPixL(pointF);
-            final PointF pt9 = LatLng.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            final PointF pt9 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             locError("pt1 : " + pt9.toString());
             float mdelta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
             for (MPOI poi : pois) {
@@ -835,7 +835,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE) {
                 // TODO : 编辑添加线要素添加逻辑
                 whiteBlank_fab.setVisibility(View.GONE);
-                PointF ptf = getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY()));
+                PointF ptf = pt1;
                 Log.w(TAG, "onTaplzylzylzy: " + centerPointLoc.x);
                 if (drawLineFeature.isEmpty()) {
                     if (showMode == TuzhiEnum.CENTERMODE) {
@@ -1019,7 +1019,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         pointF = new PointF(pointF.x, pointF.y - 70);
                         //pointF = getGeoLocFromPixL(pointF);
-                        PointF pt8 = LatLng.getPixLocFromGeoL(getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY())), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         locError("pt1special : " + pt8.toString());
                         float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
                         for (DMBZ poi : dmbzList) {
@@ -1051,12 +1051,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
 
                 if (esterEgg_dm && !isQueried) {
-                    PointF dmPt = getGeoLocFromPixL(new PointF(e.getRawX(), e.getRawY()));
+                    PointF dmPt = pt1;
                     isQueried = queryDM(dmPt);
                 }
 
                 if (!isQueried) {
-                    String poic = queryNormalPoi(e);
+                    String poic = queryNormalPoi(pt1);
                     if (!poic.isEmpty()) {
                         GoNormalSinglePOIPage(poic);
                         isQueried = true;
@@ -1064,7 +1064,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
                 if (!isQueried && QueriedIconPoiNum == -1) {
                     Log.w(TAG, "IconQuery: ");
-                    QueriedIconPoiNum = queryIconPoi(e);
+                    QueriedIconPoiNum = queryIconPoi(pt1);
                     if (QueriedIconPoiNum != -1)
                         isQueried = true;
                 }
@@ -4368,29 +4368,31 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private PointF getGeoLocFromPixL(final PointF pt) {
         //textView = (TextView) findViewById(R.id.txt);
         //精确定位算法
+        PointF mpt;
         float xxxx, yyyy;
         if (current_pageheight < viewer_height || current_pagewidth < viewer_width) {
             xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
             yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
             if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
-                pt.x = (float) (max_lat - (yyyy) / current_pageheight * (max_lat - min_lat));
-                pt.y = (float) ((xxxx) / current_pagewidth * (max_long - min_long) + min_long);
-                locLatForTap = pt.x;
-                locLongForTap = pt.y;
+                mpt = new PointF();
+                mpt.x = (float) (max_lat - (yyyy) / current_pageheight * (max_lat - min_lat));
+                mpt.y = (float) ((xxxx) / current_pagewidth * (max_long - min_long) + min_long);
+                locLatForTap = mpt.x;
+                locLongForTap = mpt.y;
             } else {
-                pt.x = 0;
-                pt.y = 0;
+                mpt = new PointF(0, 0);
             }
         } else {
             xxxx = pt.x - (screen_width - viewer_width);
             yyyy = pt.y - (screen_height - viewer_height);
             Log.w(TAG, "getGeoLocFromPixL: " + screen_height + ";" + viewer_height);
-            pt.x = (float) (max_lat - (yyyy - pdfView.getCurrentYOffset()) / current_pageheight * (max_lat - min_lat));
-            pt.y = (float) ((xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * (max_long - min_long) + min_long);
-            locLatForTap = pt.x;
-            locLongForTap = pt.y;
+            mpt = new PointF();
+            mpt.x = (float) (max_lat - (yyyy - pdfView.getCurrentYOffset()) / current_pageheight * (max_lat - min_lat));
+            mpt.y = (float) ((xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * (max_long - min_long) + min_long);
+            locLatForTap = mpt.x;
+            locLongForTap = mpt.y;
         }
-        return pt;
+        return mpt;
         //
     }
 
