@@ -726,9 +726,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     @Override
     public boolean onTap(final MotionEvent e) {
         PointF pt = new PointF(e.getRawX(), e.getRawY());
+        //获取像素点的地理位置信息
         final PointF pt1 = getGeoLocFromPixL(pt);
+        //在textview中显示地理位置信息
         showLocationText(pt1);
+
         if (pt1.x != 0) {
+
             if (isDrawType == TuzhiEnum.POI_DRAW_TYPE && !isQuery) {
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(MainInterface.this);
                 builder1.setTitle("提示");
@@ -752,6 +756,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             public void onClick(DialogInterface dialog, int which) {
                                 CreatePOI = true;
                                 POIType = 0;
+                                // TODO LM
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                                 }
@@ -765,6 +770,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             public void onClick(DialogInterface dialog, int which) {
                                 CreatePOI = true;
                                 POIType = 1;
+
+                                // TODO LM
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                                 } else {
@@ -780,6 +787,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             public void onClick(DialogInterface dialog, int which) {
                                 CreatePOI = true;
                                 POIType = 2;
+                                // TODO LM
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                                 }
@@ -974,6 +982,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             boolean isQueried = false;
             if (isQuery && isDrawType == TuzhiEnum.NONE_DRAW_TYPE) {
                 Log.w(TAG, "onTapspecial : ");
+                // TODO PLQ
                 if (esterEgg_plq) {
                     int n = 0;
                     int num = 0;
@@ -1010,6 +1019,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             //locError(Integer.toString(kmltests.get(num).getPhotonum()));
                         } else locError("没有正常查询");
                     }
+                    // TODO LM
                 } else if (esterEgg_lm) {
                     int n = 0;
                     int num = 0;
@@ -1050,6 +1060,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     }
                 }
 
+                // TODO DM
                 if (esterEgg_dm && !isQueried) {
                     PointF dmPt = pt1;
                     isQueried = queryDM(dmPt);
@@ -1585,7 +1596,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         Log.w(TAG, "zoomCenteredTo: " + current_pageheight + "; " + current_pagewidth);
         current_pageheight = pageHeight;
         current_pagewidth = pageWidth;
-        Log.w(TAG, "zoomCenteredTo: " + current_pageheight + "; " + current_pagewidth);
         viewer_height = pdfView.getHeight();
         viewer_width = pdfView.getWidth();
 
@@ -1641,9 +1651,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         //Log.w(TAG, "onLayerDrawn!!!: " + dmPoints.size());
         //Log.w(TAG, "onLayerDrawn!!!: " + type1Checked);
-        if (esterEgg_dm && type1Checked) {
-            drawDM(canvas);
-        }
+
+
 
         /*if (isMessure && showMode == TuzhiEnum.CENTERMODE) {
             String messure_pts1 = messure_pts;
@@ -1758,13 +1767,22 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             parseAndrawLinesforWhiteBlank(canvas);
             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
         }
+        // TODO REDLINE
         if (showMode == TuzhiEnum.CENTERMODE && esterEgg_redline) {
             managePatchsData();
             drawDemoArea(canvas);
         }
         if (isDrawType == TuzhiEnum.POI_DRAW_TYPE || showPOI) {
+
+            // TODO DM
+            if (esterEgg_dm && type1Checked) {
+                drawDM(canvas);
+            }
+            // TODO PLQ
             if (esterEgg_plq) drawPLQData(canvas);
             //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
+
+            // TODO LM
             if (type2Checked && esterEgg_lm) {
                 drawDMBZ(canvas);
             }
@@ -3672,6 +3690,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         intent.putExtra("POIC", poic);
         startActivity(intent);*/
         Log.w(TAG, "updateMapPage: ");
+        // TODO LM
         if (!esterEgg_lm) GoNormalSinglePOIPage(poic);
     }
 
@@ -4058,66 +4077,78 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void controlSpecificFunction(String query) {
-        if (query.equals("kqbz")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_plq", true);
-            editor.apply();
-            esterEgg_plq = true;
-            getEsterEgg_plq();
-            pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
-        } else if (query.equals("gbbz")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_plq", false);
-            editor.apply();
-            esterEgg_plq = false;
-            pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
-        } else if (query.equals("kqhx")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_redline", true);
-            editor.apply();
-            esterEgg_redline = true;
-            getEsterEgg_redline();
-            pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
-        } else if (query.equals("gbhx")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_redline", false);
-            editor.apply();
-            esterEgg_redline = false;
-            pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
-        } else if (query.equals("kqlm")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_lm", true);
-            editor.apply();
-            esterEgg_lm = true;
-            dmbzList = LitePal.findAll(DMBZ.class);
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
-        } else if (query.equals("gblm")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_lm", false);
-            editor.apply();
-            esterEgg_lm = false;
-            dmbzList.clear();
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
-        } else if (query.equals("kqdm")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_dm", true);
-            editor.apply();
-            esterEgg_dm = true;
-            getEsterEgg_dm();
-            pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
-        } else if (query.equals("gbdm")) {
-            SharedPreferences.Editor editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
-            editor.putBoolean("open_dm", false);
-            editor.apply();
-            esterEgg_dm = false;
-            pdfView.zoomWithAnimation(c_zoom);
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
+        // TODO EASTER
+        SharedPreferences.Editor editor;
+        switch (query){
+            case "kqbz":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_plq", true);
+                editor.apply();
+                esterEgg_plq = true;
+                getEsterEgg_plq();
+                pdfView.zoomWithAnimation(c_zoom);
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
+                break;
+            case "gbbz":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_plq", false);
+                editor.apply();
+                esterEgg_plq = false;
+                pdfView.zoomWithAnimation(c_zoom);
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
+                break;
+            case "kqhx":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_redline", true);
+                editor.apply();
+                esterEgg_redline = true;
+                getEsterEgg_redline();
+                pdfView.zoomWithAnimation(c_zoom);
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
+                break;
+            case "gbhx":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_redline", false);
+                editor.apply();
+                esterEgg_redline = false;
+                pdfView.zoomWithAnimation(c_zoom);
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
+                break;
+            case "kqlm":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_lm", true);
+                editor.apply();
+                esterEgg_lm = true;
+                dmbzList = LitePal.findAll(DMBZ.class);
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
+                break;
+            case "gblm":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_lm", false);
+                editor.apply();
+                esterEgg_lm = false;
+                dmbzList.clear();
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
+                break;
+            case "kqdm":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_dm", true);
+                editor.apply();
+                esterEgg_dm = true;
+                getEsterEgg_dm();
+                pdfView.zoomWithAnimation(c_zoom);
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggOpenInfo), Toast.LENGTH_LONG).show();
+                break;
+            case "gbdm":
+                editor = getSharedPreferences("easter_egg", MODE_PRIVATE).edit();
+                editor.putBoolean("open_dm", false);
+                editor.apply();
+                esterEgg_dm = false;
+                pdfView.zoomWithAnimation(c_zoom);
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.EasterEggCloseInfo), Toast.LENGTH_LONG).show();
+                break;
         }
+
     }
 
     public void showListPopupWindow(View view, String query) {
@@ -4846,6 +4877,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             type1_checkbox.setChecked(true);
                             type2_checkbox.setChecked(true);
                             type3_checkbox.setChecked(true);
+                            showPOI = true;
                         }
                     } catch (Exception e) {
                         Log.w(TAG, e.toString());
@@ -4855,6 +4887,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         type1_checkbox.setChecked(false);
                         type2_checkbox.setChecked(false);
                         type3_checkbox.setChecked(false);
+                        showPOI = false;
                     } catch (Exception e) {
                         Log.w(TAG, e.toString());
                     }
@@ -4869,12 +4902,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     if (isChecked) {
                         type1Checked = true;
                         poiLayerBt.setChecked(true);
+                        showPOI = true;
                     } else {
                         type1Checked = false;
-                        if (!type1Checked && !type2Checked && !type3Checked)
+                        if (!type1Checked && !type2Checked && !type3Checked) {
                             poiLayerBt.setChecked(false);
+                            showPOI = false;
+                        }
                     }
-                    showPOI = true;
                     pdfView.zoomWithAnimation(c_zoom);
                 } catch (Exception e) {
                     Log.w(TAG, e.toString());
@@ -4889,12 +4924,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     if (isChecked) {
                         type2Checked = true;
                         poiLayerBt.setChecked(true);
+                        showPOI = true;
                     } else {
                         type2Checked = false;
-                        if (!type1Checked && !type2Checked && !type3Checked)
+                        if (!type1Checked && !type2Checked && !type3Checked){
                             poiLayerBt.setChecked(false);
+                            showPOI = false;
+                        }
                     }
-                    showPOI = true;
                     pdfView.zoomWithAnimation(c_zoom);
                 } catch (Exception e) {
                     Log.w(TAG, e.toString());
@@ -4909,12 +4946,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     if (isChecked) {
                         type3Checked = true;
                         poiLayerBt.setChecked(true);
+                        showPOI = true;
                     } else {
                         type3Checked = false;
-                        if (!type1Checked && !type2Checked && !type3Checked)
+                        if (!type1Checked && !type2Checked && !type3Checked){
                             poiLayerBt.setChecked(false);
+                            showPOI = false;
+                        }
                     }
-                    showPOI = true;
                     pdfView.zoomWithAnimation(c_zoom);
                 } catch (Exception e) {
                     Log.w(TAG, e.toString());
@@ -5158,7 +5197,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
                         Log.w(TAG, "run: " + IconBitmaps.size());
                         iconBitmapNum = IconBitmaps.size();
                         //pdfView.zoomWithAnimation(c_zoom);
@@ -5193,7 +5232,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(MainInterface.this, "done", Toast.LENGTH_LONG).show();
                         Log.w(TAG, "run: " + IconBitmaps.size());
                         iconBitmapNum = IconBitmaps.size();
                         pdfView.zoomWithAnimation(c_zoom);
@@ -6917,6 +6956,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             try {
                 locationManager.removeUpdates(locationListener);
             } catch (SecurityException e) {
+                Log.w(TAG, e.toString());
             }
         }
         /*if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE){

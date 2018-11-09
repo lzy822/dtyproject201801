@@ -83,20 +83,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private static final String TAG = "select_page";
     private final static int REQUEST_CODE = 42;
     private final static int REQUEST_CODE_INPUT = 41;
-    public static final int PERMISSION_CODE = 42042;
     public static final int SAMPLE_TYPE = 1;
     public static final int URI_TYPE = 2;
     private final String DEF_DIR =  Environment.getExternalStorageDirectory().toString() + "/tencent/TIMfile_recv/";
-
-    public static final String SAMPLE_FILE = "dt/图志简介.dt";
-    public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
-    public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     public static final String LOC_DELETE_ITEM = "map_num";
     private Map_test[] map_tests = new Map_test[30];
     private List<Map_test> map_testList = new ArrayList<>();
-    private Map_testAdapter adapter;
-    private RecyclerView recyclerView;
-    private GridLayoutManager layoutManager;
 
     //记录地图文件添加过程
     private int add_current = 0, add_max = 0;
@@ -142,14 +134,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     //记录长按的position
     private String mselectedpos = "";
 
-    //添加地图按钮声明
-    com.github.clans.fab.FloatingActionButton addbt;
-    //导出数据按钮声明
-    com.github.clans.fab.FloatingActionButton outputbt;
-    //导入数据按钮声明
-    com.github.clans.fab.FloatingActionButton inputbt;
-    //fam菜单声明
-    FloatingActionMenu floatingActionsMenu;
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -183,7 +168,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         selectedNum = 0;
         isLongClick = 1;
         invalidateOptionsMenu();
-        floatingActionsMenu.setVisibility(View.VISIBLE);
+        setFAMVisible(true);
+    }
+
+    private void setFAMVisible(boolean visible){
+        //fam菜单声明
+        FloatingActionMenu floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
+        if (visible)
+            floatingActionsMenu.setVisibility(View.VISIBLE);
+        else
+            floatingActionsMenu.setVisibility(View.INVISIBLE);
     }
 
     private void parseSelectedpos(){
@@ -236,16 +230,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     void pickFile() {
         int permissionCheck = ContextCompat.checkSelfPermission(this,
-                READ_EXTERNAL_STORAGE);
+                EnumClass.READ_EXTERNAL_STORAGE);
         int permissionCheck1 = ContextCompat.checkSelfPermission(this,
-                WRITE_EXTERNAL_STORAGE);
+                EnumClass.WRITE_EXTERNAL_STORAGE);
 
         if (permissionCheck != PackageManager.PERMISSION_GRANTED || permissionCheck1 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                     this,
                     new String[]{
-                            READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
-                    PERMISSION_CODE
+                            EnumClass.READ_EXTERNAL_STORAGE, EnumClass.WRITE_EXTERNAL_STORAGE},
+                    EnumClass.PERMISSION_CODE
             );
 
             return;
@@ -314,16 +308,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     //重新刷新Recycler
     public void refreshRecycler(){
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        layoutManager = new GridLayoutManager(this,1);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new Map_testAdapter(map_testList);
+        Map_testAdapter adapter = new Map_testAdapter(map_testList);
         adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
             @Override
             public void onItemLongClick(View view, int map_num, int position) {
                 //Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
                 setTitle(select_page.this.getResources().getText(R.string.IsLongClicking));
-                floatingActionsMenu.setVisibility(View.INVISIBLE);
+                setFAMVisible(false);
                 locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
                 selectedNum = map_num;
                 selectedpos = position;
@@ -1665,11 +1659,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
+        //fam菜单声明
+        FloatingActionMenu floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
         floatingActionsMenu.setClosedOnTouchOutside(true);
         //locError("deviceId : " + getIMEI());
         //addMap_selectpage按钮事件编辑
-        addbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addMap_selectpage);
+
+        //添加地图按钮声明
+        com.github.clans.fab.FloatingActionButton addbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addMap_selectpage);
         addbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1680,7 +1677,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 startActivityForResult(intent, 17);
             }
         });
-        inputbt = (FloatingActionButton) findViewById(R.id.inputData_selectpage);
+        //导入数据按钮声明
+        com.github.clans.fab.FloatingActionButton inputbt = (FloatingActionButton) findViewById(R.id.inputData_selectpage);
         inputbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1699,7 +1697,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
         });
         //output_selectpage按钮事件编辑
-        outputbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.outputData_selectpage);
+
+        //导出数据按钮声明
+        com.github.clans.fab.FloatingActionButton outputbt = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.outputData_selectpage);
         outputbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1873,7 +1873,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }
                     }
                 }).start();
-                floatingActionsMenu.close(false);
+                setFAMVisible(false);
             }
         });
     }
@@ -1916,7 +1916,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void run() {
                 add_max ++;
-                manageGeoInfo("", SAMPLE_TYPE, "", DataUtil.findNamefromSample(SAMPLE_FILE), true);
+                manageGeoInfo("", SAMPLE_TYPE, "", DataUtil.findNamefromSample(EnumClass.SAMPLE_FILE), true);
                 LitePal.getDatabase();
                 Message message = new Message();
                 message.what = UPDATE_TEXT;
@@ -1947,7 +1947,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         String m_BBox = "", m_GPTS = "", m_MediaBox = "", m_CropBox = "", m_LPTS = "";
         try {
             if (Type == SAMPLE_TYPE){
-                in = getAssets().open(SAMPLE_FILE);
+                in = getAssets().open(EnumClass.SAMPLE_FILE);
             }
             else {
                 in = new FileInputStream(file);
