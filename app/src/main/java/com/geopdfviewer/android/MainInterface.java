@@ -773,7 +773,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
                                 // TODO LM
                                 if (!esterEgg_lm) {
-                                    GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
+                                    GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
                                 } else {
                                     GoDMBZSinglePOIPage(addDMBZPoi(pt1));
                                 }
@@ -789,7 +789,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 POIType = 2;
                                 // TODO LM
                                 if (!esterEgg_lm) {
-                                    GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
+                                    GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
                                 }
                                 pdfView.resetZoomWithAnimation();
                                 POIType = -1;
@@ -6792,9 +6792,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void resumeSurface() {
+        String title = toolbar.getTitle().toString();
         if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
-            toolbar.setTitle("正在记录轨迹");
-        } else toolbar.setTitle(pdfFileName);
+            toolbar.setTitle(title + "(正在记录轨迹)");
+        } else toolbar.setTitle(title);
+        if (isOpenWhiteBlank){
+
+        }else {
+
+        }
     }
 
     private void resumeVariable() {
@@ -6932,14 +6938,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     @Override
     protected void onResume() {
-        super.onResume();
         if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
+            Log.w(TAG, "onResume: isOK");
             receiveQueryForMap();
             getScreenParameter();
             resumeVariableAndSurface();
             getBitmap();
             registerSensor();
         }
+        super.onResume();
     }
 
     @Override
