@@ -228,7 +228,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         startActivity(intent);*/
     }
 
-    void pickFile() {
+    private void pickFile() {
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 EnumClass.READ_EXTERNAL_STORAGE);
         int permissionCheck1 = ContextCompat.checkSelfPermission(this,
@@ -243,12 +243,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             );
 
             return;
-        }
-
-        launchPicker();
+        }else launchPicker();
     }
 
-    void launchPicker() {
+    private void launchPicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
         SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
         String filepath = prf1.getString("mapath", "");
