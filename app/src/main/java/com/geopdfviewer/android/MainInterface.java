@@ -120,6 +120,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     PDFView pdfView;
     TextView textView;
     TextView scaleShow;
+    //记录标题
+    String title;
 
 
 
@@ -3112,6 +3114,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     //显示GeoPDF
     private void displayFromAsset(String assetFileName) {
         pdfFileName = assetFileName;
+        title = pdfFileName;
         pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfView.setBackgroundColor(Color.WHITE);
         pdfView.fromAsset(EnumClass.SAMPLE_FILE)
@@ -3301,8 +3304,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
 
     private void displayFromFile(String filePath) {
-        locError("filePath: " + filePath);
-        toolbar.setTitle(pdfFileName);
         pdfView = (PDFView) findViewById(R.id.pdfView);
         pdfView.setBackgroundColor(Color.WHITE);
         pdfView.setMidZoom(10);
@@ -3326,6 +3327,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 .spacing(10) // in dp
                 .onPageError(this)
                 .load();
+        title = pdfFileName;
+        toolbar.setTitle(pdfFileName);
+        locError("filePath: " + filePath);
+        locError("pdfFileName: " + pdfFileName);
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -6792,7 +6797,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void resumeSurface() {
-        String title = toolbar.getTitle().toString();
+        //String title = toolbar.getTitle().toString();
+        Log.w(TAG, "resumeSurface: " + title);
+        //String title = pdfFileName;
         if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
             toolbar.setTitle(title + "(正在记录轨迹)");
         } else toolbar.setTitle(title);
@@ -6931,6 +6938,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             initVariable(num);
             initWidget();
             displayFromFile(uri);
+            Log.w(TAG, "resumeSurface: " + toolbar.getTitle().toString());
         } else {
             showLeaflets();
         }
@@ -6954,6 +6962,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             sensorManager.unregisterListener(listener);
         }
+        title = toolbar.getTitle().toString();
         super.onPause();
     }
 
