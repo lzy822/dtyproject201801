@@ -12,6 +12,7 @@ public class FileManage {
     private String[] FileSubset;
     private File file;
     public static int BUBBLESORT = -1;
+    public static int MERGERSORT = -2;
 
     public void setFileType(String fileType) {
         FileType = fileType;
@@ -141,7 +142,45 @@ public class FileManage {
 
     public String[] getFileSubset(int type) {
         if (type == BUBBLESORT) return bubbleSort(FileSubset);
+        else if (type == MERGERSORT) return MergerSort(FileSubset);
         else return FileSubset;
+    }
+
+    private static String[] MergerSort(String[] arr){
+        String []temp = new String[arr.length];//在排序前，先建好一个长度等于原数组长度的临时数组，避免递归中频繁开辟空间
+        MergerSort(arr,0,arr.length-1,temp);
+        return arr;
+    }
+    private static void MergerSort(String[] arr,int left,int right,String[]temp){
+        if(left<right){
+            int mid = (left+right)/2;
+            MergerSort(arr,left,mid,temp);//左边归并排序，使得左子序列有序
+            MergerSort(arr,mid+1,right,temp);//右边归并排序，使得右子序列有序
+            MergerMerge(arr,left,mid,right,temp);//将两个有序子数组合并操作
+        }
+    }
+    private static void MergerMerge(String[] arr,int left,int mid,int right,String[] temp){
+        int i = left;//左序列指针
+        int j = mid+1;//右序列指针
+        int t = 0;//临时数组指针
+        while (i<=mid && j<=right){
+            if(arr[i].toUpperCase().charAt(0)<=arr[j].toUpperCase().charAt(0)){
+                temp[t++] = arr[i++];
+            }else {
+                temp[t++] = arr[j++];
+            }
+        }
+        while(i<=mid){//将左边剩余元素填充进temp中
+            temp[t++] = arr[i++];
+        }
+        while(j<=right){//将右序列剩余元素填充进temp中
+            temp[t++] = arr[j++];
+        }
+        t = 0;
+        //将temp中的元素全部拷贝到原数组中
+        while(left <= right){
+            arr[left++] = temp[t++];
+        }
     }
 
     private String[] bubbleSort(String[] arr) {

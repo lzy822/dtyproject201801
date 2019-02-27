@@ -2837,7 +2837,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         for (int k = 0; k < size; ++k) {
             locError("geometry: " + geometry_whiteBlanks.get(k).getM_lines());
             Paint paint7 = new Paint();
-            paint7.setStrokeWidth(10);
+            paint7.setStrokeWidth(3);
             paint7.setColor(geometry_whiteBlanks.get(k).getM_color());
             paint7.setStyle(Paint.Style.STROKE);
             if (isWhiteBlank && !geometry_whiteBlanks.get(k).getM_lines().isEmpty()) {
@@ -2935,7 +2935,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private void parseAndrawLinesforWhiteBlank(String whiteBlankPt, Canvas canvas) {
         locError("geometry: " + whiteBlankPt);
         Paint paint7 = new Paint();
-        paint7.setStrokeWidth(10);
+        paint7.setStrokeWidth(3);
         paint7.setColor(color_Whiteblank);
         paint7.setStyle(Paint.Style.STROKE);
         if (isWhiteBlank && !whiteBlankPt.isEmpty()) {
@@ -3890,7 +3890,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         popupWindow.showAtLocation(popView, Gravity.BOTTOM, 0, 50);
 
     }
-
+    PointF mLastPTForWhiteBlank = null;
     private void showPopueWindowForWhiteblank() {
         final View popView = View.inflate(this, R.layout.popupwindow_whiteblank, null);
         isWhiteBlank = true;
@@ -4027,6 +4027,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         lines.setMaxlng(spatialIndex[2]);
                         lines.setMinlng(spatialIndex[3]);
                         lines.save();
+                        mLastPTForWhiteBlank = null;
                         break;
                 }
 
@@ -4035,12 +4036,26 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 locError("RawX : " + pt.x + "; RawY : " + pt.y);
                 //pt_last = pt_current;
                 //pt_current = pt;
-                pdfView.zoomWithAnimation(c_zoom);
+                //pdfView.zoomWithAnimation(c_zoom);
                 /*if (event.getRawY() >= height - 100 && event.getRawY() <= height && event.getRawX() >= 50 && event.getRawX() <= 150){
                     popupWindow.dismiss();
                     whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
                 }*/
-                if (isWhiteBlank) {
+                double mDis = -1;
+                try {
+                    if(mLastPTForWhiteBlank != null) {
+                        mDis = LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlank.y, mLastPTForWhiteBlank.x);
+
+                        locError("RawX" + mDis);
+                    }
+                }
+                catch (Exception e)
+                {
+                    locError("RawX" + e.toString());
+                }
+                if (isWhiteBlank && ( mDis >= 0.2 || mDis == -1)) {
+                    //locError("RawX" + LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlank.y, mLastPTForWhiteBlank.x));
+                    mLastPTForWhiteBlank = pt;
                     num_whiteBlankPt++;
                     if (num_whiteBlankPt == 1) {
                         whiteBlankPt = Float.toString(pt.x) + " " + Float.toString(pt.y);

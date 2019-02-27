@@ -40,6 +40,9 @@ public class Activity_FileManage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity__file_manage);
         Log.w(TAG, "aaa" + Environment.getExternalStorageDirectory().toString());
+
+        Intent intent = getIntent();
+        type = intent.getStringExtra("type");
         toolbar = (Toolbar) findViewById(R.id.toolbar_filemanage);
         toolbar.setTitle(R.string.FileManage);
         toolbar.inflateMenu(R.menu.filemanagemenu);
@@ -54,8 +57,8 @@ public class Activity_FileManage extends AppCompatActivity {
                             String RootPath = fileManage.getRootPath();
                             String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
                             for (int i = 0; i < strings.length; i++) {
-                                if (!strings[i].contains(".dt"))
-                                    fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", ".dt"));
+                                if (!strings[i].contains(type))
+                                    fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", type));
                                 else {
                                     fileManages.add(new FileManage(RootPath + "/" + strings[i], RootPath + "/", 1));
                                 }
@@ -69,10 +72,8 @@ public class Activity_FileManage extends AppCompatActivity {
                 return true;
             }
         });
-        Intent intent = getIntent();
-        type = intent.getStringExtra("type");
         String filepath = "";
-        if (type.equals(".dt")) {
+        if (type.equals(type)) {
             SharedPreferences prf1 = getSharedPreferences("filepath", MODE_PRIVATE);
             filepath = prf1.getString("mapath", "");
             Log.w(TAG, "onCreate: " + filepath);
@@ -106,7 +107,7 @@ public class Activity_FileManage extends AppCompatActivity {
                 }
             } else {
                 fileManage = new FileManage(type);
-                String[] strings = fileManage.getFileSubset(FileManage.BUBBLESORT);
+                String[] strings = fileManage.getFileSubset(FileManage.MERGERSORT);
                 for (int i = 0; i < strings.length; i++) {
                     if (!strings[i].contains(type))
                         fileManages.add(new FileManage(Environment.getExternalStorageDirectory().toString() + "/" + strings[i], Environment.getExternalStorageDirectory().toString() + "/", type));
