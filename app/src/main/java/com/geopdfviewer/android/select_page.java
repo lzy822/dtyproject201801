@@ -1958,9 +1958,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             //line = bufferedReader.readLine()
             while((line = bufferedReader.readLine()) != null) {
                 //sb.append(line + "/n");
-                if(line.contains("PROJCS")) {
+                if(line.contains("PROJCS") || line.contains("GEOGCS")) {
                     //locError(line);
-                    m_WKT = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
+                    if (line.contains("PROJCS"))
+                        m_WKT = line.substring(line.indexOf("PROJCS["), line.indexOf(")>>"));
+                    else if (line.contains("GEOGCS"))
+                        m_WKT = line.substring(line.indexOf("GEOGCS["), line.indexOf(")>>"));
+                    locError("wkt信息： " + m_WKT);
+                        //GEOGCS["GCS_China_Geodetic_Coordinate_System_2000",DATUM["D_China_2000",SPHEROID["CGCS2000",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]
                 }
                 if (line.contains("ESRI") || line.contains("esri") || line.contains("arcgis") || line.contains("ARCGIS") || line.contains("Adobe"))
                 {

@@ -72,6 +72,7 @@ import android.widget.Toast;
 import com.esri.arcgisruntime.geometry.AreaUnit;
 import com.esri.arcgisruntime.geometry.AreaUnitId;
 import com.esri.arcgisruntime.geometry.GeodeticCurveType;
+import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.LinearUnit;
 import com.esri.arcgisruntime.geometry.LinearUnitId;
@@ -1592,6 +1593,21 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         } else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
     }
 
+    private String SimplifyLines(String lines) {
+        String SimplifiedLines = "";
+        String[] cors = lines.split(" ");
+        PointCollection pointCollection = new PointCollection(SpatialReferences.getWgs84());
+        for (int i = 0; i < cors.length / 2; i = i + 2)
+        {
+            pointCollection.add(new com.esri.arcgisruntime.geometry.Point(Double.valueOf(cors[i+1]), Double.valueOf(cors[i])));
+        }
+        Polyline polyline = new Polyline(pointCollection);
+        Polyline SimplifiedPolyline = (Polyline) GeometryEngine.simplify(polyline);
+        Geometry geometry = GeometryEngine.boundary(SimplifiedPolyline);
+        locError("看这里：" + geometry.getGeometryType().toString());
+        return  SimplifiedLines;
+    }
+
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
         Log.w(TAG, "zoomCenteredTo: " + pdfView.getZoom());
@@ -1766,8 +1782,11 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
         }
         if (isWhiteBlank) {
+            // TODO 点位抽稀算法
             parseAndrawLinesforWhiteBlank(canvas);
             parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
+            SimplifyLines(whiteBlankPt);
+            //parseAndrawLinesforWhiteBlank(SimplifyLines(whiteBlankPt), canvas);
         }
         // TODO REDLINE
         if (showMode == TuzhiEnum.CENTERMODE && esterEgg_redline) {
@@ -4053,7 +4072,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 {
                     locError("RawX" + e.toString());
                 }
-                if (isWhiteBlank && ( mDis >= 0.2 || mDis == -1)) {
+                //if (isWhiteBlank && ( mDis >= 0.2 || mDis == -1)) {//设置点位基础抽稀
+                if (isWhiteBlank) {//不设置点位基础抽稀
                     //locError("RawX" + LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlank.y, mLastPTForWhiteBlank.x));
                     mLastPTForWhiteBlank = pt;
                     num_whiteBlankPt++;
