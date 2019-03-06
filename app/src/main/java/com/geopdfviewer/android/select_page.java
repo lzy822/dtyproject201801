@@ -689,6 +689,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             dialog.setPositiveButton("地理框架一", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+
                     if (path.contains(".dt")) {
                         new Thread(new Runnable() {
                             @Override
@@ -754,6 +755,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }).start();
 
                     } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+
                 }
             });
             dialog.setNegativeButton("地理框架二", new DialogInterface.OnClickListener() {
@@ -825,6 +827,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }).start();
 
                     } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
+
                 }
             });
             dialog.show();
@@ -1701,9 +1704,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         outputbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+
+
                         List<POI> pois = LitePal.findAll(POI.class);
                         List<String> types = new ArrayList<>();
                         Log.w(TAG, "runlzy: " + pois.size());
@@ -1869,8 +1875,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             Log.w(TAG, "run: " + e.toString());
                             Log.w(TAG, "run: " + e.getMessage());
                         }
+
+
                     }
+
                 }).start();
+                }catch (Exception e)
+                {
+                    Log.w(TAG, "error: " + e.toString());
+                }
                 setFAMVisible(false);
             }
         });
@@ -1949,6 +1962,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             }
             else {
                 in = new FileInputStream(file);
+                //TODO 内存泄漏检测
                 bmPath = DataUtil.getDtThumbnail(name, "/TuZhi" + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
             }
             InputStreamReader inputStreamReader = new InputStreamReader(in);

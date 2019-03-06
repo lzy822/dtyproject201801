@@ -76,11 +76,13 @@ import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.LinearUnit;
 import com.esri.arcgisruntime.geometry.LinearUnitId;
+import com.esri.arcgisruntime.geometry.Multipoint;
 import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.Polyline;
 import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
+import com.esri.arcgisruntime.tasks.geoprocessing.GeoprocessingTask;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
@@ -1594,17 +1596,42 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private String SimplifyLines(String lines) {
+        locError("看这里：" + lines);
         String SimplifiedLines = "";
-        String[] cors = lines.split(" ");
-        PointCollection pointCollection = new PointCollection(SpatialReferences.getWgs84());
-        for (int i = 0; i < cors.length / 2; i = i + 2)
-        {
-            pointCollection.add(new com.esri.arcgisruntime.geometry.Point(Double.valueOf(cors[i+1]), Double.valueOf(cors[i])));
+        try {
+            String[] cors = lines.split(" ");
+            PointCollection pointCollection = new PointCollection(SpatialReferences.getWgs84());
+            for (int i = 0; i < cors.length / 2; i = i + 2) {
+                pointCollection.add(new com.esri.arcgisruntime.geometry.Point(Double.valueOf(cors[i + 1]), Double.valueOf(cors[i])));
+            }
+            locError("看这里：" + pointCollection.size());
+            Polyline polyline = new Polyline(pointCollection);
+            Polyline SimplifiedPolyline = (Polyline) GeometryEngine.generalize(polyline, 0.000005, true);
+            int mNum = 0;
+            for (int i = 0; i < SimplifiedPolyline.getParts().size(); ++i) {
+                for (com.esri.arcgisruntime.geometry.Point pt : SimplifiedPolyline.getParts().get(i).getPoints()) {
+                    ++mNum;
+                    SimplifiedLines += pt.getY() + " " + pt.getX() + " ";
+                }
+            }
+            locError("看这里：" + mNum + SimplifiedPolyline.toJson());
+            /*Multipoint multipoint = (Multipoint) GeometryEngine.boundary(SimplifiedPolyline);
+            //locError("看这里：" + multipoint.getGeometryType().toString());
+            int num = multipoint.getPoints().size();
+            for(int i = 0; i < num; ++i)
+            {
+                SimplifiedLines += multipoint.getPoints().get(i).getY() + " " + multipoint.getPoints().get(i).getX() + " ";
+            }*/
+            SimplifiedLines = SimplifiedLines.trim();
         }
-        Polyline polyline = new Polyline(pointCollection);
-        Polyline SimplifiedPolyline = (Polyline) GeometryEngine.simplify(polyline);
-        Geometry geometry = GeometryEngine.boundary(SimplifiedPolyline);
-        locError("看这里：" + geometry.getGeometryType().toString());
+        catch (IllegalArgumentException e1)
+        {
+            Log.w(TAG, "SimplifyLines: " + e1.toString());
+        }
+        catch (Exception e) {
+            Log.w(TAG, "SimplifyLines: " + e.toString());
+        }
+        locError("看这里：" + SimplifiedLines);
         return  SimplifiedLines;
     }
 
@@ -1782,11 +1809,16 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
         }
         if (isWhiteBlank) {
-            // TODO 点位抽稀算法
-            parseAndrawLinesforWhiteBlank(canvas);
-            parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
-            SimplifyLines(whiteBlankPt);
-            //parseAndrawLinesforWhiteBlank(SimplifyLines(whiteBlankPt), canvas);
+            try {
+                // TODO 点位抽稀算法
+                parseAndrawLinesforWhiteBlank(canvas);
+                parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
+            /*SimplifyLines(whiteBlankPt);
+            parseAndrawLinesforWhiteBlank(SimplifyLines(whiteBlankPt), canvas);*/
+            }
+            catch (Exception em) {
+                locError(em.toString());
+            }
         }
         // TODO REDLINE
         if (showMode == TuzhiEnum.CENTERMODE && esterEgg_redline) {
@@ -2854,42 +2886,62 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private void parseAndrawLinesforWhiteBlank(Canvas canvas) {
         int size = geometry_whiteBlanks.size();
         for (int k = 0; k < size; ++k) {
+            if (canDrawLine(geometry_whiteBlanks.get(k).getMaxlat(), geometry_whiteBlanks.get(k).getMinlat(), geometry_whiteBlanks.get(k).getMaxlng(), geometry_whiteBlanks.get(k).getMinlng())){
             locError("geometry: " + geometry_whiteBlanks.get(k).getM_lines());
             Paint paint7 = new Paint();
             paint7.setStrokeWidth(3);
             paint7.setColor(geometry_whiteBlanks.get(k).getM_color());
             paint7.setStyle(Paint.Style.STROKE);
             if (isWhiteBlank && !geometry_whiteBlanks.get(k).getM_lines().isEmpty()) {
+
                 geometry_whiteBlanks.get(k).setM_lines(geometry_whiteBlanks.get(k).getM_lines());
                 String[] pts = geometry_whiteBlanks.get(k).getM_lines().split(" ");
                 float[] mpts;
                 if (pts.length <= 4 && pts.length > 3) {
                     mpts = new float[pts.length];
+                    //TODO 优化点位白板刷新算法
                     for (int i = 0; i < pts.length; ++i) {
                         mpts[i] = Float.valueOf(pts[i]);
                     }
-                    for (int i = 0; i < pts.length; ++i) {
+                    double max_lat1 = mpts[0];
+                    double min_lat1 = mpts[0];
+                    double max_long1 = mpts[1];
+                    double min_long1 = mpts[1];
+                    /*for (int i = 0; i < pts.length; ++i) {
                         locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
                     }
                     for (int i = 0; i < pts.length; i = i + 4) {
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
                         PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
-                    }
+                    }*/
                     for (int i = 0; i < pts.length; i = i + 2) {
-                        //mpts[i] = Float.valueOf(pts[i]);
+                        if (mpts[i] > max_lat1) max_lat1 = mpts[i];
+                        if (mpts[i] < min_lat1) min_lat1 = mpts[i];
+                        if (mpts[i + 1] > max_long1) max_long1 = mpts[i + 1];
+                        if (mpts[i + 1] < min_long1) min_long1 = mpts[i + 1];
                         PointF xx = new PointF(mpts[i], mpts[i + 1]);
                         PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         mpts[i] = pt11.x;
                         mpts[i + 1] = pt11.y;
                     }
-                    for (int i = 0; i < pts.length; ++i) {
+                    /*for (int i = 0; i < pts.length; ++i) {
                         locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
-                    }
+                    }*/
                     //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                     locError(geometry_whiteBlanks.get(k).getM_lines());
                     locError("mpts : " + Integer.toString(mpts.length));
-                    canvas.drawLines(mpts, paint7);
+                    if ((max_lat1 < cs_top && max_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                            || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                            || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                            || (min_lat1 < cs_top && min_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                            || (max_lat1 > cs_top && min_lat1 < cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                            || (max_lat1 > cs_top && min_lat1 < cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                            || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)
+                            || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)) {
+                        canvas.drawLines(mpts, paint7);
+                        locError("画线");
+                    }
                 } else if (pts.length > 4) {
                     mpts = new float[pts.length * 2 - 4];
                     locError("pts.length * 2 - 4 : " + Integer.toString(pts.length * 2 - 4));
@@ -2910,30 +2962,50 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
                     }
 
-                    for (int i = 0; i < pts.length - 2; i = i + 2) {
+                    double max_lat1 = mpts[0];
+                    double min_lat1 = mpts[0];
+                    double max_long1 = mpts[1];
+                    double min_long1 = mpts[1];
+
+                    /*for (int i = 0; i < pts.length - 2; i = i + 2) {
                         //mpts[i] = Float.valueOf(pts[i]);
                         PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
                         PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
                         distanceSum = distanceSum + LatLng.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
-                    }
+                    }*/
                     for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
-                        //mpts[i] = Float.valueOf(pts[i]);
+                        if (mpts[i] > max_lat1) max_lat1 = mpts[i];
+                        if (mpts[i] < min_lat1) min_lat1 = mpts[i];
+                        if (mpts[i + 1] > max_long1) max_long1 = mpts[i + 1];
+                        if (mpts[i + 1] < min_long1) min_long1 = mpts[i + 1];
                         PointF xx = new PointF(mpts[i], mpts[i + 1]);
                         PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                         mpts[i] = pt11.x;
                         mpts[i + 1] = pt11.y;
                     }
-                    for (int i = 0; i < pts.length; ++i) {
+                    /*for (int i = 0; i < pts.length; ++i) {
                         locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
-                    }
+                    }*/
                     //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                     locError(geometry_whiteBlanks.get(k).getM_lines());
                     locError("mpts : " + Integer.toString(mpts.length));
-                    canvas.drawLines(mpts, paint7);
+
+                    if ((max_lat1 < cs_top && max_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                            || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                            || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                            || (min_lat1 < cs_top && min_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                            || (max_lat1 > cs_top && min_lat1 < cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                            || (max_lat1 > cs_top && min_lat1 < cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                            || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)
+                            || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)) {
+                        canvas.drawLines(mpts, paint7);
+
+                        locError("画线");
+                    }
                 } else {
                     mpts = new float[pts.length];
                 }
-
+            }
 
         /*PointF xx = new PointF(mpts[0], mpts[1]);
         PointF yy = new PointF(mpts[2], mpts[3]);
@@ -2948,6 +3020,19 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 //canvas.drawLine(mpts[0], mpts[1], mpts[2], mpts[3], paint6);
             }
         }
+    }
+
+    private boolean canDrawLine(double max_lat1, double min_lat1, double max_long1, double min_long1) {
+        if((max_lat1 < cs_top && max_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                || (min_lat1 < cs_top && min_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                || (max_lat1 > cs_top && min_lat1 < cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                || (max_lat1 > cs_top && min_lat1 < cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)
+                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left))
+            return true;
+        else return false;
     }
 
     //解析白板字符串并绘制1
@@ -4030,8 +4115,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         //抬起
                         locError("抬起!!!");
                         //Toast.makeText(MainInterface.this, "抬起", Toast.LENGTH_SHORT).show();
-                        geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(ic, whiteBlankPt, color_Whiteblank);
-                        geometry_whiteBlanks.add(geometry_whiteBlank);
                         List<Lines_WhiteBlank> liness = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
                         Log.w(TAG, "onTouch: " + liness.size());
                         int size = liness.size();
@@ -4046,6 +4129,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         lines.setMaxlng(spatialIndex[2]);
                         lines.setMinlng(spatialIndex[3]);
                         lines.save();
+                        geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(ic, whiteBlankPt, color_Whiteblank, spatialIndex[0], spatialIndex[2], spatialIndex[1], spatialIndex[3]);
+                        geometry_whiteBlanks.add(geometry_whiteBlank);
                         mLastPTForWhiteBlank = null;
                         break;
                 }
@@ -6484,7 +6569,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         List<Lines_WhiteBlank> lines = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
         if (lines.size() >= 0) {
             for (Lines_WhiteBlank line : lines) {
-                geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getIc(), line.getLines(), line.getColor());
+                geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getIc(), line.getLines(), line.getColor(), line.getMaxlat(), line.getMaxlng(), line.getMinlat(), line.getMinlng());
                 geometry_whiteBlanks.add(geometry_whiteBlank);
             }
         }
