@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:id="@+id/MainInterfaceToolBar1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:translationZ="10dp"
+        android:elevation="10dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center">
+            <ImageButton
+                android:id="@+id/startTrail1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_play"
+                android:visibility="invisible"
+                />
+            <ImageButton
+                android:id="@+id/trail1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_gravity="start"
+                android:background="@drawable/ic_subway_black"
+                />
+            <ImageButton
+                android:id="@+id/endTrail1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_stop"
+                android:visibility="invisible"
+                />
+
+            <TextView
+                android:id="@+id/txt1"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/LatLngTip"/>
+            <ImageButton
+                android:id="@+id/addPoi1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_location"
+                />
+            <ImageButton
+                android:id="@+id/query_poi1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_search_black"
+                android:visibility="invisible"
+                />
+            <ImageButton
+                android:id="@+id/trans1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="@drawable/ic_close_black_24dp"
+                />
+        </LinearLayout>
+    </LinearLayout>
+    <com.github.barteksc.pdfviewer.PDFView
+        android:id="@+id/pdfView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:translationZ="0dp"
+        android:elevation="0dp"/>
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fam1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        fab:menu_backgroundColor="#ccffffff"
+        fab:menu_fab_label="@string/Back"
+        fab:menu_labels_ellipsize="end"
+        fab:menu_labels_singleLine="true">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/addTape1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_label="@string/AddTape"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/addPhoto1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_label="@string/AddPhoto"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/restoreZoom1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_label="@string/Reset"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/messureDistance1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_label="@string/Messure"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/addMap_jzactivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_label="@string/AddMap"
+            fab:fab_size="mini" />
+    </com.github.clans.fab.FloatingActionMenu>
+
+</RelativeLayout>

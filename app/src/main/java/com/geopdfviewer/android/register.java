@@ -66,7 +66,7 @@ public class register extends AppCompatActivity {
                     //Log.w(TAG, "verifyLisenceStatus: " + DataUtil.renamePath(path));
                 }
                 //Log.w(TAG, "verifyLisenceStatus: " + path);
-                Intent intent = new Intent(register.this, select_page.class);
+                Intent intent = new Intent(register.this, JZActivity.class);
                 //intent.putExtra("test22", path);
                 startActivity(intent);
                 this.finish();
@@ -296,7 +296,7 @@ public class register extends AppCompatActivity {
                 }
                 if (isOKforGo) {
                     editor.apply();
-                    Intent intent = new Intent(register.this, select_page.class);
+                    Intent intent = new Intent(register.this, JZActivity.class);
                     startActivity(intent);
                     register.this.finish();
                 } else

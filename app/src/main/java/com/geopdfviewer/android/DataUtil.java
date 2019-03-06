@@ -549,6 +549,7 @@ public class DataUtil {
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
             outputStream.flush();
             outputStream.close();
+            //bitmap.recycle();
         }
         catch (IOException e) {
             activity.runOnUiThread(new Runnable() {
