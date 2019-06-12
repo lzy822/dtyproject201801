@@ -35,29 +35,73 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jz);
         initWidget();
+
+        cacheMaps();
+        showMap();
     }
 
     public void initWidget() {
         try {
-            displayFromFile("/storage/emulated/0/tencent/TIMfile_recv/cangyuan.dt");
             com.github.clans.fab.FloatingActionMenu floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam1);
             floatingActionsMenu.setClosedOnTouchOutside(true);
             FloatingActionButton addTape = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape1);
             addTape.setImageResource(R.drawable.ic_sound);
+            addTape.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
             FloatingActionButton addPhoto = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addPhoto1);
             addPhoto.setImageResource(R.drawable.ic_add_a_photo);
+            addPhoto.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
             FloatingActionButton restoreZoom_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.restoreZoom1);
             restoreZoom_fab.setImageResource(R.drawable.ic_autorenew);
+            restoreZoom_fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
             FloatingActionButton messureDistance_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.messureDistance1);
             messureDistance_fab.setImageResource(R.drawable.ic_straighten);
+            messureDistance_fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
             FloatingActionButton addMap_jzactivity = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addMap_jzactivity);
             addMap_jzactivity.setImageResource(R.drawable.ic_map_black);
+            addMap_jzactivity.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
 
             setStatusBarColor(this);
         }
         catch (Exception e) {
             Log.w(TAG, "initWidget: " + e.toString());
         }
+    }
+
+    public void addMap(){
+
+    }
+
+    public void cacheMaps(){
+
+    }
+
+    public void showMap(){
+        displayFromFile("/storage/emulated/0/tencent/TIMfile_recv/cangyuan.dt");
     }
 
     @TargetApi(21)
