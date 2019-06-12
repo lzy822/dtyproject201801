@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="POIStore" ></dbname>
-    <version value="27" ></version>
+    <version value="28" ></version>
     <list>
         <mapping class="com.geopdfviewer.android.Trail"></mapping>
         <mapping class="com.geopdfviewer.android.POI"></mapping>
@@ -16,5 +16,6 @@
         <mapping class="com.geopdfviewer.android.DMPoint"></mapping>
         <mapping class="com.geopdfviewer.android.IconDataset"></mapping>
         <mapping class="com.geopdfviewer.android.MPOI"></mapping>
+        <mapping class="com.geopdfviewer.android.Map"></mapping>
     </list>
 </litepal>

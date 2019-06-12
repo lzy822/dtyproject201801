@@ -48,4 +48,15 @@ public class EnumClass {
     public static final int NONE_FILE_TYPE = 0;
     public static final int FILE_FILE_TYPE = 1;
     public static final int ASSET_FILE_TYPE = 2;
+
+    //记录地图类型
+
+    static public final int ROOTMAP = -92;
+    static public final int FIRSTMAP = -91;
+    static public final int SECONDMAP = 90;
+    static public final int THIRDMAP = 91;
+    static public final int FORTHMAP = 92;
+    static public final int FIFTHMAP = 93;
+    static public final int SIXTHMAP = 94;
+    static public final int LEAFMAP = 95;
 }
