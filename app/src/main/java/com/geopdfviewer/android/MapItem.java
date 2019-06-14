@@ -2,6 +2,8 @@ package com.geopdfviewer.android;
 
 import android.util.Log;
 
+import java.util.Iterator;
+
 public class MapItem extends MapComponent {
     private static final String TAG = "MapItem";
     private String position;
@@ -16,6 +18,11 @@ public class MapItem extends MapComponent {
         this.uri = uri;
         this.imguri = imguri;
         this.maptype = maptype;
+    }
+
+    @Override
+    public Iterator createIterator() {
+        return new NullIterator();
     }
 
     @Override

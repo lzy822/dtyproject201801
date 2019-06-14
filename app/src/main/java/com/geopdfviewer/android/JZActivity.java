@@ -85,10 +85,17 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jz);
+
+        doSomethingElse();
+
         initWidget();
 
         cacheMaps();
         showMap();
+    }
+
+    private void doSomethingElse() {
+        //LitePal.deleteAll(Map.class);
     }
 
     //屏幕坐标位置到经纬度转化
@@ -439,9 +446,15 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         Point centerPt = new Point((gpts[2] + gpts[3]) / 2, (gpts[0] + gpts[1]) / 2);
         String position = gpts[2] + "," + gpts[1] + ";" + gpts[3] + "," + gpts[0] + ";" + centerPt.getX() + "," + centerPt.getY();
 
-        LitePal.deleteAll(Map.class);
 
-        Map map = new Map(name, WKT, uri, GPTS, BBox, MediaBox, CropBox, img_path, ic, position, EnumClass.ROOTMAP);
+
+        Map map = null;
+
+        List<Map> maps = LitePal.where("maptype = ?", Integer.toString(EnumClass.FIFTHMAP)).find(Map.class);
+        if (maps.size() > 0)
+            map = new Map(name, WKT, uri, GPTS, BBox, MediaBox, CropBox, img_path, ic, position, EnumClass.LEAFMAP);
+        else
+            map = new Map(name, WKT, uri, GPTS, BBox, MediaBox, CropBox, img_path, ic, position, EnumClass.FIFTHMAP);
         map.save();
     }
 
@@ -651,6 +664,8 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     public void cacheMaps(){
         maps = LitePal.findAll(Map.class);
         for (int i = 0; i < maps.size(); ++i){
+            /*Map map = maps.get(i);
+            MapItem mapItem = new MapItem(map.getPosition(), map.getName(), map.getUri(), map.getImguri(), map.getMaptype());*/
             if (maps.get(i).getMaptype() == EnumClass.ROOTMAP)
             {
                 currentMap = maps.get(i);
@@ -736,31 +751,6 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         } else locError("请打开GPS功能");*/
     }
 
-    @Override
-    public void loadComplete(int nbPages) {
-
-    }
-
-    @Override
-    public void onPageChanged(int page, int pageCount) {
-
-    }
-
-    @Override
-    public void onPageError(int page, Throwable t) {
-
-    }
-
-    @Override
-    public boolean onTap(MotionEvent e) {
-        PointF pt = new PointF(e.getRawX(), e.getRawY());
-        //获取像素点的地理位置信息
-        final PointF pt1 = getGeoLocFromPixL(pt);
-        //在textview中显示地理位置信息
-        showLocationText(pt1);
-        return false;
-    }
-
     private void displayFromFile(String filePath) {
         //PDFView pdfView;
         pdfView = (PDFView) findViewById(R.id.pdfView1);
@@ -798,6 +788,31 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         };
         Timer timer = new Timer();
         timer.schedule(task, 2500);*/
+    }
+
+    @Override
+    public void loadComplete(int nbPages) {
+
+    }
+
+    @Override
+    public void onPageChanged(int page, int pageCount) {
+
+    }
+
+    @Override
+    public void onPageError(int page, Throwable t) {
+
+    }
+
+    @Override
+    public boolean onTap(MotionEvent e) {
+        PointF pt = new PointF(e.getRawX(), e.getRawY());
+        //获取像素点的地理位置信息
+        final PointF pt1 = getGeoLocFromPixL(pt);
+        //在textview中显示地理位置信息
+        showLocationText(pt1);
+        return false;
     }
 
     @Override

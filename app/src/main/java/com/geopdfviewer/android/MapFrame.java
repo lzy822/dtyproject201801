@@ -33,6 +33,11 @@ public class MapFrame extends MapComponent {
     }
 
     @Override
+    public Iterator createIterator() {
+        return new CompositeIterator(mapComponentList.iterator());
+    }
+
+    @Override
     public void print() {
         Log.w(TAG, "MapFrame: name \n");
         Iterator iterator = mapComponentList.iterator();

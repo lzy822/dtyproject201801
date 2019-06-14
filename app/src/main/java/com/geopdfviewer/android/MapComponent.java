@@ -1,5 +1,7 @@
 package com.geopdfviewer.android;
 
+import java.util.Iterator;
+
 public abstract class MapComponent {
 
 
@@ -15,6 +17,7 @@ public abstract class MapComponent {
         throw new UnsupportedOperationException();
     }
 
+    public abstract Iterator createIterator();
 
     public void print(){
         throw new UnsupportedOperationException();
