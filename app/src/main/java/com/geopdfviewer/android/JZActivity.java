@@ -2,28 +2,52 @@ package com.geopdfviewer.android;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ListPopupWindow;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.esri.arcgisruntime.geometry.GeometryEngine;
+import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnDrawListener;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
@@ -45,6 +69,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,6 +78,30 @@ import static com.geopdfviewer.android.DataUtil.renamePath1;
 
 public class JZActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener, OnDrawListener, OnTapListener {
+
+    //自动切图按钮
+    ImageButton autoTrans_imgbt;
+
+    String pdfFileName;
+
+    //记录当前GeoPDF识别码
+    private String ic;
+
+    //记录是否开始查询操作
+    private boolean isQuery = false;
+
+    //初始化传感器管理器
+    private SensorManager sensorManager;
+    private float predegree = 0;
+    private float degree = 0;
+
+    //记录当前绘图类型
+    private TuzhiEnum isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+    //记录是否开始绘制轨迹
+    private TuzhiEnum isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+
+    //记录是否渲染完文件
+    private boolean isRomance = false;
 
     private static final String TAG = "JZActivity";
     List<Map> maps;//缓存所有map数据
@@ -72,6 +121,20 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     //记录点选的坐标位置
     private float locLatForTap, locLongForTap;
 
+    //记录当前轨迹
+    private String m_cTrail = "";
+    //当前记录的坐标点个数
+    private int isLocate = 0;
+
+    //上一个记录下来的坐标点坐标
+    private float last_x, last_y;
+    //是否结束绘制
+    private boolean isLocateEnd = true;
+    Location location;
+    //记录verx
+    float verx = 0;
+    private LocationManager locationManager;//获取当前坐标位置
+
     private TuzhiEnum isCoordinateType = TuzhiEnum.COORDINATE_DEFAULT_TYPE;
 
     PDFView pdfView;
@@ -81,10 +144,86 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     private TuzhiEnum showMode = TuzhiEnum.CENTERMODE;
     double w, h;
 
+    float c_zoom, c_zoom1;
+    TuzhiEnum isZoom = TuzhiEnum.ZOOM_NONE;
+    boolean isAutoTrans = false;
+
+    public String mUri = "";
+    public String mGpts = "";
+
+    //声明Paint
+    Paint paint, paint1, paint2, paint3, paint4, paint5, paint6, paint8, paint9, paint10;
+
+    //记录当前图号
+    private int num_map;
+    List<Trail> trails;
+
+    //坐标信息
+    double m_lat = 0, m_long = 0;
+
+    Toolbar toolbar;
+
+
+    private void initPaint(){
+        paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStrokeWidth((float) 3.0);
+        paint.setStyle(Paint.Style.FILL);
+
+        paint1 = new Paint();
+        paint1.setColor(Color.GREEN);
+        paint1.setStrokeWidth((float) 2.0);
+        paint1.setStyle(Paint.Style.FILL);
+
+        paint2 = new Paint();
+        paint2.setColor(Color.BLACK);
+        paint2.setStrokeWidth((float) 2.0);
+        paint2.setStyle(Paint.Style.FILL);
+
+        paint3 = new Paint();
+        paint3.setColor(Color.BLUE);
+        paint3.setStrokeWidth((float) 2.0);
+        paint3.setStyle(Paint.Style.FILL);
+
+        paint4 = new Paint();
+        paint4.setColor(Color.YELLOW);
+        paint4.setStrokeWidth((float) 2.0);
+        paint4.setStyle(Paint.Style.FILL);
+
+        paint5 = new Paint();
+        paint5.setColor(Color.rgb(123, 175, 212));
+        paint5.setStrokeWidth((float) 2.0);
+        paint5.setStyle(Paint.Style.FILL);
+
+        paint6 = new Paint();
+        paint6.setStrokeWidth(10);
+        paint6.setStyle(Paint.Style.STROKE);
+        paint6.setColor(Color.YELLOW);
+        paint6.setAlpha(127);
+
+        paint8 = new Paint();
+        paint8.setStrokeWidth(10);
+        paint8.setStyle(Paint.Style.STROKE);
+        paint8.setColor(Color.BLUE);
+
+        paint9 = new Paint();
+        paint9.setStrokeWidth(10);
+        paint9.setStyle(Paint.Style.STROKE);
+        paint9.setColor(Color.RED);
+
+        paint10 = new Paint();
+        paint10.setStrokeWidth(10);
+        paint10.setStyle(Paint.Style.STROKE);
+        paint10.setColor(Color.GREEN);
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jz);
+
+        initPaint();
 
         doSomethingElse();
 
@@ -158,8 +297,187 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         }
     }
 
+    private void transNextMap(){
+        //toolbar.setTitle("下一幅图");
+    }
+
+    private void transPriorMap(){
+        //toolbar.setTitle("上一幅图");
+    }
+    //判断GPS功能是否处于开启状态
+    private boolean isGPSEnabled() {
+        //textView = (TextView) findViewById(R.id.txt);
+        //得到系统的位置服务，判断GPS是否激活
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean ok = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (ok) {
+            //textView.setText("GPS已经开启");
+            //Toast.makeText(this, "GPS已经开启", Toast.LENGTH_LONG).show();
+            return true;
+        } else {
+            Toast.makeText(this, R.string.LocError, Toast.LENGTH_SHORT).show();
+            //textView.setText("GPS没有开启");
+            return false;
+        }
+    }
+
+    private void drawMLocPoint(Canvas canvas){
+        if (isGPSEnabled()) {
+            PointF pt = new PointF((float) m_lat, (float) m_long);
+            pt = LatLng.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            canvas.drawCircle(pt.x, pt.y, 23, paint);
+            canvas.drawCircle(pt.x, pt.y, 20, paint5);
+            canvas.drawCircle(pt.x, pt.y, 10, paint3);
+                            /*if (predegree >= 0 && predegree < 90){
+                                locError("您当前处于第一象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(predegree)), (float)(pt.y - 50 * Math.cos(predegree)), paint6);
+                            }else if (predegree >= 90 & predegree < 180){
+                                locError("您当前处于第二象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x + 50 * Math.sin(180 - predegree)), (float)(pt.y + 50 * Math.cos(180 - predegree)), paint6);
+                            }else if (predegree >= 180 & predegree < 270){
+                                locError("您当前处于第三象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(predegree - 180)), (float)(pt.y + 50 * Math.cos(predegree - 180)), paint6);
+                            }else {
+                                locError("您当前处于第四象限");
+                                locError(Float.toString(predegree));
+                                canvas.drawLine(pt.x, pt.y, (float) (pt.x - 50 * Math.sin(360 - predegree)), (float)(pt.y - 50 * Math.cos(360 - predegree)), paint6);
+                            }*/
+            int version = Build.VERSION.SDK_INT;
+            if (version >= 21) {
+                canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
+            }
+        } else locError("请在手机设置中打开GPS功能, 否则该页面很多功能将无法正常使用");
+    }
+
+
     public void initWidget() {
         try {
+            //获取传感器管理器系统服务
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+            toolbar = (Toolbar) findViewById(R.id.toolBar1_jz);
+            setSupportActionBar(toolbar);
+
+            ImageButton trail_imgbt = (ImageButton) findViewById(R.id.trail1);
+            ImageButton startTrail_imgbt = (ImageButton) findViewById(R.id.startTrail1);
+            ImageButton endTrail_imgbt = (ImageButton) findViewById(R.id.endTrail1);
+            trail_imgbt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (m_lat <= max_lat && m_lat >= min_lat && m_long <= max_long && m_long >= min_long) {
+                        toolbar.setTitle("准备记录轨迹");
+                /*PointF mmm = LatLng.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);*/
+                        pdfView.resetZoomWithAnimation();
+                        TimerTask task = new TimerTask() {
+                            @Override
+                            public void run() {
+                                final PointF ppz = LatLng.getPixLocFromGeoL(new PointF((float) m_lat, (float) m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                                ppz.x = ppz.x - 10;
+                                //final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        pdfView.zoomCenteredTo(8, ppz);
+                                        pdfView.setPositionOffset(verx);
+                                    }
+                                });
+                            }
+                        };
+                        Timer timer = new Timer();
+                        timer.schedule(task, 1000);
+                        startTrail_imgbt.setVisibility(View.VISIBLE);
+                        endTrail_imgbt.setVisibility(View.VISIBLE);
+                        trail_imgbt.setVisibility(View.INVISIBLE);
+                    } else
+                        Toast.makeText(JZActivity.this, R.string.TrailError, Toast.LENGTH_SHORT).show();
+                }
+            });
+            startTrail_imgbt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toolbar.setTitle("正在记录轨迹");
+                    isDrawType = TuzhiEnum.TRAIL_DRAW_TYPE;
+                    isDrawTrail = TuzhiEnum.TRAIL_DRAW_TYPE;
+                    //isQuery = false;
+                    m_cTrail = "";
+                    isLocateEnd = false;
+                    isLocate = 0;
+                    initTrail();
+                    startTrail_imgbt.setVisibility(View.INVISIBLE);
+                    //addpoi.setVisibility(View.INVISIBLE);
+                    //query_poi.setVisibility(View.INVISIBLE);
+                    //floatingActionsMenu.setVisibility(View.INVISIBLE);
+                    invalidateOptionsMenu();
+                    Intent start_mService = new Intent(JZActivity.this, RecordTrail.class);
+                    start_mService.putExtra("ic", ic);
+                    startService(start_mService);
+                }
+            });
+            endTrail_imgbt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toolbar.setTitle(pdfFileName);
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                        isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                        isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                        isLocateEnd = true;
+                        recordTrail(last_x, last_y);
+                        locError(m_cTrail);
+                        invalidateOptionsMenu();
+                        Intent stop_mService = new Intent(JZActivity.this, RecordTrail.class);
+                        stopService(stop_mService);
+                    /*Trail trail = new Trail();
+                    List<Trail> trails = LitePal.where("ic = ?", ic).find(Trail.class);
+                    trail.setIc(ic);
+                    trail.setName("路径" + Integer.toString(trails.size() + 1));
+                    trail.setPath(m_cTrail);
+                    trail.save();*/
+                        trails = LitePal.findAll(Trail.class);
+                        locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
+                        if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
+                        else isQuery = false;
+                    } else {
+                        Toast.makeText(JZActivity.this, R.string.OpenTrailError, Toast.LENGTH_SHORT).show();
+                    }
+                    startTrail_imgbt.setVisibility(View.INVISIBLE);
+                    endTrail_imgbt.setVisibility(View.INVISIBLE);
+                    trail_imgbt.setVisibility(View.VISIBLE);
+                    pdfView.resetZoomWithAnimation();
+                }
+            });
+            ImageButton trans_next = (ImageButton) findViewById(R.id.trans_next);
+            trans_next.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    transNextMap();
+                }
+            });
+            ImageButton trans_prior = (ImageButton) findViewById(R.id.trans_prior);
+            trans_prior.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    transPriorMap();
+                }
+            });
+            autoTrans_imgbt = (ImageButton) findViewById(R.id.trans1);
+            autoTrans_imgbt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isAutoTrans) {
+                        TransMapCommand.getInstance(JZActivity.this).off();
+                        isAutoTrans = false;
+                        autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    } else {
+                        TransMapCommand.getInstance(JZActivity.this).on();
+                        isAutoTrans = true;
+                        autoTrans_imgbt.setBackgroundResource(R.drawable.ic_check_black_24dp);
+                    }
+                }
+            });
             textView = (TextView) findViewById(R.id.txt1);
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -456,6 +774,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         else
             map = new Map(name, WKT, uri, GPTS, BBox, MediaBox, CropBox, img_path, ic, position, EnumClass.FIFTHMAP);
         map.save();
+        maps.add(map);
     }
 
     private void manageGeoInfo(String filePath, String uri, String name, boolean type){
@@ -666,9 +985,11 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         for (int i = 0; i < maps.size(); ++i){
             /*Map map = maps.get(i);
             MapItem mapItem = new MapItem(map.getPosition(), map.getName(), map.getUri(), map.getImguri(), map.getMaptype());*/
-            if (maps.get(i).getMaptype() == EnumClass.ROOTMAP)
+            if (maps.get(i).getMaptype() == EnumClass.FIFTHMAP)
             {
                 currentMap = maps.get(i);
+                num_map = i;
+                initMapVariable();
                 break;
             }
         }
@@ -676,11 +997,20 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
 
     public void showMap(){
         try {
-            manageInfo(currentMap.getGpts());
-            displayFromFile(currentMap.getUri());
+            displayFromFile(mUri);
+            locError("good");
         }catch (NullPointerException e){
             displayFromFile("/storage/emulated/0/tencent/TIMfile_recv/cangyuan.dt");
+            locError("error");
         }
+    }
+
+    public void initMapVariable(){
+        pdfFileName = currentMap.getName();
+        ic = currentMap.getIc();
+        mUri = currentMap.getUri();
+        mGpts = currentMap.getGpts();
+        manageInfo(mGpts);
     }
 
     @TargetApi(21)
@@ -691,11 +1021,225 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
 
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-        current_pageheight = pageHeight;
+        getCurrentScreenFrameInfo(pageWidth, pageHeight);
+        getCurrentScreenLoc();
+        getZoom();
+        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
+        k_w = k[0];
+        k_h = k[1];
+        if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
+            int size = maps.size();
+            if (size > 1) {
+                float thedelta = 0;
+                int thenum = 0;
+                for (int j = 0; j < size; ++j) {
+                    String Muri = maps.get(j).getUri();
+                    String MGPTS = maps.get(j).getGpts();
+                    if (MGPTS != null && !MGPTS.isEmpty()) {
+                        String[] GPTString = MGPTS.split(" ");
+                        float[] GPTSs = new float[GPTString.length];
+                        for (int i = 0; i < GPTString.length; ++i) {
+                            GPTSs[i] = Float.valueOf(GPTString[i]);
+                        }
+                        float lat_axis, long_axis;
+                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                        for (int i = 0; i < GPTSs.length; i = i + 2) {
+                            if (GPTSs[i] < lat_axis) {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lb.x = GPTSs[i];
+                                    pt_lb.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rb.x = GPTSs[i];
+                                    pt_rb.y = GPTSs[i + 1];
+                                }
+                            } else {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lt.x = GPTSs[i];
+                                    pt_lt.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rt.x = GPTSs[i];
+                                    pt_rt.y = GPTSs[i + 1];
+                                }
+                            }
+                        }
+                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                        if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
+                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                            if (j != num_map) {
+                                if (thedelta == 0) {
+                                    thedelta = thedelta1;
+                                    thenum = j;
+                                }
+                                if (thedelta1 < thedelta) {
+                                    thedelta = thedelta1;
+                                    thenum = j;
+                                }
+                            }
+                        }
+                    }
+                }
+                double deltaK_trans;
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, JZActivity.this, TuzhiEnum.ZOOM_IN);
+                if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
+                    //updateMapInfo(thenum);
+
+                    processTransMapCommand(thenum);
+                    //TransMapCommand.getInstance(this, thenum).process();
+
+                    /*geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
+                    num_map1 = num_map;
+                    getInfo(thenum);
+                    toolbar.setTitle(pdfFileName);
+                    getNormalBitmap();
+                    manageInfo();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();*/
+                }
+            } else
+                Toast.makeText(JZActivity.this, JZActivity.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+        } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
+            int size = maps.size();
+            if (size > 1) {
+                float thedelta = 0;
+                int thenum = 0;
+                for (int j = 1; j <= size; ++j) {
+                    String Muri = maps.get(j).getUri();
+                    String MGPTS = maps.get(j).getGpts();
+                    if (MGPTS != null && !MGPTS.isEmpty()) {
+                        Log.w(TAG, "GPTS: " + MGPTS);
+                        String[] GPTString = MGPTS.split(" ");
+                        float[] GPTSs = new float[GPTString.length];
+                        for (int i = 0; i < GPTString.length; ++i) {
+                            if (MGPTS != null && !MGPTS.isEmpty())
+                                GPTSs[i] = Float.valueOf(GPTString[i]);
+                        }
+                        float lat_axis, long_axis;
+                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                        for (int i = 0; i < GPTSs.length; i = i + 2) {
+                            if (GPTSs[i] < lat_axis) {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lb.x = GPTSs[i];
+                                    pt_lb.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rb.x = GPTSs[i];
+                                    pt_rb.y = GPTSs[i + 1];
+                                }
+                            } else {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lt.x = GPTSs[i];
+                                    pt_lt.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rt.x = GPTSs[i];
+                                    pt_rt.y = GPTSs[i + 1];
+                                }
+                            }
+                        }
+                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                        if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
+                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                            if (thedelta == 0) {
+                                thedelta = thedelta1;
+                                thenum = j;
+                            } else if (thedelta1 < thedelta) {
+                                thedelta = thedelta1;
+                                thenum = j;
+                            }
+                        }
+                    }
+                }
+                double deltaK_trans;
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, JZActivity.this, TuzhiEnum.ZOOM_OUT);
+                if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
+                    processTransMapCommand(thenum);
+                    //updateMapInfo(thenum);
+                    //TransMapCommand.getInstance(this, thenum).process();
+                    /*geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
+                    num_map1 = num_map;
+                    getInfo(thenum);
+                    manageInfo();
+                    toolbar.setTitle(pdfFileName);
+                    getNormalBitmap();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();*/
+                }
+            } else
+                Toast.makeText(JZActivity.this, JZActivity.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+        }
+        drawMLocPoint(canvas);
+    }
+
+    private void processTransMapCommand(int thenum){
+        TransMapCommand transMapCommand = TransMapCommand.getInstance(this);
+        transMapCommand.setMap_num(thenum);
+        transMapCommand.process();
+    }
+
+    public void updateMapInfo(int i){
+        Map map = maps.get(i);
+        ic = map.getIc();
+        mUri = map.getUri();
+        mGpts = map.getGpts();
+        currentMap = map;
+        num_map = i;
+        manageInfo(mGpts);
+    }
+
+    private boolean verifyAreaForAutoTrans(double mmax_lat, double mmin_lat, double mmax_long, double mmin_long) {
+        double deltaLatK, deltaLongK;
+        deltaLatK = (max_lat - min_lat) * 0.014;
+        deltaLongK = (max_long - min_long) * 0.014;
+        if ((mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left)
+            return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left)
+            return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmin_long - deltaLongK) < cs_left)
+            return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right)
+            return true;
+        else if ((mmax_lat + deltaLatK) > cs_top && (mmin_lat - deltaLatK) < cs_bottom && (mmax_long + deltaLongK) > cs_right && (mmin_long - deltaLongK) < cs_left)
+            return true;
+        else return false;
+    }
+
+    private void getCurrentScreenFrameInfo(float pageWidth, float pageHeight){
         current_pagewidth = pageWidth;
+        current_pageheight = pageHeight;
         viewer_height = pdfView.getHeight();
         viewer_width = pdfView.getWidth();
-        getCurrentScreenLoc();
+    }
+
+    private void getZoom(){
+        if (c_zoom != pdfView.getZoom()) {
+            c_zoom1 = c_zoom;
+            c_zoom = pdfView.getZoom();
+            if ((c_zoom - c_zoom1) > 0) {
+                isZoom = TuzhiEnum.ZOOM_IN;
+            } else if ((c_zoom - c_zoom1) < 0) {
+                isZoom = TuzhiEnum.ZOOM_OUT;
+            }
+        } else isZoom = TuzhiEnum.ZOOM_NONE;
     }
 
     //获取当前屏幕所视区域的经纬度与像素范围
@@ -737,7 +1281,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     }
 
     //处理地理信息
-    private void manageInfo(String GPTS) {
+    public void manageInfo(String GPTS) {
         double[] gpts = DataUtil.getGPTS(GPTS);
         min_lat = gpts[0];
         max_lat = gpts[1];
@@ -751,7 +1295,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         } else locError("请打开GPS功能");*/
     }
 
-    private void displayFromFile(String filePath) {
+    public void displayFromFile(String filePath) {
         //PDFView pdfView;
         pdfView = (PDFView) findViewById(R.id.pdfView1);
         pdfView.setBackgroundColor(Color.WHITE);
@@ -776,18 +1320,21 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                 .spacing(10) // in dp
                 .onPageError(this)
                 .load();
-        /*title = pdfFileName;
-        toolbar.setTitle(pdfFileName);
+        //title = pdfFileName;
         locError("filePath: " + filePath);
         locError("pdfFileName: " + pdfFileName);
+        //toolbar.setTitle(pdfFileName);
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
+                runOnUiThread(() -> {
+                    toolbar.setTitle(pdfFileName);
+                });
                 isRomance = true;
             }
         };
         Timer timer = new Timer();
-        timer.schedule(task, 2500);*/
+        timer.schedule(task, 2500);
     }
 
     @Override
@@ -817,7 +1364,14 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
 
     @Override
     protected void onResume() {
+        registerSensor();
         super.onResume();
+    }
+
+    private void registerSensor() {
+        //注册传感器监听器
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
@@ -830,13 +1384,399 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         super.onStop();
     }
 
+    private SensorEventListener listener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (degree != 0 && predegree != degree && Math.abs(degree - predegree) > 10) {
+                predegree = degree;
+                if (isRomance) {
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+            degree = event.values[0];
+            //locError("predegree: " + Float.toString(predegree) + " degree: " + Float.toString(degree));
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
     @Override
     protected void onPause() {
+        sensorManager.unregisterListener(listener);
         super.onPause();
+    }
+
+    //开始记录轨迹
+    private void initTrail() {
+        if (isGPSEnabled()) {
+            locError("开始绘制轨迹");
+        } else locError("请打开GPS功能");
+    }
+
+    private void getLocation() {
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
+            Toast.makeText(this, R.string.LocError, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(intent, 0);
+            return;
+        }
+
+        try {
+
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location == null) {
+                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            updateView(location);
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 5, locationListener);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void recordTrail(Location location) {
+        isLocate++;
+        if (location != null) {
+            if (isLocateEnd || isLocate == 1) {
+                m_cTrail = m_cTrail + Double.toString(m_lat) + " " + Double.toString(m_long);
+                //isLocateEnd = true;
+            } else
+                m_cTrail = m_cTrail + " " + Double.toString(m_lat) + " " + Double.toString(m_long) + " " + Double.toString(m_lat) + " " + Double.toString(m_long);
+            //setHereLocation();
+            //locError(Double.toString(m_lat) + "," + Double.toString(m_long) + "Come here");
+
+        } else {
+
+        }
+    }
+
+    //记录轨迹
+    private void recordTrail(float x, float y) {
+        isLocate++;
+        last_x = x;
+        last_y = y;
+        locError(Integer.toString(isLocate));
+        //if (location != null) {
+        if (isLocateEnd || isLocate == 1) {
+            if (!m_cTrail.isEmpty()) {
+                if (isLocate > 2) {
+                    int num = DataUtil.appearNumber(m_cTrail, " ");
+                    String str = m_cTrail;
+                    for (int i = 0; i <= num - 2; ++i) {
+                        str = str.substring(str.indexOf(" ") + 1);
+                    }
+                    m_cTrail = m_cTrail.substring(0, m_cTrail.length() - str.length());
+                } else m_cTrail = m_cTrail + " " + Float.toString(x) + " " + Float.toString(y);
+            } else m_cTrail = m_cTrail + Float.toString(x) + " " + Float.toString(y);
+        } else
+            m_cTrail = m_cTrail + " " + Float.toString(x) + " " + Float.toString(y) + " " + Float.toString(x) + " " + Float.toString(y);
+        //setHereLocation();
+        //locError(Integer.toString(m_lat) + "," + Double.toString(m_long) + "Come here");
+
+        //} else {
+
+        //}
+    }
+
+    //坐标监听器
+    protected final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            //Log.d(TAG, "Location changed to: " + getLocationInfo(location));
+            updateView(location);
+            if (!isLocateEnd) {
+                recordTrail((float) location.getLatitude(), (float) location.getLongitude());
+                locError(m_cTrail);
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.d(TAG, "onStatusChanged() called with " + "provider = [" + provider + "], status = [" + status + "], extras = [" + extras + "]");
+            switch (status) {
+                case LocationProvider.AVAILABLE:
+                    Log.i(TAG, "AVAILABLE");
+                    break;
+                case LocationProvider.OUT_OF_SERVICE:
+                    Log.i(TAG, "OUT_OF_SERVICE");
+                    break;
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                    Log.i(TAG, "TEMPORARILY_UNAVAILABLE");
+                    break;
+            }
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d(TAG, "onProviderEnabled() called with " + "provider = [" + provider + "]");
+            try {
+                Location location = locationManager.getLastKnownLocation(provider);
+                Log.d(TAG, "onProviderDisabled.location = " + location);
+                updateView(location);
+            } catch (SecurityException e) {
+
+            }
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d(TAG, "onProviderDisabled() called with " + "provider = [" + provider + "]");
+        }
+    };
+
+    //更新坐标信息
+    private void updateView(Location location) {
+        /*
+        locError("isFullLocation : " + Boolean.toString(isFullLocation));
+        locError("location : " + location.toString());
+        if(isFullLocation && location != null){
+        Geocoder gc = new Geocoder(JZActivity.this);
+        List<Address> addresses = null;
+        String msg = "";
+        Log.d(TAG, "updateView.location = " + location);
+            try {
+                addresses = gc.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                //Log.d(TAG, "updateView.addresses = " + Integer.toString(addresses.size()));
+                if (addresses.size() > 0) Toast.makeText(JZActivity.this, "当前位置: " + addresses.get(0).getAddressLine(0), Toast.LENGTH_LONG).show();
+                else Toast.makeText(this, "你当前没有连接网络, 无法进行详细地址查询", Toast.LENGTH_LONG).show();
+                Log.d(TAG, "updateView.addresses = " + addresses);
+                if (addresses.size() > 0) {
+                    msg += addresses.get(0).getAdminArea().substring(0,2);
+                    msg += " " + addresses.get(0).getLocality().substring(0,2);
+                    Log.d(TAG, "updateView.addresses = " + msg);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }*/
+        if (location != null) {
+            m_lat = location.getLatitude();
+            m_long = location.getLongitude();
+            locError("wgs2000: " + Double.toString(m_lat) + "&&" + Double.toString(m_long) + "Come here");
+            com.esri.arcgisruntime.geometry.Point wgs84Point = new com.esri.arcgisruntime.geometry.Point(m_long, m_lat, SpatialReferences.getWgs84());
+            locError("wgs2000: " + Double.toString(wgs84Point.getX()) + "&&" + Double.toString(wgs84Point.getY()) + "Come here");
+            com.esri.arcgisruntime.geometry.Point wgs2000Point = (com.esri.arcgisruntime.geometry.Point) GeometryEngine.project(wgs84Point, SpatialReference.create(4490));
+            locError("wgs2000: " + Double.toString(wgs2000Point.getX()) + "&&" + Double.toString(wgs2000Point.getY()) + "Come here");
+            m_lat = wgs2000Point.getY();
+            m_long = wgs2000Point.getX();
+            verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+            //setHereLocation();
+
+        }
+    }
+
+    private void locError(String str){
+        Log.w(TAG, "locError: " + str);
     }
 
     @Override
     protected void onDestroy() {
+        try {
+            locationManager.removeUpdates(locationListener);
+        } catch (SecurityException e) {
+            Log.w(TAG, e.toString());
+        }
         super.onDestroy();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    public void showListPopupWindow(View view, String query) {
+        final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        query = query.trim();
+        //controlSpecificFunction(query);
+        String sql = "select * from POI where";
+        String[] strings = query.split(" ");
+        for (int i = 0; i < strings.length; ++i) {
+            if (strings.length == 1) sql = sql + " (name LIKE '%" + strings[i] + "%'";
+            else {
+                if (i == 0) sql = sql + " ((name LIKE '%" + strings[i] + "%'";
+                else if (i != strings.length - 1)
+                    sql = sql + " AND description LIKE '%" + strings[i] + "%'";
+                else sql = sql + " AND name LIKE '%" + strings[i] + "%')";
+            }
+        }
+        for (int i = 0; i < strings.length; ++i) {
+            if (strings.length == 1) sql = sql + " OR description LIKE '%" + strings[i] + "%')";
+            else {
+                if (i == 0)
+                    sql = sql + " OR (description LIKE '%" + strings[i] + "%'";
+                else if (i != strings.length - 1)
+                    sql = sql + " AND description LIKE '%" + strings[i] + "%'";
+                else sql = sql + " AND description LIKE '%" + strings[i] + "%'))";
+            }
+        }
+        sql = sql + " AND (x >= ? AND x <= ? AND y >= ? AND y <= ?)";
+        Log.w(TAG, "showListPopupWindow: " + sql);
+        final List<mPOIobj> pois = new ArrayList<>();
+        Cursor cursor = LitePal.findBySQL(sql, String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
+        if (cursor.moveToFirst()) {
+            do {
+                String POIC = cursor.getString(cursor.getColumnIndex("poic"));
+                String time = cursor.getString(cursor.getColumnIndex("time"));
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                String description = cursor.getString(cursor.getColumnIndex("description"));
+                int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
+                int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                float x = cursor.getFloat(cursor.getColumnIndex("x"));
+                float y = cursor.getFloat(cursor.getColumnIndex("y"));
+                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                pois.add(mPOIobj);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        String[] items = new String[pois.size()];
+        for (int i = 0; i < pois.size(); ++i) {
+            items[i] = pois.get(i).getM_name();
+        }
+
+        // ListView适配器
+        listPopupWindow.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items));
+
+        // 选择item的监听事件
+        listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (pois.get(position).getM_POIC().contains("POI")) {
+                    Intent intent = new Intent(JZActivity.this, singlepoi.class);
+                    intent.putExtra("POIC", pois.get(position).getM_POIC());
+                    JZActivity.this.startActivity(intent);
+                } /*else if (esterEgg_plq && !esterEgg_lm) {
+                    Intent intent = new Intent(JZActivity.this, plqpoishow.class);
+                    intent.putExtra("xh", pois.get(position).getM_POIC());
+                    JZActivity.this.startActivity(intent);
+                } else if (pois.get(position).getM_POIC().contains("DMBZ"))
+                    GoDMBZSinglePOIPage(pois.get(position).getM_POIC().replace("DMBZ", ""));
+                else if (pois.get(position).getM_POIC().contains("DMLine"))
+                    GoDMLSinglePOIPage(pois.get(position).getM_POIC().replace("DMLine", ""));
+                else if (pois.get(position).getM_POIC().contains("DMPoint"))
+                    GoDMPSinglePOIPage(pois.get(position).getM_POIC().replace("DMPoint", ""));*/
+
+                listPopupWindow.dismiss();
+                isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                invalidateOptionsMenu();
+            }
+        });
+
+        // 对话框的宽高
+        listPopupWindow.setWidth(600);
+        listPopupWindow.setHeight(600);
+
+        // ListPopupWindow的锚,弹出框的位置是相对当前View的位置
+        listPopupWindow.setAnchorView(view);
+
+        // ListPopupWindow 距锚view的距离
+        listPopupWindow.setHorizontalOffset(50);
+        listPopupWindow.setVerticalOffset(100);
+
+        listPopupWindow.setModal(false);
+
+        listPopupWindow.show();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        switch (isDrawTrail) {
+            case TRAIL_DRAW_TYPE:
+                toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
+                menu.findItem(R.id.back).setVisible(false);
+                menu.findItem(R.id.queryPOI).setVisible(true);
+                menu.findItem(R.id.action_search).setVisible(false);
+                //menu.findItem(R.id.queryLatLng).setVisible(false);
+                break;
+            case NONE_DRAW_TYPE:
+                toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                menu.findItem(R.id.back).setVisible(false);
+                menu.findItem(R.id.queryPOI).setVisible(true);
+                menu.findItem(R.id.action_search).setVisible(false);
+                menu.findItem(R.id.queryLatLng).setVisible(true);
+                break;
+            case SEARCH_DEMO:
+                toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                menu.findItem(R.id.back).setVisible(false);
+                menu.findItem(R.id.queryPOI).setVisible(false);
+                menu.findItem(R.id.queryLatLng).setVisible(false);
+                menu.findItem(R.id.action_search).setVisible(true);
+
+                SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+                SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+                // Assumes current activity is the searchable activity
+                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+                searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+                searchView.setSubmitButtonEnabled(true);
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+
+                        showListPopupWindow(searchView, query);
+                        //Toast.makeText(JZActivity.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+
+                        @Override
+                        public boolean onQueryTextChange(String newText) {
+                            return true;
+                        }
+                    });
+            }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    //加载当前菜单
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.maintoolbar, menu);
+        menu.findItem(R.id.queryPOI).setVisible(true);
+        menu.findItem(R.id.back).setVisible(false);
+        menu.findItem(R.id.queryLatLng).setVisible(true);
+        menu.findItem(R.id.info).setVisible(false);
+        menu.findItem(R.id.action_search).setVisible(false);
+        return true;
+    }
+
+    //菜单栏按钮监控
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.back:
+                if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
+                else {
+                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                    invalidateOptionsMenu();
+                }
+                break;
+            case R.id.info:
+                /*Intent intent = new Intent(JZActivity.this, info_page.class);
+                intent.putExtra("extra_data", WKT);
+                startActivity(intent);*/
+                break;
+            case R.id.queryLatLng:
+                isDrawTrail = TuzhiEnum.SEARCH_DEMO;
+                invalidateOptionsMenu();
+                break;
+            case R.id.queryPOI:
+                Intent intent2 = new Intent(JZActivity.this, pois.class);
+                intent2.putExtra("ic", ic);
+                intent2.putExtra("min_lat", min_lat);
+                intent2.putExtra("max_lat", max_lat);
+                intent2.putExtra("min_long", min_long);
+                intent2.putExtra("max_long", max_long);
+                startActivity(intent2);
+                break;
+            default:
+        }
+        return true;
     }
 }

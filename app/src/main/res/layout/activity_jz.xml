@@ -7,6 +7,18 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolBar1_jz"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        fab:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <LinearLayout
         android:id="@+id/MainInterfaceToolBar1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -70,19 +82,50 @@
                 />
         </LinearLayout>
     </LinearLayout>
-    <com.github.barteksc.pdfviewer.PDFView
-        android:id="@+id/pdfView1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="top"
-        android:translationZ="0dp"
-        android:elevation="0dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:translationZ="0dp"
+            android:elevation="0dp">
+            <com.github.barteksc.pdfviewer.PDFView
+                android:id="@+id/pdfView1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top"
+                android:translationZ="0dp"
+                android:elevation="0dp"/>
+            <ImageButton
+                android:id="@+id/trans_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/ic_arrow_forward_black_24dp"
+                android:visibility="visible" />
+
+            <ImageButton
+                android:id="@+id/trans_prior"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/ic_arrow_back_black_24dp" />
+        </RelativeLayout>
+    </LinearLayout>
+
+
+
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fam1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="0dp"
         fab:menu_backgroundColor="#ccffffff"
         fab:menu_fab_label="@string/Back"
         fab:menu_labels_ellipsize="end"
