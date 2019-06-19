@@ -732,6 +732,321 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         } else return -1;
     }
 
+    public final static int REFINE_ORIGINSTATE = 3000;
+    public final static int REFINE_QUERYPOISTATE = 3001;
+    public final static int REFINE_MESSURESTATE = 3002;
+    public final static int REFINE_ADDPOISTATE = 3003;
+    public final static int REFINE_WHITEBLANKSTATE = 3004;
+    public final static int REFINE_DRAWLINE = 3005;
+
+    public int Refine_State = REFINE_ORIGINSTATE;
+
+    public void addPOI_onTap(PointF pt){
+        PointF pt1 = new PointF();
+        pt1.x = pt.x;
+        pt1.y = pt.y;
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(JZActivity.this);
+        builder1.setTitle("提示");
+        builder1.setMessage("请选择你要添加的兴趣点种类");
+        builder1.setNegativeButton("标志点", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                showPopueWindowForIconAdd(pt1);
+            }
+        });
+        builder1.setPositiveButton("普通兴趣点", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(JZActivity.this);
+                builder.setTitle("提示");
+                builder.setMessage("请选择你要添加的图层");
+                builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CreatePOI = true;
+                        POIType = 0;
+                        // TODO LM
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
+                        }
+                        pdfView.resetZoomWithAnimation();
+                        POIType = -1;
+                        CreatePOI = false;
+                    }
+                });
+                builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CreatePOI = true;
+                        POIType = 1;
+
+                        // TODO LM
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
+                        } else {
+                            GoDMBZSinglePOIPage(addDMBZPoi(pt1));
+                        }
+                        pdfView.resetZoomWithAnimation();
+                        POIType = -1;
+                        CreatePOI = false;
+                    }
+                });
+                builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CreatePOI = true;
+                        POIType = 2;
+                        // TODO LM
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
+                        }
+                        pdfView.resetZoomWithAnimation();
+                        POIType = -1;
+                        CreatePOI = false;
+                    }
+                });
+                builder.show();
+            }
+        });
+        builder1.show();
+    }
+
+    public void drawLine_onTap(PointF pt){
+        whiteBlank_fab.setVisibility(View.GONE);
+        PointF ptf = new PointF();
+        ptf.x = pt.x;
+        ptf.y = pt.y;
+        Log.w(TAG, "onTaplzylzylzy: " + centerPointLoc.x);
+        if (drawLineFeature.isEmpty()) {
+            if (showMode == TuzhiEnum.CENTERMODE) {
+                drawLineFeature = Float.toString(centerPointLoc.y) + "," + Float.toString(centerPointLoc.x) + ",0";
+            } else {
+                drawLineFeature = Float.toString(ptf.y) + "," + Float.toString(ptf.x) + ",0";
+            }
+        } else {
+            if (showMode == TuzhiEnum.CENTERMODE) {
+                drawLineFeature = drawLineFeature + " " + Float.toString(centerPointLoc.y) + "," + Float.toString(centerPointLoc.x) + ",0";
+            } else {
+                drawLineFeature = drawLineFeature + " " + Float.toString(ptf.y) + "," + Float.toString(ptf.x) + ",0";
+            }
+        }
+
+        Log.w(TAG, "onTaplzylzylzy: " + drawLineFeature);
+    }
+
+    public void messure_onTap(PointF pt){
+        PointF pt1 = new PointF();
+        pt1.x = pt.x;
+        pt1.y = pt.y;
+        MessureChanged = true;
+        locError("messure_pts" + messure_pts);
+        poinum_messure++;
+        if (poinum_messure == 1) {
+            if (showMode == TuzhiEnum.NOCENTERMODE) {
+                messure_pts = Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+            } else {
+                messure_pts = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+            }
+            //setTitle("正在测量");
+            if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                toolbar.setTitle("正在测量(轨迹记录中)");
+            } else toolbar.setTitle("正在测量");
+        } else if (poinum_messure == 2) {
+            if (showMode == TuzhiEnum.NOCENTERMODE) {
+                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+            } else {
+                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+            }
+            pdfView.zoomWithAnimation(c_zoom);
+        } else {
+            if (showMode == TuzhiEnum.NOCENTERMODE) {
+                messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
+            } else {
+                messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+            }
+            //setTitle("正在测量");
+            pdfView.zoomWithAnimation(c_zoom);
+        }
+
+        if (showMode == TuzhiEnum.NOCENTERMODE) {
+            switch (distancesLatLngs.size()) {
+                case 0:
+                    int size = distanceLatLngs.size();
+                    if (size > 0) {
+                        double distance = LatLng.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), pt1.y, pt1.x);
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                        distanceLatLngs.add(distanceLatLng);
+                    } else {
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                        distanceLatLngs.add(distanceLatLng);
+                    }
+                    break;
+                case 1:
+                    int size1 = distanceLatLngs1.size();
+                    if (size1 > 0) {
+                        double distance = LatLng.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), pt1.y, pt1.x);
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                        distanceLatLngs1.add(distanceLatLng);
+                    } else {
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                        distanceLatLngs1.add(distanceLatLng);
+                    }
+                    break;
+                case 2:
+                    int size2 = distanceLatLngs2.size();
+                    if (size2 > 0) {
+                        double distance = LatLng.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), pt1.y, pt1.x);
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                        distanceLatLngs2.add(distanceLatLng);
+                    } else {
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, 0);
+                        distanceLatLngs2.add(distanceLatLng);
+                    }
+                    break;
+                default:
+                    Toast.makeText(JZActivity.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        } else {
+            switch (distancesLatLngs.size()) {
+                case 0:
+                    int size = distanceLatLngs.size();
+                    if (size > 0) {
+                        double distance = LatLng.algorithm(distanceLatLngs.get(size - 1).getLongitude(), distanceLatLngs.get(size - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs.get(size - 1).getDistance() + (float) distance);
+                        distanceLatLngs.add(distanceLatLng);
+                    } else {
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                        distanceLatLngs.add(distanceLatLng);
+                    }
+                    break;
+                case 1:
+                    int size1 = distanceLatLngs1.size();
+                    if (size1 > 0) {
+                        double distance = LatLng.algorithm(distanceLatLngs1.get(size1 - 1).getLongitude(), distanceLatLngs1.get(size1 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs1.get(size1 - 1).getDistance() + (float) distance);
+                        distanceLatLngs1.add(distanceLatLng);
+                    } else {
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                        distanceLatLngs1.add(distanceLatLng);
+                    }
+                    break;
+                case 2:
+                    int size2 = distanceLatLngs2.size();
+                    if (size2 > 0) {
+                        double distance = LatLng.algorithm(distanceLatLngs2.get(size2 - 1).getLongitude(), distanceLatLngs2.get(size2 - 1).getLatitude(), centerPointLoc.y, centerPointLoc.x);
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, distanceLatLngs2.get(size2 - 1).getDistance() + (float) distance);
+                        distanceLatLngs2.add(distanceLatLng);
+                    } else {
+                        DistanceLatLng distanceLatLng = new DistanceLatLng(centerPointLoc.x, centerPointLoc.y, 0);
+                        distanceLatLngs2.add(distanceLatLng);
+                    }
+                    break;
+                default:
+                    Toast.makeText(JZActivity.this, R.string.MessureNumOutOfIndex, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+        pdfView.zoomWithAnimation(c_zoom);
+    }
+
+    public void query_onTap(PointF pt){
+        PointF pt1 = new PointF();
+        pt1.x = pt.x;
+        pt1.y = pt.y;
+
+        boolean isQueried = false;
+
+        if (esterEgg_plq) {
+            int n = 0;
+            int num = 0;
+            if (kmltests.size() > 0) {
+                kmltest poii = kmltests.get(0);
+                PointF pointF = new PointF(poii.getLat(), poii.getLongi());
+                pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                pointF = new PointF(pointF.x, pointF.y - 70);
+                //pointF = getGeoLocFromPixL(pointF);
+                PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                locError("pt1special : " + pt8.toString());
+                float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                for (kmltest poi : kmltests) {
+                    PointF mpointF = new PointF(poi.getLat(), poi.getLongi());
+                    mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                    if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                        locError("mpointFspecial : " + mpointF.toString());
+                        delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                        num = n;
+                    }
+                    locError("n : " + Integer.toString(n));
+                    n++;
+                }
+                locError("numspecial : " + Integer.toString(num));
+                locError("deltaspecial : " + Float.toString(delta));
+                if (delta < 35 || num != 0) {
+                    Intent intent = new Intent(JZActivity.this, plqpoishow.class);
+                    Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
+                    intent.putExtra("xh", kmltests.get(num).getXh());
+                    startActivity(intent);
+                    isQueried = true;
+                } else locError("没有正常查询");
+            }
+            // TODO LM
+        } else if (esterEgg_lm) {
+            int n = 0;
+            int num = 0;
+            if (dmbzList.size() > 0) {
+                DMBZ poii = dmbzList.get(0);
+                PointF pointF = new PointF(poii.getLat(), poii.getLng());
+                pointF = LatLng.getPixLocFromGeoL(pointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                pointF = new PointF(pointF.x, pointF.y - 70);
+                //pointF = getGeoLocFromPixL(pointF);
+                PointF pt8 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                locError("pt1special : " + pt8.toString());
+                float delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                for (DMBZ poi : dmbzList) {
+                    PointF mpointF = new PointF(poi.getLat(), poi.getLng());
+                    mpointF = LatLng.getPixLocFromGeoL(mpointF, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    mpointF = new PointF(mpointF.x, mpointF.y - 70);
+                    if (Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < delta && Math.abs(mpointF.x - pt8.x) + Math.abs(mpointF.y - pt8.y) < 35) {
+                        locError("mpointFspecial : " + mpointF.toString());
+                        delta = Math.abs(pointF.x - pt8.x) + Math.abs(pointF.y - pt8.y);
+                        num = n;
+                    }
+                    locError("n : " + Integer.toString(n));
+                    n++;
+                }
+                locError("numspecial : " + Integer.toString(num));
+                locError("deltaspecial : " + Float.toString(delta));
+                if (delta < 35 || num != 0) {
+                    locError("GoDMBZSinglePOIPage" + dmbzList.get(num).getXH());
+                    GoDMBZSinglePOIPage(dmbzList.get(num).getXH());
+                    isQueried = true;
+                } else locError("没有正常查询");
+            }
+        }
+
+        // TODO DM
+        if (esterEgg_dm && !isQueried) {
+            PointF dmPt = pt1;
+            isQueried = queryDM(dmPt);
+        }
+
+        if (!isQueried) {
+            String poic = queryNormalPoi(pt1);
+            if (!poic.isEmpty()) {
+                GoNormalSinglePOIPage(poic);
+                isQueried = true;
+            }
+        }
+        if (!isQueried && QueriedIconPoiNum == -1) {
+            Log.w(TAG, "IconQuery: ");
+            QueriedIconPoiNum = queryIconPoi(pt1);
+            if (QueriedIconPoiNum != -1)
+                isQueried = true;
+        }
+    }
+
     @Override
     public boolean onTap(final MotionEvent e) {
         PointF pt = new PointF(e.getRawX(), e.getRawY());
@@ -741,8 +1056,22 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         showLocationText(pt1);
 
         if (pt1.x != 0) {
+            switch (Refine_State){
+                case REFINE_ADDPOISTATE:
+                    addPOI_onTap(pt1);
+                    break;
+                case REFINE_QUERYPOISTATE:
+                    query_onTap(pt1);
+                    break;
+                case REFINE_MESSURESTATE:
+                    messure_onTap(pt1);
+                    break;
+                case REFINE_DRAWLINE:
+                    drawLine_onTap(pt1);
+                    break;
+            }
 
-            if (isDrawType == TuzhiEnum.POI_DRAW_TYPE && !isQuery) {
+            /*if (isDrawType == TuzhiEnum.POI_DRAW_TYPE && !isQuery) {
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(JZActivity.this);
                 builder1.setTitle("提示");
                 builder1.setMessage("请选择你要添加的兴趣点种类");
@@ -750,8 +1079,6 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         showPopueWindowForIconAdd(pt1);
-                        //AddIconPOI(pt1);
-                        //pdfView.zoomWithAnimation(c_zoom);
                     }
                 });
                 builder1.setPositiveButton("普通兴趣点", new DialogInterface.OnClickListener() {
@@ -765,7 +1092,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                             public void onClick(DialogInterface dialog, int which) {
                                 CreatePOI = true;
                                 POIType = 0;
-                                // TODO LM
+
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                                 }
@@ -780,7 +1107,6 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                                 CreatePOI = true;
                                 POIType = 1;
 
-                                // TODO LM
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
                                 } else {
@@ -796,7 +1122,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                             public void onClick(DialogInterface dialog, int which) {
                                 CreatePOI = true;
                                 POIType = 2;
-                                // TODO LM
+
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
                                 }
@@ -809,50 +1135,14 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     }
                 });
                 builder1.show();
-                /*if (CreatePOI && POIType != -1) {
-                    List<POI> POIs = LitePal.findAll(POI.class);
-                    POI poi = new POI();
-                    poi.setName("POI" + String.valueOf(POIs.size() + 1));
-                    poi.setIc(currentMap.getIc());
-                    if (showMode == TuzhiEnum.NOCENTERMODE) {
-                        poi.setX(pt1.x);
-                        poi.setY(pt1.y);
-                    } else {
-                        poi.setX(centerPointLoc.x);
-                        poi.setY(centerPointLoc.y);
-                    }
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(JZActivity.this.getResources().getText(R.string.DateAndTime).toString());
-                    Date date = new Date(System.currentTimeMillis());
-                    poi.setTime(simpleDateFormat.format(date));
-                    poi.setPhotonum(0);
-                    String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
-                    poi.setPoic(mpoic);
-                    if (POIType == 0) {
-                        poi.setType(strings[0]);
-                    }
-                    else if (POIType == 1) {
-                        poi.setType(strings[1]);
-                    }
-                    else if (POIType == 2) {
-                        poi.setType(strings[2]);
-                    }
-                    poi.save();
-                    locError(pt1.toString());
-                    pdfView.zoomWithAnimation(c_zoom);
-                    POIType = -1;
-                    CreatePOI = false;
-                }*/
-                /*Intent intent = new Intent(JZActivity.this, singlepoi.class);
-                intent.putExtra("POIC", mpoic);
-                startActivity(intent);*/
-
-            }
+            }*/
 
             //记录线要素
-            if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE) {
-                // TODO : 编辑添加线要素添加逻辑
+            /*if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE) {
                 whiteBlank_fab.setVisibility(View.GONE);
-                PointF ptf = pt1;
+                PointF ptf = new PointF();
+                ptf.x = pt.x;
+                ptf.y = pt.y;
                 Log.w(TAG, "onTaplzylzylzy: " + centerPointLoc.x);
                 if (drawLineFeature.isEmpty()) {
                     if (showMode == TuzhiEnum.CENTERMODE) {
@@ -869,10 +1159,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                 }
 
                 Log.w(TAG, "onTaplzylzylzy: " + drawLineFeature);
-            }
+            }*/
             ///////////////////
 
-            if (isMessure) {
+            /*if (isMessure) {
                 MessureChanged = true;
                 locError("messure_pts" + messure_pts);
                 poinum_messure++;
@@ -892,9 +1182,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     } else {
                         messure_pts = messure_pts + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
                     }
-                    //setTitle("正在测量");
                     pdfView.zoomWithAnimation(c_zoom);
-                    //Toast.makeText(JZActivity.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                 } else {
                     if (showMode == TuzhiEnum.NOCENTERMODE) {
                         messure_pts = messure_pts + " " + Float.toString(pt1.x) + " " + Float.toString(pt1.y);
@@ -904,6 +1192,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     //setTitle("正在测量");
                     pdfView.zoomWithAnimation(c_zoom);
                 }
+
                 if (showMode == TuzhiEnum.NOCENTERMODE) {
                     switch (distancesLatLngs.size()) {
                         case 0:
@@ -984,14 +1273,13 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     }
                 }
                 pdfView.zoomWithAnimation(c_zoom);
-                //PointF mpt = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                //DistanceLatLng distanceLatLng = new DistanceLatLng(pt1.x, pt1.y, (float) distanceSum);
-                //distanceLatLngs.add(distanceLatLng);
-            }
-            boolean isQueried = false;
+            }*/
+
+            /*boolean isQueried = false;
             if (isQuery && isDrawType == TuzhiEnum.NONE_DRAW_TYPE) {
                 Log.w(TAG, "onTapspecial : ");
-                // TODO PLQ
+
+
                 if (esterEgg_plq) {
                     int n = 0;
                     int num = 0;
@@ -1024,11 +1312,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                             intent.putExtra("xh", kmltests.get(num).getXh());
                             startActivity(intent);
                             isQueried = true;
-                            //Toast.makeText(JZActivity.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
-                            //locError(Integer.toString(kmltests.get(num).getPhotonum()));
                         } else locError("没有正常查询");
                     }
-                    // TODO LM
+
+
                 } else if (esterEgg_lm) {
                     int n = 0;
                     int num = 0;
@@ -1056,20 +1343,15 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                         locError("numspecial : " + Integer.toString(num));
                         locError("deltaspecial : " + Float.toString(delta));
                         if (delta < 35 || num != 0) {
-                        /*Intent intent = new Intent(JZActivity.this, plqpoishow.class);
-                        Log.w(TAG, "xhhh : " + kmltests.get(num).getXh());
-                        intent.putExtra("xh", kmltests.get(num).getXh());
-                        startActivity(intent);*/
                             locError("GoDMBZSinglePOIPage" + dmbzList.get(num).getXH());
                             GoDMBZSinglePOIPage(dmbzList.get(num).getXH());
                             isQueried = true;
-                            //Toast.makeText(JZActivity.this, kmltests.get(num).getDmbzmc(), Toast.LENGTH_LONG).show();
-                            //locError(Integer.toString(kmltests.get(num).getPhotonum()));
                         } else locError("没有正常查询");
                     }
                 }
 
-                // TODO DM
+
+
                 if (esterEgg_dm && !isQueried) {
                     PointF dmPt = pt1;
                     isQueried = queryDM(dmPt);
@@ -1088,7 +1370,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     if (QueriedIconPoiNum != -1)
                         isQueried = true;
                 }
-            }
+            }*/
         }
         return true;
     }
@@ -3835,6 +4117,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         bt_distance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Refine_State = REFINE_MESSURESTATE;
                 locHere_fab.setVisibility(View.GONE);
                 centerPointModeBt.setVisibility(View.GONE);
                 popupWindow.dismiss();
@@ -3859,6 +4142,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         bt_area.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Refine_State = REFINE_MESSURESTATE;
                 locHere_fab.setVisibility(View.GONE);
                 centerPointModeBt.setVisibility(View.GONE);
                 popupWindow.dismiss();
@@ -4893,6 +5177,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
                         showMode = TuzhiEnum.CENTERMODE;
+                        Refine_State = REFINE_QUERYPOISTATE;
                         centerPoint.setVisibility(View.VISIBLE);
                         isQuery = true;
                         isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
@@ -4900,6 +5185,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                         isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                         query_poi_imgbt.setVisibility(View.INVISIBLE);
                     } else {
+                        Refine_State = REFINE_ORIGINSTATE;
                         locError("不是中心点模式");
                         showMode = TuzhiEnum.NOCENTERMODE;
                         centerPoint.setVisibility(View.INVISIBLE);
@@ -5854,6 +6140,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
             cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (showMode == TuzhiEnum.CENTERMODE)
+                        Refine_State = REFINE_QUERYPOISTATE;
+                    else
+                        Refine_State = REFINE_ORIGINSTATE;
                     area = 0;
                     CenterPtMessuredArea = new PointF();
                     MessureChanged = true;
@@ -5866,8 +6156,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                         distanceLatLngs.clear();
                         distanceLatLngs1.clear();
                         distanceLatLngs2.clear();
-                        if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
-                        else isQuery = false;
+                        if (showMode == TuzhiEnum.CENTERMODE)
+                            isQuery = true;
+                        else
+                            isQuery = false;
                         centerPointModeBt.setVisibility(View.VISIBLE);
                         isMessure = false;
                         poinum_messure = 0;
@@ -6169,8 +6461,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     trail.save();*/
                         trails = LitePal.findAll(Trail.class);
                         locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
-                        if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
-                        else isQuery = false;
+                        if (showMode == TuzhiEnum.CENTERMODE)
+                            isQuery = true;
+                        else
+                            isQuery = false;
                     } else {
                         Toast.makeText(JZActivity.this, R.string.OpenTrailError, Toast.LENGTH_SHORT).show();
                     }
@@ -6191,6 +6485,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                         dialog.setPositiveButton("点要素", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Refine_State = REFINE_ADDPOISTATE;
                                 poiLayerBt.setChecked(true);
                                 showPOI = true;
                                 //pdfView.resetZoomWithAnimation();
@@ -6200,8 +6495,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                                     if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                                         toolbar.setTitle("正在记录轨迹");
                                     } else toolbar.setTitle(currentMap.getName());
-                                    if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
-                                    else isQuery = false;
+                                    if (showMode == TuzhiEnum.CENTERMODE)
+                                        isQuery = true;
+                                    else
+                                        isQuery = false;
                                     pdfView.zoomWithAnimation(c_zoom);
                                 } else {
                                     isDrawType = TuzhiEnum.POI_DRAW_TYPE;
@@ -6216,6 +6513,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                         dialog.setNegativeButton("线要素(地名类型,需打开地名功能)", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Refine_State = REFINE_DRAWLINE;
                                 backpt_messure_fab.setVisibility(View.VISIBLE);
                                 cancel_messure_fab.setVisibility(View.VISIBLE);
                                 delete_messure_fab.setVisibility(View.VISIBLE);
@@ -6227,8 +6525,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                                     if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                                         toolbar.setTitle("正在记录轨迹");
                                     } else toolbar.setTitle(currentMap.getName());
-                                    if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
-                                    else isQuery = false;
+                                    if (showMode == TuzhiEnum.CENTERMODE)
+                                        isQuery = true;
+                                    else
+                                        isQuery = false;
                                     pdfView.zoomWithAnimation(c_zoom);
                                 } else {
                                     isDrawType = TuzhiEnum.LINE_DRAW_TYPE;
@@ -6244,6 +6544,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                         });
                         dialog.show();
                     } else {
+                        Refine_State = REFINE_ADDPOISTATE;
                         poiLayerBt.setChecked(true);
                         showPOI = true;
                         //pdfView.resetZoomWithAnimation();
@@ -6253,8 +6554,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                             if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                                 toolbar.setTitle("正在记录轨迹");
                             } else toolbar.setTitle(currentMap.getName());
-                            if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
-                            else isQuery = false;
+                            if (showMode == TuzhiEnum.CENTERMODE)
+                                isQuery = true;
+                            else
+                                isQuery = false;
                             pdfView.zoomWithAnimation(c_zoom);
                         } else {
                             isDrawType = TuzhiEnum.POI_DRAW_TYPE;
@@ -6275,6 +6578,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     showPOI = true;
                     pdfView.zoomWithAnimation(c_zoom);
                     if (!isQuery) {
+                        Refine_State = REFINE_QUERYPOISTATE;
                         if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                             toolbar.setTitle("正在查询(轨迹记录中)");
                         } else toolbar.setTitle("正在查询");
@@ -6282,6 +6586,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                         isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
                         isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                     } else {
+                        Refine_State = REFINE_ORIGINSTATE;
                         isQuery = false;
                         if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
                             toolbar.setTitle("正在记录轨迹");
@@ -6374,6 +6679,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                     floatingActionsMenu.close(false);
                     //重置按钮具体功能如下:
                     if (isCreateBitmap) {
+                        if (showMode == TuzhiEnum.CENTERMODE)
+                            Refine_State = REFINE_QUERYPOISTATE;
+                        else
+                            Refine_State = REFINE_ORIGINSTATE;
                         isWhiteBlank = true;
                         poiLayerBt.setChecked(true);
                         trailLayerBt.setChecked(true);
@@ -6899,11 +7208,13 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
 
     public void resumeVariable() {
         if (showMode == TuzhiEnum.CENTERMODE) {
+            Refine_State = REFINE_QUERYPOISTATE;
             centerPoint.setVisibility(View.VISIBLE);
             isQuery = true;
             locError("中心点模式");
             query_poi_imgbt.setVisibility(View.INVISIBLE);
         } else {
+            Refine_State = REFINE_ORIGINSTATE;
             locError("不是中心点模式");
             centerPoint.setVisibility(View.INVISIBLE);
             isQuery = false;
