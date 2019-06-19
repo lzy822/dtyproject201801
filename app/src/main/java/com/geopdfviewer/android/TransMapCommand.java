@@ -11,8 +11,13 @@ public class TransMapCommand implements BtCommand{
     private JZActivity jzActivity;
     private int map_num;
 
+    public boolean isON() {
+        return isON;
+    }
+
     private TransMapCommand(JZActivity activity) {
         jzActivity = activity;
+        isON = false;
         //map_num = i;
     }
 
@@ -47,8 +52,7 @@ public class TransMapCommand implements BtCommand{
             jzActivity.pdfView.recycle();
             Log.w(TAG, "process: " + map_num);
             jzActivity.displayFromFile(map.getUri());
-
-            jzActivity.isAutoTrans = false;
+            off();
             jzActivity.autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
             jzActivity.getWhiteBlankData();
         }else {

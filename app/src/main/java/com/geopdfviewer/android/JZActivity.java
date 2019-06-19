@@ -141,7 +141,8 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     List<Map> maps;//缓存所有map数据
     Map currentMap;//当前map数据
 
-
+    //声明命令
+    TransMapCommand transMapCommand;
 
     //声明bts容器
     List<bt> bts;
@@ -177,8 +178,6 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
 
     public boolean isGetStretchRatio = false;
 
-    //记录是否自动切换地图
-    public boolean isAutoTrans = false;
     //按钮声明
     ImageButton autoTrans_imgbt;
 
@@ -2254,7 +2253,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
             if (!drawLineFeature.isEmpty())
                 drawLineFromLineString("", mdrawLineFeature, false, false, canvas, paint9, paint2);
         }
-        if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
+        if (transMapCommand.isON() && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
             int size = maps.size();
             if (size > 1) {
                 float thedelta = 0;
@@ -2317,7 +2316,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                 }
             } else
                 Toast.makeText(JZActivity.this, JZActivity.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-        } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
+        } else if (c_zoom <= 1.5 && transMapCommand.isON() && isZoom == TuzhiEnum.ZOOM_OUT) {
             int size = maps.size();
             if (size > 1) {
                 float thedelta = 0;
@@ -6046,13 +6045,11 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
             autoTrans_imgbt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (isAutoTrans) {
-                        TransMapCommand.getInstance(JZActivity.this).off();
-                        isAutoTrans = false;
+                    if (transMapCommand.isON()) {
+                        transMapCommand.off();
                         autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                     } else {
-                        TransMapCommand.getInstance(JZActivity.this).on();
-                        isAutoTrans = true;
+                        transMapCommand.on();
                         autoTrans_imgbt.setBackgroundResource(R.drawable.ic_check_black_24dp);
                     }
                 }
@@ -7294,7 +7291,6 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     }
 
     public void processTransMapCommand(int thenum){
-        TransMapCommand transMapCommand = TransMapCommand.getInstance(this);
         transMapCommand.setMap_num(thenum);
         transMapCommand.process();
     }
@@ -7507,7 +7503,9 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         }*/
     }
 
-
+    public void initCommands(){
+        transMapCommand = TransMapCommand.getInstance(JZActivity.this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -7515,6 +7513,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         setContentView(R.layout.activity_jz);
 
         doSpecificOperation();
+        initCommands();
         try {
             cacheMaps();
             showMap();
