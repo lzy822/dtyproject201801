@@ -1,8 +1,11 @@
 package com.geopdfviewer.android;
 
 import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
-public class TransMapCommand implements BtCommand {
+public class TransMapCommand implements BtCommand{
+    private static final String TAG = "TransMapCommand";
     private volatile static TransMapCommand uniqueInstance;
     private boolean isON;
     private JZActivity jzActivity;
@@ -19,6 +22,8 @@ public class TransMapCommand implements BtCommand {
 
     public void setMap_num(int map_num) {
         this.map_num = map_num;
+        jzActivity.num_map1 = jzActivity.num_map;
+        jzActivity.num_map = map_num;
     }
 
     @Override
@@ -29,9 +34,23 @@ public class TransMapCommand implements BtCommand {
     @Override
     public void process() {
         if (isON){
+            jzActivity.geometry_whiteBlanks.clear();
+            jzActivity.num_whiteBlankPt = 0;
+            jzActivity.isWhiteBlank = false;
+            jzActivity.whiteBlankPt = "";
+            jzActivity.getInfo(map_num);
             jzActivity.updateMapInfo(map_num);
-            jzActivity.manageInfo(jzActivity.mGpts);
-            jzActivity.displayFromFile(jzActivity.mUri);
+            Map map = jzActivity.currentMap;
+            jzActivity.toolbar.setTitle(map.getName());
+            jzActivity.getNormalBitmap();
+            //manageInfo();
+            jzActivity.pdfView.recycle();
+            Log.w(TAG, "process: " + map_num);
+            jzActivity.displayFromFile(map.getUri());
+
+            jzActivity.isAutoTrans = false;
+            jzActivity.autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+            jzActivity.getWhiteBlankData();
         }else {
 
         }
@@ -52,4 +71,6 @@ public class TransMapCommand implements BtCommand {
         }
         return uniqueInstance;
     }
+
+
 }
