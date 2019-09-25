@@ -4825,6 +4825,23 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
             locError("verx: " + Double.toString(max_lat - m_lat) + "&&" + Double.toString(max_lat - min_lat) + "Come here");
             //setHereLocation();
 
+            /*
+             *  创建测试地理围栏
+             *  使用“点是否在面内”进行简单判断
+             *
+             *  @see    com.geopdfviewer.android.LatLng
+             *
+             *  @author 李正洋
+             *
+             *  @since  1.7
+             */
+            //  TODO 地理围栏
+            List<LatLng> m_geoland = new ArrayList<>();
+            m_geoland.add(new LatLng((float)25.1438, (float)102.7034));
+            m_geoland.add(new LatLng((float)24.9172, (float)102.5564));
+            m_geoland.add(new LatLng((float)24.9064, (float)102.8613));
+            LatLng m_latlng = new LatLng((float)m_lat, (float)m_long);
+            locError("wgs2000; " + LatLng.PtInPolygon(m_latlng, m_geoland));
         }
     }
 
@@ -5252,10 +5269,10 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         //LitePal.deleteAll(DMBZ.class);
         Sampler.getInstance().init(JZActivity.this, 100);
         Sampler.getInstance().start();
-        updateDBFormOldToNow();
-        initEsterEgg();
+        updateDBFormOldToNow();//将老数据库内容转换为array所存的类型
+        initEsterEgg();//初始化当前彩蛋
         //LitePal.deleteAll(IconDataset.class);
-        initIconBitmap(addIconDataset());
+        initIconBitmap(addIconDataset());//进行武警DEMO的图例缓存
         /*
         PointCollection points = new PointCollection(SpatialReferences.getWgs84());
         for (int i = 0; i < 10; ++i){
@@ -5274,8 +5291,23 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         Log.w(TAG, "doSpecificOperation: " + i);
         */
 
+
     }
 
+
+    /*
+     *  用于缓存武警DEMO的图例数据
+     *  访问根目录下的./原图 文件夹
+     *
+     *  如果IconDataset数据库中没有数据且该文件夹存在
+     *  就进行图例缓存
+     *
+     *  @author 李正洋
+     *
+     *  @see    com.geopdfviewer.android.IconDataset
+     *
+     *  @since  1.6
+     */
     public List<IconDataset> addIconDataset() {
         List<IconDataset> iconDatasets1 = LitePal.findAll(IconDataset.class);
         File file = new File(Environment.getExternalStorageDirectory().toString() + "/原图");
@@ -5409,6 +5441,25 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     public List<bt> IconBitmaps;
     public int iconBitmapNum;
 
+    /*
+     *  用于缓存武警DEMO的图例数据
+     *
+     *  根据图例原图地址逐张生成缩略图
+     *  将缩略图缓存到IconBitmaps全局变量中
+     *
+     *  将MPOI数据库中的数据也逐张生成缩略图
+     *  将缩略图缓存到IconBitmaps全局变量中
+     *
+     *  获取IconBitmaps缓存的缩略图数目
+     *  存放到iconBitmapNum全局变量中
+     *
+     *  @author 李正洋
+     *
+     *  @param  iconDatasets    所有图例的地址缓存List
+     *
+     *  @see    com.geopdfviewer.android.IconDataset
+     *  @since  1.6
+     */
     public void initIconBitmap(final List<IconDataset> iconDatasets) {
         new Thread(new Runnable() {
             @Override
@@ -7725,6 +7776,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jz);
 
+        Log.w(TAG, "wgs2000 onCreate: ");
         doSpecificOperation();
         initCommands();
         try {
@@ -7740,6 +7792,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
 
     @Override
     protected void onResume() {
+        Log.w(TAG, "wgs2000 onResume: ");
         if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             Log.w(TAG, "onResume: isOK");
             receiveQueryForMap();

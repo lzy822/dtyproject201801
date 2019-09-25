@@ -5140,10 +5140,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         //LitePal.deleteAll(DMBZ.class);
         Sampler.getInstance().init(MainInterface.this, 100);
         Sampler.getInstance().start();
-        updateDBFormOldToNow();
-        initEsterEgg();
+        updateDBFormOldToNow();//将老数据库内容转换为array所存的类型
+        initEsterEgg();//初始化当前彩蛋
         //LitePal.deleteAll(IconDataset.class);
-        initIconBitmap(addIconDataset());
+        initIconBitmap(addIconDataset());//进行武警DEMO的图例缓存
         /*
         PointCollection points = new PointCollection(SpatialReferences.getWgs84());
         for (int i = 0; i < 10; ++i){
@@ -5164,6 +5164,19 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     }
 
+    /*
+     *  用于缓存武警DEMO的图例数据
+     *  访问根目录下的./原图 文件夹
+     *
+     *  如果IconDataset数据库中没有数据且该文件夹存在
+     *  就进行图例缓存
+     *
+     *  @author 李正洋
+     *
+     *  @see    com.geopdfviewer.android.IconDataset
+     *
+     *  @since  1.6
+     */
     private List<IconDataset> addIconDataset() {
         List<IconDataset> iconDatasets1 = LitePal.findAll(IconDataset.class);
         File file = new File(Environment.getExternalStorageDirectory().toString() + "/原图");
@@ -5294,9 +5307,28 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         popupWindow.showAtLocation(popView, Gravity.TOP, 0, 400);
     }
 
-    private List<bt> IconBitmaps;
-    private int iconBitmapNum;
+    private List<bt> IconBitmaps;//用于缓存所有图例的缩略图
+    private int iconBitmapNum;//用于记录缩略图数目
 
+    /*
+     *  用于缓存武警DEMO的图例数据
+     *
+     *  根据图例原图地址逐张生成缩略图
+     *  将缩略图缓存到IconBitmaps全局变量中
+     *
+     *  将MPOI数据库中的数据也逐张生成缩略图
+     *  将缩略图缓存到IconBitmaps全局变量中
+     *
+     *  获取IconBitmaps缓存的缩略图数目
+     *  存放到iconBitmapNum全局变量中
+     *
+     *  @author 李正洋
+     *
+     *  @param  iconDatasets    所有图例的地址缓存List
+     *
+     *  @see    com.geopdfviewer.android.IconDataset
+     *  @since  1.6
+     */
     private void initIconBitmap(final List<IconDataset> iconDatasets) {
         new Thread(new Runnable() {
             @Override
@@ -7051,7 +7083,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
 
-
+        Log.w(TAG, "onCreate: ");
         int num = receiveInfo();
         if (num != -1) {
             doSpecificOperation();
@@ -7066,6 +7098,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     @Override
     protected void onResume() {
+        Log.w(TAG, "onResume: ");
         if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             Log.w(TAG, "onResume: isOK");
             receiveQueryForMap();
