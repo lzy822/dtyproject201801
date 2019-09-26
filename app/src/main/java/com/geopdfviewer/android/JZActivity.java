@@ -4826,23 +4826,83 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
             //setHereLocation();
 
             /*
-             *  创建测试地理围栏
-             *  使用“点是否在面内”进行简单判断
-             *
-             *  @see    com.geopdfviewer.android.LatLng
-             *
-             *  @author 李正洋
-             *
-             *  @since  1.7
+             *  调用地理围栏功能测试模块
              */
-            //  TODO 地理围栏
-            List<LatLng> m_geoland = new ArrayList<>();
-            m_geoland.add(new LatLng((float)25.1438, (float)102.7034));
-            m_geoland.add(new LatLng((float)24.9172, (float)102.5564));
-            m_geoland.add(new LatLng((float)24.9064, (float)102.8613));
-            LatLng m_latlng = new LatLng((float)m_lat, (float)m_long);
-            locError("wgs2000; " + LatLng.PtInPolygon(m_latlng, m_geoland));
+            //  TODO    调用地理围栏功能测试模块
+            testGeoFenceFunction();
         }
+    }
+
+    /*
+     *  地理围栏功能测试模块
+     *  使用“点是否在面内”进行简单判断
+     *
+     *
+     *  @see    com.geopdfviewer.android.LatLng
+     *
+     *  @author 李正洋
+     *
+     *  @since  1.7
+     */
+    private void testGeoFenceFunction() {
+        //  TODO    地理围栏功能测试模块
+        List<List<LatLng>> m_geolands = createGeoFence();//所有地理围栏
+
+        LatLng m_latlng = new LatLng((float)m_lat, (float)m_long);//当前设备坐标
+
+        boolean inGeoFence = beInGeoFence(m_latlng, m_geolands);//检测当前设备是否在地理围栏中
+
+        locError("wgs2000; " + inGeoFence);//输出检测结果
+    }
+
+    /*
+     *  创建地理围栏
+     *
+     *
+     *  @see    com.geopdfviewer.android.LatLng
+     *
+     *  @author 李正洋
+     *
+     *  @since 1.7
+     */
+    private List<List<LatLng>> createGeoFence(){
+        //  TODO    创建地理围栏
+        List<List<LatLng>> m_geolands = new ArrayList<>();//存储所有地理围栏
+
+        List<LatLng> m_geoland0 = new ArrayList<>();//地理围栏0
+        m_geoland0.add(new LatLng((float)25.1438, (float)102.7034));
+        m_geoland0.add(new LatLng((float)24.9172, (float)102.5564));
+        m_geoland0.add(new LatLng((float)24.9064, (float)102.8613));
+
+        m_geolands.add(m_geoland0);
+        return m_geolands;
+    }
+
+    /*
+     *  检测当前设备是否在地理围栏中
+     *
+     *
+     *  @see    com.geopdfviewer.android.LatLng
+     *
+     *  @author 李正洋
+     *
+     *  @since 1.7
+     */
+    private boolean beInGeoFence(LatLng m_latlng, List<List<LatLng>> m_geolands) {
+        //  TODO    检测当前设备是否在地理围栏中
+        boolean beInFence = false;//记录当前设备是否在地理围栏中
+
+        /*
+         *  检测当前设备是否在地理围栏中
+         */
+        for(int i = 0; i < m_geolands.size(); ++i){
+            if (LatLng.PtInPolygon(m_latlng, m_geolands.get(i))){
+                beInFence = true;
+                break;
+            }
+        }
+
+        return beInFence;
     }
 
     //退出提醒弹窗
