@@ -5,6 +5,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 
+/**
+ *
+ * 检测是否存在第三方地图app
+ * 如果有则直接调用其导航功能
+ *
+ *
+ */
 public class CheckApkExist {
     private static String BaiduMapPkgName = "com.baidu.BaiduMap";
     private static String TencentMapPkgName = "com.tencent.map";

@@ -4833,7 +4833,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         }
     }
 
-    /*
+    /**
      *  地理围栏功能测试模块
      *  使用“点是否在面内”进行简单判断
      *
@@ -4855,7 +4855,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         locError("wgs2000; " + inGeoFence);//输出检测结果
     }
 
-    /*
+    /**
      *  创建地理围栏
      *
      *
@@ -4878,7 +4878,7 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         return m_geolands;
     }
 
-    /*
+    /**
      *  检测当前设备是否在地理围栏中
      *
      *
