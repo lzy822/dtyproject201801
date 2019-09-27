@@ -5,6 +5,10 @@ import android.graphics.PointF;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+/**
+ * 渲染工具类
+ * 用于存储渲染方法
+ */
 public class RenderUtil {
     //设置当前地图切换查询的容许误差值
     public static double getDeltaKforTrans(float page_width, double max_long, double min_long, Activity activity, TuzhiEnum type){

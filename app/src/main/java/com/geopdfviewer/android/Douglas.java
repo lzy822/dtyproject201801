@@ -5,6 +5,10 @@ import android.graphics.PointF;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 道格拉斯普克算法
+ * 用于简化线中的点位
+ */
 public class Douglas {
     // 存储用于处理的点的List列表
     private List<PointF> list = null;

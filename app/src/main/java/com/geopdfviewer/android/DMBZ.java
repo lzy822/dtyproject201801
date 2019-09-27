@@ -2,6 +2,10 @@ package com.geopdfviewer.android;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 地名标志类
+ * 用于存储地名标志数据，须区分于地名点数据类
+ */
 public class DMBZ extends LitePalSupport{
     private String XH;
     private String DY;

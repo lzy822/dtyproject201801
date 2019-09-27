@@ -2,6 +2,10 @@ package com.geopdfviewer.android;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 地名点类
+ * 用于存储地名点数据
+ */
 public class DMPoint extends LitePalSupport{
     private String xh;
     private String qydm;

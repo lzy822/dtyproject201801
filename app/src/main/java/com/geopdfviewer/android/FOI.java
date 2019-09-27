@@ -1,5 +1,8 @@
 package com.geopdfviewer.android;
 
+/**
+ * 兴趣要素类
+ */
 public class FOI {
     protected String name;
 

@@ -53,6 +53,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 兴趣点显示页面
+ * 用于显示兴趣点
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ */
 public class singlepoi extends AppCompatActivity {
 
     private static final String TAG = "singlepoi";

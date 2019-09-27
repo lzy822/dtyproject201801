@@ -2,6 +2,17 @@ package com.geopdfviewer.android;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 地图数据存储类
+ * 用于存储geopdf的基础数据内容
+ * 该内容有对应的数据表
+ *
+ * 该数据取自geopdf中的内容
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ */
 public class Map extends LitePalSupport {
     private String name;
     private String wkt;

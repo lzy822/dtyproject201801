@@ -1,5 +1,9 @@
 package com.geopdfviewer.android;
 
+/**
+ * 整型伪枚举类
+ * 用于记录该项目中出现的大多数枚举内容
+ */
 public class EnumClass {
     //记录测量类型（距离测量或面积测量）
     public final static int MESSURE_NONE_TYPE = 0;

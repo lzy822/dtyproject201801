@@ -4,6 +4,15 @@ import android.graphics.PointF;
 
 import java.util.List;
 
+/**
+ * 经纬度类
+ * 用于存储经纬度，用于进行坐标转换，用于进行屏幕坐标转换
+ * 用于基础空间分析，如距离，面积，点是否在面内
+ *
+ * @author 李正洋
+ *
+ * @since 1.4
+ */
 public class LatLng {
     public static double x_PI = 3.14159265358979324 * 3000.0 / 180.0;
     public static double PI = 3.1415926535897932384626;

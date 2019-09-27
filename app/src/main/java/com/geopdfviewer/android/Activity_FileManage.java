@@ -21,6 +21,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 文件管理器界面
+ * 用于显示当前的文件夹内容
+ *
+ * @author  李正洋
+ *
+ * @since   1.4
+ */
 public class Activity_FileManage extends AppCompatActivity {
 
     private static final String TAG = "Activity_FileManage";

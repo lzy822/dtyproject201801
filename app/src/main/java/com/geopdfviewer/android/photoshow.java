@@ -41,6 +41,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 图片显示界面
+ * 用于显示与各类兴趣点绑定的照片内容
+ *
+ * @see com.geopdfviewer.android.mPhotobj
+ * @see com.geopdfviewer.android.MPHOTO
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ */
 public class photoshow extends AppCompatActivity {
 
     private static final String TAG = "photoshow";

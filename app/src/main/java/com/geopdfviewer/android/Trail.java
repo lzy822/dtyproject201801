@@ -5,6 +5,13 @@ import org.litepal.crud.LitePalSupport;
 import java.util.List;
 
 /**
+ * 路径记录类
+ * 用于存储记录的路径信息，与地图相关联
+ * 该内容有对应的数据表
+ *
+ * @author  李正洋
+ *
+ * @since   1.3
  * Created by 54286 on 2018/3/15.
  */
 

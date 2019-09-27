@@ -2,6 +2,13 @@ package com.geopdfviewer.android;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 白板线类
+ * 用于存储白板的空间信息，序号，颜色和空间索引
+ * 该内容有对应的数据表
+ *
+ * @author  李正洋
+ */
 public class Lines_WhiteBlank extends LitePalSupport {
     private String ic;
     private String lines;

@@ -2,6 +2,15 @@ package com.geopdfviewer.android;
 
 import java.util.Iterator;
 
+/**
+ * 地图组件抽象类
+ * 用于被继承，MapFrame和MapItem的基类
+ *
+ * @author  李正洋
+ *
+ * @since   1.6
+ *
+ */
 public abstract class MapComponent {
 
 

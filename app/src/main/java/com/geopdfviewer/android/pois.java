@@ -21,6 +21,11 @@ import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 兴趣点批量展示页面
+ * 用于以列表的形式批量展示该地图范围内的兴趣点
+ *
+ */
 public class pois extends AppCompatActivity {
     private static final String TAG = "pois";
     private String ic;

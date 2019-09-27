@@ -1,9 +1,16 @@
 package com.geopdfviewer.android;
 
 /**
+ * 音频对象类
+ * 该类用于音频要素表的缓存
+ * 相比于MTAPE类多存储了空间信息
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ *
  * Created by 54286 on 2018/3/20.
  */
-
 public class mTapeobj {
     private String m_POIC;
     private String m_name;

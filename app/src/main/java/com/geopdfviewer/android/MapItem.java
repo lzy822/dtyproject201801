@@ -4,6 +4,14 @@ import android.util.Log;
 
 import java.util.Iterator;
 
+/**
+ * 叶地图类，类似于菜单项
+ * 用于存储没有下一级地图的地图数据
+ *
+ * @author  李正洋
+ *
+ * @since   1.6
+ */
 public class MapItem extends MapComponent {
     private static final String TAG = "MapItem";
     private String position;

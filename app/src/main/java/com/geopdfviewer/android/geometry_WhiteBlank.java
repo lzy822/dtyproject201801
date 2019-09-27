@@ -1,5 +1,11 @@
 package com.geopdfviewer.android;
 
+/**
+ * 白板要素类
+ * 用于缓存白板的空间信息，序号，颜色和空间索引
+ *
+ * @author  李正洋
+ */
 public class geometry_WhiteBlank {
     private String ic;
     private String m_lines;

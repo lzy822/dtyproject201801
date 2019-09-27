@@ -28,6 +28,18 @@ import org.litepal.LitePal;
 import java.text.DecimalFormat;
 import java.util.List;
 
+/**
+ * 盘龙区兴趣点显示界面
+ * 用于显示盘龙区兴趣点的概略数据
+ *
+ * @see com.geopdfviewer.android.plqyp  记录盘龙区音频数据
+ * @see com.geopdfviewer.android.plqzp  记录盘龙区照片数据
+ * @see com.geopdfviewer.android.kmltest    记录kml中直接导入盘龙区poi数据
+ *
+ * @author  李正洋
+ *
+ * @since   1.4
+ */
 public class plqpoishow extends AppCompatActivity {
     private static final String TAG = "plqpoishow";
     private String xh, dmbzbzmc, dmbzmc, xzqdm, gg, sccj, szdw, xzq, zp, yp;

@@ -113,6 +113,14 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * 地图主界面
+ * 用于显示地图内容
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ */
 public class MainInterface extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener, OnDrawListener, OnTapListener {
     private static final String TAG = "MainInterface";

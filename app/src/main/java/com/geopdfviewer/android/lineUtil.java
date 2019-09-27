@@ -6,6 +6,12 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 线操作类
+ * 用于进行线数据的操作
+ *
+ * @author  李正洋
+ */
 public class lineUtil {
     private static final String TAG = "lineUtil";
     private static final long time = 100;

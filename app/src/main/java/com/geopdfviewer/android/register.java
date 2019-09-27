@@ -31,6 +31,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 注册页面
+ * 用于进行授权
+ *
+ * @author  李正洋
+ *
+ * @since   1.3
+ */
 public class register extends AppCompatActivity {
     EditText editText;
     Button button1;

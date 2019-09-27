@@ -5,6 +5,14 @@ import android.os.Environment;
 import java.io.File;
 import java.util.List;
 
+/**
+ * 内置文件管理器
+ *
+ * @author 李正洋
+ *
+ * @since 1.2
+ *
+ */
 public class FileManage {
     private String RootPath;
     private String LastPath;

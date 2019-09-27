@@ -22,6 +22,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 路径记录的后台服务类
+ * 用于以后台服务的形式记录路径
+ *
+ * @author  李正洋
+ *
+ * @since   1.3
+ */
 public class RecordTrail extends Service {
     private static final String TAG = "RecordTrail";
 

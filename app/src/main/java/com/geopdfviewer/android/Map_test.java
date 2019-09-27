@@ -3,7 +3,14 @@ package com.geopdfviewer.android;
 import android.net.Uri;
 
 /**
- * Created by 54286 on 2018/3/6.
+ * 地图数据缓存类
+ * 用于缓存geopdf的基础数据内容
+ *
+ * 该数据取自geopdf中的内容
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
  */
 
 public class Map_test {

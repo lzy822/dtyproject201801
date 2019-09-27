@@ -1,9 +1,17 @@
 package com.geopdfviewer.android;
 
+
 /**
+ * 兴趣点缓存类
+ * 该类用于兴趣点表的缓存
+ * 相比于MPOI类多存储了描述，录音和照片数据
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ *
  * Created by 54286 on 2018/3/20.
  */
-
 public class mPOIobj {
     private String m_POIC;
     private float m_X;

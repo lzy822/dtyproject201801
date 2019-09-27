@@ -6,6 +6,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * 非叶地图类，类似于子菜单类
+ * 用于存储有下一级地图的地图数据
+ *
+ * @author  李正洋
+ *
+ * @since   1.6
+ */
 public class MapFrame extends MapComponent {
     private static final String TAG = "MapFrame";
     List<MapComponent> mapComponentList = new ArrayList<>();

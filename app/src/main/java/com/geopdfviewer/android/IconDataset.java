@@ -1,12 +1,13 @@
 package com.geopdfviewer.android;
 
 import org.litepal.crud.LitePalSupport;
-/*
+/**
  *  用来存储武警DEMO中的图例样式
  *  访问根目录下的./原图 文件夹
  *
  *  @author 李正洋
  *
+ * @since 1.5
  */
 public class IconDataset extends LitePalSupport{
     private String path;

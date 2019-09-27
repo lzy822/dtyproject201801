@@ -3,9 +3,16 @@ package com.geopdfviewer.android;
 import org.litepal.crud.LitePalSupport;
 
 /**
+ * 音频要素类
+ * 用于记录与兴趣点绑定的音频数据
+ * 该内容有对应的数据表，音频要素表与兴趣点表通过poic字段相连接
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ *
  * Created by 54286 on 2018/3/19.
  */
-
 public class MTAPE extends LitePalSupport {
     private int id;
     private String pdfic;

@@ -4,6 +4,10 @@ import org.litepal.crud.LitePalSupport;
 
 import java.util.List;
 
+/**
+ * 地名线类
+ * 用于存储地名线数据
+ */
 public class DMLine extends LitePalSupport{
     private String xh;
     private String qydm;

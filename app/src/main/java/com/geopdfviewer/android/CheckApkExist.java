@@ -6,7 +6,7 @@ import android.content.pm.PackageManager;
 import android.text.TextUtils;
 
 /**
- *
+ * 第三方地图app检测类
  * 检测是否存在第三方地图app
  * 如果有则直接调用其导航功能
  *

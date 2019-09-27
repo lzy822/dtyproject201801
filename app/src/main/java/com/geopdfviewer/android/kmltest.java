@@ -2,6 +2,16 @@ package com.geopdfviewer.android;
 
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 盘龙区兴趣点类
+ * 用于记录由kml数据直接转换来的盘龙区兴趣点数据
+ * 该表通过xh字段与plqzp表和plqyp表相连接
+ * 该内容有对应的数据表
+ *
+ * @author  李正洋
+ *
+ * @since   1.4
+ */
 public class kmltest extends LitePalSupport{
     private String xh;
     private String dmbzmc;

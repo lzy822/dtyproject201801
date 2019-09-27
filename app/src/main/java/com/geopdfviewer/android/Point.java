@@ -1,5 +1,12 @@
 package com.geopdfviewer.android;
 
+/**
+ * Pointf的扩展类
+ * 用于更精确的存储x,y类型的坐标数据
+ *
+ * @author  李正洋
+ *
+ */
 public class Point {
     private double x;
     private double y;

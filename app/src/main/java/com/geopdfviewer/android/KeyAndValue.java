@@ -1,5 +1,16 @@
 package com.geopdfviewer.android;
 
+/**
+ * 键值对类
+ * 用于存储键值对
+ *
+ * 现在可用hashmap，map等集合类进行存储
+ *
+ *
+ * @author 李正洋
+ *
+ * @since   1.4
+ */
 public class KeyAndValue {
     private String key;
     private String value;

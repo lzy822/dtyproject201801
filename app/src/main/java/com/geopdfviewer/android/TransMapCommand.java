@@ -4,6 +4,14 @@ import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+/**
+ * 自动切换地图命令类
+ * 用于以命令类的形式存储动态切图的命令
+ *
+ * @author  李正洋
+ *
+ * @since   1.6
+ */
 public class TransMapCommand implements BtCommand{
     private static final String TAG = "TransMapCommand";
     private volatile static TransMapCommand uniqueInstance;

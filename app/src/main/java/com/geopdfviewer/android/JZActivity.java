@@ -124,6 +124,14 @@ import java.util.TimerTask;
 
 import static com.geopdfviewer.android.DataUtil.renamePath1;
 
+/**
+ * 举证界面
+ * 用于显示定制化的举证内容
+ *
+ * @author 李正洋
+ *
+ * @since 1.6
+ */
 public class JZActivity extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener, OnDrawListener, OnTapListener {
 

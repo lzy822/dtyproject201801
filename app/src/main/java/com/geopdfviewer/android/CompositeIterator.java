@@ -3,6 +3,18 @@ package com.geopdfviewer.android;
 import java.util.Iterator;
 import java.util.Stack;
 
+/**
+ * 栈迭代器类
+ * 用于返回一个复合迭代器，既能返回MapFrame又能返回MapItem
+ *
+ * @see com.geopdfviewer.android.MapComponent
+ * @see com.geopdfviewer.android.MapFrame
+ * @see com.geopdfviewer.android.MapItem
+ *
+ * @author  李正洋
+ *
+ * @since   1.6
+ */
 public class CompositeIterator implements Iterator {
     Stack stack = new Stack();
 

@@ -1,5 +1,9 @@
 package com.geopdfviewer.android;
 
+/**
+ * 距离类
+ * 用于存储当前子路径的距离
+ */
 public class DistanceLatLng extends LatLng {
     private float distance;
 

@@ -31,6 +31,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 录音显示页面
+ * 用于显示兴趣点中的录音内容
+ *
+ * @author  李正洋
+ *
+ * @since   1.7
+ */
 public class tapeshow extends AppCompatActivity {
     private static final String TAG = "tapeshow";
     private String POIC;

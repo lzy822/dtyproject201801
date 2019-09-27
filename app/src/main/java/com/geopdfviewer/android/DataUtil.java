@@ -43,6 +43,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 数据操作类
+ * 用于进行和数据相关的操作
+ *
+ * @author  李正洋
+ *
+ * @since   1.3
+ */
 public class DataUtil {
     private static final String TAG = "DataUtil";
     public static Context mContext;

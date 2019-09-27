@@ -3,6 +3,13 @@ package com.geopdfviewer.android;
 import org.litepal.crud.LitePalSupport;
 
 /**
+ * 兴趣点类
+ * 用于记录兴趣点内容
+ *
+ * @author  李正洋
+ *
+ * @since   1.3
+ *
  * Created by 54286 on 2018/3/15.
  */
 

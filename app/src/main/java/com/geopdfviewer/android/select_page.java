@@ -77,6 +77,15 @@ import java.util.zip.ZipOutputStream;
 import static com.geopdfviewer.android.DataUtil.makeTxt;
 import static com.geopdfviewer.android.DataUtil.renamePath1;
 
+/**
+ * 地图选择界面
+ * 用于添加和删除地图，
+ * 导入和导出数据
+ *
+ * @author 李正洋
+ *
+ * @since   1.1
+ */
 public class select_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
 

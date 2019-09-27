@@ -12,6 +12,12 @@ import java.util.concurrent.TimeUnit;
 
 import static android.os.Process.myPid;
 
+/**
+ * 统计分析类
+ * 用于分析该应用的内存空间占用数据
+ *
+ * @since 1.4
+ */
 public class Sampler implements Runnable {
     private volatile static Sampler instance = null;
     private ScheduledExecutorService scheduler;

@@ -2,6 +2,14 @@ package com.geopdfviewer.android;
 
 import android.support.v7.app.AppCompatActivity;
 
+/**
+ * 定位当前位置命令类
+ * 用于以命令类的形式存储定位到当前位置的命令
+ *
+ * @author  李正洋
+ *
+ * @since   1.6
+ */
 public class LocHereCommand implements BtCommand {
     private volatile static LocHereCommand uniqueInstance;
     private boolean isON;

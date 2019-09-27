@@ -31,6 +31,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * 版本信息界面
+ * 用于显示开发者想展示的版本信息内容
+ *
+ * @author  李正洋
+ *
+ * @since   1.1
+ */
 public class info_page extends AppCompatActivity implements OnPageChangeListener, OnLoadCompleteListener,
         OnPageErrorListener {
     private static final String TAG = "info_page";
