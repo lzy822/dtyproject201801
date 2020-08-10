@@ -4331,9 +4331,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (pois.get(position).getM_POIC().contains("POI")) {
-                    Intent intent = new Intent(MainInterface.this, singlepoi.class);
+                    GoNormalSinglePOIPage(pois.get(position).getM_POIC());
+                    /*Intent intent = new Intent(MainInterface.this, singlepoi.class);
                     intent.putExtra("POIC", pois.get(position).getM_POIC());
-                    MainInterface.this.startActivity(intent);
+                    MainInterface.this.startActivity(intent);*/
                 } else if (esterEgg_plq && !esterEgg_lm) {
                     Intent intent = new Intent(MainInterface.this, plqpoishow.class);
                     intent.putExtra("xh", pois.get(position).getM_POIC());
@@ -7001,6 +7002,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
+
+        //Toast.makeText(this, "locate here", Toast.LENGTH_SHORT).show();
+
 
         Log.w(TAG, "onCreate: ");
         int num = receiveInfo();

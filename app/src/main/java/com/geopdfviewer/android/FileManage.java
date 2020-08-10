@@ -1,9 +1,12 @@
 package com.geopdfviewer.android;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.util.List;
+
+import static com.geopdfviewer.android.JZActivity.TAG;
 
 /**
  * 内置文件管理器
@@ -28,9 +31,12 @@ public class FileManage {
 
     public FileManage(String fileType) {
         RootPath = Environment.getExternalStorageDirectory().toString();
+        Log.w(TAG, "FileManagelzyRootPath: " + RootPath);
         LastPath = Environment.getExternalStorageDirectory().toString();
+        Log.w(TAG, "FileManagelzyLastPath: " + LastPath);
         FileType = fileType;
         file = new File(RootPath);
+        Log.w(TAG, "FileManagelzyRootPath: " + file.listFiles().length);
         if (FileType.equals("")) FileSubset = file.list();
         else {
             String[] strings = file.list();

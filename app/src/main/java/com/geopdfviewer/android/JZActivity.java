@@ -6416,14 +6416,19 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
     }
 
     public void getWhiteBlankData() {
-        if (currentMap.getIc() != null) {
-            List<Lines_WhiteBlank> lines = LitePal.where("ic = ?", currentMap.getIc()).find(Lines_WhiteBlank.class);
-            if (lines.size() >= 0) {
-                for (Lines_WhiteBlank line : lines) {
-                    geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getIc(), line.getLines(), line.getColor(), line.getMaxlat(), line.getMaxlng(), line.getMinlat(), line.getMinlng());
-                    geometry_whiteBlanks.add(geometry_whiteBlank);
+        try {
+            if (currentMap.getIc() != null) {
+                List<Lines_WhiteBlank> lines = LitePal.where("ic = ?", currentMap.getIc()).find(Lines_WhiteBlank.class);
+                if (lines.size() >= 0) {
+                    for (Lines_WhiteBlank line : lines) {
+                        geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getIc(), line.getLines(), line.getColor(), line.getMaxlat(), line.getMaxlng(), line.getMinlat(), line.getMinlng());
+                        geometry_whiteBlanks.add(geometry_whiteBlank);
+                    }
                 }
             }
+        }catch (Exception e)
+        {
+
         }
     }
 
@@ -7405,9 +7410,12 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
         }catch (Exception e){
             Log.w(TAG, "onCreate: " + e.toString());
         }
-        initVariable();
-        initWidget();
-
+        try {
+            initVariable();
+            initWidget();
+        }catch (Exception e) {
+            Log.w(TAG, "onCreate: initVariableAndWidgetException" + e.toString());
+        }
     }
 
     @Override

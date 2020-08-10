@@ -12,7 +12,7 @@
     <string name="NoInRedLine">不在生态保护红线内</string>
     <string name="RedLineError">请输入标准经纬度格式</string>
     <string name="NoLongClickError">请长按某个子项后, 再选择菜单栏操作</string>
-    <string name="version_info">1.7</string>
+    <string name="version_info">1.8</string>
     <string name="version_info_0">当前版本: </string>
     <string name="QueryPathError">请安装一款主流地图软件</string>
     <string name="QueryPathError1">路径规划查询中出现了未知错误</string>
@@ -90,5 +90,8 @@
     <string name="Date_1">yyyyMMdd</string>
     <string name="FileManage">文件管理器</string>
     <string name="RegisterError_1">授权码已经过期, 请重新获取!</string>
+    <string name="title_activity_house_info_window">HouseInfoWindow</string>
+    <string name="title_activity_right_person_info_window">RightPersonInfoWindow</string>
+    <string name="title_activity_parcel_info_window">ParcelInfoWindow</string>
 
 </resources>
