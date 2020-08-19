@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -97,6 +98,7 @@ public class register extends AppCompatActivity {
             SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
             editor.putString("mimei", deviceId);
             editor.putString("password", DataUtil.getPassword1(deviceId.substring(deviceId.length() - 6)).substring(0, 6));
+            Log.w(TAG, "verifyLisenceStatus: " + DataUtil.getPassword1(deviceId.substring(deviceId.length() - 6)).substring(0, 6));
             editor.putBoolean("type", false);
             editor.apply();
             return false;
@@ -157,12 +159,14 @@ public class register extends AppCompatActivity {
 
     //获取设备IMEI码
     public String getIMEI(){
-        /*String deviceId = "";
+        String deviceId = "";
         try {
 
-            TelephonyManager telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-            deviceId = telephonyManager.getDeviceId();
-
+            /*TelephonyManager telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+            deviceId = telephonyManager.getDeviceId();*/
+            deviceId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+            deviceId = deviceId.substring(1);
+            Log.w(TAG, "getIMEI: " + deviceId);
             ;
         }catch (SecurityException e){
 
@@ -170,9 +174,10 @@ public class register extends AppCompatActivity {
 
         }
         return deviceId;
-        */
-        Log.w(TAG, "getIMEI: " + getUUID());
-        return getUUID();
+
+
+        //Log.w(TAG, "getIMEI: " + getUUID());
+        //return getUUID();
     }
 
     /*

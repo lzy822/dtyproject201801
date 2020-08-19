@@ -85,12 +85,12 @@ public class DataUtil {
         password = password.replace("7", "s");
         password = password.replace("8", "W");
         password = password.replace("9", "F");
-        password = password.replace("A", "d");
-        password = password.replace("B", "o");
-        password = password.replace("C", "O");
-        password = password.replace("D", "n");
-        password = password.replace("E", "v");
-        password = password.replace("F", "C");
+        password = password.replace("a", "d");
+        password = password.replace("b", "o");
+        password = password.replace("c", "O");
+        password = password.replace("d", "n");
+        password = password.replace("e", "v");
+        password = password.replace("f", "C");
         return password;
     }
 

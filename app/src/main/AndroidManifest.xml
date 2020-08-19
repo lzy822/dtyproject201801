@@ -39,11 +39,6 @@
             android:hardwareAccelerated="true"
             android:label="图志"
             android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter tools:ignore="AppLinkUrlError">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -86,7 +81,14 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".register" />
+        <activity android:name=".register" >
+
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
         <activity android:name=".plqpoishow" />
         <activity android:name=".Activity_FileManage" />
         <activity android:name=".JZActivity" />
