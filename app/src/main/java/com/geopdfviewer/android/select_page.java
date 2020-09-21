@@ -109,6 +109,20 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private LocationManager locationManager;
 
+    class MapCollectionType{
+        //NONE, GROSS, XTZ, ZYHJTZ, SHJJTZ, QYDLTZ
+        public static final int NONE = -1;
+        public static final int GROSS = 0;
+        public static final int XTZ = 1;
+        public static final int ZYHJTZ = 2;
+        public static final int SHJJTZ = 3;
+        public static final int QYDLTZ = 4;
+
+    }
+
+    //标识当前是否处于选择地图的状态
+    private int mapCollectionType = MapCollectionType.GROSS;
+
     @Override
     public void loadComplete(int nbPages) {
 
@@ -275,8 +289,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
     }
 
-    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic, String center_latlong) {
-        Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
+    public void initMapNext(int num, String name, String WKT, String uri, String GPTS, String BBox, String imguri, String MediaBox, String CropBox, String ic, String center_latlong, int MapType) {
+        Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong, MapType);
         map_tests[num_pdf - 1] = mapTest;
         map_testList.clear();
         for (int i = 0; i < num_pdf; ++i) {
@@ -301,9 +315,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String CropBox = pref1.getString(str + "CropBox", "");
             String center_latlong = pref1.getString(str + "center_latlong", "");
             String ic = pref1.getString(str + "ic", "");
-            Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
-            map_tests[j - 1] = mapTest;
-            map_testList.add(map_tests[j - 1]);
+            // TODO 修改获取函数
+            int MapType = pref1.getInt(str + "MapType", -1);
+            if (MapType == mapCollectionType) {
+                Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong, MapType);
+                map_tests[j - 1] = mapTest;
+                map_testList.add(map_tests[j - 1]);
+            }
         }
         //refreshRecycler();
 
@@ -319,63 +337,131 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         GridLayoutManager layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);
         Map_testAdapter adapter = new Map_testAdapter(map_testList);
-        adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
-            @Override
-            public void onItemLongClick(View view, int map_num, int position) {
-                //Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
-                setTitle(select_page.this.getResources().getText(R.string.IsLongClicking));
-                setFAMVisible(false);
-                locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
-                selectedNum = map_num;
-                selectedpos = position;
-                mselectedpos = String.valueOf(map_num);
-                if (isLongClick != 0){
-                    isLongClick = 0;
-                }else {
-                    adapter.notifyItemChanged(selectedpos);
-                }
-                locError("mselectedpos: " + mselectedpos);
-                invalidateOptionsMenu();
-            }
-        });
-        adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
-            @Override
-            public void onItemClick(View view, int map_num, int position) {
-                Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
-                Map_test map = map_testList.get(position);
-                if (isLongClick == 0){
-                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
-                        holder.cardView.setCardBackgroundColor(Color.GRAY);
-                        mselectedpos = mselectedpos + " " + String.valueOf(map_num);
-                    }else {
-                        holder.cardView.setCardBackgroundColor(Color.WHITE);
-                        if (mselectedpos.contains(" ")) {
-                            String replace = " " + String.valueOf(map_num);
-                            mselectedpos = mselectedpos.replace(replace, "");
-                            if (mselectedpos.length() == mselectedpos.replace(replace, "").length()){
-                                String replace1 = String.valueOf(map_num) + " ";
-                                mselectedpos = mselectedpos.replace(replace1, "");
-                            }
-                        }else {
-                            refreshRecycler();
-                            resetView();
-                        }
+        if (mapCollectionType == MapCollectionType.NONE) {
+            adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
+                @Override
+                public void onItemLongClick(View view, int map_num, int position) {
+                    //Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
+                    setTitle(select_page.this.getResources().getText(R.string.IsLongClicking));
+                    setFAMVisible(false);
+                    locError("map_num: " + Integer.toString(map_num) + "\n" + "position: " + Integer.toString(position));
+                    selectedNum = map_num;
+                    selectedpos = position;
+                    mselectedpos = String.valueOf(map_num);
+                    if (isLongClick != 0) {
+                        isLongClick = 0;
+                    } else {
+                        adapter.notifyItemChanged(selectedpos);
                     }
                     locError("mselectedpos: " + mselectedpos);
-                }else {
-                    if (isFileExist(map.getM_uri()) || map.getM_name().equals("图志简介")) {
-                        Log.w(TAG, "onItemClick: " + map.getM_name());
-                        Intent intent = new Intent(select_page.this, MainInterface.class);
-                        if (!map.getM_name().equals("图志简介")) {
-                            intent.putExtra("num", map.getM_num());
+                    invalidateOptionsMenu();
+                }
+            });
+        }
+        if (mapCollectionType == 1 || mapCollectionType == 2 || mapCollectionType == 3
+                || mapCollectionType == 5 || mapCollectionType == 6 || mapCollectionType == 7
+                || mapCollectionType == 9 || mapCollectionType == 10 || mapCollectionType == 11
+                || mapCollectionType == 12 || mapCollectionType == 13 || mapCollectionType == 14
+                || mapCollectionType == 15 || mapCollectionType == 16 || mapCollectionType == -1) {
+            adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
+                @Override
+                public void onItemClick(View view, String map_name, int map_num, int position) {
+                    Map_testAdapter.ViewHolder holder = new Map_testAdapter.ViewHolder(view);
+                    Map_test map = map_testList.get(position);
+                    if (isLongClick == 0) {
+                        if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY) {
+                            holder.cardView.setCardBackgroundColor(Color.GRAY);
+                            mselectedpos = mselectedpos + " " + String.valueOf(map_num);
                         } else {
-                            intent.putExtra("num", -1);
+                            holder.cardView.setCardBackgroundColor(Color.WHITE);
+                            if (mselectedpos.contains(" ")) {
+                                String replace = " " + String.valueOf(map_num);
+                                mselectedpos = mselectedpos.replace(replace, "");
+                                if (mselectedpos.length() == mselectedpos.replace(replace, "").length()) {
+                                    String replace1 = String.valueOf(map_num) + " ";
+                                    mselectedpos = mselectedpos.replace(replace1, "");
+                                }
+                            } else {
+                                refreshRecycler();
+                                resetView();
+                            }
                         }
-                        select_page.this.startActivity(intent);
+                        locError("mselectedpos: " + mselectedpos);
+                    } else {
+                        if (isFileExist(map.getM_uri()) || map.getM_name().equals("图志简介")) {
+                            Log.w(TAG, "onItemClick: " + map.getM_name());
+                            Intent intent = new Intent(select_page.this, MainInterface.class);
+                            if (!map.getM_name().equals("图志简介")) {
+                                intent.putExtra("num", map.getM_num());
+                            } else {
+                                intent.putExtra("num", -1);
+                            }
+                            select_page.this.startActivity(intent);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+        else {
+            adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
+                @Override
+                public void onItemClick(View view, String map_name, int map_num, int position) {
+                    // TODO Gross
+                    switch (map_name){
+                        case "序图组":
+                            mapCollectionType = 1;
+                            break;
+                        case "资源与环境图组":
+                            mapCollectionType = 2;
+                            break;
+                        case "社会经济图组":
+                            mapCollectionType = 3;
+                            break;
+                        case "区域地理图组":
+                            mapCollectionType = 4;
+                            break;
+                        case "县图":
+                            mapCollectionType = 5;
+                            break;
+                        case "各县城区图":
+                            mapCollectionType = 6;
+                            break;
+                        case "各县影像图":
+                            mapCollectionType = 7;
+                            break;
+                        case "乡镇图":
+                            mapCollectionType = 8;
+                            break;
+                        case "临翔区":
+                            mapCollectionType = 9;
+                            break;
+                        case "凤庆县":
+                            mapCollectionType = 10;
+                            break;
+                        case "云县":
+                            mapCollectionType = 11;
+                            break;
+                        case "永德县":
+                            mapCollectionType = 12;
+                            break;
+                        case "镇康县":
+                            mapCollectionType = 13;
+                            break;
+                        case "双江县":
+                            mapCollectionType = 14;
+                            break;
+                        case "耿马县":
+                            mapCollectionType = 15;
+                            break;
+                        case "沧源县":
+                            mapCollectionType = 16;
+                            break;
+                    }
+                    initMap();
+                    refreshRecycler();
+                }
+            });
+        }
         //adapter.getItemSelected();
         recyclerView.setAdapter(adapter);
         /*addbt.hide(false);
@@ -482,26 +568,27 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         boolean deleted = false;
         for (int j = 1; j <= num_pdf; ++j) {
             if (j != selectedNum){
-            locError(Integer.toString(j));
-            SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
-            String str = "n_" + j + "_";
-            int num = pref1.getInt(str + "num", 0);
-            String name = pref1.getString(str + "name", "");
-            String WKT = pref1.getString(str + "WKT", "");
-            String uri = pref1.getString(str + "uri", "");
-            String GPTS = pref1.getString(str + "GPTS", "");
-            String BBox = pref1.getString(str + "BBox", "");
-            String imguri = pref1.getString(str + "img_path", "");
-            String MediaBox = pref1.getString(str + "MediaBox", "");
-            String CropBox = pref1.getString(str + "CropBox", "");
-            String ic = pref1.getString(str + "ic", "");
-            String center_latlong = pref1.getString(str + "center_latlong", "");
+                locError(Integer.toString(j));
+                SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
+                String str = "n_" + j + "_";
+                int num = pref1.getInt(str + "num", 0);
+                String name = pref1.getString(str + "name", "");
+                String WKT = pref1.getString(str + "WKT", "");
+                String uri = pref1.getString(str + "uri", "");
+                String GPTS = pref1.getString(str + "GPTS", "");
+                String BBox = pref1.getString(str + "BBox", "");
+                String imguri = pref1.getString(str + "img_path", "");
+                String MediaBox = pref1.getString(str + "MediaBox", "");
+                String CropBox = pref1.getString(str + "CropBox", "");
+                String ic = pref1.getString(str + "ic", "");
+                String center_latlong = pref1.getString(str + "center_latlong", "");
+                int MapType = pref1.getInt(str + "MapType", -1);
             if (!deleted){
-                Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
+                Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong, MapType);
                 map_tests[j - 1] = mapTest;
                 map_testList.add(map_tests[j - 1]);
             }else {
-                Map_test mapTest = new Map_test(name, num - 1, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong);
+                Map_test mapTest = new Map_test(name, num - 1, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong, MapType);
                 map_tests[j - 2] = mapTest;
                 map_testList.add(map_tests[j - 2]);
             }
@@ -563,7 +650,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path, String MediaBox, String CropBox, String ic){
+    public void saveGeoInfo(String name, String uri, String WKT, String BBox, String GPTS, String img_path, String MediaBox, String CropBox, String ic, int MapType){
         num_pdf ++;
         SharedPreferences.Editor editor = getSharedPreferences("data_num", MODE_PRIVATE).edit();
         editor.putInt("num", num_pdf);
@@ -583,8 +670,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         String center_latlong = Double.toString(m_center_x) + "," + Double.toString(m_center_y);
         locError(center_latlong);
         editor1.putString(str + "center_latlong", center_latlong);
+        // TODO 修改地图存储函数
+        editor1.putInt(str + "MapType", MapType);
+
         editor1.apply();
-        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox, ic, center_latlong);
+        initMapNext(num_pdf, name, WKT, uri, GPTS, BBox, img_path, MediaBox, CropBox, ic, center_latlong, MapType);
     }
 
     public void Btn_clearData(){
@@ -699,71 +789,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
-                    if (path.contains(".dt")) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                add_max++;
-                                try {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                                    String configPath;
-                                    configPath = URLDecoder.decode(path, "utf-8");
-                                    SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                    editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                    editor.apply();
-                                    manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
-                                    locError(configPath);
-                                    //locError(path);
-                                    //locError(findNameFromUri(uri));
-                                    //LitePal.getDatabase();
-                                    Message message = new Message();
-                                    message.what = UPDATE_TEXT;
-                                    handler.sendMessage(message);
-                                } catch (Exception e) {
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }).start();
-                    } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path)).contains(".dt")) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                add_max++;
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                        Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                                try {
-                                    String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
-                                    configPath = URLDecoder.decode(configPath, "utf-8");
-                                    SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                    editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                    editor.apply();
-                                    manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
-                                } catch (Exception e) {
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                }
-                                //locError(path);
-                                //locError(findNameFromUri(uri));
-                                //LitePal.getDatabase();
-                                Message message = new Message();
-                                message.what = UPDATE_TEXT;
-                                handler.sendMessage(message);
-
-
-                            }
-                        }).start();
-
-                    } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+                    addMapForGeoType1ForPicker(path);
 
                 }
             });
@@ -771,76 +797,167 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
-                    if (path.contains(".dt")) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                add_max++;
-                                try {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                                    String configPath;
-                                    configPath = URLDecoder.decode(path, "utf-8");
-                                    SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                    editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                    editor.apply();
-                                    manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
-                                    locError(configPath);
-                                    //locError(path);
-                                    //locError(findNameFromUri(uri));
-                                    //LitePal.getDatabase();
-                                    Message message = new Message();
-                                    message.what = UPDATE_TEXT;
-                                    handler.sendMessage(message);
-                                } catch (Exception e) {
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }).start();
-                    } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path)).contains(".dt")) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                add_max++;
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                        Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                                try {
-                                    String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
-                                    configPath = URLDecoder.decode(configPath, "utf-8");
-                                    SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                    editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                    editor.apply();
-                                    manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
-                                } catch (Exception e) {
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                }
-                                //locError(path);
-                                //locError(findNameFromUri(uri));
-                                //LitePal.getDatabase();
-                                Message message = new Message();
-                                message.what = UPDATE_TEXT;
-                                handler.sendMessage(message);
-
-
-                            }
-                        }).start();
-
-                    } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
+                    addMapForGeoType2ForPicker(path);
 
                 }
             });
             dialog.show();
         } else Toast.makeText(this, select_page.this.getResources().getText(R.string.AddedMapTip), Toast.LENGTH_SHORT).show();
+    }
+
+    int MapTypeNum = -1;
+    private void GetMapType(){
+        final String[] items = new String[] { "序图组", "资源与环境图组", "社会经济图组", "区域地理图组县图", "区域地理图组县城区图" , "区域地理图组县影像图" , "临翔区乡镇图" , "凤庆县乡镇图" , "云县乡镇图"
+                , "永德乡镇图" , "镇康乡镇图" , "双江乡镇图" , "耿马乡镇图" , "沧源乡镇图" };
+        AlertDialog.Builder dialog = new AlertDialog.Builder(select_page.this);
+        dialog.setTitle("请选择当前地图类型");
+        //dialog.setMessage("地图集");
+        dialog.setCancelable(false);
+        dialog.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                MapTypeNum = i+1;
+            }
+        });
+        dialog.show();
+    }
+
+    private void addMapForGeoType1ForPicker(String path){
+        GetMapType();
+        if (path.contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        String configPath;
+                        configPath = URLDecoder.decode(path, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true, MapTypeNum);
+                        locError(configPath);
+                        //locError(path);
+                        //locError(findNameFromUri(uri));
+                        //LitePal.getDatabase();
+                        Message message = new Message();
+                        message.what = UPDATE_TEXT;
+                        handler.sendMessage(message);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).start();
+        } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path)).contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    try {
+                        String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true, MapTypeNum);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                    //locError(path);
+                    //locError(findNameFromUri(uri));
+                    //LitePal.getDatabase();
+                    Message message = new Message();
+                    message.what = UPDATE_TEXT;
+                    handler.sendMessage(message);
+
+
+                }
+            }).start();
+
+        } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError), Toast.LENGTH_SHORT).show();
+    }
+
+    private void addMapForGeoType2ForPicker(String path){
+        GetMapType();
+        if (path.contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        String configPath;
+                        configPath = URLDecoder.decode(path, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false, MapTypeNum);
+                        locError(configPath);
+                        //locError(path);
+                        //locError(findNameFromUri(uri));
+                        //LitePal.getDatabase();
+                        Message message = new Message();
+                        message.what = UPDATE_TEXT;
+                        handler.sendMessage(message);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).start();
+        } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path)).contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    try {
+                        String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), Uri.parse(path));
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false, MapTypeNum);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                    //locError(path);
+                    //locError(findNameFromUri(uri));
+                    //LitePal.getDatabase();
+                    Message message = new Message();
+                    message.what = UPDATE_TEXT;
+                    handler.sendMessage(message);
+
+
+                }
+            }).start();
+
+        } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -882,156 +999,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     dialog.setPositiveButton("类型一", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (uri.toString().contains(".dt")) {
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        add_max++;
-                                        try {
-                                            runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                                }
-                                            });
-                                            locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
-                                            String configPath;
-                                            configPath = URLDecoder.decode(uri.toString(), "utf-8");
-                                            if (configPath.substring(8).contains(":")) {
-                                                configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
-                                            } else
-                                                configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                            //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                            configPath = URLDecoder.decode(configPath, "utf-8");
-                                            SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                            editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                            editor.apply();
-                                            manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
-                                            locError(configPath);
-                                            //locError(uri.toString());
-                                            //locError(findNameFromUri(uri));
-                                            //LitePal.getDatabase();
-                                            Message message = new Message();
-                                            message.what = UPDATE_TEXT;
-                                            handler.sendMessage(message);
-                                        } catch (Exception e) {
-                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                }).start();
-                            } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        add_max++;
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                            }
-                                        });
-                                        try {
-                                            String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                            configPath = URLDecoder.decode(configPath, "utf-8");
-                                            SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                            editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                            editor.apply();
-                                            manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true);
-                                        } catch (Exception e) {
-                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                        }
-                                        //locError(uri.toString());
-                                        //locError(findNameFromUri(uri));
-                                        //LitePal.getDatabase();
-                                        Message message = new Message();
-                                        message.what = UPDATE_TEXT;
-                                        handler.sendMessage(message);
-
-
-                                    }
-                                }).start();
-
-                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError)+ "_1", Toast.LENGTH_SHORT).show();
+                            addMapType1();
                         }
                     });
                     dialog.setNegativeButton("类型二", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
-                            if (uri.toString().contains(".dt")) {
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        add_max++;
-                                        try {
-                                            runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                    Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                                }
-                                            });
-                                            locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
-                                            String configPath;
-                                            configPath = URLDecoder.decode(uri.toString(), "utf-8");
-                                            if (configPath.substring(8).contains(":")) {
-                                                configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
-                                            } else
-                                                configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                            //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                            configPath = URLDecoder.decode(configPath, "utf-8");
-                                            SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                            editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                            editor.apply();
-                                            manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
-                                            locError(configPath);
-                                            //locError(uri.toString());
-                                            //locError(findNameFromUri(uri));
-                                            //LitePal.getDatabase();
-                                            Message message = new Message();
-                                            message.what = UPDATE_TEXT;
-                                            handler.sendMessage(message);
-                                        } catch (Exception e) {
-                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                }).start();
-                            } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        add_max++;
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
-                                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
-                                            }
-                                        });
-                                        try {
-                                            String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
-                                            configPath = URLDecoder.decode(configPath, "utf-8");
-                                            SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
-                                            editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
-                                            editor.apply();
-                                            manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false);
-                                        } catch (Exception e) {
-                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                        }
-                                        //locError(uri.toString());
-                                        //locError(findNameFromUri(uri));
-                                        //LitePal.getDatabase();
-                                        Message message = new Message();
-                                        message.what = UPDATE_TEXT;
-                                        handler.sendMessage(message);
-
-
-                                    }
-                                }).start();
-
-                            } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
+                            addMapType2();
                         }
                     });
                     dialog.show();
@@ -1293,6 +1267,158 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     break;
             }
         }
+    }
+
+    private void addMapType2(){
+        GetMapType();
+        if (uri.toString().contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
+                        String configPath;
+                        configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                        if (configPath.substring(8).contains(":")) {
+                            configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                        } else
+                            configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false, MapTypeNum);
+                        locError(configPath);
+                        //locError(uri.toString());
+                        //locError(findNameFromUri(uri));
+                        //LitePal.getDatabase();
+                        Message message = new Message();
+                        message.what = UPDATE_TEXT;
+                        handler.sendMessage(message);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).start();
+        } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    try {
+                        String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false, MapTypeNum);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                    //locError(uri.toString());
+                    //locError(findNameFromUri(uri));
+                    //LitePal.getDatabase();
+                    Message message = new Message();
+                    message.what = UPDATE_TEXT;
+                    handler.sendMessage(message);
+
+
+                }
+            }).start();
+
+        } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_1", Toast.LENGTH_SHORT).show();
+    }
+
+    private void addMapType1(){
+        GetMapType();
+        if (uri.toString().contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                                Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        locError(URLDecoder.decode(uri.getAuthority(), "utf-8"));
+                        String configPath;
+                        configPath = URLDecoder.decode(uri.toString(), "utf-8");
+                        if (configPath.substring(8).contains(":")) {
+                            configPath = Environment.getExternalStorageDirectory().toString() + "/" + configPath.substring(configPath.lastIndexOf(":") + 1, configPath.length());
+                        } else
+                            configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        //configPath = getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true, MapTypeNum);
+                        locError(configPath);
+                        //locError(uri.toString());
+                        //locError(findNameFromUri(uri));
+                        //LitePal.getDatabase();
+                        Message message = new Message();
+                        message.what = UPDATE_TEXT;
+                        handler.sendMessage(message);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).start();
+        } else if (DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri).contains(".dt")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    add_max++;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toolbar.setTitle("正在提取地理信息(" + Integer.toString(add_current) + "/" + Integer.toString(add_max) + ")");
+                            Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.GetGeoInfo).toString() + select_page.this.getResources().getText(R.string.QSH).toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    try {
+                        String configPath = DataUtil.getRealPathFromUriForPhoto(MyApplication.getContext(), uri);
+                        configPath = URLDecoder.decode(configPath, "utf-8");
+                        SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
+                        editor.putString("mapath", configPath.substring(0, configPath.lastIndexOf("/")));
+                        editor.apply();
+                        manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true, MapTypeNum);
+                    } catch (Exception e) {
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                    //locError(uri.toString());
+                    //locError(findNameFromUri(uri));
+                    //LitePal.getDatabase();
+                    Message message = new Message();
+                    message.what = UPDATE_TEXT;
+                    handler.sendMessage(message);
+
+
+                }
+            }).start();
+
+        } else Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError)+ "_1", Toast.LENGTH_SHORT).show();
     }
 
     //数据库入库函数
@@ -1719,171 +1845,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     public void run() {
 
 
-                        List<POI> pois = LitePal.findAll(POI.class);
-                        List<String> types = new ArrayList<>();
-                        Log.w(TAG, "runlzy: " + pois.size());
-                        for (int i = 0; i < pois.size(); ++i){
-                            String temp = pois.get(i).getType();
-                            Log.w(TAG, "runlzy: " + temp);
-                            if (temp != null) {
-                                if (!temp.isEmpty()) {
-                                    if (types.size() > 0) {
-                                        for (int j = 0; j < types.size(); ++j) {
-                                            if (temp.equals(types.get(j))) break;
-                                            else {
-                                                if (j == types.size() - 1) types.add(temp);
-                                                else continue;
-                                            }
-                                        }
-                                    }else types.add(temp);
-                                }
-                            }
-                        }
-                        DataUtil.makeKML();
-                        Log.w(TAG, "runlzy: " + types.size());
-                        if (types.size() > 0) {
-                            for (int i = 0; i < types.size(); ++i) {
-                                DataUtil.makeTxt(types.get(i));
-                            }
-                        }else DataUtil.makeTxt("");
-                        DataUtil.makeTxt1();
-                        DataUtil.makeWhiteBlankKML();
-                        List<File> files = new ArrayList<File>();
-                        StringBuffer sb = new StringBuffer();
-                        int size_POI = pois.size();
-                        sb = sb.append("<POI>").append("\n");
-                        for (int i = 0; i < size_POI; ++i){
-                            sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
-                            sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
-                            sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
-                            sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
-                            sb.append("<type>").append(pois.get(i).getType()).append("</type>").append("\n");
-                            sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
-                            sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
-                            sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
-                            sb.append("<x>").append(pois.get(i).getX()).append("</x>").append("\n");
-                            sb.append("<y>").append(pois.get(i).getY()).append("</y>").append("\n");
-                            sb.append("<time>").append(pois.get(i).getTime()).append("</time>").append("\n");
-                        }
-                        sb.append("</POI>").append("\n");
-                        List<Trail> trails = LitePal.findAll(Trail.class);
-                        int size_trail = trails.size();
-                        sb = sb.append("<Trail>").append("\n");
-                        for (int i = 0; i < size_trail; ++i){
-                            sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
-                            sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
-                            sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
-                            sb.append("<path>").append(trails.get(i).getPath()).append("</path>").append("\n");
-                            sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
-                            sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
-                        }
-                        sb.append("</Trail>").append("\n");
-                        List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
-                        int size_mphoto = mphotos.size();
-                        sb = sb.append("<MPHOTO>").append("\n");
-                        for (int i = 0; i < size_mphoto; ++i){
-                            sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
-                            sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
-                            sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
-                            String path = mphotos.get(i).getPath();
-                            sb.append("<path>").append(path).append("</path>").append("\n");
-                            files.add(new File(path));
-                            sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
-                        }
-                        sb.append("</MPHOTO>").append("\n");
-                        List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
-                        int size_mtape = mtapes.size();
-                        sb = sb.append("<MTAPE>").append("\n");
-                        for (int i = 0; i < size_mtape; ++i){
-                            sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
-                            sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
-                            sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
-                            String path = mtapes.get(i).getPath();
-                            sb.append("<path>").append(path).append("</path>").append("\n");
-                            files.add(new File(path));
-                            sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
-                        }
-                        sb.append("</MTAPE>").append("\n");
-                        List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
-                        int size_lines_whiteBlank = lines_whiteBlanks.size();
-                        sb = sb.append("<Lines_WhiteBlank>").append("\n");
-                        for (int i = 0; i < size_lines_whiteBlank; ++i){
-                            sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
-                            sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
-                            sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
-                        }
-                        sb.append("</Lines_WhiteBlank>").append("\n");
-                        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
-                        if (!file.exists() && !file.isDirectory()){
-                            file.mkdirs();
-                        }
-                        final String outputPath = Long.toString(System.currentTimeMillis());
-                        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
-                        try {
-                            FileOutputStream of = new FileOutputStream(file1);
-                            of.write(sb.toString().getBytes());
-                            of.close();
-                            files.add(file1);
-                        }catch (IOException e){
-                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                        }
-                        try {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
-                                    toolbar.setTitle("数据打包中");
-                                }
-                            });
-                            File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
-                            //InputStream inputStream = null;
-                            ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
-                            zipOut.setComment("test");
-                            int size = files.size();
-                            Log.w(TAG, "run: " + size);
-                            for (int i = 0; i < size; ++i){
-                                Log.w(TAG, "run: " + i);
-                                Log.w(TAG, "run: " + files.get(i).getPath());
-                                boolean isOK = false;
-                                for (int k = 0; k < i; ++k) {
-                                    if (files.get(i).getPath().equals(files.get(k).getPath())) break;
-                                    if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
-                                }
-                                Log.w(TAG, "aa");
-                                if (i == 0 & files.get(i).exists()) isOK = true;
-                                if (isOK){
-                                    Log.w(TAG, "aa");
-                                    InputStream inputStream = new FileInputStream(files.get(i));
-                                    Log.w(TAG, "aa");
-                                    zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
-                                    Log.w(TAG, "aa");
-                                    //int temp = 0;
-                                    //while ((temp = inputStream.read()) != -1){
-                                    //    zipOut.write(temp);
-                                    //}
-                                    byte buffer[] = new byte[4096];
-                                    int realLength;
-                                    while ((realLength = inputStream.read(buffer)) > 0) {
-                                        zipOut.write(buffer, 0, realLength);
-                                    }
-                                    inputStream.close();
-                                }
-                            }
-                            zipOut.close();
-                            file1.delete();
-                            files.clear();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
-                                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
-                                }
-                            });
-                        }catch (IOException e){
-                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                            Log.w(TAG, "run: " + e.toString());
-                            Log.w(TAG, "run: " + e.getMessage());
-                        }
+                        OutputData();
 
 
                     }
@@ -1896,6 +1858,174 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 setFAMVisible(false);
             }
         });
+    }
+
+    private void OutputData(){
+        List<POI> pois = LitePal.findAll(POI.class);
+        List<String> types = new ArrayList<>();
+        Log.w(TAG, "runlzy: " + pois.size());
+        for (int i = 0; i < pois.size(); ++i){
+            String temp = pois.get(i).getType();
+            Log.w(TAG, "runlzy: " + temp);
+            if (temp != null) {
+                if (!temp.isEmpty()) {
+                    if (types.size() > 0) {
+                        for (int j = 0; j < types.size(); ++j) {
+                            if (temp.equals(types.get(j))) break;
+                            else {
+                                if (j == types.size() - 1) types.add(temp);
+                                else continue;
+                            }
+                        }
+                    }else types.add(temp);
+                }
+            }
+        }
+        DataUtil.makeKML();
+        Log.w(TAG, "runlzy: " + types.size());
+        if (types.size() > 0) {
+            for (int i = 0; i < types.size(); ++i) {
+                DataUtil.makeTxt(types.get(i));
+            }
+        }else DataUtil.makeTxt("");
+        DataUtil.makeTxt1();
+        DataUtil.makeWhiteBlankKML();
+        List<File> files = new ArrayList<File>();
+        StringBuffer sb = new StringBuffer();
+        int size_POI = pois.size();
+        sb = sb.append("<POI>").append("\n");
+        for (int i = 0; i < size_POI; ++i){
+            sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
+            sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
+            sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
+            sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
+            sb.append("<type>").append(pois.get(i).getType()).append("</type>").append("\n");
+            sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
+            sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
+            sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
+            sb.append("<x>").append(pois.get(i).getX()).append("</x>").append("\n");
+            sb.append("<y>").append(pois.get(i).getY()).append("</y>").append("\n");
+            sb.append("<time>").append(pois.get(i).getTime()).append("</time>").append("\n");
+        }
+        sb.append("</POI>").append("\n");
+        List<Trail> trails = LitePal.findAll(Trail.class);
+        int size_trail = trails.size();
+        sb = sb.append("<Trail>").append("\n");
+        for (int i = 0; i < size_trail; ++i){
+            sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
+            sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
+            sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
+            sb.append("<path>").append(trails.get(i).getPath()).append("</path>").append("\n");
+            sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
+            sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
+        }
+        sb.append("</Trail>").append("\n");
+        List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
+        int size_mphoto = mphotos.size();
+        sb = sb.append("<MPHOTO>").append("\n");
+        for (int i = 0; i < size_mphoto; ++i){
+            sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
+            sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
+            sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
+            String path = mphotos.get(i).getPath();
+            sb.append("<path>").append(path).append("</path>").append("\n");
+            files.add(new File(path));
+            sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
+        }
+        sb.append("</MPHOTO>").append("\n");
+        List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
+        int size_mtape = mtapes.size();
+        sb = sb.append("<MTAPE>").append("\n");
+        for (int i = 0; i < size_mtape; ++i){
+            sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
+            sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
+            sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
+            String path = mtapes.get(i).getPath();
+            sb.append("<path>").append(path).append("</path>").append("\n");
+            files.add(new File(path));
+            sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
+        }
+        sb.append("</MTAPE>").append("\n");
+        List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
+        int size_lines_whiteBlank = lines_whiteBlanks.size();
+        sb = sb.append("<Lines_WhiteBlank>").append("\n");
+        for (int i = 0; i < size_lines_whiteBlank; ++i){
+            sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
+            sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
+            sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
+        }
+        sb.append("</Lines_WhiteBlank>").append("\n");
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        final String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+            files.add(file1);
+        }catch (IOException e){
+            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+        }
+        try {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
+                    toolbar.setTitle("数据打包中");
+                }
+            });
+            File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
+            //InputStream inputStream = null;
+            ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
+            zipOut.setComment("test");
+            int size = files.size();
+            Log.w(TAG, "run: " + size);
+            for (int i = 0; i < size; ++i){
+                Log.w(TAG, "run: " + i);
+                Log.w(TAG, "run: " + files.get(i).getPath());
+                boolean isOK = false;
+                for (int k = 0; k < i; ++k) {
+                    if (files.get(i).getPath().equals(files.get(k).getPath())) break;
+                    if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
+                }
+                Log.w(TAG, "aa");
+                if (i == 0 & files.get(i).exists()) isOK = true;
+                if (isOK){
+                    Log.w(TAG, "aa");
+                    InputStream inputStream = new FileInputStream(files.get(i));
+                    Log.w(TAG, "aa");
+                    zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
+                    Log.w(TAG, "aa");
+                    //int temp = 0;
+                    //while ((temp = inputStream.read()) != -1){
+                    //    zipOut.write(temp);
+                    //}
+                    byte buffer[] = new byte[4096];
+                    int realLength;
+                    while ((realLength = inputStream.read(buffer)) > 0) {
+                        zipOut.write(buffer, 0, realLength);
+                    }
+                    inputStream.close();
+                }
+            }
+            zipOut.close();
+            file1.delete();
+            files.clear();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
+                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                }
+            });
+        }catch (IOException e){
+            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+            Log.w(TAG, "run: " + e.toString());
+            Log.w(TAG, "run: " + e.getMessage());
+        }
     }
 
     @Override
@@ -1924,11 +2054,117 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         initVariable();
         //获取卡片数目
         if (num_pdf == 0) {
-            initDemo();
+            //initDemo();
+            BatchAddMap();
         }else
             initMap();
         //Log.w(TAG, Integer.toString(num_pdf) );
         //初始化
+    }
+
+    private void BatchAddMap(){
+        // TODO 批量添加地图
+        AddFirstView();
+        AddXTZ();
+        AddZYHJTZ();
+        AddSHJJTZ();
+        AddQYDLView();
+        AddXTTZ();
+        AddXCQTZ();
+        AddXYXTZ();
+        AddXZTView();
+        AddLXQXZTZ();
+        AddFQXXZTZ();
+        AddYXXZTZ();
+        AddYDXXZTZ();
+        AddZKXXZTZ();
+        AddSJXXZTZ();
+        AddGMXXZTZ();
+        AddCYXXZTZ();
+    }
+
+    //临沧市地图集的首界面
+    private void AddFirstView(){
+        saveGeoInfo("序图组", "", "", "", "", "", "", "", "序图组", 0);
+        saveGeoInfo("资源与环境图组", "", "", "", "", "", "", "", "资源与环境图组", 0);
+        saveGeoInfo("社会经济图组", "", "", "", "", "", "", "", "社会经济图组", 0);
+        saveGeoInfo("区域地理图组", "", "", "", "", "", "", "", "区域地理图组", 0);
+    }
+
+    private void AddXTZ(){
+
+    }
+
+    private void AddZYHJTZ(){
+
+    }
+
+    private void AddSHJJTZ(){
+
+    }
+
+    //区域地理图组的首界面
+    private void AddQYDLView(){
+        saveGeoInfo("县图", "", "", "", "", "", "", "", "县图", 4);
+        saveGeoInfo("各县城区图", "", "", "", "", "", "", "", "各县城区图", 4);
+        saveGeoInfo("各县影像图", "", "", "", "", "", "", "", "各县影像图", 4);
+        saveGeoInfo("乡镇图", "", "", "", "", "", "", "", "乡镇图", 4);
+    }
+
+    private void AddXTTZ(){
+
+    }
+
+    private void AddXCQTZ(){
+
+    }
+
+    private void AddXYXTZ(){
+
+    }
+
+    //乡镇图组的首界面
+    private void AddXZTView(){
+        saveGeoInfo("临翔区", "", "", "", "", "", "", "", "临翔区", 8);
+        saveGeoInfo("凤庆县", "", "", "", "", "", "", "", "凤庆县", 8);
+        saveGeoInfo("云县", "", "", "", "", "", "", "", "云县", 8);
+        saveGeoInfo("永德县", "", "", "", "", "", "", "", "永德县", 8);
+        saveGeoInfo("镇康县", "", "", "", "", "", "", "", "镇康县", 8);
+        saveGeoInfo("双江县", "", "", "", "", "", "", "", "双江县", 8);
+        saveGeoInfo("耿马县", "", "", "", "", "", "", "", "耿马县", 8);
+        saveGeoInfo("沧源县", "", "", "", "", "", "", "", "沧源县", 8);
+    }
+
+    private void AddLXQXZTZ(){
+
+    }
+
+    private void AddFQXXZTZ(){
+
+    }
+
+    private void AddYXXZTZ(){
+
+    }
+
+    private void AddYDXXZTZ(){
+
+    }
+
+    private void AddZKXXZTZ(){
+
+    }
+
+    private void AddSJXXZTZ(){
+
+    }
+
+    private void AddGMXXZTZ(){
+
+    }
+
+    private void AddCYXXZTZ(){
+
     }
 
     public void initDemo(){
@@ -1936,7 +2172,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             @Override
             public void run() {
                 add_max ++;
-                manageGeoInfo("", SAMPLE_TYPE, "", DataUtil.findNamefromSample(EnumClass.SAMPLE_FILE), true);
+                manageGeoInfo("", SAMPLE_TYPE, "", DataUtil.findNamefromSample(EnumClass.SAMPLE_FILE), true, 0);
                 LitePal.getDatabase();
                 Message message = new Message();
                 message.what = UPDATE_TEXT;
@@ -2149,15 +2385,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
-    private void manageGeoInfo(String filePath, int Type, String uri, String name, boolean type){
+    private void manageGeoInfo(String filePath, int Type, String uri, String name, boolean type, int MapType){
         if (!filePath.isEmpty()) {
             String[] strings = getGeoInfo(filePath, Type, uri, name, type);
             if (strings != null)
-                saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
+                saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8], MapType);
         }else {
             try {
                 String[] strings = new String[]{"图志简介", "", "", "", "", getAssets().open("image/图志简介1.jpg").toString(), "", "", "图志简介"};
-                saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
+                saveGeoInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8], 0);
             }catch (Exception e){
 
             }

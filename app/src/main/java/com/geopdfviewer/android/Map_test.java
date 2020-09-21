@@ -25,8 +25,17 @@ public class Map_test {
     private String m_CropBox;
     private String m_ic;
     private String m_center_latlong;
+    private int MapType;
 
-    public Map_test(String m_name, int m_num, String m_GPTS, String m_BBox, String m_WKT, String m_uri, String m_imguri, String m_MediaBox, String m_CropBox, String m_ic, String m_center_latlong) {
+    public int getMapType() {
+        return MapType;
+    }
+
+    public void setMapType(int mapType) {
+        MapType = mapType;
+    }
+
+    public Map_test(String m_name, int m_num, String m_GPTS, String m_BBox, String m_WKT, String m_uri, String m_imguri, String m_MediaBox, String m_CropBox, String m_ic, String m_center_latlong, int MapType) {
         this.m_name = m_name;
         this.m_num = m_num;
         this.m_GPTS = m_GPTS;
@@ -38,6 +47,7 @@ public class Map_test {
         this.m_CropBox = m_CropBox;
         this.m_ic = m_ic;
         this.m_center_latlong = m_center_latlong;
+        this.MapType = MapType;
     }
 
     public String getM_center_latlong() {
@@ -50,6 +60,11 @@ public class Map_test {
 
     public String getM_ic() {
         return m_ic;
+    }
+
+    public Map_test(String m_name, int mapType) {
+        this.m_name = m_name;
+        MapType = mapType;
     }
 
     public void setM_ic(String m_ic) {

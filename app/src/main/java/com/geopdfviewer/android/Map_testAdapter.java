@@ -79,7 +79,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 Map_test map = mMapList.get(position);
-                mOnItemClick.onItemClick(v, map.getM_num(), position);
+                mOnItemClick.onItemClick(v, map.getM_name(), map.getM_num(), position);
                 /*
                 Intent intent = new Intent(mContext, MainInterface.class);
                 intent.putExtra("num", map.getM_num());
@@ -116,7 +116,70 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map_test map = mMapList.get(position);
-        if (!map.getM_name().equals("图志简介")){
+        try {
+            int MapType = map.getMapType();
+            if (MapType == 0 || MapType == 4 || MapType == 8) {
+                holder.MapName.setText(map.getM_name());
+            } else {
+                if (isFileExist(map.getM_uri())) {
+                    DecimalFormat df = new DecimalFormat("0.0");
+                    SharedPreferences pref1 = mContext.getSharedPreferences("latlong", MODE_PRIVATE);
+                    String mlatlong = pref1.getString("mlatlong", "");
+                    if (!mlatlong.isEmpty()) {
+                        String[] latandlong;
+                        latandlong = mlatlong.split(",");
+                        Log.w(TAG, "onBindViewHolder: " + mlatlong);
+                        double m_lat = Double.valueOf(latandlong[0]);
+                        double m_long = Double.valueOf(latandlong[1]);
+                        //String[] latandlong1;
+                        //latandlong1 = map.getM_center_latlong().split(",");
+                        //double the_lat = Double.valueOf(latandlong1[0]);
+                        //double the_long = Double.valueOf(latandlong1[1]);
+                        double distance;
+                        if (!map.getM_GPTS().isEmpty()) {
+                            distance = getDistanceWithMap(map.getM_GPTS(), m_lat, m_long) / 1000;
+                        } else distance = 0;
+                        if (distance != 0) {
+                            holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
+                        } else holder.MapName.setText(map.getM_name() + "\n" + "在地图上 ");
+                    } else holder.MapName.setText(map.getM_name());
+                    String ImgUri = map.getM_imguri();
+                    if (ImgUri != "") {
+                        //Toast.makeText(mContext, map.getM_imguri(), Toast.LENGTH_SHORT).show();
+                        File file = new File(ImgUri);
+                        if (file.exists()) holder.MapImage.setImageURI(Uri.parse(ImgUri));
+                        else {
+                            Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                            BitmapDrawable bd = (BitmapDrawable) drawable;
+                            Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                            holder.MapImage.setImageBitmap(bitmap);
+                        }
+                    } else {
+                        //holder.MapImage.setImageResource(R.drawable.ic_android_black);
+
+                    }
+                } else {
+                    String ImgUri = map.getM_imguri();
+                    File file = new File(ImgUri);
+                    if (file.exists()) holder.MapImage.setImageURI(Uri.parse(ImgUri));
+                    else {
+                        Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                        BitmapDrawable bd = (BitmapDrawable) drawable;
+                        Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                        holder.MapImage.setImageBitmap(bitmap);
+                    }
+                    holder.cardView.setCardBackgroundColor(Color.CYAN);
+                    holder.MapName.setText(map.getM_name() + "\n" + "请移除后重新添加该地图");
+                }
+            }
+        }catch (Exception e){
+            Log.w(TAG, "exception: " + map.getM_name());
+        }
+        /*if (!map.getM_name().equals("图志简介")){
             if (isFileExist(map.getM_uri())) {
                 DecimalFormat df = new DecimalFormat("0.0");
                 SharedPreferences pref1 = mContext.getSharedPreferences("latlong", MODE_PRIVATE);
@@ -139,8 +202,6 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                         holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
                     } else holder.MapName.setText(map.getM_name() + "\n" + "在地图上 ");
                 } else holder.MapName.setText(map.getM_name());
-        /*holder.MapName.setText(map.getM_name() + "\n" + "距中心: " + df.format(algorithm(m_long, m_lat, the_long, the_lat) / 1000) + "公里"
-                + "\n" + "在地图上 ");*/
                 String ImgUri = map.getM_imguri();
                 if (ImgUri != "") {
                     //Toast.makeText(mContext, map.getM_imguri(), Toast.LENGTH_SHORT).show();
@@ -181,7 +242,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     private Double getDistanceWithMap(String GPTS, double lat, double longi){
@@ -259,7 +320,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
     }
 
     public interface OnRecyclerItemClickListener{
-        void onItemClick(View view,int map_num, int position);
+        void onItemClick(View view, String map_name,int map_num, int position);
     }
     public void setOnItemClickListener(OnRecyclerItemClickListener listener){
         this.mOnItemClick =  listener;
