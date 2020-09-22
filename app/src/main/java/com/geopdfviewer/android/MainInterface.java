@@ -2286,7 +2286,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     String str = "n_" + j + "_";
                     String Muri = pref2.getString(str + "uri", "");
                     String MGPTS = pref2.getString(str + "GPTS", "");
-                    if (MGPTS != null && !MGPTS.isEmpty()) {
+                    int MMapType = pref2.getInt(str + "MapType", -1);
+                    if ((MMapType == 1 || MMapType == 4) && MGPTS != null && !MGPTS.isEmpty())
+                    {
                         String[] GPTString = MGPTS.split(" ");
                         float[] GPTSs = new float[GPTString.length];
                         for (int i = 0; i < GPTString.length; ++i) {
@@ -2382,7 +2384,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     String str = "n_" + j + "_";
                     String Muri = pref2.getString(str + "uri", "");
                     String MGPTS = pref2.getString(str + "GPTS", "");
-                    if (MGPTS != null && !MGPTS.isEmpty()) {
+                    int MMapType = pref2.getInt(str + "MapType", -1);
+                    if ((MMapType == 1 || MMapType == 4) && MGPTS != null && !MGPTS.isEmpty())
+                    {
                         Log.w(TAG, "GPTS: " + MGPTS);
                         String[] GPTString = MGPTS.split(" ");
                         float[] GPTSs = new float[GPTString.length];
