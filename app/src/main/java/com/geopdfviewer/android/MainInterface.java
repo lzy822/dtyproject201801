@@ -441,6 +441,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         String mpoic = "POI" + String.valueOf(System.currentTimeMillis());
         poi.setPoic(mpoic);
         poi.setType(strings[num]);
+        poi.setVedionum(0);
         poi.save();
         return mpoic;
     }
@@ -644,9 +645,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 String description = cursor.getString(cursor.getColumnIndex("description"));
                 int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
                 int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                int videonum = cursor.getInt(cursor.getColumnIndex("vedionum"));
                 float x = cursor.getFloat(cursor.getColumnIndex("x"));
                 float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, videonum, name, description);
                 pois.add(mPOIobj);
             } while (cursor.moveToNext());
         }
@@ -755,7 +757,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 builder1.setNegativeButton("标志点", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        showPopueWindowForIconAdd(pt1);
+                        //showPopueWindowForIconAdd(pt1);
+                        Toast.makeText(MainInterface.this, "已经暂时屏蔽标志点功能", Toast.LENGTH_LONG).show();
                         //AddIconPOI(pt1);
                         //pdfView.zoomWithAnimation(c_zoom);
                     }
@@ -3735,6 +3738,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void GoNormalSinglePOIPage(String poic) {
+        toolbar.setTitle(pdfFileName);
         Log.w(TAG, "updateMapPage: 0");
         if (!poic.isEmpty()) {
             Intent intent = new Intent(MainInterface.this, singlepoi.class);
@@ -4244,9 +4248,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 String description = cursor.getString(cursor.getColumnIndex("description"));
                 int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
                 int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                int videonum = cursor.getInt(cursor.getColumnIndex("vedionum"));
                 float x = cursor.getFloat(cursor.getColumnIndex("x"));
                 float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, videonum, name, description);
                 pois.add(mPOIobj);
             } while (cursor.moveToNext());
         }
@@ -6839,9 +6844,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         String description = cursor.getString(cursor.getColumnIndex("description"));
                         int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
                         int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                        int videonum = cursor.getInt(cursor.getColumnIndex("vedionum"));
                         float x = cursor.getFloat(cursor.getColumnIndex("x"));
                         float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                        queriedPoi = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                        queriedPoi = new mPOIobj(POIC, x, y, time, tapenum, photonum, videonum, name, description);
                     } while (cursor.moveToNext());
                 }
                 cursor.close();
@@ -6850,13 +6856,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 poic = poic.replace("DMBZ", "");
                 //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
                 List<DMBZ> dmbzList = LitePal.where("xh = ?", poic).find(DMBZ.class);
-                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
+                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, 0, "", "");
             } else if (poic.contains("DMP")) {
                 hasQueriedPoi = true;
                 poic = poic.replace("DMP", "");
                 //List<kmltest> kmltests = LitePal.where("xh = ?", poic).find(kmltest.class);
                 List<DMPoint> dmbzList = LitePal.where("mapid = ?", poic).find(DMPoint.class);
-                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, "", "");
+                queriedPoi = new mPOIobj(poic, dmbzList.get(0).getLat(), dmbzList.get(0).getLng(), "", 0, 0, 0, "", "");
             } else if (poic.contains("DML")) {
                 hasQueriedLine = true;
                 poic = poic.replace("DML", "");

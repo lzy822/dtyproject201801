@@ -22,9 +22,18 @@ public class POI  extends LitePalSupport {
     private int photonum;
     private String description;
     private int tapenum;
+    private int vedionum;
     private float x;
     private float y;
     private String time;
+
+    public int getVedionum() {
+        return vedionum;
+    }
+
+    public void setVedionum(int vedionum) {
+        this.vedionum = vedionum;
+    }
 
     public String getType() {
         return type;

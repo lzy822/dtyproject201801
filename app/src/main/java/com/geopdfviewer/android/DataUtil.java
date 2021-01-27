@@ -386,6 +386,54 @@ public class DataUtil {
         }
     }
 
+    /**
+     * 保存bitmap到本地
+     *
+     * @param bitmap Bitmap
+     */
+    public static void saveBitmap(Bitmap bitmap, String path) {
+        String savePath;
+        File filePic;
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            savePath = path;
+        } else {
+            Log.e("tag", "saveBitmap failure : sdcard not mounted");
+            return;
+        }
+        try {
+            filePic = new File(savePath);
+            if (!filePic.exists()) {
+                filePic.getParentFile().mkdirs();
+                filePic.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(filePic);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            Log.e("tag", "saveBitmap: " + e.getMessage());
+            return;
+        }
+        Log.i("tag", "saveBitmap success: " + filePic.getAbsolutePath());
+    }
+
+    //获取照片文件路径
+    public static String getRealPathFromUriForVedio(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Video.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     //获取地图名称
     public static String findNameFromUri(Uri uri){
         int num;
@@ -1536,6 +1584,23 @@ public class DataUtil {
             //
             sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
             sb.append("\n");
+            sb.append("<td>").append("VideoStr").append("</td>").append("\n");
+            sb.append("\n");
+            List<MVEDIO> mvedios = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MVEDIO.class);
+            String VideoStr = "";
+            for (int j = 0; j < mvedios.size(); ++j){
+                if (j == 0){
+                    VideoStr = mvedios.get(j).getPath().substring(mvedios.get(j).getPath().lastIndexOf("/"), mvedios.get(j).getPath().length());
+                }else VideoStr = VideoStr + "|" + mvedios.get(j).getPath().substring(mvedios.get(j).getPath().lastIndexOf("/") + 1, mvedios.get(j).getPath().length());
+            }
+            sb.append("<td>").append(VideoStr).append("</td>").append("\n");
+            sb.append("\n");
+            sb.append("</tr>").append("\n");
+            sb.append("\n");
+            //
+            //
+            sb.append("<tr bgcolor=\"#D4E4F3\">").append("\n");
+            sb.append("\n");
             sb.append("<td>").append("time").append("</td>").append("\n");
             sb.append("\n");
             sb.append("<td>").append(pois.get(i).getTime()).append("</td>").append("\n");
@@ -1737,6 +1802,7 @@ public class DataUtil {
         sb = sb.append("poic").append(";");
         sb = sb.append("photo").append(";");
         sb = sb.append("tape").append(";");
+        sb = sb.append("video").append(";");
         sb = sb.append("description").append(";");
         sb = sb.append("time").append(";");
         sb = sb.append("type").append(";");
@@ -1812,7 +1878,16 @@ public class DataUtil {
                         tapeStr = tapeStr + "|" + mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
                 }
                 tapeStr = URLDecoder.decode(tapeStr, "utf-8");
-                sb.append(tapeStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getType()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
+                List<MVEDIO> mvedios = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MVEDIO.class);
+                String VideoStr = "";
+                for (int j = 0; j < mvedios.size(); ++j) {
+                    if (j == 0) {
+                        VideoStr = mvedios.get(j).getPath().substring(mvedios.get(j).getPath().lastIndexOf("/") + 1, mvedios.get(j).getPath().length());
+                    } else
+                        VideoStr = VideoStr + "|" + mvedios.get(j).getPath().substring(mvedios.get(j).getPath().lastIndexOf("/") + 1, mvedios.get(j).getPath().length());
+                }
+                VideoStr = URLDecoder.decode(VideoStr, "utf-8");
+                sb.append(tapeStr).append(";").append(VideoStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getType()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
             }
             makeFile(sb, type);
         }catch (UnsupportedEncodingException e){

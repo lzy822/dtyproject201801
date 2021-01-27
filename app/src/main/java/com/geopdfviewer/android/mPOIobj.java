@@ -19,6 +19,7 @@ public class mPOIobj {
     private String m_time;
     private int m_tapenum;
     private int m_photonum;
+    private int m_videonum;
     private String m_name;
     private String m_description;
 
@@ -27,7 +28,7 @@ public class mPOIobj {
         this.m_name = m_name;
     }
 
-    public mPOIobj(String m_POIC, float m_X, float m_Y, String m_time, int m_tapenum, int m_photonum, String m_name, String m_description) {
+    public mPOIobj(String m_POIC, float m_X, float m_Y, String m_time, int m_tapenum, int m_photonum, int m_videonum, String m_name, String m_description) {
         this.m_POIC = m_POIC;
         this.m_X = m_X;
         this.m_Y = m_Y;
@@ -36,6 +37,15 @@ public class mPOIobj {
         this.m_photonum = m_photonum;
         this.m_name = m_name;
         this.m_description = m_description;
+        this.m_videonum = m_videonum;
+    }
+
+    public int getM_videonum() {
+        return m_videonum;
+    }
+
+    public void setM_videonum(int m_videonum) {
+        this.m_videonum = m_videonum;
     }
 
     public String getM_POIC() {
