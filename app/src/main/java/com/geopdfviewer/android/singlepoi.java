@@ -937,6 +937,8 @@ public class singlepoi extends AppCompatActivity {
         addphoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                CacheDescription = editText_des.getText().toString();
+                CacheName = editText_name.getText().toString();
                 showPopueWindowForPhoto();
             }
         });
@@ -946,6 +948,8 @@ public class singlepoi extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
+                    CacheDescription = editText_des.getText().toString();
+                    CacheName = editText_name.getText().toString();
                     Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
                     startActivityForResult(intent, REQUEST_CODE_TAPE);
                 }catch (ActivityNotFoundException e){
@@ -959,6 +963,8 @@ public class singlepoi extends AppCompatActivity {
         AddVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                CacheDescription = editText_des.getText().toString();
+                CacheName = editText_name.getText().toString();
                 showPopueWindowForVideo();
             }
         });
@@ -1180,6 +1186,7 @@ public class singlepoi extends AppCompatActivity {
         // TODO 2021/1/27 数据缓存
         if (!CacheName.equals(name))
             editText_name.setText(CacheName);
+
         editText_des = (EditText) findViewById(R.id.edit_des);
         editText_des.setVisibility(View.VISIBLE);
         if (poi.getDescription() != null) {
@@ -1187,6 +1194,7 @@ public class singlepoi extends AppCompatActivity {
         }else editText_des.setText("");
         if (!CacheDescription.equals(editText_des.getText().toString()))
             editText_des.setText(CacheDescription);
+
         TextView textView_time = (TextView) findViewById(R.id.txt_timeshow);
         textView_time.setVisibility(View.VISIBLE);
         textView_time.setText(poi.getTime());
@@ -1249,6 +1257,8 @@ public class singlepoi extends AppCompatActivity {
         addphoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                CacheDescription = editText_des.getText().toString();
+                CacheName = editText_name.getText().toString();
                 showPopueWindowForPhoto();
             }
         });
@@ -1258,6 +1268,8 @@ public class singlepoi extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
+                    CacheDescription = editText_des.getText().toString();
+                    CacheName = editText_name.getText().toString();
                     Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
                     startActivityForResult(intent, REQUEST_CODE_TAPE);
                 }catch (ActivityNotFoundException e){
@@ -1271,6 +1283,8 @@ public class singlepoi extends AppCompatActivity {
         AddVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                CacheDescription = editText_des.getText().toString();
+                CacheName = editText_name.getText().toString();
                 showPopueWindowForVideo();
             }
         });
