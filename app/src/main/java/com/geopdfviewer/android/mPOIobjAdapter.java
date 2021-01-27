@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.litepal.LitePal;
+
 import java.util.List;
 
 /**
@@ -98,8 +100,9 @@ public class mPOIobjAdapter extends RecyclerView.Adapter<mPOIobjAdapter.ViewHold
             holder.POIImage.setImageResource(R.drawable.ic_pin_green1);
         }
         String data;
+        List<MVEDIO> videos = LitePal.where("poic = ?", poi.getM_POIC()).find(MVEDIO.class);
         data = "兴趣点名称: " + poi.getM_name() + "\n" + "描述: " + poi.getM_description() + "\n" + "时间: " + poi.getM_time() + "\n" + "有" +
-                poi.getM_tapenum() + "个录音, 有" + poi.getM_photonum() + "个图片";
+                poi.getM_tapenum() + "段录音, 有" + poi.getM_photonum() + "张图片, 有" + videos.size() + "个视频";
         holder.POIName.setText(data);
     }
 

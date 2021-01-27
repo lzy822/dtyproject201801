@@ -18,6 +18,7 @@ import android.view.View;
 
 import org.litepal.LitePal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,9 +86,10 @@ public class pois extends AppCompatActivity {
                 String description = cursor.getString(cursor.getColumnIndex("description"));
                 int tapenum = cursor.getInt(cursor.getColumnIndex("tapenum"));
                 int photonum = cursor.getInt(cursor.getColumnIndex("photonum"));
+                int videonum = cursor.getInt(cursor.getColumnIndex("vedionum"));
                 float x = cursor.getFloat(cursor.getColumnIndex("x"));
                 float y = cursor.getFloat(cursor.getColumnIndex("y"));
-                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, name, description);
+                mPOIobj mPOIobj = new mPOIobj(POIC, x, y, time, tapenum, photonum, videonum, name, description);
                 mPOIobjList.add(mPOIobj);
             }while (cursor.moveToNext());
         }
@@ -100,8 +102,27 @@ public class pois extends AppCompatActivity {
             @Override
             public void onItemLongClick(View view, String POIC) {
                 setTitle(pois.this.getResources().getText(R.string.IsLongClicking));
-                selectedPOIC = POIC;
-                isLongClick = 0;
+
+                if (isLongClick != 0) {
+                    selectedPOIC = POIC;
+                    isLongClick = 0;
+                    invalidateOptionsMenu();
+                    Log.w(TAG, "onItemLongClick: " + selectedPOIC);
+                }
+                else {
+                    mPOIobjAdapter.ViewHolder holder = new mPOIobjAdapter.ViewHolder(view);
+                    holder.cardView.setCardBackgroundColor(Color.WHITE);
+                    if (selectedPOIC.contains(" ")) {
+                        String replace = " " + String.valueOf(POIC);
+                        selectedPOIC = selectedPOIC.replace(replace, "");
+                        if (selectedPOIC.length() == selectedPOIC.replace(replace, "").length()){
+                            String replace1 = String.valueOf(POIC) + " ";
+                            selectedPOIC = selectedPOIC.replace(replace1, "");
+                        }
+                    }else {
+                        resetView();
+                    }
+                }
                 invalidateOptionsMenu();
             }
         });
@@ -203,11 +224,39 @@ public class pois extends AppCompatActivity {
                 LitePal.deleteAll(POI.class, "POIC = ?", nums[i]);
                 LitePal.deleteAll(MTAPE.class, "POIC = ?", nums[i]);
                 LitePal.deleteAll(MPHOTO.class, "POIC = ?", nums[i]);
+                try {
+                    List<MVEDIO> videos = LitePal.where("poic = ?", nums[i]).find(MVEDIO.class);
+                    for (int j = 0; j < videos.size(); j++) {
+                        {
+                            File file = new File(videos.get(j).getThumbnailImg());
+                            file.delete();
+                            break;
+                        }
+                    }
+                }
+                catch (Exception e){
+
+                }
+                LitePal.deleteAll(MVEDIO.class, "poic = ?", nums[i]);
             }
         }else {
             LitePal.deleteAll(POI.class, "POIC = ?", selectedPOIC);
             LitePal.deleteAll(MTAPE.class, "POIC = ?", selectedPOIC);
             LitePal.deleteAll(MPHOTO.class, "POIC = ?", selectedPOIC);
+            try {
+                List<MVEDIO> videos = LitePal.where("poic = ?", selectedPOIC).find(MVEDIO.class);
+                for (int j = 0; j < videos.size(); j++) {
+                    {
+                        File file = new File(videos.get(j).getThumbnailImg());
+                        file.delete();
+                        break;
+                    }
+                }
+            }
+            catch (Exception e){
+
+            }
+            LitePal.deleteAll(MVEDIO.class, "poic = ?", selectedPOIC);
         }
     }
 }

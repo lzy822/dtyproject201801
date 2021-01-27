@@ -89,9 +89,32 @@ public class photoshow extends AppCompatActivity {
             public void onItemLongClick(View view, String path, String time) {
                 setTitle(photoshow.this.getResources().getText(R.string.IsLongClicking));
                 //deletePath = path;
-                deletePath = time;
-                isLongClick = 0;
-                invalidateOptionsMenu();
+                if (isLongClick == 0){
+                    mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        //deletePath = deletePath + "wslzy" + path;
+                        deletePath = deletePath + "wslzy" + time;
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            //String replace = "wslzy" + path;
+                            String replace = "wslzy" + time;
+                            deletePath = deletePath.replace(replace, "");
+                            if (deletePath.length() == deletePath.replace(replace, "").length()){
+                                //String replace1 = path + "wslzy";
+                                String replace1 = time + "wslzy";
+                                deletePath = deletePath.replace(replace1, "");
+                            }
+                        }else {
+                            resetView();
+                        }
+                    }
+                }else {
+                    deletePath = time;
+                    isLongClick = 0;
+                    invalidateOptionsMenu();
+                }
             }
         });
         adapter.setOnItemClickListener(new mPhotobjAdapter.OnRecyclerItemClickListener() {
@@ -317,10 +340,34 @@ public class photoshow extends AppCompatActivity {
             public void onItemLongClick(View view, String path, String time) {
                 setTitle(photoshow.this.getResources().getText(R.string.IsLongClicking));
                 //deletePath = path;
-                deletePath = path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
-                Log.w(TAG, "onItemLongClick: " + deletePath);
-                isLongClick = 0;
-                invalidateOptionsMenu();
+                if (isLongClick == 0){
+                    mPhotobjAdapter.ViewHolder holder = new mPhotobjAdapter.ViewHolder(view);
+                    if (holder.cardView.getCardBackgroundColor().getDefaultColor() != Color.GRAY){
+                        holder.cardView.setCardBackgroundColor(Color.GRAY);
+                        //deletePath = deletePath + "wslzy" + path;
+                        deletePath = deletePath + "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                    }else {
+                        holder.cardView.setCardBackgroundColor(Color.WHITE);
+                        if (deletePath.contains("wslzy")) {
+                            //String replace = "wslzy" + path;
+                            String replace = "wslzy" + path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                            deletePath = deletePath.replace(replace, "");
+                            if (deletePath.length() == deletePath.replace(replace, "").length()){
+                                //String replace1 = path + "wslzy";
+                                String replace1 = path + "wslzy";
+                                deletePath = deletePath.replace(replace1, "");
+                            }
+                        }else {
+                            resetView();
+                        }
+                    }
+                    Log.w(TAG, "onItemLongClick: " + deletePath);
+                }else {
+                    deletePath = path.replace(Environment.getExternalStorageDirectory().toString() + "/盘龙区多媒体数据/照片/", "");
+                    Log.w(TAG, "onItemLongClick: " + deletePath);
+                    isLongClick = 0;
+                    invalidateOptionsMenu();
+                }
             }
         });
         adapter.setOnItemClickListener(new mPhotobjAdapter.OnRecyclerItemClickListener() {

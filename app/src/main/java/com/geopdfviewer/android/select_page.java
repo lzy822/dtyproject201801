@@ -1778,6 +1778,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
                         }
                         sb.append("</Trail>").append("\n");
+
                         List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
                         int size_mphoto = mphotos.size();
                         sb = sb.append("<MPHOTO>").append("\n");
@@ -1791,6 +1792,34 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
                         }
                         sb.append("</MPHOTO>").append("\n");
+
+                        List<MVEDIO> mvedios = LitePal.findAll(MVEDIO.class);
+                        int size_mvideo = mvedios.size();
+                        sb = sb.append("<MVIDEO>").append("\n");
+                        for (int i = 0; i < size_mvideo; ++i){
+                            sb.append("<id>").append(mvedios.get(i).getId()).append("</id>").append("\n");
+                            sb.append("<pdfic>").append(mvedios.get(i).getPdfic()).append("</pdfic>").append("\n");
+                            sb.append("<POIC>").append(mvedios.get(i).getPoic()).append("</POIC>").append("\n");
+                            String path1 = mvedios.get(i).getThumbnailImg();
+                            sb.append("<Thumbnailpath>").append(path1).append("</Thumbnailpath>").append("\n");
+                            try {
+                                files.add(new File(path1));
+                            }
+                            catch (Exception e){
+
+                            }
+                            String path = mvedios.get(i).getPath();
+                            sb.append("<path>").append(path).append("</path>").append("\n");
+                            try {
+                                files.add(new File(path));
+                            }
+                            catch (Exception e){
+
+                            }
+                            sb.append("<time>").append(mvedios.get(i).getTime()).append("</time>").append("\n");
+                        }
+                        sb.append("</MVIDEO>").append("\n");
+
                         List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
                         int size_mtape = mtapes.size();
                         sb = sb.append("<MTAPE>").append("\n");
@@ -1804,6 +1833,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
                         }
                         sb.append("</MTAPE>").append("\n");
+
+
                         List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
                         int size_lines_whiteBlank = lines_whiteBlanks.size();
                         sb = sb.append("<Lines_WhiteBlank>").append("\n");
