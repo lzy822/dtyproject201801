@@ -2615,6 +2615,33 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     //获取地理信息
+    public void getInfoForElectronicAtlas(String MapName) {
+        List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+        for (int i = 0; i < mapList.size(); i++) {
+            ElectronicAtlasMap map = mapList.get(i);
+            if (MapName.equals(map.getName())) {
+                num_map = 0;
+                pdfFileName = map.getName();
+                WKT = "";
+                uri = map.getPath();
+                String[] strs = map.getMapGeoStr().split(",");
+                GPTS = strs[0];
+                BBox = strs[2];
+                MediaBox = strs[1];
+                CropBox = strs[1];
+                ic = map.getName();
+            }
+        }
+        Log.w(TAG, "BBox : " + BBox);
+        Log.w(TAG, "GPTS : " + GPTS);
+        Log.w(TAG, "MediaBox : " + MediaBox);
+        Log.w(TAG, "CropBox : " + CropBox);
+        Log.w(TAG, "ic : " + ic);
+        //GPTSList = new double[8];
+
+    }
+
+    //获取地理信息
     public void getInfo(int num) {
         num_map = num;
         SharedPreferences pref1 = getSharedPreferences("data", MODE_PRIVATE);
@@ -5053,13 +5080,35 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         initOtherVariable();
     }
 
+    private void initVariableForElectronicAtlas(final String MapName) {
+        initMapVariableForElectronicAtlas(MapName);
+        initOtherVariable();
+    }
+
+    private String receiveMapName() {
+        final Intent intent = getIntent();
+        return intent.getStringExtra("MapName");
+    }
+
     private int receiveInfo() {
         final Intent intent = getIntent();
         return intent.getIntExtra("num", 0);
     }
 
+    private void initMapVariableForElectronicAtlas(final String MapName) {
+        //getInfo(m_num);
+        getInfoForElectronicAtlas(MapName);
+        manageInfo();
+        num_map1 = 0;
+        File m_file = new File(uri);
+        if (uri != null && !uri.isEmpty() && m_file.exists()) {
+            FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
+        }
+    }
+
     private void initMapVariable(final int m_num) {
         getInfo(m_num);
+        //getInfoForElectronicAtlas(m_num);
         manageInfo();
         num_map1 = m_num;
         File m_file = new File(uri);
@@ -7008,6 +7057,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         return metric.density;
     }
 
+    private void ReadAndParseData(){
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -7016,17 +7069,23 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         //Toast.makeText(this, "locate here", Toast.LENGTH_SHORT).show();
 
 
+        String MapName = receiveMapName();
+        initVariableForElectronicAtlas(MapName);
+        initWidget();
+        displayFromFile(uri);
+
         Log.w(TAG, "onCreate: ");
-        int num = receiveInfo();
+        /*int num = receiveInfo();
         if (num != -1) {
             doSpecificOperation();
+            //initMapVariableForElectronicAtlas();
             initVariable(num);
             initWidget();
             displayFromFile(uri);
             Log.w(TAG, "resumeSurface: " + toolbar.getTitle().toString());
         } else {
             showLeaflets();
-        }
+        }*/
     }
 
     @Override

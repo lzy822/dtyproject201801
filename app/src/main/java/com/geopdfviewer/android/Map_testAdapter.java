@@ -120,6 +120,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
             int MapType = map.getMapType();
             if (MapType == 0 || MapType == 4 || MapType == 8) {
                 holder.MapName.setText(map.getM_name());
+                holder.MapImage.setImageResource(R.drawable.ic_content_black_24dp);
             } else {
                 if (isFileExist(map.getM_uri())) {
                     DecimalFormat df = new DecimalFormat("0.0");
@@ -157,8 +158,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                             holder.MapImage.setImageBitmap(bitmap);
                         }
                     } else {
-                        //holder.MapImage.setImageResource(R.drawable.ic_android_black);
-
+                        holder.MapImage.setImageResource(R.drawable.ic_content_black_24dp);
                     }
                 } else {
                     String ImgUri = map.getM_imguri();
@@ -177,7 +177,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                 }
             }
         }catch (Exception e){
-            Log.w(TAG, "exception: " + map.getM_name());
+            Log.w(TAG, "ElectronicAtlas: " + map.getM_name() + ", " + e.toString());
         }
         /*if (!map.getM_name().equals("图志简介")){
             if (isFileExist(map.getM_uri())) {
