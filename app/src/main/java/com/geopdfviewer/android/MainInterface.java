@@ -2279,6 +2279,95 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 drawLineFromLineString("", mdrawLineFeature, false, false, canvas, paint9, paint2);
         }
         if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
+
+            List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+            int size = mapList.size();
+            float thedelta = 0;
+            String theName = "";
+            for (int j = 0; j < size; ++j) {
+                ElectronicAtlasMap map = mapList.get(j);
+                String MapGeoStr = map.getMapGeoStr();
+                if (MapGeoStr != null){
+                    String[] MapGeoStrs = MapGeoStr.split(",");
+                    String MGPTS = MapGeoStrs[0];
+                    int MMapType = map.getMapType();
+                    if ((MMapType == 1 || MMapType >= 5) && MGPTS != null && !MGPTS.isEmpty()) {
+                        String[] GPTString = MGPTS.split(" ");
+                        float[] GPTSs = new float[GPTString.length];
+                        for (int i = 0; i < GPTString.length; ++i) {
+                            GPTSs[i] = Float.valueOf(GPTString[i]);
+                        }
+                        float lat_axis, long_axis;
+                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                        for (int i = 0; i < GPTSs.length; i = i + 2) {
+                            if (GPTSs[i] < lat_axis) {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lb.x = GPTSs[i];
+                                    pt_lb.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rb.x = GPTSs[i];
+                                    pt_rb.y = GPTSs[i + 1];
+                                }
+                            } else {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lt.x = GPTSs[i];
+                                    pt_lt.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rt.x = GPTSs[i];
+                                    pt_rt.y = GPTSs[i + 1];
+                                }
+                            }
+                        }
+                        locError("see here");
+                        locError("see here");
+                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                        if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
+                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                            locError("find delta1: " + Float.toString(thedelta1));
+                            locError("find delta: " + Float.toString(thedelta));
+                            locError("find num: " + Integer.toString(j));
+                            if (j != num_map) {
+                                if (thedelta == 0) {
+                                    thedelta = thedelta1;
+                                    theName = map.getName();
+                                }
+                                if (thedelta1 < thedelta) {
+                                    locError("change!!!");
+                                    thedelta = thedelta1;
+                                    theName = map.getName();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Log.w(TAG, "theName: " + theName);
+            double deltaK_trans;
+            deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
+            locError("deltaK_trans: " + Double.toString(deltaK_trans));
+            if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
+                geometry_whiteBlanks.clear();
+                num_whiteBlankPt = 0;
+                isWhiteBlank = false;
+                whiteBlankPt = "";
+                    /*num_map1 = num_map;
+                    getInfo(thenum);*/
+                getInfoForElectronicAtlas(theName);
+                manageInfo();
+                toolbar.setTitle(pdfFileName);
+                getNormalBitmap();
+                pdfView.recycle();
+                displayFromFile(uri);
+                isAutoTrans = false;
+                autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                getWhiteBlankData();
+            }
+            /*老版图志
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
             if (size != 0) {
@@ -2321,8 +2410,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             }
                         }
                         locError("see here");
-                        //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                        //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
                         locError("see here");
                         float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
                         float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
@@ -2345,13 +2432,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 }
                             }
                             locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
-                                        /*num_map1 = num_map;
-                                        getInfo(j);
-                                        toolbar.setTitle(pdfFileName);
-                                        getBitmap();
-                                        displayFromFile(uri);
-                                        isAutoTrans = false;
-                                        autoTrans.setBackgroundResource(R.drawable.ic_close_black_24dp);*/
                         }
                     }
                 }
@@ -2375,20 +2455,100 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     getWhiteBlankData();
                 }
             } else
-                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();*/
         } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
+            List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+            int size = mapList.size();
+            float thedelta = 0;
+            String theName = "";
+            for (int j = 0; j < size; j++) {
+                ElectronicAtlasMap map = mapList.get(j);
+                String MapGeoStr = map.getMapGeoStr();
+                if (MapGeoStr != null) {
+                    String[] MapGeoStrs = MapGeoStr.split(",");
+                    String MGPTS = MapGeoStrs[0];
+                    int MMapType = map.getMapType();
+                    if ((MMapType == 1 || MMapType >= 5)) {
+                        Log.w(TAG, "GPTS: " + MGPTS);
+                        String[] GPTString = MGPTS.split(" ");
+                        float[] GPTSs = new float[GPTString.length];
+                        for (int i = 0; i < GPTString.length; ++i) {
+                            if (MGPTS != null && !MGPTS.isEmpty())
+                                GPTSs[i] = Float.valueOf(GPTString[i]);
+                        }
+                        float lat_axis, long_axis;
+                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                        for (int i = 0; i < GPTSs.length; i = i + 2) {
+                            if (GPTSs[i] < lat_axis) {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lb.x = GPTSs[i];
+                                    pt_lb.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rb.x = GPTSs[i];
+                                    pt_rb.y = GPTSs[i + 1];
+                                }
+                            } else {
+                                if (GPTSs[i + 1] < long_axis) {
+                                    pt_lt.x = GPTSs[i];
+                                    pt_lt.y = GPTSs[i + 1];
+                                } else {
+                                    pt_rt.x = GPTSs[i];
+                                    pt_rt.y = GPTSs[i + 1];
+                                }
+                            }
+                        }
+                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                        if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
+                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                            if (thedelta == 0) {
+                                thedelta = thedelta1;
+                                theName = map.getName();
+                            } else if (thedelta1 < thedelta) {
+                                thedelta = thedelta1;
+                                theName = map.getName();
+                            }
+                        }
+                    }
+                }
+                Log.w(TAG, "theName: " + theName);
+                double deltaK_trans;
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
+                locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
+                    geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
+                    getInfoForElectronicAtlas(theName);
+                    manageInfo();
+                    toolbar.setTitle(pdfFileName);
+                    getNormalBitmap();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();
+                }
+            }
+            /*老版图志
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
-            if (size != 0) {
+            if (size != 0)
+            {
                 float thedelta = 0;
                 int thenum = 0;
-                for (int j = 1; j <= size; ++j) {
+                for (int j = 0; j <= size; ++j) {
                     SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
                     String str = "n_" + j + "_";
                     String Muri = pref2.getString(str + "uri", "");
                     String MGPTS = pref2.getString(str + "GPTS", "");
                     int MMapType = pref2.getInt(str + "MapType", -1);
-                    if ((MMapType == 1 || MMapType >= 4) && MGPTS != null && !MGPTS.isEmpty())
+                    if ((MMapType == 1 || MMapType >= 5) && MGPTS != null && !MGPTS.isEmpty())
                     {
                         Log.w(TAG, "GPTS: " + MGPTS);
                         String[] GPTString = MGPTS.split(" ");
@@ -2462,7 +2622,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     getWhiteBlankData();
                 }
             } else
-                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+             */
         }
         if (hasQueriedPoi) {
             PointF ptf = LatLng.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -4238,6 +4399,73 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     }
 
+    public void showListPopupWindowForMapQuery(View view, String query) {
+        final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        query = query.trim();
+        String sql = "select * from ElectronicAtlasMap where";
+        String[] strings = query.split(" ");
+        for (int i = 0; i < strings.length; ++i) {
+            if (strings.length == 1) sql = sql + " (name LIKE '%" + strings[i] + "%')";
+            else {
+                if (i == 0) sql = sql + " (name LIKE '%" + strings[i] + "%'";
+                else if (i != strings.length - 1)
+                    sql = sql + " AND name LIKE '%" + strings[i] + "%'";
+                else sql = sql + " AND name LIKE '%" + strings[i] + "%')";
+            }
+        }
+        // TODO 2021/2/1 图幅查询
+        final List<String> pois = new ArrayList<>();
+        Cursor cursor = LitePal.findBySQL(sql);
+        if (cursor.moveToFirst()) {
+            do {
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                String path = cursor.getString(cursor.getColumnIndex("path"));
+                if (!path.equals(""))
+                    pois.add(name);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        String[] items = new String[pois.size()];
+        for (int i = 0; i < pois.size(); ++i) {
+            items[i] = pois.get(i);
+        }
+
+        // ListView适配器
+        listPopupWindow.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items));
+
+        // 选择item的监听事件
+        listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String MapName = items[position];
+
+                initVariableForElectronicAtlas(MapName);
+                initWidget();
+                displayFromFile(uri);
+
+                listPopupWindow.dismiss();
+                isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                invalidateOptionsMenu();
+            }
+        });
+
+        // 对话框的宽高
+        listPopupWindow.setWidth(600);
+        listPopupWindow.setHeight(600);
+
+        // ListPopupWindow的锚,弹出框的位置是相对当前View的位置
+        listPopupWindow.setAnchorView(view);
+
+        // ListPopupWindow 距锚view的距离
+        listPopupWindow.setHorizontalOffset(50);
+        listPopupWindow.setVerticalOffset(100);
+
+        listPopupWindow.setModal(false);
+
+        listPopupWindow.show();
+    }
+
     public void showListPopupWindow(View view, String query) {
         final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
         query = query.trim();
@@ -4249,7 +4477,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             else {
                 if (i == 0) sql = sql + " ((name LIKE '%" + strings[i] + "%'";
                 else if (i != strings.length - 1)
-                    sql = sql + " AND description LIKE '%" + strings[i] + "%'";
+                    sql = sql + " AND name LIKE '%" + strings[i] + "%'";
                 else sql = sql + " AND name LIKE '%" + strings[i] + "%')";
             }
         }
@@ -7172,8 +7400,37 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 queryMode = TuzhiEnum.POI_QUERY;
                             }
                         });
+                        /*新版图志
+                        dialog.setNeutralButton("图幅查询", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                queryMode = TuzhiEnum.MAP_QUERY;
+                            }
+                        });*/
                         dialog.show();
-                    } else queryMode = TuzhiEnum.POI_QUERY;
+                    } else {
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                        dialog.setTitle("提示");
+                        dialog.setMessage("需要进行什么查询?");
+                        dialog.setCancelable(false);
+                        dialog.setNegativeButton("简单查询", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                queryMode = TuzhiEnum.POI_QUERY;
+                            }
+                        });
+                        dialog.setNeutralButton("图幅查询", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                queryMode = TuzhiEnum.MAP_QUERY;
+                            }
+                        });
+                        dialog.show();
+
+
+                        /*老版图志
+                        queryMode = TuzhiEnum.POI_QUERY;*/
+                    }
                     SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                     searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
                     // Assumes current activity is the searchable activity
@@ -7229,9 +7486,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.RedLineError), Toast.LENGTH_LONG).show();
                                     return true;
                                 }
-                            } else {
+                            } else if (queryMode == TuzhiEnum.POI_QUERY){
                                 showListPopupWindow(searchView, query);
                                 //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
+                                return true;
+                            }
+                            else {
+                                showListPopupWindowForMapQuery(searchView, query);
                                 return true;
                             }
                         }

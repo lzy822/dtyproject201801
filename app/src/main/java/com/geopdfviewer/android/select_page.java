@@ -2,6 +2,7 @@ package com.geopdfviewer.android;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -33,13 +34,17 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
@@ -162,7 +167,33 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         //toolbar = (Toolbar) findViewById(R.id.toolbar);
-        switch (isLongClick){
+        // TODO 2021/2/1
+
+        menu.findItem(R.id.queryPOI).setVisible(false);
+        menu.findItem(R.id.queryLatLng).setVisible(false);
+        menu.findItem(R.id.info).setVisible(false);
+        menu.findItem(R.id.action_search).setVisible(true);
+        menu.findItem(R.id.back).setVisible(false);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                showListPopupWindowForMapQuery(searchView, query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return true;
+            }
+        });
+        /*老版图志switch (isLongClick){
             case 1:
                 toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
                 menu.findItem(R.id.delete).setVisible(false);
@@ -175,14 +206,260 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 menu.findItem(R.id.mmcancel).setVisible(true);
                 menu.findItem(R.id.showinfo).setVisible(false);
                 break;
-        }
+        }*/
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    public void showListPopupWindowForMapQuery(View view, String query) {
+        final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        query = query.trim();
+        String sql = "select * from ElectronicAtlasMap where";
+        String[] strings = query.split(" ");
+        for (int i = 0; i < strings.length; ++i) {
+            if (strings.length == 1) sql = sql + " (name LIKE '%" + strings[i] + "%')";
+            else {
+                if (i == 0) sql = sql + " (name LIKE '%" + strings[i] + "%'";
+                else if (i != strings.length - 1)
+                    sql = sql + " AND name LIKE '%" + strings[i] + "%'";
+                else sql = sql + " AND name LIKE '%" + strings[i] + "%')";
+            }
+        }
+        final List<ElectronicAtlasMap> maps = new ArrayList<>();
+        Cursor cursor = LitePal.findBySQL(sql);
+        if (cursor.moveToFirst()) {
+            do {
+                String parentNode = cursor.getString(cursor.getColumnIndex("parentnode"));
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                int mapType = cursor.getInt(cursor.getColumnIndex("maptype"));
+                String path = cursor.getString(cursor.getColumnIndex("path"));
+                String MapGeoStr = cursor.getString(cursor.getColumnIndex("mapgeostr"));
+                ElectronicAtlasMap map = new ElectronicAtlasMap(parentNode, name, mapType, path, MapGeoStr);
+                maps.add(map);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        String[] items = new String[maps.size()];
+        for (int i = 0; i < maps.size(); ++i) {
+            items[i] = maps.get(i).getName();
+            Log.w(TAG, "showListPopupWindowForMapQuery: " + maps.get(i).getName() + ", " + maps.get(i).getPath() + ", " + maps.get(i).getMapGeoStr());
+        }
+
+        // ListView适配器
+        listPopupWindow.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items));
+
+        // 选择item的监听事件
+        listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                ElectronicAtlasMap map = maps.get(position);
+                if (map.getMapGeoStr() != null) {
+                    String MapName = map.getName();
+
+                    Intent intent = new Intent(select_page.this, MainInterface.class);
+                    intent.putExtra("MapName", MapName);
+                    select_page.this.startActivity(intent);
+                }
+                else
+                {
+                    List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                    Boolean HasNode = false;
+                    for (int i = 0; i < mapList.size(); i++) {
+                        ElectronicAtlasMap map1 = mapList.get(i);
+                        if (map1.getParentNode().equals(map.getName())){
+                            ParentNodeName = map.getName();
+                            mapCollectionType = map1.getMapType();
+                            InitElectronicAtlasData();
+                            refreshRecyclerForElectronicAtlas();
+                            FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
+                            if (mapCollectionType == 0){
+                                floatingActionButton.setVisibility(View.GONE);
+                            }
+                            else
+                            {
+                                floatingActionButton.setVisibility(View.VISIBLE);
+                                floatingActionButton.setElevation(100);
+                            }
+                            floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                                    for (int i = 0; i < mapList.size(); i++) {
+                                        ElectronicAtlasMap map = mapList.get(i);
+                                        if (map.getName().equals(ParentNodeName)){
+                                            ParentNodeName = map.getParentNode();
+                                            mapCollectionType = map.getMapType();
+                                            InitElectronicAtlasData();
+                                            refreshRecyclerForElectronicAtlas();
+                                            if (mapCollectionType == 0){
+                                                floatingActionButton.setVisibility(View.GONE);
+                                            }
+                                            else
+                                            {
+                                                floatingActionButton.setVisibility(View.VISIBLE);
+                                                floatingActionButton.setElevation(100);
+                                            }
+                                            break;
+                                        }
+                                        else if (ParentNodeName.equals("")){
+                                            mapCollectionType = 0;
+                                            InitElectronicAtlasData();
+                                            refreshRecyclerForElectronicAtlas();
+                                            if (mapCollectionType == 0){
+                                                floatingActionButton.setVisibility(View.GONE);
+                                            }
+                                            else
+                                            {
+                                                floatingActionButton.setVisibility(View.VISIBLE);
+                                                floatingActionButton.setElevation(100);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            });
+                            HasNode = true;
+                            break;
+                        }
+                    }
+                    if (HasNode == false){
+                        for (int i = 0; i < mapList.size(); i++) {
+                                ParentNodeName = map.getName();
+                                switch (ParentNodeName) {
+                                case "序图组":
+                                    mapCollectionType = 1;
+                                    break;
+                                case "资源与环境图组":
+                                    mapCollectionType = 2;
+                                    break;
+                                case "社会经济图组":
+                                    mapCollectionType = 3;
+                                    break;
+                                case "区域地理图组":
+                                    mapCollectionType = 4;
+                                    break;
+                                case "县图":
+                                    mapCollectionType = 5;
+                                    break;
+                                case "各县城区图":
+                                    mapCollectionType = 6;
+                                    break;
+                                case "各县影像图":
+                                    mapCollectionType = 7;
+                                    break;
+                                case "乡镇图":
+                                    mapCollectionType = 8;
+                                    break;
+                                case "临翔区":
+                                    mapCollectionType = 9;
+                                    break;
+                                case "凤庆县":
+                                    mapCollectionType = 10;
+                                    break;
+                                case "云县":
+                                    mapCollectionType = 11;
+                                    break;
+                                case "永德县":
+                                    mapCollectionType = 12;
+                                    break;
+                                case "镇康县":
+                                    mapCollectionType = 13;
+                                    break;
+                                case "双江县":
+                                    mapCollectionType = 14;
+                                    break;
+                                case "耿马县":
+                                    mapCollectionType = 15;
+                                    break;
+                                case "沧源县":
+                                    mapCollectionType = 16;
+                                    break;
+                            }
+                                InitElectronicAtlasData();
+                                refreshRecyclerForElectronicAtlas();
+                                FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
+                                if (mapCollectionType == 0){
+                                    floatingActionButton.setVisibility(View.GONE);
+                                }
+                                else
+                                {
+                                    floatingActionButton.setVisibility(View.VISIBLE);
+                                    floatingActionButton.setElevation(100);
+                                }
+                                floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                                        for (int i = 0; i < mapList.size(); i++) {
+                                            ElectronicAtlasMap map = mapList.get(i);
+                                            if (map.getName().equals(ParentNodeName)){
+                                                ParentNodeName = map.getParentNode();
+                                                mapCollectionType = map.getMapType();
+                                                InitElectronicAtlasData();
+                                                refreshRecyclerForElectronicAtlas();
+                                                if (mapCollectionType == 0){
+                                                    floatingActionButton.setVisibility(View.GONE);
+                                                }
+                                                else
+                                                {
+                                                    floatingActionButton.setVisibility(View.VISIBLE);
+                                                    floatingActionButton.setElevation(100);
+                                                }
+                                                break;
+                                            }
+                                            else if (ParentNodeName.equals("")){
+                                                mapCollectionType = 0;
+                                                InitElectronicAtlasData();
+                                                refreshRecyclerForElectronicAtlas();
+                                                if (mapCollectionType == 0){
+                                                    floatingActionButton.setVisibility(View.GONE);
+                                                }
+                                                else
+                                                {
+                                                    floatingActionButton.setVisibility(View.VISIBLE);
+                                                    floatingActionButton.setElevation(100);
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                });
+                                break;
+                        }
+                    }
+                }
+                listPopupWindow.dismiss();
+                invalidateOptionsMenu();
+            }
+        });
+
+        // 对话框的宽高
+        listPopupWindow.setWidth(600);
+        listPopupWindow.setHeight(600);
+
+        // ListPopupWindow的锚,弹出框的位置是相对当前View的位置
+        listPopupWindow.setAnchorView(view);
+
+        // ListPopupWindow 距锚view的距离
+        listPopupWindow.setHorizontalOffset(50);
+        listPopupWindow.setVerticalOffset(100);
+
+        listPopupWindow.setModal(false);
+
+        listPopupWindow.show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //getMenuInflater().inflate(R.menu.options, menu);
-        getMenuInflater().inflate(R.menu.deletetoolbar, menu);
+        /*老版图志
+        getMenuInflater().inflate(R.menu.deletetoolbar, menu);*/
+        getMenuInflater().inflate(R.menu.maintoolbar, menu);
+        menu.findItem(R.id.queryPOI).setVisible(false);
+        menu.findItem(R.id.queryLatLng).setVisible(false);
+        menu.findItem(R.id.info).setVisible(false);
+        menu.findItem(R.id.action_search).setVisible(true);
+        menu.findItem(R.id.back).setVisible(false);
         return true;
     }
 
@@ -335,6 +612,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     public void refreshRecyclerForElectronicAtlas(){
         try {
             RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+            recyclerView.setElevation(1);
             GridLayoutManager layoutManager = new GridLayoutManager(this, 1);
             recyclerView.setLayoutManager(layoutManager);
             Map_testAdapter adapter = new Map_testAdapter(map_testList);
@@ -407,6 +685,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
                     @Override
                     public void onItemClick(View view, String map_name, int map_num, int position) {
+                        ParentNodeName = map_name;
                         // TODO Gross
                         switch (map_name) {
                             case "序图组":
@@ -477,7 +756,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             floatingActionButton.setVisibility(View.GONE);
                                         }
                                         else
+                                        {
                                             floatingActionButton.setVisibility(View.VISIBLE);
+                                            floatingActionButton.setElevation(100);
+                                        }
                                         break;
                                     }
                                     else if (ParentNodeName.equals("")){
@@ -488,7 +770,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             floatingActionButton.setVisibility(View.GONE);
                                         }
                                         else
+                                        {
                                             floatingActionButton.setVisibility(View.VISIBLE);
+                                            floatingActionButton.setElevation(100);
+                                        }
                                         break;
                                     }
                                 }
@@ -1912,17 +2197,24 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_test_page);
 
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         //获取定位信息
         getLocation();
         //初始化界面一
         //doSpecificOperation();
         //initPage();
 
+        mapCollectionType = 0;
         if (LitePal.findAll(ElectronicAtlasMap.class).size() != 0){
             InitElectronicAtlasData();
         }
         else
+        {
             GetDataForElectronicAtlas();
+            //InitElectronicAtlasData();
+        }
 
 
         //fam菜单声明
@@ -1950,7 +2242,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
         floatingActionButton.setVisibility(View.GONE);
 
-        mapCollectionType = 0;
     }
 
     private void doSpecificOperation(){
@@ -2532,7 +2823,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             ElectronicAtlasMap map = maps.get(i);
             if (map.getMapType() == mapCollectionType) {
                 ParentNodeName = map.getParentNode();
-                if (map.getImgPath().equals("")) {
+                if (map.getMapGeoStr() == null) {
                     map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
                 } else {
                     String[] MapGeoStrs = map.getMapGeoStr().split(",");
@@ -2558,7 +2849,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     private void BatchAddMapsForAndroid(){
         try {
             ParentNodeName = "";
-            List<ElectronicAtlasMap> mapList = new ArrayList<>();
             String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "临沧市地图集安卓/dataForAndroid.txt";
             String Data = DataUtil.readtxt(DataFilePath);
             String[] mData = Data.split("\n");
@@ -2569,18 +2859,21 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 if (strings.length <= 4) {
                     ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), "", null);
                     map.save();
-                    map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
-                    mapList.add(map);
+                    if (map.getMapType() == 0)
+                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
                 } else {
                     //PointF[] pts = GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7]);
                     String bmPath = DataUtil.getDtThumbnail(strings[1], "/TuZhi" + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
                     Log.w(TAG, "BatchAddMapsForAndroid: " + bmPath);
-                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]);
+                    String[] MapGeoStrs = (strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]).split(",");
+                    String GeoInfo = DataUtil.getGPTS(MapGeoStrs[0], MapGeoStrs[3]);
+                    GeoInfo = DataUtil.rubberCoordinate(MapGeoStrs[1], MapGeoStrs[2], GeoInfo);
+                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7]);
                     map.save();
-                    String[] MapGeoStrs = map.getMapGeoStr().split(",");
                     //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
-                    map_testList.add(new Map_test(map.getName(), i, MapGeoStrs[0], MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType()));
-                    mapList.add(map);
+
+                    if (map.getMapType() == 0)
+                        map_testList.add(new Map_test(map.getName(), i, GeoInfo, MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType()));
                 }
             }
         }

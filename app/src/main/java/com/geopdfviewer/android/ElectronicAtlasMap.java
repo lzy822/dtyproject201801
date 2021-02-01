@@ -20,6 +20,14 @@ public class ElectronicAtlasMap extends LitePalSupport {
         MapGeoStr = mapGeoStr;
     }
 
+    public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String mapGeoStr) {
+        this.parentNode = parentNode;
+        this.name = name;
+        this.mapType = mapType;
+        this.path = path;
+        MapGeoStr = mapGeoStr;
+    }
+
     public String getImgPath() {
         return imgPath;
     }
