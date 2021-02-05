@@ -10,14 +10,16 @@ public class ElectronicAtlasMap extends LitePalSupport {
     private String imgPath;
     private PointF[] MapGeoInfo = new PointF[4];
     private String MapGeoStr;
+    private int XZQNum;
 
-    public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr) {
+    public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr, int XZQNum) {
         this.parentNode = parentNode;
         this.name = name;
         this.mapType = mapType;
         this.path = path;
         this.imgPath = imgPath;
         MapGeoStr = mapGeoStr;
+        this.XZQNum = XZQNum;
     }
 
     public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String mapGeoStr) {
@@ -26,6 +28,14 @@ public class ElectronicAtlasMap extends LitePalSupport {
         this.mapType = mapType;
         this.path = path;
         MapGeoStr = mapGeoStr;
+    }
+
+    public int getXZQNum() {
+        return XZQNum;
+    }
+
+    public void setXZQNum(int XZQNum) {
+        this.XZQNum = XZQNum;
     }
 
     public String getImgPath() {

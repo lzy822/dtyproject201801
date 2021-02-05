@@ -184,7 +184,7 @@
             android:text="@string/CenterMode"
             android:textColor="#ff0000"
             android:textStyle="bold"
-            android:checked="true"/>
+            android:checked="false"/>
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/locHere"
             android:layout_width="wrap_content"

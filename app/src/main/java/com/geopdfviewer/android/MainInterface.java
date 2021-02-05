@@ -305,7 +305,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     DecimalFormat scale_df;
 
     //记录当前显示模式
-    private TuzhiEnum showMode = TuzhiEnum.CENTERMODE;
+    private TuzhiEnum showMode = TuzhiEnum.NOCENTERMODE;
 
 
     private boolean esterEgg_lm = false;

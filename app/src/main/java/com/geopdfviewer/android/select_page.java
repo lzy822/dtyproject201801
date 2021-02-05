@@ -183,8 +183,18 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
-                showListPopupWindowForMapQuery(searchView, query);
+                if (query.equals("resetall"))
+                {
+                    toolbar.setTitle("正在重置，请稍候");
+                    Toast.makeText(MyApplication.getContext(), "正在重置，请稍候", Toast.LENGTH_LONG);
+                    mapCollectionType = 0;
+                    GetDataForElectronicAtlas();
+                    refreshRecyclerForElectronicAtlas();
+                    Toast.makeText(MyApplication.getContext(), "重置成功", Toast.LENGTH_LONG);
+                    toolbar.setTitle("图志");
+                }
+                else
+                    showListPopupWindowForMapQuery(searchView, query);
                 return true;
             }
 
@@ -2206,12 +2216,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //doSpecificOperation();
         //initPage();
 
-        mapCollectionType = 0;
         if (LitePal.findAll(ElectronicAtlasMap.class).size() != 0){
+            mapCollectionType = 0;
             InitElectronicAtlasData();
         }
         else
         {
+            mapCollectionType = 0;
             GetDataForElectronicAtlas();
             //InitElectronicAtlasData();
         }
@@ -2811,8 +2822,51 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private void GetDataForElectronicAtlas(){
         LitePal.deleteAll(ElectronicAtlasMap.class);
+        LitePal.deleteAll(XZQTree.class);
         BatchAddMapsForAndroid();
+        GetDataForXZQTree();
         Log.w(TAG, "GetDataForElectronicAtlas: " + LitePal.findAll(ElectronicAtlasMap.class).size());
+    }
+
+    private void GetDataForXZQTree(){
+        try {
+            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "临沧市地图集安卓/行政区划树.txt";
+            String Data = DataUtil.readtxt(DataFilePath);
+            String[] mData = Data.split("\n");
+            String LastXZQNameForLevel0 = "";
+            String LastXZQNameForLevel1 = "";
+            for (int i = 0; i < mData.length; i++) {
+                String line = mData[i];
+                Log.w(TAG, "GetDataForXZQTree: " + line);
+                String[] strings = line.split(",");
+                String XZQName = strings[0];
+                int XZQNum = Integer.valueOf(strings[1].trim());
+                XZQTree xzqTree;
+                switch (XZQNum){
+                    case 0:
+                        xzqTree = new XZQTree(XZQName, XZQNum, "");
+                        LastXZQNameForLevel0 = XZQName;
+                        xzqTree.save();
+                        Log.w(TAG, "GetDataForXZQTree: " + "地州级： " + XZQName);
+                        break;
+                    case 1:
+                        xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel0);
+                        LastXZQNameForLevel1 = XZQName;
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel0 + "县级： " + XZQName);
+                        xzqTree.save();
+                        break;
+                    case 2:
+                        xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel1);
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel1 + "乡镇级： " + XZQName);
+                        xzqTree.save();
+                        break;
+                }
+            }
+        }
+        catch (Exception e){
+            Log.w(TAG, "GetDataForXZQTree: " + e.toString());
+            Toast.makeText(select_page.this, "获取行政区划树的过程中出错，请检查行政区划树文件", Toast.LENGTH_LONG);
+        }
     }
 
     private void InitElectronicAtlasData(){
@@ -2848,6 +2902,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private void BatchAddMapsForAndroid(){
         try {
+            map_testList = new ArrayList<>();
             ParentNodeName = "";
             String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "临沧市地图集安卓/dataForAndroid.txt";
             String Data = DataUtil.readtxt(DataFilePath);
@@ -2857,7 +2912,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 String line = mData[i];
                 String[] strings = line.split(",");
                 if (strings.length <= 4) {
-                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), "", null);
+                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), "", null, -1);
                     map.save();
                     if (map.getMapType() == 0)
                         map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
@@ -2868,7 +2923,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     String[] MapGeoStrs = (strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]).split(",");
                     String GeoInfo = DataUtil.getGPTS(MapGeoStrs[0], MapGeoStrs[3]);
                     GeoInfo = DataUtil.rubberCoordinate(MapGeoStrs[1], MapGeoStrs[2], GeoInfo);
-                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7]);
+                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7], FindXZQNumForMapName(strings[1]));
                     map.save();
                     //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
 
@@ -2880,6 +2935,16 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         catch (Exception e){
             Log.w(TAG, "BatchAddMapsForAndroid: " + e.toString());
         }
+    }
+
+    private int FindXZQNumForMapName(String MapName){
+        List<XZQTree> xzqTrees = LitePal.findAll(XZQTree.class);
+        for (int i = 0; i < xzqTrees.size(); i++) {
+            XZQTree xzqTree = xzqTrees.get(i);
+            if (MapName.contains(xzqTree.getXZQName()))
+                return xzqTree.getXZQNum();
+        }
+        return -1;
     }
 
     private String GetCenterLatAndLong(PointF[] pts){
