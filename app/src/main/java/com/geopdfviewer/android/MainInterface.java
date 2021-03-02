@@ -102,7 +102,10 @@ import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -112,6 +115,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * 地图主界面
@@ -751,7 +756,56 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         if (pt1.x != 0) {
 
             if (isDrawType == TuzhiEnum.POI_DRAW_TYPE && !isQuery) {
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(MainInterface.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
+                builder.setTitle("提示");
+                builder.setMessage("请选择你要添加的图层");
+                builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CreatePOI = true;
+                        POIType = 0;
+                        // TODO LM
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
+                        }
+                        pdfView.resetZoomWithAnimation();
+                        POIType = -1;
+                        CreatePOI = false;
+                    }
+                });
+                builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CreatePOI = true;
+                        POIType = 1;
+
+                        // TODO LM
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
+                        } else {
+                            GoDMBZSinglePOIPage(addDMBZPoi(pt1));
+                        }
+                        pdfView.resetZoomWithAnimation();
+                        POIType = -1;
+                        CreatePOI = false;
+                    }
+                });
+                builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CreatePOI = true;
+                        POIType = 2;
+                        // TODO LM
+                        if (!esterEgg_lm) {
+                            GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
+                        }
+                        pdfView.resetZoomWithAnimation();
+                        POIType = -1;
+                        CreatePOI = false;
+                    }
+                });
+                builder.show();
+                /*AlertDialog.Builder builder1 = new AlertDialog.Builder(MainInterface.this);
                 builder1.setTitle("提示");
                 builder1.setMessage("请选择你要添加的兴趣点种类");
                 builder1.setNegativeButton("标志点", new DialogInterface.OnClickListener() {
@@ -817,7 +871,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         builder.show();
                     }
                 });
-                builder1.show();
+                builder1.show();*/
                 /*if (CreatePOI && POIType != -1) {
                     List<POI> POIs = LitePal.findAll(POI.class);
                     POI poi = new POI();
@@ -1657,6 +1711,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         viewer_height = pdfView.getHeight();
         viewer_width = pdfView.getWidth();
 
+        Log.w(TAG, "getGeoLocFromPixL, current: " + current_pageheight + ", " + current_pagewidth);
+        Log.w(TAG, "getGeoLocFromPixL, viewer: " + viewer_height + ", " + viewer_width);
+
                         /*if (isQuery && num_map == 4 & c_zoom > 5 & ( ( cs_bottom > 24.6 & cs_top < 25.3) & ( cs_left > 102.48 & cs_right < 102.97))){
                             getInfo(3);
                             displayFromFile(uri);
@@ -1692,23 +1749,30 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
         } else isZoom = TuzhiEnum.ZOOM_NONE;
         locError("zoom: " + Float.toString(c_zoom));
-        getCurrentScreenLoc();
-        ImageView imageView = (ImageView) findViewById(R.id.myscale);
-        //double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
-        double scale_deltaLong = (max_long - min_long) / pageWidth * imageView.getWidth();
-        Log.w(TAG, "onLayerDrawn: " + imageView.getWidth());
-        double scale_distance = LatLng.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
-        Log.w(TAG, "scale_distance: " + scale_distance);
-        Log.w(TAG, "getMetric: " + getMetric());
-        //scale_distance = scale_distance * getMetric();
-        if (scale_distance > 1000) {
-            scale_distance = scale_distance / 1000;
-            scaleShow.setText(scale_df.format(scale_distance) + "公里");
-        } else scaleShow.setText(scale_df.format(scale_distance) + "米");
+
+        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
+        k_w = k[0];
+        k_h = k[1];
 
 
-        //Log.w(TAG, "onLayerDrawn!!!: " + dmPoints.size());
-        //Log.w(TAG, "onLayerDrawn!!!: " + type1Checked);
+        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
+            getCurrentScreenLoc();
+            ImageView imageView = (ImageView) findViewById(R.id.myscale);
+            //double scale_deltaLong = (max_long - min_long) / pageWidth * 100;
+            double scale_deltaLong = (max_long - min_long) / pageWidth * imageView.getWidth();
+            Log.w(TAG, "onLayerDrawn: " + imageView.getWidth());
+            double scale_distance = LatLng.algorithm((cs_left + cs_right) / 2, (cs_bottom + cs_top) / 2, (cs_left + cs_right) / 2 + scale_deltaLong, (cs_bottom + cs_top) / 2);
+            Log.w(TAG, "scale_distance: " + scale_distance);
+            Log.w(TAG, "getMetric: " + getMetric());
+            //scale_distance = scale_distance * getMetric();
+            if (scale_distance > 1000) {
+                scale_distance = scale_distance / 1000;
+                scaleShow.setText(scale_df.format(scale_distance) + "公里");
+            } else scaleShow.setText(scale_df.format(scale_distance) + "米");
+
+
+            //Log.w(TAG, "onLayerDrawn!!!: " + dmPoints.size());
+            //Log.w(TAG, "onLayerDrawn!!!: " + type1Checked);
 
 
 
@@ -1740,13 +1804,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             parseAndrawMessure(messure_pts, canvas);
         }*/
 
-        if (isMessure){
-            switch (showMode){
-                case CENTERMODE:
-                    String messure_pts1 = messure_pts;
-                    locError("messure_pts1" + messure_pts1);
-                    int poinum_messure1 = poinum_messure + 1;
-                    //poinum_messure++;
+            if (isMessure) {
+                switch (showMode) {
+                    case CENTERMODE:
+                        String messure_pts1 = messure_pts;
+                        locError("messure_pts1" + messure_pts1);
+                        int poinum_messure1 = poinum_messure + 1;
+                        //poinum_messure++;
                     /*if (poinum_messure1 == 1) {
                         messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
                         if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
@@ -1763,152 +1827,103 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         pdfView.zoomWithAnimation(c_zoom);
                         //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                     }*/
-                    switch (poinum_messure1){
-                        case 1:
-                            messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                            if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
-                                toolbar.setTitle("正在测量(轨迹记录中)");
-                            } else toolbar.setTitle("正在测量");
-                            break;
-                        case 2:
-                            messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                            //setTitle("正在测量");
-                            pdfView.zoomWithAnimation(c_zoom);
-                            //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                            break;
-                        default:
-                            messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
-                            //setTitle("正在测量");
-                            pdfView.zoomWithAnimation(c_zoom);
-                            break;
+                        switch (poinum_messure1) {
+                            case 1:
+                                messure_pts1 = Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在测量(轨迹记录中)");
+                                } else toolbar.setTitle("正在测量");
+                                break;
+                            case 2:
+                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                                break;
+                            default:
+                                messure_pts1 = messure_pts1 + " " + Float.toString(centerPointLoc.x) + " " + Float.toString(centerPointLoc.y);
+                                //setTitle("正在测量");
+                                pdfView.zoomWithAnimation(c_zoom);
+                                break;
 
-                    }
-                    parseAndrawMessure(messure_pts1, canvas);
-                    break;
-                case NOCENTERMODE:
-                    parseAndrawMessure(messure_pts, canvas);
-                    break;
+                        }
+                        parseAndrawMessure(messure_pts1, canvas);
+                        break;
+                    case NOCENTERMODE:
+                        parseAndrawMessure(messure_pts, canvas);
+                        break;
+                }
             }
-        }
 
                         /*if (isOpenWhiteBlank){
                         //白板功能监控
                         onTouchListenerForView();
                         }*/
-        //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
-        float[] k = RenderUtil.getK(pageWidth, pageHeight, viewer_width, viewer_height);
-        k_w = k[0];
-        k_h = k[1];
-        //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
+            //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
+            //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
 
-        drawMLocPoint(canvas);
-        if (isLocateEnd && !m_cTrail.isEmpty() || showTrail) {
-            for (int ii = 0; ii < trails.size(); ii++) {
-                String str1 = trails.get(ii).getPath();
-                String[] TrailString = str1.split(" ");
-                float[] Trails = new float[TrailString.length];
-                for (int i = 0; i < TrailString.length; ++i) {
-                    Trails[i] = Float.valueOf(TrailString[i]);
-                }
-                if (InspectTrail(Trails)) {
-                    Log.w(TAG, "onLayerDrawn: ");
-                    for (int j = 0; j < Trails.length - 2; j = j + 2) {
-                        PointF pt11, pt12;
-                        pt11 = LatLng.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        pt12 = LatLng.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
+            drawMLocPoint(canvas);
+            if (isLocateEnd && !m_cTrail.isEmpty() || showTrail) {
+                for (int ii = 0; ii < trails.size(); ii++) {
+                    String str1 = trails.get(ii).getPath();
+                    String[] TrailString = str1.split(" ");
+                    float[] Trails = new float[TrailString.length];
+                    for (int i = 0; i < TrailString.length; ++i) {
+                        Trails[i] = Float.valueOf(TrailString[i]);
+                    }
+                    if (InspectTrail(Trails)) {
+                        Log.w(TAG, "onLayerDrawn: ");
+                        for (int j = 0; j < Trails.length - 2; j = j + 2) {
+                            PointF pt11, pt12;
+                            pt11 = LatLng.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            pt12 = LatLng.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
+                        }
                     }
                 }
             }
-        }
-        if (isWhiteBlank) {
-            try {
-                // TODO 点位抽稀算法
-                parseAndrawLinesforWhiteBlank(canvas);
-                parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
+            if (isWhiteBlank) {
+                try {
+                    parseAndrawLinesforWhiteBlank(canvas);
+                    parseAndrawLinesforWhiteBlank(whiteBlankPt, canvas);
             /*SimplifyLines(whiteBlankPt);
             parseAndrawLinesforWhiteBlank(SimplifyLines(whiteBlankPt), canvas);*/
+                } catch (Exception em) {
+                    locError(em.toString());
+                }
             }
-            catch (Exception em) {
-                locError(em.toString());
+            // TODO REDLINE
+            if (showMode == TuzhiEnum.CENTERMODE && esterEgg_redline) {
+                managePatchsData();
+                drawDemoArea(canvas);
             }
-        }
-        // TODO REDLINE
-        if (showMode == TuzhiEnum.CENTERMODE && esterEgg_redline) {
-            managePatchsData();
-            drawDemoArea(canvas);
-        }
-        if (isDrawType == TuzhiEnum.POI_DRAW_TYPE || showPOI) {
+            if (isDrawType == TuzhiEnum.POI_DRAW_TYPE || showPOI) {
 
-            // TODO DM
-            if (esterEgg_dm && type1Checked) {
-                drawDM(canvas);
-            }
-            // TODO PLQ
-            if (esterEgg_plq) drawPLQData(canvas);
-            //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
+                // TODO DM
+                if (esterEgg_dm && type1Checked) {
+                    drawDM(canvas);
+                }
+                // TODO PLQ
+                if (esterEgg_plq) drawPLQData(canvas);
+                //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
 
-            // TODO LM
-            if (type2Checked && esterEgg_lm) {
-                drawDMBZ(canvas);
-            }
+                // TODO LM
+                if (type2Checked && esterEgg_lm) {
+                    drawDMBZ(canvas);
+                }
 
-            List<PointF> showpts = new ArrayList<>();
-            List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" + "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-            int size0 = pois.size();
-            for (int i = 0; i < size0; ++i) {
-                if (strings[0].equals(pois.get(i).getType()) && type1Checked) {
-                    if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
-                        PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (c_zoom != 20) {
-                            if (showpts.size() == 0) {
-                                showpts.add(pt3);
-                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                                //canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                if (pois.get(i).getPhotonum() == 0) {
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                    }
-                                } else {
-                                    if (pois.get(i).getTapenum() == 0) {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                        //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; ++j) {
-                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
-                                        }
-                                    } else {
-                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
-                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
-                                        int size = bts.size();
-                                        for (int j = 0; j < size; ++j) {
-                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                                locError("lzy");
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                float deltaDistance = 0;
-                                for (int j = 0; j < showpts.size(); ++j) {
-                                    if (j == 0)
-                                        deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                    else {
-                                        float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                        if (deltaDistance1 < deltaDistance)
-                                            deltaDistance = deltaDistance1;
-                                    }
-                                }
-                                if (deltaDistance > 200) {
+                List<PointF> showpts = new ArrayList<>();
+                List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" + "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+                int size0 = pois.size();
+                for (int i = 0; i < size0; ++i) {
+                    if (strings[0].equals(pois.get(i).getType()) && type1Checked) {
+                        if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
+                            PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            if (c_zoom != 20) {
+                                if (showpts.size() == 0) {
                                     showpts.add(pt3);
                                     canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    //canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                                     if (pois.get(i).getPhotonum() == 0) {
                                         if (pois.get(i).getTapenum() == 0) {
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
@@ -1916,13 +1931,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
                                         }
                                     } else {
-                                        //List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
                                         if (pois.get(i).getTapenum() == 0) {
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
                                             int size = bts.size();
                                             for (int j = 0; j < size; ++j) {
-                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                                     canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                                     locError("lzy");
                                                 }
@@ -1932,55 +1946,61 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
                                             int size = bts.size();
                                             for (int j = 0; j < size; ++j) {
-                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                                     canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                                     locError("lzy");
                                                 }
                                             }
                                         }
                                     }
-                                }
-                            }
-                        } else {
-                            canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                            if (pois.get(i).getPhotonum() == 0) {
-                                if (pois.get(i).getTapenum() == 0) {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                                 } else {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                    float deltaDistance = 0;
+                                    for (int j = 0; j < showpts.size(); ++j) {
+                                        if (j == 0)
+                                            deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                        else {
+                                            float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                            if (deltaDistance1 < deltaDistance)
+                                                deltaDistance = deltaDistance1;
+                                        }
+                                    }
+                                    if (deltaDistance > 200) {
+                                        showpts.add(pt3);
+                                        canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                        if (pois.get(i).getPhotonum() == 0) {
+                                            if (pois.get(i).getTapenum() == 0) {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                            } else {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                            }
+                                        } else {
+                                            //List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                            if (pois.get(i).getTapenum() == 0) {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                                //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                                int size = bts.size();
+                                                for (int j = 0; j < size; ++j) {
+                                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                        canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
+                                                }
+                                            } else {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                                //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                                int size = bts.size();
+                                                for (int j = 0; j < size; ++j) {
+                                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                        canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             } else {
-                                if (pois.get(i).getTapenum() == 0) {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                    //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
-                                    int size = bts.size();
-                                    for (int j = 0; j < size; ++j) {
-                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                            locError("lzy");
-                                        }
-                                    }
-                                } else {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
-                                    //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
-                                    int size = bts.size();
-                                    for (int j = 0; j < size; ++j) {
-                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                            locError("lzy");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if (strings[1].equals(pois.get(i).getType()) && type2Checked) {
-                    if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
-                        PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (c_zoom != 20) {
-                            if (showpts.size() == 0) {
-                                showpts.add(pt3);
                                 canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
                                 canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                                 if (pois.get(i).getPhotonum() == 0) {
@@ -2012,18 +2032,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                         }
                                     }
                                 }
-                            } else {
-                                float deltaDistance = 0;
-                                for (int j = 0; j < showpts.size(); ++j) {
-                                    if (j == 0)
-                                        deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                    else {
-                                        float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                        if (deltaDistance1 < deltaDistance)
-                                            deltaDistance = deltaDistance1;
-                                    }
-                                }
-                                if (deltaDistance > 200) {
+                            }
+                        }
+                    } else if (strings[1].equals(pois.get(i).getType()) && type2Checked) {
+                        if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
+                            PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            if (c_zoom != 20) {
+                                if (showpts.size() == 0) {
                                     showpts.add(pt3);
                                     canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
                                     canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
@@ -2034,13 +2049,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
                                         }
                                     } else {
-                                        List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
                                         if (pois.get(i).getTapenum() == 0) {
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
                                             int size = bts.size();
                                             for (int j = 0; j < size; ++j) {
-                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                                     canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                                     locError("lzy");
                                                 }
@@ -2050,55 +2064,61 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
                                             int size = bts.size();
                                             for (int j = 0; j < size; ++j) {
-                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                                     canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                                     locError("lzy");
                                                 }
                                             }
                                         }
                                     }
-                                }
-                            }
-                        } else {
-                            canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                            if (pois.get(i).getPhotonum() == 0) {
-                                if (pois.get(i).getTapenum() == 0) {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                                 } else {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                    float deltaDistance = 0;
+                                    for (int j = 0; j < showpts.size(); ++j) {
+                                        if (j == 0)
+                                            deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                        else {
+                                            float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                            if (deltaDistance1 < deltaDistance)
+                                                deltaDistance = deltaDistance1;
+                                        }
+                                    }
+                                    if (deltaDistance > 200) {
+                                        showpts.add(pt3);
+                                        canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                        if (pois.get(i).getPhotonum() == 0) {
+                                            if (pois.get(i).getTapenum() == 0) {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                            } else {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                            }
+                                        } else {
+                                            List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                            if (pois.get(i).getTapenum() == 0) {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                                //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                                int size = bts.size();
+                                                for (int j = 0; j < size; ++j) {
+                                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                        canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
+                                                }
+                                            } else {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                                //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                                int size = bts.size();
+                                                for (int j = 0; j < size; ++j) {
+                                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                        canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             } else {
-                                if (pois.get(i).getTapenum() == 0) {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                    //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
-                                    int size = bts.size();
-                                    for (int j = 0; j < size; ++j) {
-                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                            locError("lzy");
-                                        }
-                                    }
-                                } else {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
-                                    //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
-                                    int size = bts.size();
-                                    for (int j = 0; j < size; ++j) {
-                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                            locError("lzy");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if (strings[2].equals(pois.get(i).getType()) && type3Checked) {
-                    if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
-                        PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                        if (c_zoom != 20) {
-                            if (showpts.size() == 0) {
-                                showpts.add(pt3);
                                 canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
                                 canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                                 if (pois.get(i).getPhotonum() == 0) {
@@ -2130,18 +2150,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                         }
                                     }
                                 }
-                            } else {
-                                float deltaDistance = 0;
-                                for (int j = 0; j < showpts.size(); ++j) {
-                                    if (j == 0)
-                                        deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                    else {
-                                        float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
-                                        if (deltaDistance1 < deltaDistance)
-                                            deltaDistance = deltaDistance1;
-                                    }
-                                }
-                                if (deltaDistance > 200) {
+                            }
+                        }
+                    } else if (strings[2].equals(pois.get(i).getType()) && type3Checked) {
+                        if ((pois.get(i).getY() < cs_right && pois.get(i).getY() > cs_left && pois.get(i).getX() < cs_top && pois.get(i).getX() > cs_bottom)) {
+                            PointF pt3 = LatLng.getPixLocFromGeoL(new PointF(pois.get(i).getX(), pois.get(i).getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            if (c_zoom != 20) {
+                                if (showpts.size() == 0) {
                                     showpts.add(pt3);
                                     canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
                                     canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
@@ -2152,13 +2167,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
                                         }
                                     } else {
-                                        List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
                                         if (pois.get(i).getTapenum() == 0) {
                                             canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                            //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                            //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
                                             int size = bts.size();
                                             for (int j = 0; j < size; ++j) {
-                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                                     canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                                     locError("lzy");
                                                 }
@@ -2168,43 +2182,89 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                             //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
                                             int size = bts.size();
                                             for (int j = 0; j < size; ++j) {
-                                                if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
                                                     canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
                                                     locError("lzy");
                                                 }
                                             }
                                         }
                                     }
-                                }
-                            }
-                        } else {
-                            canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
-                            canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
-                            if (pois.get(i).getPhotonum() == 0) {
-                                if (pois.get(i).getTapenum() == 0) {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
                                 } else {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                }
-                            } else {
-                                if (pois.get(i).getTapenum() == 0) {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
-                                    //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
-                                    int size = bts.size();
-                                    for (int j = 0; j < size; ++j) {
-                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                            locError("lzy");
+                                    float deltaDistance = 0;
+                                    for (int j = 0; j < showpts.size(); ++j) {
+                                        if (j == 0)
+                                            deltaDistance = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                        else {
+                                            float deltaDistance1 = Math.abs(pt3.x - showpts.get(j).x) + Math.abs(pt3.y - showpts.get(j).y);
+                                            if (deltaDistance1 < deltaDistance)
+                                                deltaDistance = deltaDistance1;
                                         }
                                     }
+                                    if (deltaDistance > 200) {
+                                        showpts.add(pt3);
+                                        canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                        if (pois.get(i).getPhotonum() == 0) {
+                                            if (pois.get(i).getTapenum() == 0) {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                            } else {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                            }
+                                        } else {
+                                            List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                                            if (pois.get(i).getTapenum() == 0) {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                                //canvas.drawBitmap(, pt2.x, pt2.y - 70, paint1);
+                                                int size = bts.size();
+                                                for (int j = 0; j < size; ++j) {
+                                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                        canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
+                                                }
+                                            } else {
+                                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                                //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                                int size = bts.size();
+                                                for (int j = 0; j < size; ++j) {
+                                                    if (bts.get(j).getPoic().equals(pois.get(i).getPoic())) {
+                                                        canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                        locError("lzy");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                canvas.drawRect(new RectF(pt3.x - 5, pt3.y - 38, pt3.x + 5, pt3.y), paint2);
+                                canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                if (pois.get(i).getPhotonum() == 0) {
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint);
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                    }
                                 } else {
-                                    canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
-                                    //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
-                                    int size = bts.size();
-                                    for (int j = 0; j < size; ++j) {
-                                        if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
-                                            canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
-                                            locError("lzy");
+                                    if (pois.get(i).getTapenum() == 0) {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint4);
+                                        //canvas.drawBitmap(, pt3.x, pt3.y - 70, paint1);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; ++j) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
+                                        }
+                                    } else {
+                                        canvas.drawCircle(pt3.x, pt3.y - 70, 35, paint1);
+                                        //canvas.drawBitmap(getImageThumbnail(mphotos.get(0).getPath(), 100, 80), pt3.x, pt3.y - 70, paint4);
+                                        int size = bts.size();
+                                        for (int j = 0; j < size; ++j) {
+                                            if (pois.get(i).getPoic().equals(bts.get(j).getPoic())) {
+                                                canvas.drawBitmap(bts.get(j).getM_bm(), pt3.x, pt3.y - 70, paint1);
+                                                locError("lzy");
+                                            }
                                         }
                                     }
                                 }
@@ -2212,7 +2272,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         }
                     }
                 }
-            }
             /*if (pois.size() > 0) {
                 for (POI poi : pois) {
                     PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
@@ -2266,107 +2325,107 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     }
                 }
             }*/
-        }
-        if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE && (LineFeatures.size() > 0 || !drawLineFeature.isEmpty())) {
-            for (int i = 0; i < LineFeatures.size(); ++i) {
-                drawLineFromLineString("", LineFeatures.get(i), false, false, canvas, paint9, paint2);
             }
-            String mdrawLineFeature = drawLineFeature;
-            if (showMode == TuzhiEnum.CENTERMODE) {
-                mdrawLineFeature = mdrawLineFeature + " " + centerPointLoc.y + "," + centerPointLoc.x + ",0";
+            if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE && (LineFeatures.size() > 0 || !drawLineFeature.isEmpty())) {
+                for (int i = 0; i < LineFeatures.size(); ++i) {
+                    drawLineFromLineString("", LineFeatures.get(i), false, false, canvas, paint9, paint2);
+                }
+                String mdrawLineFeature = drawLineFeature;
+                if (showMode == TuzhiEnum.CENTERMODE) {
+                    mdrawLineFeature = mdrawLineFeature + " " + centerPointLoc.y + "," + centerPointLoc.x + ",0";
+                }
+                if (!drawLineFeature.isEmpty())
+                    drawLineFromLineString("", mdrawLineFeature, false, false, canvas, paint9, paint2);
             }
-            if (!drawLineFeature.isEmpty())
-                drawLineFromLineString("", mdrawLineFeature, false, false, canvas, paint9, paint2);
-        }
-        if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
+            if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
 
-            List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
-            int size = mapList.size();
-            float thedelta = 0;
-            String theName = "";
-            for (int j = 0; j < size; ++j) {
-                ElectronicAtlasMap map = mapList.get(j);
-                String MapGeoStr = map.getMapGeoStr();
-                if (MapGeoStr != null){
-                    String[] MapGeoStrs = MapGeoStr.split(",");
-                    String MGPTS = MapGeoStrs[0];
-                    int MMapType = map.getMapType();
-                    if ((MMapType == 1 || MMapType >= 5) && MGPTS != null && !MGPTS.isEmpty()) {
-                        String[] GPTString = MGPTS.split(" ");
-                        float[] GPTSs = new float[GPTString.length];
-                        for (int i = 0; i < GPTString.length; ++i) {
-                            GPTSs[i] = Float.valueOf(GPTString[i]);
-                        }
-                        float lat_axis, long_axis;
-                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                        for (int i = 0; i < GPTSs.length; i = i + 2) {
-                            if (GPTSs[i] < lat_axis) {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lb.x = GPTSs[i];
-                                    pt_lb.y = GPTSs[i + 1];
+                List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                int size = mapList.size();
+                float thedelta = 0;
+                String theName = "";
+                for (int j = 0; j < size; ++j) {
+                    ElectronicAtlasMap map = mapList.get(j);
+                    String MapGeoStr = map.getMapGeoStr();
+                    if (MapGeoStr != null) {
+                        String[] MapGeoStrs = MapGeoStr.split(",");
+                        String MGPTS = MapGeoStrs[0];
+                        int MMapType = map.getMapType();
+                        if ((MMapType == 1 || MMapType >= 5) && MGPTS != null && !MGPTS.isEmpty()) {
+                            String[] GPTString = MGPTS.split(" ");
+                            float[] GPTSs = new float[GPTString.length];
+                            for (int i = 0; i < GPTString.length; ++i) {
+                                GPTSs[i] = Float.valueOf(GPTString[i]);
+                            }
+                            float lat_axis, long_axis;
+                            PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                            lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                            long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                            for (int i = 0; i < GPTSs.length; i = i + 2) {
+                                if (GPTSs[i] < lat_axis) {
+                                    if (GPTSs[i + 1] < long_axis) {
+                                        pt_lb.x = GPTSs[i];
+                                        pt_lb.y = GPTSs[i + 1];
+                                    } else {
+                                        pt_rb.x = GPTSs[i];
+                                        pt_rb.y = GPTSs[i + 1];
+                                    }
                                 } else {
-                                    pt_rb.x = GPTSs[i];
-                                    pt_rb.y = GPTSs[i + 1];
-                                }
-                            } else {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lt.x = GPTSs[i];
-                                    pt_lt.y = GPTSs[i + 1];
-                                } else {
-                                    pt_rt.x = GPTSs[i];
-                                    pt_rt.y = GPTSs[i + 1];
+                                    if (GPTSs[i + 1] < long_axis) {
+                                        pt_lt.x = GPTSs[i];
+                                        pt_lt.y = GPTSs[i + 1];
+                                    } else {
+                                        pt_rt.x = GPTSs[i];
+                                        pt_rt.y = GPTSs[i + 1];
+                                    }
                                 }
                             }
-                        }
-                        locError("see here");
-                        locError("see here");
-                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                        if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
-                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                            locError("find delta1: " + Float.toString(thedelta1));
-                            locError("find delta: " + Float.toString(thedelta));
-                            locError("find num: " + Integer.toString(j));
-                            if (j != num_map) {
-                                if (thedelta == 0) {
-                                    thedelta = thedelta1;
-                                    theName = map.getName();
-                                }
-                                if (thedelta1 < thedelta) {
-                                    locError("change!!!");
-                                    thedelta = thedelta1;
-                                    theName = map.getName();
+                            locError("see here");
+                            locError("see here");
+                            float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                            float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                            float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                            float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                            if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
+                                float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                locError("find delta1: " + Float.toString(thedelta1));
+                                locError("find delta: " + Float.toString(thedelta));
+                                locError("find num: " + Integer.toString(j));
+                                if (j != num_map) {
+                                    if (thedelta == 0) {
+                                        thedelta = thedelta1;
+                                        theName = map.getName();
+                                    }
+                                    if (thedelta1 < thedelta) {
+                                        locError("change!!!");
+                                        thedelta = thedelta1;
+                                        theName = map.getName();
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            Log.w(TAG, "theName: " + theName);
-            double deltaK_trans;
-            deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
-            locError("deltaK_trans: " + Double.toString(deltaK_trans));
-            if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
-                geometry_whiteBlanks.clear();
-                num_whiteBlankPt = 0;
-                isWhiteBlank = false;
-                whiteBlankPt = "";
+                Log.w(TAG, "theName: " + theName);
+                double deltaK_trans;
+                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
+                locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
+                    geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
                     /*num_map1 = num_map;
                     getInfo(thenum);*/
-                getInfoForElectronicAtlas(theName);
-                manageInfo();
-                toolbar.setTitle(pdfFileName);
-                getNormalBitmap();
-                pdfView.recycle();
-                displayFromFile(uri);
-                isAutoTrans = false;
-                autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                getWhiteBlankData();
-            }
+                    getInfoForElectronicAtlasWithGeoInfo(theName);
+                    manageInfo();
+                    toolbar.setTitle(pdfFileName);
+                    getNormalBitmap();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();
+                }
             /*老版图志
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
@@ -2456,85 +2515,85 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
             } else
                 Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();*/
-        } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
-            List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
-            int size = mapList.size();
-            float thedelta = 0;
-            String theName = "";
-            for (int j = 0; j < size; j++) {
-                ElectronicAtlasMap map = mapList.get(j);
-                String MapGeoStr = map.getMapGeoStr();
-                if (MapGeoStr != null) {
-                    String[] MapGeoStrs = MapGeoStr.split(",");
-                    String MGPTS = MapGeoStrs[0];
-                    int MMapType = map.getMapType();
-                    if ((MMapType == 1 || MMapType >= 5)) {
-                        Log.w(TAG, "GPTS: " + MGPTS);
-                        String[] GPTString = MGPTS.split(" ");
-                        float[] GPTSs = new float[GPTString.length];
-                        for (int i = 0; i < GPTString.length; ++i) {
-                            if (MGPTS != null && !MGPTS.isEmpty())
-                                GPTSs[i] = Float.valueOf(GPTString[i]);
-                        }
-                        float lat_axis, long_axis;
-                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                        for (int i = 0; i < GPTSs.length; i = i + 2) {
-                            if (GPTSs[i] < lat_axis) {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lb.x = GPTSs[i];
-                                    pt_lb.y = GPTSs[i + 1];
+            } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
+                List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                int size = mapList.size();
+                float thedelta = 0;
+                String theName = "";
+                for (int j = 0; j < size; j++) {
+                    ElectronicAtlasMap map = mapList.get(j);
+                    String MapGeoStr = map.getMapGeoStr();
+                    if (MapGeoStr != null) {
+                        String[] MapGeoStrs = MapGeoStr.split(",");
+                        String MGPTS = MapGeoStrs[0];
+                        int MMapType = map.getMapType();
+                        if ((MMapType == 1 || MMapType >= 5)) {
+                            Log.w(TAG, "GPTS: " + MGPTS);
+                            String[] GPTString = MGPTS.split(" ");
+                            float[] GPTSs = new float[GPTString.length];
+                            for (int i = 0; i < GPTString.length; ++i) {
+                                if (MGPTS != null && !MGPTS.isEmpty())
+                                    GPTSs[i] = Float.valueOf(GPTString[i]);
+                            }
+                            float lat_axis, long_axis;
+                            PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                            lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                            long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                            for (int i = 0; i < GPTSs.length; i = i + 2) {
+                                if (GPTSs[i] < lat_axis) {
+                                    if (GPTSs[i + 1] < long_axis) {
+                                        pt_lb.x = GPTSs[i];
+                                        pt_lb.y = GPTSs[i + 1];
+                                    } else {
+                                        pt_rb.x = GPTSs[i];
+                                        pt_rb.y = GPTSs[i + 1];
+                                    }
                                 } else {
-                                    pt_rb.x = GPTSs[i];
-                                    pt_rb.y = GPTSs[i + 1];
-                                }
-                            } else {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lt.x = GPTSs[i];
-                                    pt_lt.y = GPTSs[i + 1];
-                                } else {
-                                    pt_rt.x = GPTSs[i];
-                                    pt_rt.y = GPTSs[i + 1];
+                                    if (GPTSs[i + 1] < long_axis) {
+                                        pt_lt.x = GPTSs[i];
+                                        pt_lt.y = GPTSs[i + 1];
+                                    } else {
+                                        pt_rt.x = GPTSs[i];
+                                        pt_rt.y = GPTSs[i + 1];
+                                    }
                                 }
                             }
-                        }
-                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                        if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
-                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                            if (thedelta == 0) {
-                                thedelta = thedelta1;
-                                theName = map.getName();
-                            } else if (thedelta1 < thedelta) {
-                                thedelta = thedelta1;
-                                theName = map.getName();
+                            float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                            float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                            float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                            float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                            if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
+                                float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                if (thedelta == 0) {
+                                    thedelta = thedelta1;
+                                    theName = map.getName();
+                                } else if (thedelta1 < thedelta) {
+                                    thedelta = thedelta1;
+                                    theName = map.getName();
+                                }
                             }
                         }
                     }
+                    Log.w(TAG, "theName: " + theName);
+                    double deltaK_trans;
+                    deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
+                    locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                    if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
+                        geometry_whiteBlanks.clear();
+                        num_whiteBlankPt = 0;
+                        isWhiteBlank = false;
+                        whiteBlankPt = "";
+                        getInfoForElectronicAtlasWithGeoInfo(theName);
+                        manageInfo();
+                        toolbar.setTitle(pdfFileName);
+                        getNormalBitmap();
+                        pdfView.recycle();
+                        displayFromFile(uri);
+                        isAutoTrans = false;
+                        autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                        getWhiteBlankData();
+                    }
                 }
-                Log.w(TAG, "theName: " + theName);
-                double deltaK_trans;
-                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
-                locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
-                    geometry_whiteBlanks.clear();
-                    num_whiteBlankPt = 0;
-                    isWhiteBlank = false;
-                    whiteBlankPt = "";
-                    getInfoForElectronicAtlas(theName);
-                    manageInfo();
-                    toolbar.setTitle(pdfFileName);
-                    getNormalBitmap();
-                    pdfView.recycle();
-                    displayFromFile(uri);
-                    isAutoTrans = false;
-                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                    getWhiteBlankData();
-                }
-            }
             /*老版图志
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
@@ -2624,29 +2683,45 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             } else
             Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
              */
-        }
-        if (hasQueriedPoi) {
-            PointF ptf = LatLng.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-            Paint ptSpecial = new Paint();
-            ptSpecial.setColor(Color.rgb(255, 0, 255));
-            ptSpecial.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
-            canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
-        }
-        if (isMessure && isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE) drawMessureLine(canvas);
-        drawMPOI(canvas);
-        drawQueriedMPOI(canvas);
+            }
+            if (hasQueriedPoi) {
+                PointF ptf = LatLng.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                Paint ptSpecial = new Paint();
+                ptSpecial.setColor(Color.rgb(255, 0, 255));
+                ptSpecial.setStyle(Paint.Style.FILL);
+                canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
+                canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
+            }
+            if (isMessure && isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE)
+                drawMessureLine(canvas);
+            drawMPOI(canvas);
+            drawQueriedMPOI(canvas);
 
-        if (mmpoints != null && !mmpoints.isEmpty()){
-            for (int i = 0; i < mmpoints.size() - 1; ++i){
-                if (i != mmpoints.size() - 1) {
-                    PointF pointF0 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i).getY(), (float) mmpoints.get(i).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i + 1).getY(), (float) mmpoints.get(i + 1).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    canvas.drawLine(pointF0.x, pointF0.y, pointF1.x, pointF1.y, paint9);
-                }else {
-                    PointF pointF0 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i).getY(), (float) mmpoints.get(i).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(0).getY(), (float) mmpoints.get(0).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                    canvas.drawLine(pointF0.x, pointF0.y, pointF1.x, pointF1.y, paint8);
+            if (mmpoints != null && !mmpoints.isEmpty()) {
+                for (int i = 0; i < mmpoints.size() - 1; ++i) {
+                    if (i != mmpoints.size() - 1) {
+                        PointF pointF0 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i).getY(), (float) mmpoints.get(i).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i + 1).getY(), (float) mmpoints.get(i + 1).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        canvas.drawLine(pointF0.x, pointF0.y, pointF1.x, pointF1.y, paint9);
+                    } else {
+                        PointF pointF0 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(i).getY(), (float) mmpoints.get(i).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        PointF pointF1 = LatLng.getPixLocFromGeoL(new PointF((float) mmpoints.get(0).getY(), (float) mmpoints.get(0).getX()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                        canvas.drawLine(pointF0.x, pointF0.y, pointF1.x, pointF1.y, paint8);
+                    }
+                }
+            }
+        }
+        else if(FILE_TYPE == TuzhiEnum.ASSET_FILE_TYPE){
+
+            if (isWhiteBlank) {
+                try {
+                    // TODO 2021/2/23
+                    parseAndrawLinesforWhiteBlankWithoutGeoInfo(canvas);
+                    parseAndrawLinesforWhiteBlankWithoutGeoInfo(whiteBlankPt, canvas);
+            /*SimplifyLines(whiteBlankPt);
+            parseAndrawLinesforWhiteBlank(SimplifyLines(whiteBlankPt), canvas);*/
+                } catch (Exception em) {
+                    locError("白板异常： " + em.toString());
                 }
             }
         }
@@ -2776,7 +2851,34 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     //获取地理信息
-    public void getInfoForElectronicAtlas(String MapName) {
+    public void getInfoForElectronicAtlasWithoutGeoInfo(String MapName) {
+        List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+        for (int i = 0; i < mapList.size(); i++) {
+            ElectronicAtlasMap map = mapList.get(i);
+            if (MapName.equals(map.getName())) {
+                num_map = 0;
+                pdfFileName = map.getName();
+                WKT = "";
+                uri = map.getPath();
+                String[] strs = map.getMapGeoStr().split(",");
+                GPTS = strs[0];
+                BBox = strs[2];
+                MediaBox = strs[1];
+                CropBox = strs[1];
+                ic = map.getName();
+            }
+        }
+        Log.w(TAG, "BBox : " + BBox);
+        Log.w(TAG, "GPTS : " + GPTS);
+        Log.w(TAG, "MediaBox : " + MediaBox);
+        Log.w(TAG, "CropBox : " + CropBox);
+        Log.w(TAG, "ic : " + ic);
+        //GPTSList = new double[8];
+
+    }
+
+    //获取地理信息
+    public void getInfoForElectronicAtlasWithGeoInfo(String MapName) {
         List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
         for (int i = 0; i < mapList.size(); i++) {
             ElectronicAtlasMap map = mapList.get(i);
@@ -2973,16 +3075,28 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(centerPointLoc.y, centerPointLoc.x, SpatialReference.create(4490));
                     pointCollection.add(point);
                 }*/
+                boolean isKilometers = true;
                     if (pointCollection.size() > 2) {
                         Polygon polygon = new Polygon(pointCollection);
                         area = GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC);
+                        if (area < 1)
+                        {
+                            area = GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_METERS), GeodeticCurveType.GEODESIC);
+                            isKilometers = false;
+                        }
                         com.esri.arcgisruntime.geometry.Point point = GeometryEngine.labelPoint(polygon);
                         CenterPtMessuredArea = new PointF((float)point.getY(), (float)point.getX());
                     }
                     //Log.w(TAG, "onLongClick: " + GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC));
-                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
-                        toolbar.setTitle(df1.format(area) + "平方公里(轨迹记录中)");
-                    } else toolbar.setTitle(df1.format(area) + "平方公里");
+                    if (isKilometers) {
+                        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                            toolbar.setTitle(df1.format(area) + "平方公里(轨迹记录中)");
+                        } else toolbar.setTitle(df1.format(area) + "平方公里");
+                    }else {
+                        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                            toolbar.setTitle(df1.format(area) + "平方米(轨迹记录中)");
+                        } else toolbar.setTitle(df1.format(area) + "平方米");
+                    }
                 }
                 MessureChanged = false;
             }
@@ -3085,6 +3199,247 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         fillPaint.setColor(Color.YELLOW);
         fillPaint.setAlpha(128);
         canvas.drawPath(path, fillPaint);
+    }
+
+    //解析白板字符串并绘制
+    private void parseAndrawLinesforWhiteBlankWithoutGeoInfo(Canvas canvas) {
+        int size = geometry_whiteBlanks.size();
+        for (int k = 0; k < size; ++k) {
+            //if (canDrawLineWithoutGeoInfo(geometry_whiteBlanks.get(k).getMaxlat(), geometry_whiteBlanks.get(k).getMinlat(), geometry_whiteBlanks.get(k).getMaxlng(), geometry_whiteBlanks.get(k).getMinlng()))
+            {
+                locError("geometry: " + geometry_whiteBlanks.get(k).getM_lines());
+                Paint paint7 = new Paint();
+                paint7.setStrokeWidth(3);
+                paint7.setColor(geometry_whiteBlanks.get(k).getM_color());
+                paint7.setStyle(Paint.Style.STROKE);
+                if (isWhiteBlank && !geometry_whiteBlanks.get(k).getM_lines().isEmpty()) {
+
+                    geometry_whiteBlanks.get(k).setM_lines(geometry_whiteBlanks.get(k).getM_lines());
+                    String[] pts = geometry_whiteBlanks.get(k).getM_lines().split(" ");
+                    float[] mpts;
+                    if (pts.length <= 4 && pts.length > 3) {
+                        mpts = new float[pts.length];
+                        //TODO 优化点位白板刷新算法
+                        for (int i = 0; i < pts.length; ++i) {
+                            mpts[i] = Float.valueOf(pts[i]);
+                        }
+                    /*for (int i = 0; i < pts.length; ++i) {
+                        locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                    }
+                    for (int i = 0; i < pts.length; i = i + 4) {
+                        //mpts[i] = Float.valueOf(pts[i]);
+                        PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
+                        PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
+                    }*/
+                        for (int i = 0; i < pts.length; i = i + 2) {
+                            PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                            PointF pt11 = LatLng.getPixLocFromGeoLWithoutGeoInfo(xx, current_pagewidth, current_pageheight);
+                            //PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            mpts[i] = pt11.x;
+                            mpts[i + 1] = pt11.y;
+                        }
+                    /*for (int i = 0; i < pts.length; ++i) {
+                        locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                    }*/
+                        //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                        locError(geometry_whiteBlanks.get(k).getM_lines());
+                        locError("mpts : " + Integer.toString(mpts.length));
+                        /*if ((max_lat1 < cs_top && max_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                                || (min_lat1 < cs_top && min_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                                || (max_lat1 > cs_top && min_lat1 < cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                                || (max_lat1 > cs_top && min_lat1 < cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)
+                                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)) */
+                        {
+                            canvas.drawLines(mpts, paint7);
+                            locError("画线");
+                        }
+                    } else if (pts.length > 4) {
+                        mpts = new float[pts.length * 2 - 4];
+                        locError("pts.length * 2 - 4 : " + Integer.toString(pts.length * 2 - 4));
+                        for (int i = 0, j = 0; i < (pts.length * 2 - 4) || j < pts.length; j = j + 2) {
+                            if (j == 0 || i == (pts.length * 2 - 6)) {
+                                mpts[i] = Float.valueOf(pts[j]);
+                                mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                                i = i + 2;
+                                locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                            } else {
+                                mpts[i] = Float.valueOf(pts[j]);
+                                mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                                mpts[i + 2] = Float.valueOf(pts[j]);
+                                mpts[i + 3] = Float.valueOf(pts[j + 1]);
+                                i = i + 4;
+                                locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                            }
+
+                        }
+
+
+                    /*for (int i = 0; i < pts.length - 2; i = i + 2) {
+                        //mpts[i] = Float.valueOf(pts[i]);
+                        PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
+                        PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
+                        distanceSum = distanceSum + LatLng.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                    }*/
+                        for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
+                            PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                            PointF pt11 = LatLng.getPixLocFromGeoLWithoutGeoInfo(xx, current_pagewidth, current_pageheight);
+                            //PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            mpts[i] = pt11.x;
+                            mpts[i + 1] = pt11.y;
+                        }
+                    /*for (int i = 0; i < pts.length; ++i) {
+                        locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                    }*/
+                        //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                        locError(geometry_whiteBlanks.get(k).getM_lines());
+                        locError("mpts : " + Integer.toString(mpts.length));
+
+                        /*if ((max_lat1 < cs_top && max_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                                || (min_lat1 < cs_top && min_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                                || (max_lat1 > cs_top && min_lat1 < cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                                || (max_lat1 > cs_top && min_lat1 < cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)
+                                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)) */
+                        {
+                            canvas.drawLines(mpts, paint7);
+
+                            locError("画线");
+                        }
+                    } else {
+                        mpts = new float[pts.length];
+                    }
+                }
+
+        /*PointF xx = new PointF(mpts[0], mpts[1]);
+        PointF yy = new PointF(mpts[2], mpts[3]);
+        PointF pt11 = LatLng.getPixLocFromGeoL(xx);
+        PointF pt22 = LatLng.getPixLocFromGeoL(yy);
+        mpts[0] = pt11.x;
+        mpts[1] = pt11.y;
+        mpts[2] = pt22.x;
+        mpts[3] = pt22.y;*/
+
+
+                //canvas.drawLine(mpts[0], mpts[1], mpts[2], mpts[3], paint6);
+            }
+        }
+    }
+
+    private boolean canDrawLineWithoutGeoInfo(double max_lat1, double min_lat1, double max_long1, double min_long1) {
+        if((max_lat1 < cs_top && max_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                || (min_lat1 < cs_top && min_lat1 > cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                || (max_lat1 > cs_top && min_lat1 < cs_bottom && max_long1 < cs_right && max_long1 > cs_left)
+                || (max_lat1 > cs_top && min_lat1 < cs_bottom && min_long1 < cs_right && min_long1 > cs_left)
+                || (max_lat1 < cs_top && max_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left)
+                || (min_lat1 < cs_top && min_lat1 > cs_bottom && max_long1 > cs_right && min_long1 < cs_left))
+            return true;
+        else return false;
+    }
+
+    //解析白板字符串并绘制1
+    private void parseAndrawLinesforWhiteBlankWithoutGeoInfo(String whiteBlankPt, Canvas canvas) {
+        locError("geometry: " + whiteBlankPt);
+        Paint paint7 = new Paint();
+        paint7.setStrokeWidth(3);
+        paint7.setColor(color_Whiteblank);
+        paint7.setStyle(Paint.Style.STROKE);
+        if (isWhiteBlank && !whiteBlankPt.isEmpty()) {
+            whiteBlankPt = whiteBlankPt.trim();
+            String[] pts = whiteBlankPt.split(" ");
+            float[] mpts;
+            if (pts.length <= 4 && pts.length > 3) {
+                mpts = new float[pts.length];
+                for (int i = 0; i < pts.length; ++i) {
+                    mpts[i] = Float.valueOf(pts[i]);
+                }
+                for (int i = 0; i < pts.length; ++i) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                for (int i = 0; i < pts.length; i = i + 4) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx1 = new PointF(mpts[i], mpts[i + 1]);
+                    PointF xx2 = new PointF(mpts[i + 2], mpts[i + 3]);
+                }
+                for (int i = 0; i < pts.length; i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                    PointF pt11 = LatLng.getPixLocFromGeoLWithoutGeoInfo(xx, current_pagewidth, current_pageheight);
+                    mpts[i] = pt11.x;
+                    mpts[i + 1] = pt11.y;
+                }
+                for (int i = 0; i < pts.length; ++i) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                locError(whiteBlankPt);
+                locError("mpts : " + Integer.toString(mpts.length));
+                canvas.drawLines(mpts, paint7);
+            } else if (pts.length > 4) {
+                mpts = new float[pts.length * 2 - 4];
+                locError("pts.length * 2 - 4 : " + Integer.toString(pts.length * 2 - 4));
+                for (int i = 0, j = 0; i < (pts.length * 2 - 4) || j < pts.length; j = j + 2) {
+                    if (j == 0 || i == (pts.length * 2 - 6)) {
+                        mpts[i] = Float.valueOf(pts[j]);
+                        mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                        i = i + 2;
+                        locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                    } else {
+                        mpts[i] = Float.valueOf(pts[j]);
+                        mpts[i + 1] = Float.valueOf(pts[j + 1]);
+                        mpts[i + 2] = Float.valueOf(pts[j]);
+                        mpts[i + 3] = Float.valueOf(pts[j + 1]);
+                        i = i + 4;
+                        locError("i = " + Integer.toString(i) + " j : " + Integer.toString(j));
+                    }
+
+                }
+
+                for (int i = 0; i < pts.length - 2; i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx1 = new PointF(Float.valueOf(pts[i]), Float.valueOf(pts[i + 1]));
+                    PointF xx2 = new PointF(Float.valueOf(pts[i + 2]), Float.valueOf(pts[i + 3]));
+                    distanceSum = distanceSum + LatLng.algorithm(xx1.y, xx1.x, xx2.y, xx2.x);
+                }
+                for (int i = 0; i < (pts.length * 2 - 4); i = i + 2) {
+                    //mpts[i] = Float.valueOf(pts[i]);
+                    PointF xx = new PointF(mpts[i], mpts[i + 1]);
+                    //PointF pt11 = LatLng.getPixLocFromGeoL(xx, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    PointF pt11 = LatLng.getPixLocFromGeoLWithoutGeoInfo(xx, current_pagewidth, current_pageheight);
+                    mpts[i] = pt11.x;
+                    mpts[i + 1] = pt11.y;
+                }
+                for (int i = 0; i < pts.length; ++i) {
+                    locError("mpts[" + Integer.toString(i) + "] : " + Float.toString(mpts[i]));
+                }
+                //Toast.makeText(MainInterface.this, "距离为: " + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                locError(whiteBlankPt);
+                locError("mpts : " + Integer.toString(mpts.length));
+                canvas.drawLines(mpts, paint7);
+            } else {
+                mpts = new float[pts.length];
+            }
+
+
+        /*PointF xx = new PointF(mpts[0], mpts[1]);
+        PointF yy = new PointF(mpts[2], mpts[3]);
+        PointF pt11 = LatLng.getPixLocFromGeoL(xx);
+        PointF pt22 = LatLng.getPixLocFromGeoL(yy);
+        mpts[0] = pt11.x;
+        mpts[1] = pt11.y;
+        mpts[2] = pt22.x;
+        mpts[3] = pt22.y;*/
+
+
+            //canvas.drawLine(mpts[0], mpts[1], mpts[2], mpts[3], paint6);
+        }
+
     }
 
     //解析白板字符串并绘制
@@ -4324,6 +4679,209 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         });
     }
 
+    // TODO 2021/2/23 无地理信息地图的白板功能
+    PointF mLastPTForWhiteBlankWithoutGeoInfo = null;
+    private void showPopueWindowForWhiteblankWithoutGeoInfo() {
+        final View popView = View.inflate(this, R.layout.popupwindow_whiteblank, null);
+        isWhiteBlank = true;
+        FloatingActionButton back_pop = (FloatingActionButton) popView.findViewById(R.id.back_pop);
+        back_pop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+                int size = lines_whiteBlanks.size();
+                for (int kk = 0; kk < size; ++kk) {
+                    Log.w(TAG, "onClick: " + lines_whiteBlanks.get(kk).getMmid());
+                }
+                int size1 = geometry_whiteBlanks.size();
+                if (size <= 0) {
+                    whiteBlankPt = "";
+                    //LitePal.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
+                    geometry_whiteBlanks.clear();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
+                } else {
+                    whiteBlankPt = "";
+                    Log.w(TAG, "onClick: " + LitePal.deleteAll(Lines_WhiteBlank.class, "mmid = ? and ic = ?", Integer.toString(size - 1), ic));
+                    if (size1 != 0) geometry_whiteBlanks.remove(size1 - 1);
+                    pdfView.zoomWithAnimation(c_zoom);
+                    //Toast.makeText(MainInterface.this, "已清空当前画板", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        FloatingActionButton fff = (FloatingActionButton) popView.findViewById(R.id.colorSeeker_pop);
+        fff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorPickerDialogBuilder
+                        .with(MainInterface.this)
+                        .setTitle("选择颜色")
+                        .initialColor(Color.RED)
+                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                        .density(12)
+                        .setOnColorSelectedListener(new OnColorSelectedListener() {
+                            @Override
+                            public void onColorSelected(int selectedColor) {
+                                locError("onColorSelected: 0x" + Integer.toHexString(selectedColor));
+                            }
+                        })
+                        .setPositiveButton("确定", new ColorPickerClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                                //changeBackgroundColor(selectedColor);
+                                locError(Integer.toString(selectedColor));
+                                color_Whiteblank = selectedColor;
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .build()
+                        .show();
+            }
+        });
+
+        FloatingActionButton eraseContent = (FloatingActionButton) popView.findViewById(R.id.eraseContent);
+        eraseContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+                int size = lines_whiteBlanks.size();
+                if (size <= 0) {
+                    whiteBlankPt = "";
+                    //LitePal.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
+                    geometry_whiteBlanks.clear();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
+                } else {
+                    whiteBlankPt = "";
+                    LitePal.deleteAll(Lines_WhiteBlank.class, "ic = ?", ic);
+                    geometry_whiteBlanks.clear();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.HasDeleteAllWhiteBlank), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        FloatingActionButton popwhiteblank = (FloatingActionButton) popView.findViewById(R.id.whiteblank_pop);
+        FrameLayout frameLayout = (FrameLayout) popView.findViewById(R.id.fml_pop);
+        //获取屏幕宽高
+        final int weight = getResources().getDisplayMetrics().widthPixels;
+        final int height = getResources().getDisplayMetrics().heightPixels - 60;
+
+        final PopupWindow popupWindow = new PopupWindow(popView, weight, height);
+        //popupWindow.setAnimationStyle(R.style.anim_popup_dir);
+        popupWindow.setFocusable(true);
+        //点击外部popueWindow消失
+        popupWindow.setOutsideTouchable(true);
+        //popupWindow消失屏幕变为不透明
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1.0f;
+                getWindow().setAttributes(lp);
+            }
+        });
+        //popupWindow OnTouchListener
+        frameLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        //按下
+                        locError("按下!!!");
+                        whiteBlankPt = "";
+                        num_whiteBlankPt = 0;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        //抬起
+                        locError("抬起!!!");
+                        //Toast.makeText(MainInterface.this, "抬起", Toast.LENGTH_SHORT).show();
+                        List<Lines_WhiteBlank> liness = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+                        Log.w(TAG, "onTouch: " + liness.size());
+                        int size = liness.size();
+                        Lines_WhiteBlank lines = new Lines_WhiteBlank();
+                        lines.setIc(ic);
+                        lines.setColor(color_Whiteblank);
+                        lines.setLines(whiteBlankPt);
+                        lines.setMmid(size);
+                        lines.save();
+                        geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(ic, whiteBlankPt, color_Whiteblank);
+                        geometry_whiteBlanks.add(geometry_whiteBlank);
+                        mLastPTForWhiteBlankWithoutGeoInfo = null;
+                        break;
+                }
+
+                PointF pt = new PointF(event.getRawX(), event.getRawY());
+                locError("RawX : " + pt.x + "; RawY : " + pt.y);
+                pt = getGeoLocFromPixLWithoutGeoInfo(pt);
+                locError("NewX : " + pt.x + "; NewY : " + pt.y);
+                //pt_last = pt_current;
+                //pt_current = pt;
+                //pdfView.zoomWithAnimation(c_zoom);
+                /*if (event.getRawY() >= height - 100 && event.getRawY() <= height && event.getRawX() >= 50 && event.getRawX() <= 150){
+                    popupWindow.dismiss();
+                    whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
+                }*/
+                //double mDis = -1;
+                try {
+                    if(mLastPTForWhiteBlankWithoutGeoInfo != null) {
+                        //mDis = LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlankWithoutGeoInfo.y, mLastPTForWhiteBlankWithoutGeoInfo.x);
+
+                        //locError("RawX" + mDis);
+                    }
+                }
+                catch (Exception e)
+                {
+                    locError("RawX" + e.toString());
+                }
+                //if (isWhiteBlank && ( mDis >= 0.2 || mDis == -1)) {//设置点位基础抽稀
+                if (isWhiteBlank) {//不设置点位基础抽稀
+                    //locError("RawX" + LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlank.y, mLastPTForWhiteBlank.x));
+                    mLastPTForWhiteBlankWithoutGeoInfo = pt;
+                    num_whiteBlankPt++;
+                    if (num_whiteBlankPt == 1) {
+                        whiteBlankPt = Float.toString(pt.x) + " " + Float.toString(pt.y);
+                    } else if (num_whiteBlankPt == 2) {
+                        whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                        //setTitle("正在测量");
+                        pdfView.zoomWithAnimation(c_zoom);
+                        //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                        //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                    } else {
+                        whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                        //setTitle("正在测量");
+                        pdfView.zoomWithAnimation(c_zoom);
+                        //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+
+                return true;
+            }
+        });
+        //popupWindow出现屏幕变为半透明
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 1f;
+        getWindow().setAttributes(lp);
+        popupWindow.showAtLocation(popView, Gravity.NO_GRAVITY, 0, 0);
+        popwhiteblank.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+                whiteBlank_fab.setVisibility(View.VISIBLE);
+                isOpenWhiteBlank = false;
+                whiteBlank_fab.setImageResource(R.drawable.ic_brush_black_24dp);
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                    toolbar.setTitle("轨迹记录中");
+                } else toolbar.setTitle(pdfFileName);
+            }
+        });
+    }
+
     private void controlSpecificFunction(String query) {
         // TODO EASTER
         SharedPreferences.Editor editor;
@@ -4413,14 +4971,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 else sql = sql + " AND name LIKE '%" + strings[i] + "%')";
             }
         }
-        // TODO 2021/2/1 图幅查询
+
         final List<String> pois = new ArrayList<>();
         Cursor cursor = LitePal.findBySQL(sql);
         if (cursor.moveToFirst()) {
             do {
                 String name = cursor.getString(cursor.getColumnIndex("name"));
-                String path = cursor.getString(cursor.getColumnIndex("path"));
-                if (!path.equals(""))
+                String path = cursor.getString(cursor.getColumnIndex("path")).trim();
+                Log.w(TAG, "showListPopupWindowForMapQuery: " + path + "," + name);
+                if (!path.equals("") && !path.equals("/storage/emulated/0/"))
                     pois.add(name);
             } while (cursor.moveToNext());
         }
@@ -4440,9 +4999,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
                 String MapName = items[position];
 
-                initVariableForElectronicAtlas(MapName);
-                initWidget();
-                displayFromFile(uri);
+                if (IsThematicMap(MapName)){
+                    InitMapWithoutGeoInfo(MapName);
+                }
+                else {
+                    showWidget();
+                    initVariableForElectronicAtlas(MapName);
+                    initWidget();
+                    displayFromFile(uri);
+                }
 
                 listPopupWindow.dismiss();
                 isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
@@ -4718,7 +5283,36 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         //精确定位算法
         PointF mpt;
         float xxxx, yyyy;
-        if (current_pageheight < viewer_height || current_pagewidth < viewer_width) {
+        if (current_pageheight >= viewer_height && current_pagewidth < viewer_width) {
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
+                mpt = new PointF();
+                mpt.x = (float) (max_lat - (yyyy - pdfView.getCurrentYOffset()) / current_pageheight * (max_lat - min_lat));
+                mpt.y = (float) ((xxxx) / current_pagewidth * (max_long - min_long) + min_long);
+                locLatForTap = mpt.x;
+                locLongForTap = mpt.y;
+            } else {
+                mpt = new PointF(0, 0);
+            }
+        }else if (current_pageheight < viewer_height && current_pagewidth >= viewer_width) {
+
+            Log.w(TAG, "getGeoLocFromPixL: " + k_w + ";" + k_h);
+
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
+                mpt = new PointF();
+                mpt.x = (float) (max_lat - (yyyy) / current_pageheight * (max_lat - min_lat));
+                mpt.y = (float) ((xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * (max_long - min_long) + min_long);
+                locLatForTap = mpt.x;
+                locLongForTap = mpt.y;
+            } else {
+                mpt = new PointF(0, 0);
+            }
+        }else if (current_pageheight < viewer_height && current_pagewidth < viewer_width) {
+            Log.w(TAG, "getGeoLocFromPixL: " + k_w + ";" + k_h);
+
             xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
             yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
             if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
@@ -4739,6 +5333,69 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             mpt.y = (float) ((xxxx - pdfView.getCurrentXOffset()) / current_pagewidth * (max_long - min_long) + min_long);
             locLatForTap = mpt.x;
             locLongForTap = mpt.y;
+        }
+        return mpt;
+        //
+    }
+
+    //屏幕坐标位置到经纬度转化
+    private PointF getGeoLocFromPixLWithoutGeoInfo(final PointF pt) {
+        //textView = (TextView) findViewById(R.id.txt);
+        //精确定位算法
+        PointF mpt;
+        float xxxx, yyyy;
+        if (current_pageheight >= viewer_height && current_pagewidth < viewer_width) {
+            Log.w(TAG, "getGeoLocFromPixL: " + k_w + ";" + k_h);
+
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
+                mpt = new PointF();
+                mpt.x = (float) ((yyyy - pdfView.getCurrentYOffset()) / current_pageheight);
+                mpt.y = (float) ((xxxx) / current_pagewidth);
+                /*locLatForTap = mpt.x;
+                locLongForTap = mpt.y;*/
+            } else {
+                mpt = new PointF(0, 0);
+            }
+        }else if (current_pageheight < viewer_height && current_pagewidth >= viewer_width) {
+
+            Log.w(TAG, "getGeoLocFromPixL: " + k_w + ";" + k_h);
+
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
+                mpt = new PointF();
+                mpt.x = (float) ((yyyy) / current_pageheight);
+                mpt.y = (float) ((xxxx - pdfView.getCurrentXOffset()) / current_pagewidth);
+                /*locLatForTap = mpt.x;
+                locLongForTap = mpt.y;*/
+            } else {
+                mpt = new PointF(0, 0);
+            }
+        }else if (current_pageheight < viewer_height && current_pagewidth < viewer_width) {
+            Log.w(TAG, "getGeoLocFromPixL: " + k_w + ";" + k_h);
+
+            xxxx = ((pt.x - (screen_width - viewer_width + k_w)));
+            yyyy = ((pt.y - (screen_height - viewer_height + k_h)));
+            if (pt.y >= (screen_height - viewer_height + k_h) && pt.y <= (screen_height - viewer_height + k_h + current_pageheight) && pt.x >= (screen_width - viewer_width + k_w) && pt.x <= (screen_width - viewer_width + k_w + current_pagewidth)) {
+                mpt = new PointF();
+                mpt.x = (float) ((yyyy) / current_pageheight);
+                mpt.y = (float) ((xxxx) / current_pagewidth);
+                /*locLatForTap = mpt.x;
+                locLongForTap = mpt.y;*/
+            } else {
+                mpt = new PointF(0, 0);
+            }
+        }else {
+            xxxx = pt.x - (screen_width - viewer_width);
+            yyyy = pt.y - (screen_height - viewer_height);
+            Log.w(TAG, "getGeoLocFromPixL: " + screen_height + ";" + viewer_height);
+            mpt = new PointF();
+            mpt.x = (float) ((yyyy - pdfView.getCurrentYOffset()) / current_pageheight);
+            mpt.y = (float) ((xxxx - pdfView.getCurrentXOffset()) / current_pagewidth);
+            /*locLatForTap = mpt.x;
+            locLongForTap = mpt.y;*/
         }
         return mpt;
         //
@@ -5297,6 +5954,326 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         getEsterEgg_dm();
     }
 
+    private void InitWhiteBlankFunctionWithoutGeoInfo(){
+        //初始化白板要素List
+        geometry_whiteBlanks = new ArrayList<geometry_WhiteBlank>();
+        geometry_whiteBlanks.clear();
+        num_whiteBlankPt = 0;
+        isWhiteBlank = false;
+        whiteBlankPt = "";
+        getWhiteBlankData();
+        whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer);
+        whiteBlankLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    isWhiteBlank = true;
+                    pdfView.zoomWithAnimation(c_zoom);
+                } else {
+                    isWhiteBlank = false;
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        whiteBlankLayerBt.setVisibility(View.VISIBLE);
+        whiteBlankLayerBt.setChecked(false);
+        //初始化白板按钮
+        whiteBlank_fab = (FloatingActionButton) findViewById(R.id.whiteBlank);
+        whiteBlank_fab.setImageResource(R.drawable.ic_brush_black_24dp);
+        whiteBlank_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isOpenWhiteBlank) {
+                    isOpenWhiteBlank = true;
+                    //whiteBlank_fab.setImageResource(R.drawable.ic_cancel_black_24dp);
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在进行白板绘图(轨迹记录中)");
+                    } else toolbar.setTitle("正在进行白板绘图");
+                    showPopueWindowForWhiteblankWithoutGeoInfo();
+                    locHere_fab.setVisibility(View.GONE);
+                    whiteBlank_fab.setVisibility(View.GONE);
+                    isWhiteBlank = true;
+                    whiteBlankLayerBt.setChecked(true);
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        whiteBlank_fab.setVisibility(View.VISIBLE);
+    }
+
+    private void OutputBTFunction(){
+        try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    List<POI> pois = LitePal.findAll(POI.class);
+                    List<String> types = new ArrayList<>();
+                    Log.w(TAG, "runlzy: " + pois.size());
+                    for (int i = 0; i < pois.size(); ++i){
+                        String temp = pois.get(i).getType();
+                        Log.w(TAG, "runlzy: " + temp);
+                        if (temp != null) {
+                            if (!temp.isEmpty()) {
+                                if (types.size() > 0) {
+                                    for (int j = 0; j < types.size(); ++j) {
+                                        if (temp.equals(types.get(j))) break;
+                                        else {
+                                            if (j == types.size() - 1) types.add(temp);
+                                            else continue;
+                                        }
+                                    }
+                                }else types.add(temp);
+                            }
+                        }
+                    }
+                    DataUtil.makeKML();
+                    Log.w(TAG, "runlzy: " + types.size());
+                    if (types.size() > 0) {
+                        for (int i = 0; i < types.size(); ++i) {
+                            DataUtil.makeTxt(types.get(i));
+                        }
+                    }else DataUtil.makeTxt("");
+                    DataUtil.makeTxt1();
+                    DataUtil.makeWhiteBlankKML();
+                    List<File> files = new ArrayList<File>();
+                    StringBuffer sb = new StringBuffer();
+                    int size_POI = pois.size();
+                    sb = sb.append("<POI>").append("\n");
+                    for (int i = 0; i < size_POI; ++i){
+                        sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
+                        sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
+                        sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
+                        sb.append("<type>").append(pois.get(i).getType()).append("</type>").append("\n");
+                        sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
+                        sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
+                        sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
+                        sb.append("<x>").append(pois.get(i).getX()).append("</x>").append("\n");
+                        sb.append("<y>").append(pois.get(i).getY()).append("</y>").append("\n");
+                        sb.append("<time>").append(pois.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</POI>").append("\n");
+                    List<Trail> trails = LitePal.findAll(Trail.class);
+                    int size_trail = trails.size();
+                    sb = sb.append("<Trail>").append("\n");
+                    for (int i = 0; i < size_trail; ++i){
+                        sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
+                        sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
+                        sb.append("<path>").append(trails.get(i).getPath()).append("</path>").append("\n");
+                        sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
+                        sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
+                    }
+                    sb.append("</Trail>").append("\n");
+
+                    List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
+                    int size_mphoto = mphotos.size();
+                    sb = sb.append("<MPHOTO>").append("\n");
+                    for (int i = 0; i < size_mphoto; ++i){
+                        sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
+                        sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
+                        String path = mphotos.get(i).getPath();
+                        sb.append("<path>").append(path).append("</path>").append("\n");
+                        files.add(new File(path));
+                        sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</MPHOTO>").append("\n");
+
+                    List<MVEDIO> mvedios = LitePal.findAll(MVEDIO.class);
+                    int size_mvideo = mvedios.size();
+                    sb = sb.append("<MVIDEO>").append("\n");
+                    for (int i = 0; i < size_mvideo; ++i){
+                        sb.append("<id>").append(mvedios.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<pdfic>").append(mvedios.get(i).getPdfic()).append("</pdfic>").append("\n");
+                        sb.append("<POIC>").append(mvedios.get(i).getPoic()).append("</POIC>").append("\n");
+                        String path1 = mvedios.get(i).getThumbnailImg();
+                        sb.append("<Thumbnailpath>").append(path1).append("</Thumbnailpath>").append("\n");
+                        try {
+                            files.add(new File(path1));
+                        }
+                        catch (Exception e){
+
+                        }
+                        String path = mvedios.get(i).getPath();
+                        sb.append("<path>").append(path).append("</path>").append("\n");
+                        try {
+                            files.add(new File(path));
+                        }
+                        catch (Exception e){
+
+                        }
+                        sb.append("<time>").append(mvedios.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</MVIDEO>").append("\n");
+
+                    List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
+                    int size_mtape = mtapes.size();
+                    sb = sb.append("<MTAPE>").append("\n");
+                    for (int i = 0; i < size_mtape; ++i){
+                        sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
+                        sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
+                        String path = mtapes.get(i).getPath();
+                        sb.append("<path>").append(path).append("</path>").append("\n");
+                        files.add(new File(path));
+                        sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</MTAPE>").append("\n");
+
+
+                    List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
+                    int size_lines_whiteBlank = lines_whiteBlanks.size();
+                    sb = sb.append("<Lines_WhiteBlank>").append("\n");
+                    for (int i = 0; i < size_lines_whiteBlank; ++i){
+                        sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
+                        sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
+                        sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
+                    }
+                    sb.append("</Lines_WhiteBlank>").append("\n");
+                    File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+                    if (!file.exists() && !file.isDirectory()){
+                        file.mkdirs();
+                    }
+                    final String outputPath = Long.toString(System.currentTimeMillis());
+                    File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+                    try {
+                        FileOutputStream of = new FileOutputStream(file1);
+                        of.write(sb.toString().getBytes());
+                        of.close();
+                        files.add(file1);
+                    }catch (IOException e){
+                        Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
+                                toolbar.setTitle("数据打包中");
+                            }
+                        });
+                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
+                        //InputStream inputStream = null;
+                        ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
+                        zipOut.setComment("test");
+                        int size = files.size();
+                        Log.w(TAG, "run: " + size);
+                        for (int i = 0; i < size; ++i){
+                            Log.w(TAG, "run: " + i);
+                            Log.w(TAG, "run: " + files.get(i).getPath());
+                            boolean isOK = false;
+                            for (int k = 0; k < i; ++k) {
+                                if (files.get(i).getPath().equals(files.get(k).getPath())) break;
+                                if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
+                            }
+                            Log.w(TAG, "aa");
+                            if (i == 0 & files.get(i).exists()) isOK = true;
+                            if (isOK){
+                                Log.w(TAG, "aa");
+                                InputStream inputStream = new FileInputStream(files.get(i));
+                                Log.w(TAG, "aa");
+                                zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
+                                Log.w(TAG, "aa");
+                                //int temp = 0;
+                                //while ((temp = inputStream.read()) != -1){
+                                //    zipOut.write(temp);
+                                //}
+                                byte buffer[] = new byte[4096];
+                                int realLength;
+                                while ((realLength = inputStream.read(buffer)) > 0) {
+                                    zipOut.write(buffer, 0, realLength);
+                                }
+                                inputStream.close();
+                            }
+                        }
+                        zipOut.close();
+                        file1.delete();
+                        files.clear();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
+                                toolbar.setTitle(MainInterface.this.getResources().getText(R.string.MapList));
+                            }
+                        });
+                    }catch (IOException e){
+                        Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "run: " + e.toString());
+                        Log.w(TAG, "run: " + e.getMessage());
+                    }
+                }
+
+            }).start();
+        }catch (Exception e)
+        {
+            Log.w(TAG, "error: " + e.toString());
+        }
+    }
+
+    private void OutputBTFunctionWithoutGeoInfo(){
+        try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    DataUtil.makeWhiteBlankKMLForSingleMap(ic, pdfView.getWidth(), pdfView.getHeight());
+                    File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+                    if (!file.exists() && !file.isDirectory()){
+                        file.mkdirs();
+                    }
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
+                                toolbar.setTitle("数据打包中");
+                            }
+                        });
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
+                                toolbar.setTitle(pdfFileName);
+                            }
+                        });
+                    }catch (Exception e){
+                        Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "run: " + e.toString());
+                        Log.w(TAG, "run: " + e.getMessage());
+                    }
+                }
+
+            }).start();
+        }catch (Exception e)
+        {
+            Log.w(TAG, "error: " + e.toString());
+        }
+    }
+
+    private void showMapWithoutGeoInfo(String uri) {
+        forbiddenWidget();
+        FloatingActionButton OutputFab = (FloatingActionButton) findViewById(R.id.outputData_MainInterface);
+        OutputFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OutputBTFunctionWithoutGeoInfo();
+            }
+        });
+        OutputFab.setVisibility(View.VISIBLE);
+        InitRightRecyclerView();
+        InitLeftRecyclerView();
+        InitWhiteBlankFunctionWithoutGeoInfo();
+        toolbar = (Toolbar) findViewById(R.id.toolBar1);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle(title);
+        setTitle(title);
+        FILE_TYPE = TuzhiEnum.ASSET_FILE_TYPE;
+        displayFromFile(uri);
+        isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+        MessureChanged = false;
+        color_Whiteblank = Color.RED;
+    }
+
     private void showLeaflets() {
         forbiddenWidget();
         FILE_TYPE = TuzhiEnum.ASSET_FILE_TYPE;
@@ -5308,8 +6285,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         initOtherVariable();
     }
 
+    private void initVariableForElectronicAtlasWithoutGeoInfo(final String MapName) {
+        initMapVariableForElectronicAtlasWithoutGeoInfo(MapName);
+        initOtherVariable();
+    }
+
     private void initVariableForElectronicAtlas(final String MapName) {
-        initMapVariableForElectronicAtlas(MapName);
+        initMapVariableForElectronicAtlasWithGeoInfo(MapName);
         initOtherVariable();
     }
 
@@ -5323,9 +6305,20 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         return intent.getIntExtra("num", 0);
     }
 
-    private void initMapVariableForElectronicAtlas(final String MapName) {
+    private void initMapVariableForElectronicAtlasWithoutGeoInfo(final String MapName) {
         //getInfo(m_num);
-        getInfoForElectronicAtlas(MapName);
+        getInfoForElectronicAtlasWithoutGeoInfo(MapName);
+        manageInfo();
+        num_map1 = 0;
+        File m_file = new File(uri);
+        if (uri != null && !uri.isEmpty() && m_file.exists()) {
+            FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
+        }
+    }
+
+    private void initMapVariableForElectronicAtlasWithGeoInfo(final String MapName) {
+        //getInfo(m_num);
+        getInfoForElectronicAtlasWithGeoInfo(MapName);
         manageInfo();
         num_map1 = 0;
         File m_file = new File(uri);
@@ -5777,6 +6770,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private void initOtherVariable() {
         MessureChanged = false;
+        color_Whiteblank = Color.RED;
+
         strings = getResources().getStringArray(R.array.Type);
         trails = LitePal.findAll(Trail.class);
         simpleDateFormat1 = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.Date).toString());
@@ -5836,8 +6831,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         paint10.setStrokeWidth(10);
         paint10.setStyle(Paint.Style.STROKE);
         paint10.setColor(Color.GREEN);
-
-        color_Whiteblank = Color.RED;
     }
 
     private void forbiddenWidgetForQuery() {
@@ -6077,8 +7070,242 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     List<com.esri.arcgisruntime.geometry.Point> mmpoints;
 
-    private void initWidget() {
+    private List<XZQTree> ExtendXZQForLevel012(List<XZQTree> xzqTrees, List<ElectronicAtlasMap> electronicAtlasMaps, String XZQName, int XZQNum){
+        List<XZQTree> xzqTreeList = new ArrayList<>();
+        for (int i = 0; i < xzqTrees.size(); i++) {
+            XZQTree xzqTree = xzqTrees.get(i);
+            if (xzqTree.getXZQNum() <= XZQNum)
+                xzqTreeList.add(xzqTree);
+            else if (xzqTree.getXZQNum() == XZQNum+1 && xzqTree.getLastXZQName().equals(XZQName))
+                xzqTreeList.add(xzqTree);
+            if (xzqTree.getXZQName().equals(XZQName))
+            {
+                for (int j = 0; j < electronicAtlasMaps.size(); j++) {
+                    ElectronicAtlasMap electronicAtlasMap = electronicAtlasMaps.get(j);
+
+                    if (electronicAtlasMap.getMapGeoStr() != null && electronicAtlasMap.getName().contains(XZQName))
+                    {
+                        XZQTree xzqTree1 = new XZQTree(electronicAtlasMap.getName(), 5, XZQName);
+                        xzqTreeList.add(xzqTree1);
+                    }
+                }
+            }
+        }
+        return xzqTreeList;
+    }
+
+    private List<XZQTree> ExtendXZQForLevel3(List<XZQTree> xzqTrees, List<ElectronicAtlasMap> electronicAtlasMaps, String XZQName, String LastXZQName, int XZQNum){
+        List<XZQTree> xzqTreeList = new ArrayList<>();
+        for (int i = 0; i < xzqTrees.size(); i++) {
+            XZQTree xzqTree = xzqTrees.get(i);
+            if (xzqTree.getXZQNum() <= XZQNum-1)
+                xzqTreeList.add(xzqTree);
+            else if (xzqTree.getXZQNum() == XZQNum && xzqTree.getLastXZQName().equals(LastXZQName))
+                xzqTreeList.add(xzqTree);
+            else if (xzqTree.getXZQNum() == XZQNum+1 && xzqTree.getLastXZQName().equals(XZQName))
+                xzqTreeList.add(xzqTree);
+            if (xzqTree.getXZQName().equals(XZQName))
+            {
+                for (int j = 0; j < electronicAtlasMaps.size(); j++) {
+                    ElectronicAtlasMap electronicAtlasMap = electronicAtlasMaps.get(j);
+                    if (electronicAtlasMap.getMapGeoStr() != null && electronicAtlasMap.getName().contains(XZQName))
+                    {
+                        XZQTree xzqTree1 = new XZQTree(electronicAtlasMap.getName(), 5, XZQName);
+                        xzqTreeList.add(xzqTree1);
+                    }
+                }
+            }
+        }
+        return xzqTreeList;
+    }
+
+    private String GetLastXZQName(List<XZQTree> xzqTrees, String XZQName){
+        for (int i = 0; i < xzqTrees.size(); i++) {
+            if (xzqTrees.get(i).getXZQName().equals(XZQName))
+                return xzqTrees.get(i).getLastXZQName();
+        }
+        return "";
+    }
+
+    private void InitRightRecyclerView(String XZQName, int XZQNum){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RightRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<XZQTree> xzqTrees = LitePal.findAll(XZQTree.class);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+
+        List<XZQTree> xzqTreeList = null;
+
+        if (XZQNum <= 2)
+            xzqTreeList = ExtendXZQForLevel012(xzqTrees, electronicAtlasMaps, XZQName, XZQNum);
+        else
+        {
+            String LastXZQName = GetLastXZQName(xzqTrees, XZQName);
+            xzqTreeList = ExtendXZQForLevel3(xzqTrees, electronicAtlasMaps, XZQName, LastXZQName, XZQNum);
+        }
+
+        XZQTreeAdapter adapter = new XZQTreeAdapter(xzqTreeList);
+        adapter.setOnItemClickListener(new XZQTreeAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String mXZQName, int position, int XZQNum) {
+                switch (XZQNum){
+                    case 0:
+                        InitRightRecyclerView();
+                        break;
+                    case 5:
+                        showWidget();
+                        ImageView imageView = (ImageView) findViewById(R.id.myscale);
+                        imageView.setVisibility(View.GONE);
+                        FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
+                        initVariableForElectronicAtlas(mXZQName);
+                        initWidgetForXZQTree();
+                        displayFromFile(uri);
+                        isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                        invalidateOptionsMenu();
+                        break;
+                    default:
+                        if (mXZQName.equals(XZQName)) {
+                            for (int i = 0; i < xzqTrees.size(); i++) {
+                                if (xzqTrees.get(i).getXZQName().equals(mXZQName))
+                                    InitRightRecyclerView(xzqTrees.get(i).getLastXZQName(), XZQNum-1);
+                            }
+                        }
+                        else
+                            InitRightRecyclerView(mXZQName, XZQNum);
+                        break;
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitRightRecyclerView(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.RightRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<XZQTree> xzqTrees = LitePal.findAll(XZQTree.class);
+
+        List<XZQTree> xzqTreeList = new ArrayList<>();
+
+        for (int i = 0; i < xzqTrees.size(); i++) {
+            if (xzqTrees.get(i).getXZQNum() == 0)
+                xzqTreeList.add(xzqTrees.get(i));
+        }
+
+        XZQTreeAdapter adapter = new XZQTreeAdapter(xzqTreeList);
+        adapter.setOnItemClickListener(new XZQTreeAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String XZQName, int position, int XZQNum) {
+                switch (XZQNum){
+                    case 0:
+                        InitRightRecyclerView(XZQName, XZQNum);
+                        break;
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitLeftRecyclerViewForSociety(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("社会经济图组");
+        for (int i = 0; i < electronicAtlasMaps.size(); i++) {
+            if (electronicAtlasMaps.get(i).getParentNode().equals("社会经济图组"))
+                list.add(electronicAtlasMaps.get(i).getName());
+        }
+        list.add("资源与环境图组");
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("社会经济图组"))
+                    InitLeftRecyclerView();
+                else if (MapName.equals("资源与环境图组"))
+                    InitLeftRecyclerViewForEarth();
+                else {
+                    InitMapWithoutGeoInfo(MapName);
+                    /*initVariableForElectronicAtlas(MapName);
+                    initWidgetForXZQTree();
+                    displayFromFile(uri);*/
+                    invalidateOptionsMenu();
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitLeftRecyclerViewForEarth(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("社会经济图组");
+        list.add("资源与环境图组");
+        for (int i = 0; i < electronicAtlasMaps.size(); i++) {
+            if (electronicAtlasMaps.get(i).getParentNode().equals("资源与环境图组"))
+                list.add(electronicAtlasMaps.get(i).getName());
+        }
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("社会经济图组"))
+                    InitLeftRecyclerViewForSociety();
+                else if (MapName.equals("资源与环境图组"))
+                    InitLeftRecyclerView();
+                else
+                {
+                    /*initVariableForElectronicAtlas(MapName);
+                    initWidgetForXZQTree();
+                    displayFromFile(uri);*/
+                    InitMapWithoutGeoInfo(MapName);
+                    invalidateOptionsMenu();
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitLeftRecyclerView(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("社会经济图组");
+        list.add("资源与环境图组");
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("社会经济图组"))
+                    InitLeftRecyclerViewForSociety();
+                else if (MapName.equals("资源与环境图组"))
+                    InitLeftRecyclerViewForEarth();
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void initWidgetForXZQTree() {
         initCheckbox();
+        FloatingActionButton OutputFab = (FloatingActionButton) findViewById(R.id.outputData_MainInterface);
+        OutputFab.setVisibility(View.GONE);
+
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
         //初始化测量相关按钮
@@ -6615,6 +7842,565 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 showPopueWindowForMessure();
             }
         });
+        messureDistance_fab.setVisibility(View.VISIBLE);
+        addTape_fab.setVisibility(View.VISIBLE);
+        restoreZoom_fab.setVisibility(View.VISIBLE);
+        locHere_fab.setVisibility(View.VISIBLE);
+        addPhoto_fab.setVisibility(View.VISIBLE);
+    }
+
+    private void initWidget() {
+        FloatingActionButton OutputFab = (FloatingActionButton) findViewById(R.id.outputData_MainInterface);
+        OutputFab.setVisibility(View.GONE);
+
+        initCheckbox();
+
+        InitRightRecyclerView();
+
+        InitLeftRecyclerView();
+
+        //中心点图标初始化
+        centerPoint = (ImageView) findViewById(R.id.centerPoint);
+        //初始化测量相关按钮
+        cancel_messure_fab = (FloatingActionButton) findViewById(R.id.cancel_messure);
+        cancel_messure_fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                MessureChanged = true;
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
+                    ////测量
+                    distanceSum = 0;
+                    poinum_messure = 0;
+                    messure_pts = "";
+                    PointCollection pointCollection = new PointCollection(SpatialReference.create(4490));
+                    for (int i = 0; i < distanceLatLngs.size(); ++i) {
+                        com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(distanceLatLngs.get(i).getLongitude(), distanceLatLngs.get(i).getLatitude(), SpatialReference.create(4490));
+                        pointCollection.add(point);
+                    }
+                    Polyline polyline = new Polyline(pointCollection);
+                    Polygon polygon = GeometryEngine.buffer(polyline, 0.0005);
+                    mmpoints = new ArrayList<>();
+                    int mnum = 0;
+                    for (Iterator<com.esri.arcgisruntime.geometry.Point> iter = polygon.toPolyline().getParts().getPartsAsPoints().iterator(); iter.hasNext(); ) {
+                        mmpoints.add(iter.next());
+                        mnum++;
+                    }
+                    pdfView.zoomWithAnimation(c_zoom);
+                    distancesLatLngs.add(distanceLatLngs);
+                    distanceLatLngs = new ArrayList<>();
+                } else {
+                    ////////////////////
+                    /////记录线要素
+
+                    String lineFeature = drawLineFeature;
+                    drawLineFeature = "";
+                    LineFeatures.add(lineFeature);
+                    PointCollection pointCollection = new PointCollection(SpatialReference.create(4490));
+                    for (int i = 0; i < distanceLatLngs.size(); ++i) {
+                        com.esri.arcgisruntime.geometry.Point point = new com.esri.arcgisruntime.geometry.Point(distanceLatLngs.get(i).getLongitude(), distanceLatLngs.get(i).getLatitude(), SpatialReference.create(4490));
+                        pointCollection.add(point);
+                    }
+                    Polygon polygon = new Polygon(pointCollection);
+                    Log.w(TAG, "onLongClick: " + GeometryEngine.areaGeodetic(polygon, new AreaUnit(AreaUnitId.SQUARE_KILOMETERS), GeodeticCurveType.GEODESIC));
+                }
+                ////////////////////////
+                return true;
+            }
+        });
+        cancel_messure_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                area = 0;
+                CenterPtMessuredArea = new PointF();
+                MessureChanged = true;
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
+                    /////////////////
+                    if (mmpoints != null)
+                        mmpoints.clear();
+                    distanceSum = 0;
+                    distancesLatLngs.clear();
+                    distanceLatLngs.clear();
+                    if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
+                    else isQuery = false;
+                    centerPointModeBt.setVisibility(View.VISIBLE);
+                    isMessure = false;
+                    poinum_messure = 0;
+                    messure_pts = "";
+                    delete_messure_fab.setVisibility(View.GONE);
+                    backpt_messure_fab.setVisibility(View.GONE);
+                    cancel_messure_fab.setVisibility(View.GONE);
+                    whiteBlank_fab.setVisibility(View.VISIBLE);
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("轨迹记录中");
+                    } else toolbar.setTitle(pdfFileName);
+                } else {
+                    ////////////////////
+                    /////记录线要素
+                    if (!drawLineFeature.isEmpty()) {
+                        String lineFeature = drawLineFeature;
+                        drawLineFeature = "";
+                        LineFeatures.add(lineFeature);
+                    }
+                    delete_messure_fab.setVisibility(View.GONE);
+                    backpt_messure_fab.setVisibility(View.GONE);
+                    cancel_messure_fab.setVisibility(View.GONE);
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    String time = String.valueOf(System.currentTimeMillis());
+                    DMLine dmLine = new DMLine();
+                    dmLine.setXh(Integer.toString(dmLines.size() + 1));
+                    dmLine.setMapid(time);
+                    dmLine.setDimingid(time);
+                    dmLine.setMultiline(LineFeatures);
+                    dmLine.save();
+                    LineFeatures.clear();
+                    dmLines = LitePal.findAll(DMLine.class);
+                    GoDMLSinglePOIPage(time);
+                }
+                pdfView.zoomWithAnimation(c_zoom);
+                ////////////////////////
+            }
+        });
+        delete_messure_fab = (FloatingActionButton) findViewById(R.id.delete_messure);
+        delete_messure_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MessureChanged = true;
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
+                    distanceLatLngs.clear();
+                    int MessuredLinesSize = distancesLatLngs.size();
+                    Log.w(TAG, "20191015test: " + MessuredLinesSize);
+                    switch (MessuredLinesSize) {
+                        case 0:
+                            break;
+                        default:
+                            if(poinum_messure == 0)
+                            {
+                                distancesLatLngs.remove(MessuredLinesSize-1);
+                                mmpoints.clear();
+                            }
+                            break;
+                    }
+                    distanceSum = 0;
+                    messure_pts = "";
+                    poinum_messure = 0;
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在测量(轨迹记录中)");
+                    } else toolbar.setTitle("正在测量");
+                } else {
+                    ////////////////////
+                    /////记录线要素
+                    if (drawLineFeature.isEmpty() && LineFeatures.size() != 0) {
+                        drawLineFeature = LineFeatures.get(LineFeatures.size() - 1);
+                        LineFeatures.remove(LineFeatures.size() - 1);
+                    } else
+                        drawLineFeature = "";
+                    ////////////////////////
+                }
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        backpt_messure_fab = (FloatingActionButton) findViewById(R.id.backpts_messure);
+        backpt_messure_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MessureChanged = true;
+                if (isDrawType != TuzhiEnum.LINE_DRAW_TYPE) {
+                    ///////////////////////////
+                    if (poinum_messure >= 1) {
+                        distanceLatLngs.remove(distanceLatLngs.size() - 1);
+
+                        if (poinum_messure > 1) {
+                            messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                            messure_pts = messure_pts.substring(0, messure_pts.lastIndexOf(" "));
+                            poinum_messure--;
+                        }
+                        else
+                        {
+                            messure_pts = "";
+                            poinum_messure = 0;
+                        }
+                        pdfView.zoomWithAnimation(c_zoom);
+                    } else {
+                        distanceLatLngs.clear();
+                        int MessuredLinesSize = distancesLatLngs.size();
+                        Log.w(TAG, "20191015test: " + MessuredLinesSize);
+                        switch (MessuredLinesSize) {
+                            case 0:
+                                distanceSum = 0;
+                                messure_pts = "";
+                                poinum_messure = 0;
+                                break;
+                            default:
+                                distanceLatLngs = distancesLatLngs.get(MessuredLinesSize-1);
+                                distancesLatLngs.remove(MessuredLinesSize-1);
+                                mmpoints.clear();
+                                setMessure_ptsAndDistanceSum();
+                                setPoinum_messure();
+                                break;
+                        }
+
+
+                    }
+                } else {
+                    ////////////////////
+                    /////记录线要素
+                    if (drawLineFeature.isEmpty() && LineFeatures.size() != 0) {
+                        drawLineFeature = LineFeatures.get(LineFeatures.size() - 1);
+                        LineFeatures.remove(LineFeatures.size() - 1);
+                    } else {
+                        if (DataUtil.appearNumber(drawLineFeature, " ") > 0)
+                            drawLineFeature = drawLineFeature.substring(0, drawLineFeature.lastIndexOf(" "));
+                        else drawLineFeature = "";
+                    }
+                    ////////////////////////
+                }
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        //初始化白板按钮
+        whiteBlank_fab = (FloatingActionButton) findViewById(R.id.whiteBlank);
+        whiteBlank_fab.setImageResource(R.drawable.ic_brush_black_24dp);
+        whiteBlank_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isOpenWhiteBlank) {
+                    isOpenWhiteBlank = true;
+                    //whiteBlank_fab.setImageResource(R.drawable.ic_cancel_black_24dp);
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在进行白板绘图(轨迹记录中)");
+                    } else toolbar.setTitle("正在进行白板绘图");
+                    showPopueWindowForWhiteblank();
+                    locHere_fab.setVisibility(View.GONE);
+                    whiteBlank_fab.setVisibility(View.INVISIBLE);
+                    isWhiteBlank = true;
+                    whiteBlankLayerBt.setChecked(true);
+                    pdfView.zoomWithAnimation(c_zoom);
+                }
+            }
+        });
+        //初始化比例尺信息
+        scaleShow = (TextView) findViewById(R.id.scale);
+        //获取传感器管理器系统服务
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        //声明ToolBar
+        toolbar = (Toolbar) findViewById(R.id.toolBar1);
+        setSupportActionBar(toolbar);
+        autoTrans_imgbt = (ImageButton) findViewById(R.id.trans);
+        autoTrans_imgbt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isAutoTrans) {
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                } else {
+                    isAutoTrans = true;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_check_black_24dp);
+                }
+            }
+        });
+        textView = (TextView) findViewById(R.id.txt);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DecimalFormat df = new DecimalFormat("0.0000");
+                String str = textView.getText().toString();
+                Log.w(TAG, "onClick: " + str);
+                if (!str.equals("点击位置在区域之外") && !str.equals("在这里显示坐标值")) {
+                    if (isCoordinateType == TuzhiEnum.COORDINATE_DEFAULT_TYPE) {
+                        //String[] strs = str.split(";");
+                        //PointF pt = new PointF(Float.valueOf(strs[0]), Float.valueOf(strs[1]));
+                        textView.setText(Integer.toString((int) locLatForTap) + "°" + Integer.toString((int) ((locLatForTap - (int) locLatForTap) * 60)) + "′" + Integer.toString((int) (((locLatForTap - (int) locLatForTap) * 60 - (int) ((locLatForTap - (int) locLatForTap) * 60)) * 60)) + "″;" + Integer.toString((int) locLongForTap) + "°" + Integer.toString((int) ((locLongForTap - (int) locLongForTap) * 60)) + "′" + Integer.toString((int) (((locLongForTap - (int) locLongForTap) * 60 - (int) ((locLongForTap - (int) locLongForTap) * 60)) * 60)) + "″");
+                        isCoordinateType = TuzhiEnum.COORDINATE_BLH_TYPE;
+                        locError(Integer.toString(textView.getHeight()));
+                    } else if (isCoordinateType == TuzhiEnum.COORDINATE_BLH_TYPE) {
+                        //String[] strs = str.split(";");
+                        //locError(strs[0] + "还有: " + strs[1]);
+                        //PointF pt = new PointF(Float.valueOf(strs[0].substring(0, strs[0].indexOf("°"))) + (Float.valueOf(strs[0].substring(strs[0].indexOf("°") + 1, strs[0].indexOf("′"))) / 60) + (Float.valueOf(strs[0].substring(strs[0].indexOf("′") + 1, strs[0].indexOf("″"))) / 3600), Float.valueOf(strs[1].substring(0, strs[1].indexOf("°"))) + (Float.valueOf(strs[1].substring(strs[1].indexOf("°") + 1, strs[1].indexOf("′"))) / 60) + (Float.valueOf(strs[1].substring(strs[1].indexOf("′") + 1, strs[1].indexOf("″"))) / 3600));
+                        textView.setText(df.format(locLatForTap) + "; " + df.format(locLongForTap));
+                        isCoordinateType = TuzhiEnum.COORDINATE_DEFAULT_TYPE;
+                        locError(Integer.toString(textView.getHeight()));
+                    }
+                }
+            }
+        });
+        textView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                manager.setText(textView.getText());
+                Toast.makeText(MainInterface.this, R.string.FinishCopy, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        trail_imgbt = (ImageButton) findViewById(R.id.trail);
+        startTrail_imgbt = (ImageButton) findViewById(R.id.startTrail);
+        endTrail_imgbt = (ImageButton) findViewById(R.id.endTrail);
+        addPoi_imgbt = (ImageButton) findViewById(R.id.addPoi);
+        query_poi_imgbt = (ImageButton) findViewById(R.id.query_poi);
+        floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam);
+        floatingActionsMenu.setClosedOnTouchOutside(true);
+        floatingActionsMenu.setVisibility(View.VISIBLE);
+        trail_imgbt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (m_lat <= max_lat && m_lat >= min_lat && m_long <= max_long && m_long >= min_long) {
+                    toolbar.setTitle("准备记录轨迹");
+                /*PointF mmm = LatLng.getPixLocFromGeoL(new PointF((float) m_lat, (float)m_long));
+                pdfView.zoomWithAnimation(mmm.x, mmm.y, 10);*/
+                    pdfView.resetZoomWithAnimation();
+                    TimerTask task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            final PointF ppz = LatLng.getPixLocFromGeoL(new PointF((float) m_lat, (float) m_long), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                            ppz.x = ppz.x - 10;
+                            //final float verx = (float) ((max_lat - m_lat) / (max_lat - min_lat));
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pdfView.zoomCenteredTo(8, ppz);
+                                    pdfView.setPositionOffset(verx);
+                                }
+                            });
+                        }
+                    };
+                    Timer timer = new Timer();
+                    timer.schedule(task, 1000);
+                    startTrail_imgbt.setVisibility(View.VISIBLE);
+                    endTrail_imgbt.setVisibility(View.VISIBLE);
+                    trail_imgbt.setVisibility(View.INVISIBLE);
+                } else
+                    Toast.makeText(MainInterface.this, R.string.TrailError, Toast.LENGTH_SHORT).show();
+            }
+        });
+        startTrail_imgbt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbar.setTitle("正在记录轨迹");
+                isDrawType = TuzhiEnum.TRAIL_DRAW_TYPE;
+                isDrawTrail = TuzhiEnum.TRAIL_DRAW_TYPE;
+                //isQuery = false;
+                m_cTrail = "";
+                isLocateEnd = false;
+                isLocate = 0;
+                initTrail();
+                startTrail_imgbt.setVisibility(View.INVISIBLE);
+                //addpoi.setVisibility(View.INVISIBLE);
+                //query_poi.setVisibility(View.INVISIBLE);
+                //floatingActionsMenu.setVisibility(View.INVISIBLE);
+                invalidateOptionsMenu();
+                Intent start_mService = new Intent(MainInterface.this, RecordTrail.class);
+                start_mService.putExtra("ic", ic);
+                startService(start_mService);
+            }
+        });
+        endTrail_imgbt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbar.setTitle(pdfFileName);
+                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                    isLocateEnd = true;
+                    recordTrail(last_x, last_y);
+                    locError(m_cTrail);
+                    invalidateOptionsMenu();
+                    Intent stop_mService = new Intent(MainInterface.this, RecordTrail.class);
+                    stopService(stop_mService);
+                    /*Trail trail = new Trail();
+                    List<Trail> trails = LitePal.where("ic = ?", ic).find(Trail.class);
+                    trail.setIc(ic);
+                    trail.setName("路径" + Integer.toString(trails.size() + 1));
+                    trail.setPath(m_cTrail);
+                    trail.save();*/
+                    trails = LitePal.findAll(Trail.class);
+                    locError("当前存在: " + Integer.toString(trails.size()) + "条轨迹");
+                    if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
+                    else isQuery = false;
+                } else {
+                    Toast.makeText(MainInterface.this, R.string.OpenTrailError, Toast.LENGTH_SHORT).show();
+                }
+                startTrail_imgbt.setVisibility(View.INVISIBLE);
+                endTrail_imgbt.setVisibility(View.INVISIBLE);
+                trail_imgbt.setVisibility(View.VISIBLE);
+                pdfView.resetZoomWithAnimation();
+            }
+        });
+        addPoi_imgbt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (esterEgg_dm) {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                    dialog.setTitle("提示");
+                    dialog.setMessage("需要添加什么要素?");
+                    dialog.setCancelable(false);
+                    dialog.setPositiveButton("点要素", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            poiLayerBt.setChecked(true);
+                            showPOI = true;
+                            //pdfView.resetZoomWithAnimation();
+                            pdfView.zoomWithAnimation(c_zoom);
+                            if (isDrawType == TuzhiEnum.POI_DRAW_TYPE) {
+                                isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在记录轨迹");
+                                } else toolbar.setTitle(pdfFileName);
+                                if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
+                                else isQuery = false;
+                                pdfView.zoomWithAnimation(c_zoom);
+                            } else {
+                                isDrawType = TuzhiEnum.POI_DRAW_TYPE;
+                                isQuery = false;
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                                } else toolbar.setTitle("正在插放兴趣点");
+                                isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
+                            }
+                        }
+                    });
+                    dialog.setNegativeButton("线要素(地名类型,需打开地名功能)", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            backpt_messure_fab.setVisibility(View.VISIBLE);
+                            cancel_messure_fab.setVisibility(View.VISIBLE);
+                            delete_messure_fab.setVisibility(View.VISIBLE);
+                            poiLayerBt.setChecked(false);
+                            showPOI = false;
+                            pdfView.zoomWithAnimation(c_zoom);
+                            if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE) {
+                                isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在记录轨迹");
+                                } else toolbar.setTitle(pdfFileName);
+                                if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
+                                else isQuery = false;
+                                pdfView.zoomWithAnimation(c_zoom);
+                            } else {
+                                isDrawType = TuzhiEnum.LINE_DRAW_TYPE;
+                                drawLineFeature = "";
+                                LineFeatures.clear();
+                                isQuery = false;
+                                if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                                    toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                                } else toolbar.setTitle("正在插放兴趣点");
+                                isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
+                            }
+                        }
+                    });
+                    dialog.show();
+                } else {
+                    poiLayerBt.setChecked(true);
+                    showPOI = true;
+                    //pdfView.resetZoomWithAnimation();
+                    pdfView.zoomWithAnimation(c_zoom);
+                    if (isDrawType == TuzhiEnum.POI_DRAW_TYPE) {
+                        isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                            toolbar.setTitle("正在记录轨迹");
+                        } else toolbar.setTitle(pdfFileName);
+                        if (showMode == TuzhiEnum.CENTERMODE) isQuery = true;
+                        else isQuery = false;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    } else {
+                        isDrawType = TuzhiEnum.POI_DRAW_TYPE;
+                        isQuery = false;
+                        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                            toolbar.setTitle("正在插放兴趣点(轨迹记录中)");
+                        } else toolbar.setTitle("正在插放兴趣点");
+                        isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
+                    }
+                }
+
+            }
+        });
+        query_poi_imgbt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                poiLayerBt.setChecked(true);
+                showPOI = true;
+                pdfView.zoomWithAnimation(c_zoom);
+                if (!isQuery) {
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在查询(轨迹记录中)");
+                    } else toolbar.setTitle("正在查询");
+                    isQuery = true;
+                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
+                } else {
+                    isQuery = false;
+                    if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+                        toolbar.setTitle("正在记录轨迹");
+                    } else toolbar.setTitle(pdfFileName);
+                }
+            }
+        });
+        addPhoto_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addPhoto);
+        addPhoto_fab.setImageResource(R.drawable.ic_add_a_photo);
+        addPhoto_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //添加照片按钮具体功能如下:
+                //pickFile();
+                floatingActionsMenu.close(false);
+                showPopueWindowForPhoto();
+                isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
+            }
+        });
+        locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        //params.addRule(RelativeLayout., whiteBlank_fab.getId());
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+        locHere_fab.setLayoutParams(params);
+        locHere_fab.setImageResource(R.drawable.ic_location_searching);
+        locHere_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickLocHereBT();
+            }
+        });
+        restoreZoom_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.restoreZoom);
+        restoreZoom_fab.setImageResource(R.drawable.ic_autorenew);
+        restoreZoom_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickRestoreZoomBT();
+            }
+        });
+        addTape_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape);
+        addTape_fab.setImageResource(R.drawable.ic_sound);
+        addTape_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //浮动按钮4 具体功能如下:
+                try {
+                    if (isPositionModuleEnable()) {
+                        floatingActionsMenu.close(false);
+                        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+                        startActivityForResult(intent, EnumClass.REQUEST_CODE_TAPE);
+                    } else
+                        Toast.makeText(MainInterface.this, R.string.LocError, Toast.LENGTH_LONG).show();
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(MyApplication.getContext(), R.string.TakeTapeError, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        messureDistance_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.messureDistance);
+        messureDistance_fab.setImageResource(R.drawable.ic_straighten);
+        messureDistance_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //浮动按钮5 具体功能如下:
+                messure_pts = "";
+                floatingActionsMenu.close(false);
+                showPopueWindowForMessure();
+            }
+        });
+        messureDistance_fab.setVisibility(View.VISIBLE);
+        addTape_fab.setVisibility(View.VISIBLE);
+        restoreZoom_fab.setVisibility(View.VISIBLE);
+        locHere_fab.setVisibility(View.VISIBLE);
+        addPhoto_fab.setVisibility(View.VISIBLE);
     }
 
     private void setMessure_ptsAndDistanceSum(){
@@ -6740,6 +8526,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         type3_checkbox.setVisibility(View.GONE);
     }
 
+    private void showCheckbox() {
+        type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
+        type1_checkbox.setVisibility(View.VISIBLE);
+        type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
+        type2_checkbox.setVisibility(View.VISIBLE);
+        type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
+        type3_checkbox.setVisibility(View.VISIBLE);
+    }
+
     private void forbiddenWidget() {
         forbiddenCheckbox();
         ImageView imageView = (ImageView) findViewById(R.id.myscale);
@@ -6768,6 +8563,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         whiteBlank_fab.setVisibility(View.GONE);
         //初始化比例尺信息
         scaleShow = (TextView) findViewById(R.id.scale);
+
+        scaleShow.setVisibility(View.GONE);
         //获取传感器管理器系统服务
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         //声明ToolBar
@@ -6803,8 +8600,85 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         linearLayout.setVisibility(View.GONE);
     }
 
+    private void showWidget() {
+        showCheckbox();
+        ImageView imageView = (ImageView) findViewById(R.id.myscale);
+        imageView.setVisibility(View.VISIBLE);
+        //中心点图标初始化
+
+        centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
+        centerPointModeBt.setVisibility(View.VISIBLE);
+        //图层控制按钮初始化
+        poiLayerBt = (CheckBox) findViewById(R.id.poiLayer);
+        poiLayerBt.setVisibility(View.VISIBLE);
+        trailLayerBt = (CheckBox) findViewById(R.id.trailLayer);
+        trailLayerBt.setVisibility(View.VISIBLE);
+        whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer);
+        whiteBlankLayerBt.setVisibility(View.VISIBLE);
+        //初始化测量相关按钮
+        /*cancel_messure_fab = (FloatingActionButton) findViewById(R.id.cancel_messure);
+        cancel_messure_fab.setVisibility(View.VISIBLE);
+        delete_messure_fab = (FloatingActionButton) findViewById(R.id.delete_messure);
+        delete_messure_fab.setVisibility(View.VISIBLE);
+        backpt_messure_fab = (FloatingActionButton) findViewById(R.id.backpts_messure);
+        backpt_messure_fab.setVisibility(View.VISIBLE);*/
+        //初始化白板按钮
+        whiteBlank_fab = (FloatingActionButton) findViewById(R.id.whiteBlank);
+        whiteBlank_fab.setVisibility(View.VISIBLE);
+        //初始化比例尺信息
+        scaleShow = (TextView) findViewById(R.id.scale);
+        scaleShow.setVisibility(View.VISIBLE);
+        //获取传感器管理器系统服务
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        //声明ToolBar
+        toolbar = (Toolbar) findViewById(R.id.toolBar1);
+        setSupportActionBar(toolbar);
+        autoTrans_imgbt = (ImageButton) findViewById(R.id.trans);
+        autoTrans_imgbt.setVisibility(View.VISIBLE);
+        textView = (TextView) findViewById(R.id.txt);
+        textView.setVisibility(View.VISIBLE);
+        trail_imgbt = (ImageButton) findViewById(R.id.trail);
+        startTrail_imgbt = (ImageButton) findViewById(R.id.startTrail);
+        endTrail_imgbt = (ImageButton) findViewById(R.id.endTrail);
+        addPoi_imgbt = (ImageButton) findViewById(R.id.addPoi);
+        query_poi_imgbt = (ImageButton) findViewById(R.id.query_poi);
+
+        floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam);
+        floatingActionsMenu.setVisibility(View.VISIBLE);
+
+        trail_imgbt.setVisibility(View.VISIBLE);
+        /*startTrail_imgbt.setVisibility(View.VISIBLE);
+        endTrail_imgbt.setVisibility(View.VISIBLE);*/
+        addPoi_imgbt.setVisibility(View.VISIBLE);
+        query_poi_imgbt.setVisibility(View.VISIBLE);
+        addPhoto_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addPhoto);
+        //addPhoto_fab.setVisibility(View.VISIBLE);
+        locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
+        //locHere_fab.setVisibility(View.VISIBLE);
+        restoreZoom_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.restoreZoom);
+        //restoreZoom_fab.setVisibility(View.VISIBLE);
+        addTape_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape);
+        //addTape_fab.setVisibility(View.VISIBLE);
+        messureDistance_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.messureDistance);
+        //messureDistance_fab.setVisibility(View.VISIBLE);
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.MainInterfaceToolBar);
+        linearLayout.setVisibility(View.VISIBLE);
+        if (showMode == TuzhiEnum.CENTERMODE) {
+            centerPoint.setVisibility(View.VISIBLE);
+            isQuery = true;
+            locError("中心点模式");
+            query_poi_imgbt.setVisibility(View.INVISIBLE);
+        } else {
+            locError("不是中心点模式");
+            centerPoint.setVisibility(View.INVISIBLE);
+            isQuery = false;
+            query_poi_imgbt.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void getWhiteBlankData() {
         List<Lines_WhiteBlank> lines = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+        Log.w(TAG, "getWhiteBlankData: " + lines.size());
         if (lines.size() >= 0) {
             for (Lines_WhiteBlank line : lines) {
                 geometry_WhiteBlank geometry_whiteBlank = new geometry_WhiteBlank(line.getIc(), line.getLines(), line.getColor(), line.getMaxlat(), line.getMaxlng(), line.getMinlat(), line.getMinlng());
@@ -7289,6 +9163,36 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     }
 
+    private boolean IsThematicMap(String MapName){
+        List<ElectronicAtlasMap> atlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+        for (int i = 0; i < atlasMaps.size(); i++) {
+            if (atlasMaps.get(i).getName().equals(MapName)){
+                if (atlasMaps.get(i).getParentNode().equals("社会经济图组") || atlasMaps.get(i).getParentNode().equals("资源与环境图组"))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private String FindUriFromMapName(String MapName){
+        List<ElectronicAtlasMap> atlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+        for (int i = 0; i < atlasMaps.size(); i++) {
+            if (atlasMaps.get(i).getName().equals(MapName)){
+                if (atlasMaps.get(i).getParentNode().equals("社会经济图组") || atlasMaps.get(i).getParentNode().equals("资源与环境图组"))
+                    return atlasMaps.get(i).getPath();
+            }
+        }
+        return "";
+    }
+
+    private void InitMapWithoutGeoInfo(String MapName){
+        FILE_TYPE = TuzhiEnum.ASSET_FILE_TYPE;
+        ic = MapName;
+        title = MapName;
+        pdfFileName = MapName;
+        showMapWithoutGeoInfo(FindUriFromMapName(MapName));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -7298,10 +9202,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
 
         String MapName = receiveMapName();
-        initVariableForElectronicAtlas(MapName);
-        initWidget();
-        displayFromFile(uri);
 
+        if (IsThematicMap(MapName)){
+            InitMapWithoutGeoInfo(MapName);
+        }
+        else {
+            initVariableForElectronicAtlas(MapName);
+            initWidget();
+            displayFromFile(uri);
+        }
         Log.w(TAG, "onCreate: ");
         /*int num = receiveInfo();
         if (num != -1) {
@@ -7322,11 +9231,11 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             Log.w(TAG, "onResume: isOK");
             receiveQueryForMap();
-            getScreenParameter();
             resumeVariableAndSurface();
             getBitmap();
             registerSensor();
         }
+        getScreenParameter();
         super.onResume();
     }
 
@@ -7334,8 +9243,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     protected void onPause() {
         if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
             sensorManager.unregisterListener(listener);
+            title = toolbar.getTitle().toString();
         }
-        title = toolbar.getTitle().toString();
         super.onPause();
     }
 
@@ -7506,7 +9415,26 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         } else {
             menu.findItem(R.id.queryPOI).setVisible(false);
             menu.findItem(R.id.queryLatLng).setVisible(false);
-            menu.findItem(R.id.action_search).setVisible(false);
+            menu.findItem(R.id.action_search).setVisible(true);
+            queryMode = TuzhiEnum.MAP_QUERY;
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+            // Assumes current activity is the searchable activity
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+            searchView.setSubmitButtonEnabled(true);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    showListPopupWindowForMapQuery(searchView, query);
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return true;
+                }
+            });
         }
         return super.onPrepareOptionsMenu(menu);
     }

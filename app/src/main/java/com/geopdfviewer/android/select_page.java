@@ -188,6 +188,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     toolbar.setTitle("正在重置，请稍候");
                     Toast.makeText(MyApplication.getContext(), "正在重置，请稍候", Toast.LENGTH_LONG);
                     mapCollectionType = 0;
+                    FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                    Output_fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            OutputBTFunction();
+                        }
+                    });
+                    Output_fab.setVisibility(View.VISIBLE);
                     GetDataForElectronicAtlas();
                     refreshRecyclerForElectronicAtlas();
                     Toast.makeText(MyApplication.getContext(), "重置成功", Toast.LENGTH_LONG);
@@ -263,7 +271,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 ElectronicAtlasMap map = maps.get(position);
-                if (map.getMapGeoStr() != null) {
+                if (map.getMapGeoStr() != null || !map.getPath().equals("")) {
                     String MapName = map.getName();
 
                     Intent intent = new Intent(select_page.this, MainInterface.class);
@@ -278,15 +286,27 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         ElectronicAtlasMap map1 = mapList.get(i);
                         if (map1.getParentNode().equals(map.getName())){
                             ParentNodeName = map.getName();
+                            setTitle(ParentNodeName);
+                            toolbar.setTitle(ParentNodeName);
                             mapCollectionType = map1.getMapType();
                             InitElectronicAtlasData();
                             refreshRecyclerForElectronicAtlas();
                             FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
                             if (mapCollectionType == 0){
                                 floatingActionButton.setVisibility(View.GONE);
+                                FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                Output_fab.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        OutputBTFunction();
+                                    }
+                                });
+                                Output_fab.setVisibility(View.VISIBLE);
                             }
                             else
                             {
+                                FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                Output_fab.setVisibility(View.GONE);
                                 floatingActionButton.setVisibility(View.VISIBLE);
                                 floatingActionButton.setElevation(100);
                             }
@@ -298,14 +318,26 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         ElectronicAtlasMap map = mapList.get(i);
                                         if (map.getName().equals(ParentNodeName)){
                                             ParentNodeName = map.getParentNode();
+                                            setTitle(ParentNodeName);
+                                            toolbar.setTitle(ParentNodeName);
                                             mapCollectionType = map.getMapType();
                                             InitElectronicAtlasData();
                                             refreshRecyclerForElectronicAtlas();
                                             if (mapCollectionType == 0){
                                                 floatingActionButton.setVisibility(View.GONE);
+                                                FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                Output_fab.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View view) {
+                                                        OutputBTFunction();
+                                                    }
+                                                });
+                                                Output_fab.setVisibility(View.VISIBLE);
                                             }
                                             else
                                             {
+                                                FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                Output_fab.setVisibility(View.GONE);
                                                 floatingActionButton.setVisibility(View.VISIBLE);
                                                 floatingActionButton.setElevation(100);
                                             }
@@ -313,13 +345,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         }
                                         else if (ParentNodeName.equals("")){
                                             mapCollectionType = 0;
+                                            setTitle("图志");
+                                            toolbar.setTitle("图志");
                                             InitElectronicAtlasData();
                                             refreshRecyclerForElectronicAtlas();
                                             if (mapCollectionType == 0){
                                                 floatingActionButton.setVisibility(View.GONE);
+                                                FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                Output_fab.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View view) {
+                                                        OutputBTFunction();
+                                                    }
+                                                });
+                                                Output_fab.setVisibility(View.VISIBLE);
                                             }
                                             else
                                             {
+                                                FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                Output_fab.setVisibility(View.GONE);
                                                 floatingActionButton.setVisibility(View.VISIBLE);
                                                 floatingActionButton.setElevation(100);
                                             }
@@ -390,9 +434,19 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
                                 if (mapCollectionType == 0){
                                     floatingActionButton.setVisibility(View.GONE);
+                                    FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                    Output_fab.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            OutputBTFunction();
+                                        }
+                                    });
+                                    Output_fab.setVisibility(View.VISIBLE);
                                 }
                                 else
                                 {
+                                    FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                    Output_fab.setVisibility(View.GONE);
                                     floatingActionButton.setVisibility(View.VISIBLE);
                                     floatingActionButton.setElevation(100);
                                 }
@@ -404,14 +458,26 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             ElectronicAtlasMap map = mapList.get(i);
                                             if (map.getName().equals(ParentNodeName)){
                                                 ParentNodeName = map.getParentNode();
+                                                setTitle(ParentNodeName);
+                                                toolbar.setTitle(ParentNodeName);
                                                 mapCollectionType = map.getMapType();
                                                 InitElectronicAtlasData();
                                                 refreshRecyclerForElectronicAtlas();
                                                 if (mapCollectionType == 0){
                                                     floatingActionButton.setVisibility(View.GONE);
+                                                    FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                    Output_fab.setOnClickListener(new View.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(View view) {
+                                                            OutputBTFunction();
+                                                        }
+                                                    });
+                                                    Output_fab.setVisibility(View.VISIBLE);
                                                 }
                                                 else
                                                 {
+                                                    FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                    Output_fab.setVisibility(View.GONE);
                                                     floatingActionButton.setVisibility(View.VISIBLE);
                                                     floatingActionButton.setElevation(100);
                                                 }
@@ -419,13 +485,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             }
                                             else if (ParentNodeName.equals("")){
                                                 mapCollectionType = 0;
+                                                setTitle("图志");
+                                                toolbar.setTitle("图志");
                                                 InitElectronicAtlasData();
                                                 refreshRecyclerForElectronicAtlas();
                                                 if (mapCollectionType == 0){
                                                     floatingActionButton.setVisibility(View.GONE);
+                                                    FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                    Output_fab.setOnClickListener(new View.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(View view) {
+                                                            OutputBTFunction();
+                                                        }
+                                                    });
+                                                    Output_fab.setVisibility(View.VISIBLE);
                                                 }
                                                 else
                                                 {
+                                                    FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                                    Output_fab.setVisibility(View.GONE);
                                                     floatingActionButton.setVisibility(View.VISIBLE);
                                                     floatingActionButton.setElevation(100);
                                                 }
@@ -696,6 +774,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     @Override
                     public void onItemClick(View view, String map_name, int map_num, int position) {
                         ParentNodeName = map_name;
+                        setTitle(map_name);
+                        toolbar.setTitle(map_name);
+                        FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                        Output_fab.setVisibility(View.GONE);
                         // TODO Gross
                         switch (map_name) {
                             case "序图组":
@@ -759,14 +841,26 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     ElectronicAtlasMap map = mapList.get(i);
                                     if (map.getName().equals(ParentNodeName)){
                                         ParentNodeName = map.getParentNode();
+                                        setTitle(ParentNodeName);
+                                        toolbar.setTitle(ParentNodeName);
                                         mapCollectionType = map.getMapType();
                                         InitElectronicAtlasData();
                                         refreshRecyclerForElectronicAtlas();
                                         if (mapCollectionType == 0){
                                             floatingActionButton.setVisibility(View.GONE);
+                                            FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                            Output_fab.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+                                                    OutputBTFunction();
+                                                }
+                                            });
+                                            Output_fab.setVisibility(View.VISIBLE);
                                         }
                                         else
                                         {
+                                            FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                            Output_fab.setVisibility(View.GONE);
                                             floatingActionButton.setVisibility(View.VISIBLE);
                                             floatingActionButton.setElevation(100);
                                         }
@@ -774,13 +868,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                     else if (ParentNodeName.equals("")){
                                         mapCollectionType = 0;
+                                        setTitle("图志");
+                                        toolbar.setTitle("图志");
                                         InitElectronicAtlasData();
                                         refreshRecyclerForElectronicAtlas();
                                         if (mapCollectionType == 0){
                                             floatingActionButton.setVisibility(View.GONE);
+                                            FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                            Output_fab.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+                                                    OutputBTFunction();
+                                                }
+                                            });
+                                            Output_fab.setVisibility(View.VISIBLE);
                                         }
                                         else
                                         {
+                                            FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                                            Output_fab.setVisibility(View.GONE);
                                             floatingActionButton.setVisibility(View.VISIBLE);
                                             floatingActionButton.setElevation(100);
                                         }
@@ -2219,11 +2325,27 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         if (LitePal.findAll(ElectronicAtlasMap.class).size() != 0){
             mapCollectionType = 0;
             InitElectronicAtlasData();
+            FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+            Output_fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    OutputBTFunction();
+                }
+            });
+            Output_fab.setVisibility(View.VISIBLE);
         }
         else
         {
             mapCollectionType = 0;
             GetDataForElectronicAtlas();
+            FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+            Output_fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    OutputBTFunction();
+                }
+            });
+            Output_fab.setVisibility(View.VISIBLE);
             //InitElectronicAtlasData();
         }
 
@@ -2416,216 +2538,220 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         outputbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            List<POI> pois = LitePal.findAll(POI.class);
-                            List<String> types = new ArrayList<>();
-                            Log.w(TAG, "runlzy: " + pois.size());
-                            for (int i = 0; i < pois.size(); ++i){
-                                String temp = pois.get(i).getType();
-                                Log.w(TAG, "runlzy: " + temp);
-                                if (temp != null) {
-                                    if (!temp.isEmpty()) {
-                                        if (types.size() > 0) {
-                                            for (int j = 0; j < types.size(); ++j) {
-                                                if (temp.equals(types.get(j))) break;
-                                                else {
-                                                    if (j == types.size() - 1) types.add(temp);
-                                                    else continue;
-                                                }
-                                            }
-                                        }else types.add(temp);
-                                    }
-                                }
-                            }
-                            DataUtil.makeKML();
-                            Log.w(TAG, "runlzy: " + types.size());
-                            if (types.size() > 0) {
-                                for (int i = 0; i < types.size(); ++i) {
-                                    DataUtil.makeTxt(types.get(i));
-                                }
-                            }else DataUtil.makeTxt("");
-                            DataUtil.makeTxt1();
-                            DataUtil.makeWhiteBlankKML();
-                            List<File> files = new ArrayList<File>();
-                            StringBuffer sb = new StringBuffer();
-                            int size_POI = pois.size();
-                            sb = sb.append("<POI>").append("\n");
-                            for (int i = 0; i < size_POI; ++i){
-                                sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
-                                sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
-                                sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
-                                sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
-                                sb.append("<type>").append(pois.get(i).getType()).append("</type>").append("\n");
-                                sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
-                                sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
-                                sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
-                                sb.append("<x>").append(pois.get(i).getX()).append("</x>").append("\n");
-                                sb.append("<y>").append(pois.get(i).getY()).append("</y>").append("\n");
-                                sb.append("<time>").append(pois.get(i).getTime()).append("</time>").append("\n");
-                            }
-                            sb.append("</POI>").append("\n");
-                            List<Trail> trails = LitePal.findAll(Trail.class);
-                            int size_trail = trails.size();
-                            sb = sb.append("<Trail>").append("\n");
-                            for (int i = 0; i < size_trail; ++i){
-                                sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
-                                sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
-                                sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
-                                sb.append("<path>").append(trails.get(i).getPath()).append("</path>").append("\n");
-                                sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
-                                sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
-                            }
-                            sb.append("</Trail>").append("\n");
-
-                            List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
-                            int size_mphoto = mphotos.size();
-                            sb = sb.append("<MPHOTO>").append("\n");
-                            for (int i = 0; i < size_mphoto; ++i){
-                                sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
-                                sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
-                                sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
-                                String path = mphotos.get(i).getPath();
-                                sb.append("<path>").append(path).append("</path>").append("\n");
-                                files.add(new File(path));
-                                sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
-                            }
-                            sb.append("</MPHOTO>").append("\n");
-
-                            List<MVEDIO> mvedios = LitePal.findAll(MVEDIO.class);
-                            int size_mvideo = mvedios.size();
-                            sb = sb.append("<MVIDEO>").append("\n");
-                            for (int i = 0; i < size_mvideo; ++i){
-                                sb.append("<id>").append(mvedios.get(i).getId()).append("</id>").append("\n");
-                                sb.append("<pdfic>").append(mvedios.get(i).getPdfic()).append("</pdfic>").append("\n");
-                                sb.append("<POIC>").append(mvedios.get(i).getPoic()).append("</POIC>").append("\n");
-                                String path1 = mvedios.get(i).getThumbnailImg();
-                                sb.append("<Thumbnailpath>").append(path1).append("</Thumbnailpath>").append("\n");
-                                try {
-                                    files.add(new File(path1));
-                                }
-                                catch (Exception e){
-
-                                }
-                                String path = mvedios.get(i).getPath();
-                                sb.append("<path>").append(path).append("</path>").append("\n");
-                                try {
-                                    files.add(new File(path));
-                                }
-                                catch (Exception e){
-
-                                }
-                                sb.append("<time>").append(mvedios.get(i).getTime()).append("</time>").append("\n");
-                            }
-                            sb.append("</MVIDEO>").append("\n");
-
-                            List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
-                            int size_mtape = mtapes.size();
-                            sb = sb.append("<MTAPE>").append("\n");
-                            for (int i = 0; i < size_mtape; ++i){
-                                sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
-                                sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
-                                sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
-                                String path = mtapes.get(i).getPath();
-                                sb.append("<path>").append(path).append("</path>").append("\n");
-                                files.add(new File(path));
-                                sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
-                            }
-                            sb.append("</MTAPE>").append("\n");
-
-
-                            List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
-                            int size_lines_whiteBlank = lines_whiteBlanks.size();
-                            sb = sb.append("<Lines_WhiteBlank>").append("\n");
-                            for (int i = 0; i < size_lines_whiteBlank; ++i){
-                                sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
-                                sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
-                                sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
-                            }
-                            sb.append("</Lines_WhiteBlank>").append("\n");
-                            File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
-                            if (!file.exists() && !file.isDirectory()){
-                                file.mkdirs();
-                            }
-                            final String outputPath = Long.toString(System.currentTimeMillis());
-                            File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
-                            try {
-                                FileOutputStream of = new FileOutputStream(file1);
-                                of.write(sb.toString().getBytes());
-                                of.close();
-                                files.add(file1);
-                            }catch (IOException e){
-                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                            }
-                            try {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
-                                        toolbar.setTitle("数据打包中");
-                                    }
-                                });
-                                File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
-                                //InputStream inputStream = null;
-                                ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
-                                zipOut.setComment("test");
-                                int size = files.size();
-                                Log.w(TAG, "run: " + size);
-                                for (int i = 0; i < size; ++i){
-                                    Log.w(TAG, "run: " + i);
-                                    Log.w(TAG, "run: " + files.get(i).getPath());
-                                    boolean isOK = false;
-                                    for (int k = 0; k < i; ++k) {
-                                        if (files.get(i).getPath().equals(files.get(k).getPath())) break;
-                                        if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
-                                    }
-                                    Log.w(TAG, "aa");
-                                    if (i == 0 & files.get(i).exists()) isOK = true;
-                                    if (isOK){
-                                        Log.w(TAG, "aa");
-                                        InputStream inputStream = new FileInputStream(files.get(i));
-                                        Log.w(TAG, "aa");
-                                        zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
-                                        Log.w(TAG, "aa");
-                                        //int temp = 0;
-                                        //while ((temp = inputStream.read()) != -1){
-                                        //    zipOut.write(temp);
-                                        //}
-                                        byte buffer[] = new byte[4096];
-                                        int realLength;
-                                        while ((realLength = inputStream.read(buffer)) > 0) {
-                                            zipOut.write(buffer, 0, realLength);
-                                        }
-                                        inputStream.close();
-                                    }
-                                }
-                                zipOut.close();
-                                file1.delete();
-                                files.clear();
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
-                                        toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
-                                    }
-                                });
-                            }catch (IOException e){
-                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                Log.w(TAG, "run: " + e.toString());
-                                Log.w(TAG, "run: " + e.getMessage());
-                            }
-                        }
-
-                    }).start();
-                }catch (Exception e)
-                {
-                    Log.w(TAG, "error: " + e.toString());
-                }
-                setFAMVisible(false);
+                OutputBTFunction();
             }
         });
+    }
+
+    private void OutputBTFunction(){
+        try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    List<POI> pois = LitePal.findAll(POI.class);
+                    List<String> types = new ArrayList<>();
+                    Log.w(TAG, "runlzy: " + pois.size());
+                    for (int i = 0; i < pois.size(); ++i){
+                        String temp = pois.get(i).getType();
+                        Log.w(TAG, "runlzy: " + temp);
+                        if (temp != null) {
+                            if (!temp.isEmpty()) {
+                                if (types.size() > 0) {
+                                    for (int j = 0; j < types.size(); ++j) {
+                                        if (temp.equals(types.get(j))) break;
+                                        else {
+                                            if (j == types.size() - 1) types.add(temp);
+                                            else continue;
+                                        }
+                                    }
+                                }else types.add(temp);
+                            }
+                        }
+                    }
+                    DataUtil.makeKML();
+                    Log.w(TAG, "runlzy: " + types.size());
+                    if (types.size() > 0) {
+                        for (int i = 0; i < types.size(); ++i) {
+                            DataUtil.makeTxt(types.get(i));
+                        }
+                    }else DataUtil.makeTxt("");
+                    DataUtil.makeTxt1();
+                    DataUtil.makeWhiteBlankKML();
+                    List<File> files = new ArrayList<File>();
+                    StringBuffer sb = new StringBuffer();
+                    int size_POI = pois.size();
+                    sb = sb.append("<POI>").append("\n");
+                    for (int i = 0; i < size_POI; ++i){
+                        sb.append("<id>").append(pois.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<ic>").append(pois.get(i).getIc()).append("</ic>").append("\n");
+                        sb.append("<name>").append(pois.get(i).getName()).append("</name>").append("\n");
+                        sb.append("<POIC>").append(pois.get(i).getPoic()).append("</POIC>").append("\n");
+                        sb.append("<type>").append(pois.get(i).getType()).append("</type>").append("\n");
+                        sb.append("<photonum>").append(pois.get(i).getPhotonum()).append("</photonum>").append("\n");
+                        sb.append("<description>").append(pois.get(i).getDescription()).append("</description>").append("\n");
+                        sb.append("<tapenum>").append(pois.get(i).getTapenum()).append("</tapenum>").append("\n");
+                        sb.append("<x>").append(pois.get(i).getX()).append("</x>").append("\n");
+                        sb.append("<y>").append(pois.get(i).getY()).append("</y>").append("\n");
+                        sb.append("<time>").append(pois.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</POI>").append("\n");
+                    List<Trail> trails = LitePal.findAll(Trail.class);
+                    int size_trail = trails.size();
+                    sb = sb.append("<Trail>").append("\n");
+                    for (int i = 0; i < size_trail; ++i){
+                        sb.append("<id>").append(trails.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<ic>").append(trails.get(i).getIc()).append("</ic>").append("\n");
+                        sb.append("<name>").append(trails.get(i).getName()).append("</name>").append("\n");
+                        sb.append("<path>").append(trails.get(i).getPath()).append("</path>").append("\n");
+                        sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
+                        sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
+                    }
+                    sb.append("</Trail>").append("\n");
+
+                    List<MPHOTO> mphotos = LitePal.findAll(MPHOTO.class);
+                    int size_mphoto = mphotos.size();
+                    sb = sb.append("<MPHOTO>").append("\n");
+                    for (int i = 0; i < size_mphoto; ++i){
+                        sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
+                        sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
+                        String path = mphotos.get(i).getPath();
+                        sb.append("<path>").append(path).append("</path>").append("\n");
+                        files.add(new File(path));
+                        sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</MPHOTO>").append("\n");
+
+                    List<MVEDIO> mvedios = LitePal.findAll(MVEDIO.class);
+                    int size_mvideo = mvedios.size();
+                    sb = sb.append("<MVIDEO>").append("\n");
+                    for (int i = 0; i < size_mvideo; ++i){
+                        sb.append("<id>").append(mvedios.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<pdfic>").append(mvedios.get(i).getPdfic()).append("</pdfic>").append("\n");
+                        sb.append("<POIC>").append(mvedios.get(i).getPoic()).append("</POIC>").append("\n");
+                        String path1 = mvedios.get(i).getThumbnailImg();
+                        sb.append("<Thumbnailpath>").append(path1).append("</Thumbnailpath>").append("\n");
+                        try {
+                            files.add(new File(path1));
+                        }
+                        catch (Exception e){
+
+                        }
+                        String path = mvedios.get(i).getPath();
+                        sb.append("<path>").append(path).append("</path>").append("\n");
+                        try {
+                            files.add(new File(path));
+                        }
+                        catch (Exception e){
+
+                        }
+                        sb.append("<time>").append(mvedios.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</MVIDEO>").append("\n");
+
+                    List<MTAPE> mtapes = LitePal.findAll(MTAPE.class);
+                    int size_mtape = mtapes.size();
+                    sb = sb.append("<MTAPE>").append("\n");
+                    for (int i = 0; i < size_mtape; ++i){
+                        sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
+                        sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
+                        sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
+                        String path = mtapes.get(i).getPath();
+                        sb.append("<path>").append(path).append("</path>").append("\n");
+                        files.add(new File(path));
+                        sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
+                    }
+                    sb.append("</MTAPE>").append("\n");
+
+
+                    List<Lines_WhiteBlank> lines_whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
+                    int size_lines_whiteBlank = lines_whiteBlanks.size();
+                    sb = sb.append("<Lines_WhiteBlank>").append("\n");
+                    for (int i = 0; i < size_lines_whiteBlank; ++i){
+                        sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
+                        sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
+                        sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
+                    }
+                    sb.append("</Lines_WhiteBlank>").append("\n");
+                    File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+                    if (!file.exists() && !file.isDirectory()){
+                        file.mkdirs();
+                    }
+                    final String outputPath = Long.toString(System.currentTimeMillis());
+                    File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+                    try {
+                        FileOutputStream of = new FileOutputStream(file1);
+                        of.write(sb.toString().getBytes());
+                        of.close();
+                        files.add(file1);
+                    }catch (IOException e){
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                    }
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
+                                toolbar.setTitle("数据打包中");
+                            }
+                        });
+                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
+                        //InputStream inputStream = null;
+                        ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
+                        zipOut.setComment("test");
+                        int size = files.size();
+                        Log.w(TAG, "run: " + size);
+                        for (int i = 0; i < size; ++i){
+                            Log.w(TAG, "run: " + i);
+                            Log.w(TAG, "run: " + files.get(i).getPath());
+                            boolean isOK = false;
+                            for (int k = 0; k < i; ++k) {
+                                if (files.get(i).getPath().equals(files.get(k).getPath())) break;
+                                if ((k == i - 1 & !files.get(i).getPath().equals(files.get(k).getPath()) & files.get(i).exists())) isOK = true;
+                            }
+                            Log.w(TAG, "aa");
+                            if (i == 0 & files.get(i).exists()) isOK = true;
+                            if (isOK){
+                                Log.w(TAG, "aa");
+                                InputStream inputStream = new FileInputStream(files.get(i));
+                                Log.w(TAG, "aa");
+                                zipOut.putNextEntry(new ZipEntry(files.get(i).getName()));
+                                Log.w(TAG, "aa");
+                                //int temp = 0;
+                                //while ((temp = inputStream.read()) != -1){
+                                //    zipOut.write(temp);
+                                //}
+                                byte buffer[] = new byte[4096];
+                                int realLength;
+                                while ((realLength = inputStream.read(buffer)) > 0) {
+                                    zipOut.write(buffer, 0, realLength);
+                                }
+                                inputStream.close();
+                            }
+                        }
+                        zipOut.close();
+                        file1.delete();
+                        files.clear();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
+                                toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                            }
+                        });
+                    }catch (IOException e){
+                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "run: " + e.toString());
+                        Log.w(TAG, "run: " + e.getMessage());
+                    }
+                }
+
+            }).start();
+        }catch (Exception e)
+        {
+            Log.w(TAG, "error: " + e.toString());
+        }
+        setFAMVisible(false);
     }
 
     private void OutputData(){
@@ -2835,6 +2961,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String[] mData = Data.split("\n");
             String LastXZQNameForLevel0 = "";
             String LastXZQNameForLevel1 = "";
+            String LastXZQNameForLevel2 = "";
             for (int i = 0; i < mData.length; i++) {
                 String line = mData[i];
                 Log.w(TAG, "GetDataForXZQTree: " + line);
@@ -2847,17 +2974,23 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         xzqTree = new XZQTree(XZQName, XZQNum, "");
                         LastXZQNameForLevel0 = XZQName;
                         xzqTree.save();
-                        Log.w(TAG, "GetDataForXZQTree: " + "地州级： " + XZQName);
+                        Log.w(TAG, "GetDataForXZQTree: " + "省级： " + XZQName);
                         break;
                     case 1:
                         xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel0);
                         LastXZQNameForLevel1 = XZQName;
-                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel0 + "县级： " + XZQName);
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel0 + "地州级： " + XZQName);
                         xzqTree.save();
                         break;
                     case 2:
                         xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel1);
-                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel1 + "乡镇级： " + XZQName);
+                        LastXZQNameForLevel2 = XZQName;
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel1 + "县级： " + XZQName);
+                        xzqTree.save();
+                        break;
+                    case 3:
+                        xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel2);
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel2 + "乡镇级： " + XZQName);
                         xzqTree.save();
                         break;
                 }
@@ -2878,7 +3011,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             if (map.getMapType() == mapCollectionType) {
                 ParentNodeName = map.getParentNode();
                 if (map.getMapGeoStr() == null) {
-                    map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
+                    if (map.getPath() != "")
+                        map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType()));
+                    else
+                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
                 } else {
                     String[] MapGeoStrs = map.getMapGeoStr().split(",");
                     //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
@@ -2912,7 +3048,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 String line = mData[i];
                 String[] strings = line.split(",");
                 if (strings.length <= 4) {
-                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), "", null, -1);
+                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), "", "", null, -1);
                     map.save();
                     if (map.getMapType() == 0)
                         map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
@@ -2920,15 +3056,25 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     //PointF[] pts = GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7]);
                     String bmPath = DataUtil.getDtThumbnail(strings[1], "/TuZhi" + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
                     Log.w(TAG, "BatchAddMapsForAndroid: " + bmPath);
-                    String[] MapGeoStrs = (strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]).split(",");
-                    String GeoInfo = DataUtil.getGPTS(MapGeoStrs[0], MapGeoStrs[3]);
-                    GeoInfo = DataUtil.rubberCoordinate(MapGeoStrs[1], MapGeoStrs[2], GeoInfo);
-                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7], FindXZQNumForMapName(strings[1]));
-                    map.save();
-                    //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
+                    if (strings.length == 5){
+                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, null, -1);
+                        map.save();
+                        //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
 
-                    if (map.getMapType() == 0)
-                        map_testList.add(new Map_test(map.getName(), i, GeoInfo, MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType()));
+                        if (map.getMapType() == 0)
+                            map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType()));
+                    }
+                    else {
+                        String[] MapGeoStrs = (strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]).split(",");
+                        String GeoInfo = DataUtil.getGPTS(MapGeoStrs[0], MapGeoStrs[3]);
+                        GeoInfo = DataUtil.rubberCoordinate(MapGeoStrs[1], MapGeoStrs[2], GeoInfo);
+                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7], FindXZQNumForMapName(strings[1]));
+                        map.save();
+                        //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
+
+                        if (map.getMapType() == 0)
+                            map_testList.add(new Map_test(map.getName(), i, GeoInfo, MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType()));
+                    }
                 }
             }
         }

@@ -309,6 +309,15 @@
         fab:fab_size="mini"
         android:visibility="gone"/>
 
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/outputData_MainInterface"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_output_black_24dp"
+            fab:fab_label="@string/OutputSingleData"
+            fab:fab_size="mini" />
 
 
     <com.github.clans.fab.FloatingActionMenu

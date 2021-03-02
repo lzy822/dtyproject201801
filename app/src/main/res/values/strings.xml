@@ -26,6 +26,7 @@
     <string name="MapList">地图列表</string>
     <string name="AddMap">添加地图</string>
     <string name="OutputData">导出数据</string>
+    <string name="OutputSingleData">导出单幅地图数据</string>
     <string name="InputData">导入数据</string>
     <string name="IsLongClicking">正在进行长按操作</string>
     <string name="DeleteBt">删除</string>
@@ -61,7 +62,7 @@
     <string name="InputLicenseError">请联系我们获取授权码</string>
     <string name="FinishCopy">已复制到剪贴板</string>
     <string name="PermissionError">必须通过所有权限才能使用本程序!</string>
-    <string name="LocError">请打开定位功能!</string>
+    <string name="LocError">请打开定位功能；若已打开定位功能，请移动到存在gps信号的位置!</string>
     <string name="LocError1">请添加带有坐标的图片!</string>
     <string name="DeleteError">删除文件失败</string>
     <string name="OpenFileError">无法打开该文件</string>

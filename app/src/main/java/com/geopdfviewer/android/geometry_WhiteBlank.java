@@ -15,6 +15,12 @@ public class geometry_WhiteBlank {
     private float minlat;
     private float minlng;
 
+    public geometry_WhiteBlank(String ic, String m_lines, int m_color) {
+        this.ic = ic;
+        this.m_lines = m_lines;
+        this.m_color = m_color;
+    }
+
     public geometry_WhiteBlank(String ic, String m_lines, int m_color, float maxlat, float maxlng, float minlat, float minlng) {
         this.ic = ic;
         this.m_lines = m_lines;

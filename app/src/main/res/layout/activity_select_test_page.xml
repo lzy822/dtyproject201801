@@ -28,6 +28,16 @@
             android:src="@drawable/ic_arrow_back"
             fab:fab_size="normal" />
 
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/outputData_selectpage_ElectronicAtlas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom|right"
+            android:src="@drawable/ic_output_black_24dp"
+            fab:fab_size="normal" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
@@ -40,6 +50,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom|right"
             fab:menu_backgroundColor="#ccffffff"
             fab:menu_labels_ellipsize="end"
             fab:menu_labels_singleLine="true">

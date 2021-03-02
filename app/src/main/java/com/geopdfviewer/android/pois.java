@@ -75,8 +75,7 @@ public class pois extends AppCompatActivity {
         refreshCard();
     }
 
-    private void refreshCard(){
-        mPOIobjList.clear();
+    private void AddAreaPOI(){
         Cursor cursor = LitePal.findBySQL("select * from POI where x >= ? and x <= ? and y >= ? and y <= ?", String.valueOf(min_lat), String.valueOf(max_lat), String.valueOf(min_long), String.valueOf(max_long));
         if (cursor.moveToFirst()){
             do {
@@ -94,6 +93,31 @@ public class pois extends AppCompatActivity {
             }while (cursor.moveToNext());
         }
         cursor.close();
+    }
+
+    private void AddOtherThisMapPOI(){
+        List<POI> pois = LitePal.findAll(POI.class);
+        for (int i = 0; i < pois.size(); i++) {
+            POI poi = pois.get(i);
+            if (poi.getIc().equals(ic)){
+                boolean HasPOI = false;
+                for (int j = 0; j < mPOIobjList.size(); j++) {
+                    if (mPOIobjList.get(j).getM_POIC().equals(poi.getPoic()))
+                    {
+                        HasPOI = true;
+                        break;
+                    }
+                }
+                if (!HasPOI)
+                    mPOIobjList.add(new mPOIobj(poi.getPoic(), poi.getX(), poi.getY(), poi.getTime(), poi.getTapenum(), poi.getPhotonum(), poi.getVedionum(), poi.getName(), poi.getDescription()));
+            }
+        }
+    }
+
+    private void refreshCard(){
+        mPOIobjList.clear();
+        AddAreaPOI();
+        AddOtherThisMapPOI();
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_poi);
         layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);

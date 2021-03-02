@@ -1742,6 +1742,60 @@ public class DataUtil {
         return file1;
     }
 
+    public static void makeWhiteBlankKMLForSingleMap(String ic, int width, int height){
+        final List<Lines_WhiteBlank> whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+        StringBuffer sb = new StringBuffer();
+        int size_whiteBlanks = whiteBlanks.size();
+        makeKMLHead(sb, "WhiteBlank");
+        for (int i = 0; i < size_whiteBlanks; ++i){
+            sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
+            sb.append("      ").append("<name>").append(whiteBlanks.get(i).getIc()).append("</name>").append("\n");
+            sb.append("      ").append("<Snippet></Snippet>").append("\n");
+            //属性表内容
+            sb = makeCDATAHead(sb);
+            sb = makeCDATATail(sb);
+            sb.append("      ").append("<styleUrl>#LineStyle00</styleUrl>").append("\n");
+            sb.append("      ").append("<MultiGeometry>").append("\n");
+            sb.append("        ").append("<LineString>").append("\n");
+            sb.append("          ").append("<extrude>0</extrude>").append("\n");
+            sb.append("          ").append("<tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode>").append("\n");
+            String[] lines_str = whiteBlanks.get(i).getLines().split(" ");
+            float[] lats = new float[lines_str.length / 2];
+            float[] lngs = new float[lines_str.length / 2];
+            for (int k = 0; k < lines_str.length; ++k){
+                if (k == 0 || (k % 2 == 0)) {
+                    lats[k / 2] = Float.valueOf(lines_str[k]) * height;
+                }
+                else {
+                    lngs[k / 2] = Float.valueOf(lines_str[k]) * width;
+                }
+            }
+            StringBuffer str = new StringBuffer();
+            for (int k = 0; k < lngs.length; ++k) {
+                str.append(" ").append(Float.toString(lngs[k])).append(",").append(Float.toString(lats[k])).append(",").append("0");
+            }
+            sb.append("          ").append("<coordinates>").append(str).append("</coordinates>").append("\n");
+            sb.append("        ").append("</LineString>").append("\n");
+            sb.append("      ").append("</MultiGeometry>").append("\n");
+            sb.append("    ").append("</Placemark>").append("\n");
+            //
+        }
+        sb = makeKMLTailForLine(sb);
+        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  "白板" + outputPath + ".kml");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        }catch (IOException e){
+            Log.w(TAG, e.toString());
+        }
+    }
+
     public static void makeWhiteBlankKML(){
         final List<Lines_WhiteBlank> whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
         StringBuffer sb = new StringBuffer();

@@ -127,22 +127,26 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
                     SharedPreferences pref1 = mContext.getSharedPreferences("latlong", MODE_PRIVATE);
                     String mlatlong = pref1.getString("mlatlong", "");
                     if (!mlatlong.isEmpty()) {
-                        String[] latandlong;
-                        latandlong = mlatlong.split(",");
-                        Log.w(TAG, "onBindViewHolder: " + mlatlong);
-                        double m_lat = Double.valueOf(latandlong[0]);
-                        double m_long = Double.valueOf(latandlong[1]);
-                        //String[] latandlong1;
-                        //latandlong1 = map.getM_center_latlong().split(",");
-                        //double the_lat = Double.valueOf(latandlong1[0]);
-                        //double the_long = Double.valueOf(latandlong1[1]);
-                        double distance;
-                        if (!map.getM_GPTS().isEmpty()) {
-                            distance = getDistanceWithMap(map.getM_GPTS(), m_lat, m_long) / 1000;
-                        } else distance = 0;
-                        if (distance != 0) {
-                            holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
-                        } else holder.MapName.setText(map.getM_name() + "\n" + "在地图上 ");
+                        if (map.getM_GPTS().equals(""))
+                            holder.MapName.setText(map.getM_name());
+                        else {
+                            String[] latandlong;
+                            latandlong = mlatlong.split(",");
+                            Log.w(TAG, "onBindViewHolder: " + mlatlong);
+                            double m_lat = Double.valueOf(latandlong[0]);
+                            double m_long = Double.valueOf(latandlong[1]);
+                            //String[] latandlong1;
+                            //latandlong1 = map.getM_center_latlong().split(",");
+                            //double the_lat = Double.valueOf(latandlong1[0]);
+                            //double the_long = Double.valueOf(latandlong1[1]);
+                            double distance;
+                            if (!map.getM_GPTS().isEmpty()) {
+                                distance = getDistanceWithMap(map.getM_GPTS(), m_lat, m_long) / 1000;
+                            } else distance = 0;
+                            if (distance != 0) {
+                                holder.MapName.setText(map.getM_name() + "\n" + df.format(distance) + "公里");
+                            } else holder.MapName.setText(map.getM_name() + "\n" + "在地图上 ");
+                        }
                     } else holder.MapName.setText(map.getM_name());
                     String ImgUri = map.getM_imguri();
                     if (ImgUri != "") {

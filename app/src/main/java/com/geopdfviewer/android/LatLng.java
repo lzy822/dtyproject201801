@@ -44,6 +44,16 @@ public class LatLng {
     }
 
     //经纬度到屏幕坐标位置转化
+    public static PointF getPixLocFromGeoLWithoutGeoInfo(PointF pt, float pageWidth, float pageHeight){
+        double x_ratio = (pt.y);
+        double y_ratio = (pt.x);
+        PointF ptt = new PointF();
+        ptt.x = (float) ( x_ratio * pageWidth);
+        ptt.y = (float) ( (y_ratio) * pageHeight);
+        return ptt;
+    }
+
+    //经纬度到屏幕坐标位置转化
     public static PointF getPixLocFromGeoL(PointF pt, float pageWidth, float pageHeight, double deltaLong, double deltaLat, double min_long, double min_lat){
         double y_ratio = ((pt.x - min_lat) / deltaLat);
         double x_ratio = ((pt.y - min_long) / deltaLong);
