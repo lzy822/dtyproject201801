@@ -1,8 +1,10 @@
 package com.geopdfviewer.android;
 
+import android.support.annotation.NonNull;
+
 import org.litepal.crud.LitePalSupport;
 
-public class ElectronicAtlasMap extends LitePalSupport {
+public class ElectronicAtlasMap extends LitePalSupport implements Comparable<ElectronicAtlasMap>{
     private String parentNode;
     private String name;
     private int mapType;
@@ -11,8 +13,9 @@ public class ElectronicAtlasMap extends LitePalSupport {
     private PointF[] MapGeoInfo = new PointF[4];
     private String MapGeoStr;
     private int XZQNum;
+    private int PageNum;
 
-    public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr, int XZQNum) {
+    /*public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr, int XZQNum) {
         this.parentNode = parentNode;
         this.name = name;
         this.mapType = mapType;
@@ -28,6 +31,38 @@ public class ElectronicAtlasMap extends LitePalSupport {
         this.mapType = mapType;
         this.path = path;
         MapGeoStr = mapGeoStr;
+    }*/
+    public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr, int XZQNum, int PageNum) {
+        this.parentNode = parentNode;
+        this.name = name;
+        this.mapType = mapType;
+        this.path = path;
+        this.imgPath = imgPath;
+        MapGeoStr = mapGeoStr;
+        this.XZQNum = XZQNum;
+        this.PageNum = PageNum;
+    }
+
+    public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String mapGeoStr, int PageNum) {
+        this.parentNode = parentNode;
+        this.name = name;
+        this.mapType = mapType;
+        this.path = path;
+        MapGeoStr = mapGeoStr;
+        this.PageNum = PageNum;
+    }
+
+    @Override
+    public int compareTo(@NonNull ElectronicAtlasMap electronicAtlasMap) {
+        return this.PageNum - electronicAtlasMap.getPageNum();
+    }
+
+    public int getPageNum() {
+        return PageNum;
+    }
+
+    public void setPageNum(int pageNum) {
+        PageNum = pageNum;
     }
 
     public int getXZQNum() {

@@ -1348,12 +1348,12 @@ public class DataUtil {
         poi.save();
     }
 
-    public static void makeKML(){
+    public static void makeKML(String save_folder_name){
         List<File> files = new ArrayList<File>();
         //POI
         List<POI> pois = LitePal.findAll(POI.class);
         if (pois.size() > 0) {
-            files.add(makePOIKML(pois));
+            files.add(makePOIKML(pois, save_folder_name));
         }
         //Trail
         //List<Trail> trails = LitePal.findAll(Trail.class);
@@ -1467,7 +1467,7 @@ public class DataUtil {
         return sb;
     }
 
-    public static File makePOIKML(final List<POI> pois){
+    public static File makePOIKML(final List<POI> pois, String save_folder_name){
         StringBuffer sb = new StringBuffer();
         int size_POI = pois.size();
         makeKMLHead(sb, "POI");
@@ -1638,12 +1638,12 @@ public class DataUtil {
             //
         }
         sb = makeKMLTail(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".kml");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1654,7 +1654,7 @@ public class DataUtil {
         return file1;
     }
 
-    public static File makeTapeKML(final List<MTAPE> mtapes, List<File> files){
+    public static File makeTapeKML(final List<MTAPE> mtapes, List<File> files, String save_folder_name){
         StringBuffer sb = new StringBuffer();
         int size_mtape = mtapes.size();
         makeKMLHead(sb, "MTAPE");
@@ -1668,12 +1668,12 @@ public class DataUtil {
             sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
         }
         sb.append("</MTAPE>").append("\n");
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  outputPath + ".dtdb");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1684,7 +1684,7 @@ public class DataUtil {
         return file1;
     }
 
-    public static File makePhotoKML(final List<MPHOTO> mphotos, List<File> files){
+    public static File makePhotoKML(final List<MPHOTO> mphotos, List<File> files, String save_folder_name){
         StringBuffer sb = new StringBuffer();
         int size_mphoto = mphotos.size();
         makeKMLHead(sb, "MPHOTO");
@@ -1698,12 +1698,12 @@ public class DataUtil {
             sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
         }
         sb.append("</MPHOTO>").append("\n");
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  outputPath + ".dtdb");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1714,7 +1714,7 @@ public class DataUtil {
         return file1;
     }
 
-    public static File makeTrailKML(final List<Trail> trails){
+    public static File makeTrailKML(final List<Trail> trails, String save_folder_name){
         StringBuffer sb = new StringBuffer();
         int size_trail = trails.size();
         makeKMLHead(sb, "Trail");
@@ -1726,12 +1726,12 @@ public class DataUtil {
             sb.append("<starttime>").append(trails.get(i).getStarttime()).append("</starttime>").append("\n");
             sb.append("<endtime>").append(trails.get(i).getEndtime()).append("</endtime>").append("\n");
         }
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  outputPath + ".dtdb");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1742,7 +1742,61 @@ public class DataUtil {
         return file1;
     }
 
-    public static void makeWhiteBlankKMLForSingleMap(String ic, int width, int height){
+    public static void makeWhiteBlankKMLForSingleMap(String ic, String save_folder_name){
+        final List<Lines_WhiteBlank> whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
+        StringBuffer sb = new StringBuffer();
+        int size_whiteBlanks = whiteBlanks.size();
+        makeKMLHead(sb, "WhiteBlank");
+        for (int i = 0; i < size_whiteBlanks; ++i){
+            sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
+            sb.append("      ").append("<name>").append(whiteBlanks.get(i).getIc()).append("</name>").append("\n");
+            sb.append("      ").append("<Snippet></Snippet>").append("\n");
+            //属性表内容
+            sb = makeCDATAHead(sb);
+            sb = makeCDATATail(sb);
+            sb.append("      ").append("<styleUrl>#LineStyle00</styleUrl>").append("\n");
+            sb.append("      ").append("<MultiGeometry>").append("\n");
+            sb.append("        ").append("<LineString>").append("\n");
+            sb.append("          ").append("<extrude>0</extrude>").append("\n");
+            sb.append("          ").append("<tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode>").append("\n");
+            String[] lines_str = whiteBlanks.get(i).getLines().split(" ");
+            float[] lats = new float[lines_str.length / 2];
+            float[] lngs = new float[lines_str.length / 2];
+            for (int k = 0; k < lines_str.length; ++k){
+                if (k == 0 || (k % 2 == 0)) {
+                    lats[k / 2] = Float.valueOf(lines_str[k]);
+                }
+                else {
+                    lngs[k / 2] = Float.valueOf(lines_str[k]);
+                }
+            }
+            StringBuffer str = new StringBuffer();
+            for (int k = 0; k < lngs.length; ++k) {
+                str.append(" ").append(Float.toString(lngs[k])).append(",").append(Float.toString(lats[k])).append(",").append("0");
+            }
+            sb.append("          ").append("<coordinates>").append(str).append("</coordinates>").append("\n");
+            sb.append("        ").append("</LineString>").append("\n");
+            sb.append("      ").append("</MultiGeometry>").append("\n");
+            sb.append("    ").append("</Placemark>").append("\n");
+            //
+        }
+        sb = makeKMLTailForLine(sb);
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
+        if (!file.exists() && !file.isDirectory()){
+            file.mkdirs();
+        }
+        String outputPath = Long.toString(System.currentTimeMillis());
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  "白板" + outputPath + ".kml");
+        try {
+            FileOutputStream of = new FileOutputStream(file1);
+            of.write(sb.toString().getBytes());
+            of.close();
+        }catch (IOException e){
+            Log.w(TAG, e.toString());
+        }
+    }
+
+    public static void makeWhiteBlankKMLForSingleMapWithoutGeoInfo(String ic, int width, int height, String save_folder_name){
         final List<Lines_WhiteBlank> whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
         StringBuffer sb = new StringBuffer();
         int size_whiteBlanks = whiteBlanks.size();
@@ -1781,12 +1835,12 @@ public class DataUtil {
             //
         }
         sb = makeKMLTailForLine(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  "白板" + outputPath + ".kml");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  "白板" + outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1796,51 +1850,55 @@ public class DataUtil {
         }
     }
 
-    public static void makeWhiteBlankKML(){
+    public static void makeWhiteBlankKML(String save_folder_name){
         final List<Lines_WhiteBlank> whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
+
         StringBuffer sb = new StringBuffer();
         int size_whiteBlanks = whiteBlanks.size();
         makeKMLHead(sb, "WhiteBlank");
         for (int i = 0; i < size_whiteBlanks; ++i){
-            sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
-            sb.append("      ").append("<name>").append(whiteBlanks.get(i).getIc()).append("</name>").append("\n");
-            sb.append("      ").append("<Snippet></Snippet>").append("\n");
-            //属性表内容
-            sb = makeCDATAHead(sb);
-            sb = makeCDATATail(sb);
-            sb.append("      ").append("<styleUrl>#LineStyle00</styleUrl>").append("\n");
-            sb.append("      ").append("<MultiGeometry>").append("\n");
-            sb.append("        ").append("<LineString>").append("\n");
-            sb.append("          ").append("<extrude>0</extrude>").append("\n");
-            sb.append("          ").append("<tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode>").append("\n");
-            String[] lines_str = whiteBlanks.get(i).getLines().split(" ");
-            float[] lats = new float[lines_str.length / 2];
-            float[] lngs = new float[lines_str.length / 2];
-            for (int k = 0; k < lines_str.length; ++k){
-                if (k == 0 || (k % 2 == 0)) {
-                    lats[k / 2] = Float.valueOf(lines_str[k]);
+            String ic = whiteBlanks.get(i).getIc();
+            List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.where("name = ?", ic).find(ElectronicAtlasMap.class);
+            if (electronicAtlasMaps.size() == 1 && !electronicAtlasMaps.get(0).getParentNode().equals("社会经济图组") && !electronicAtlasMaps.get(0).getParentNode().equals("资源与环境图组")) {
+                sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
+                sb.append("      ").append("<name>").append(whiteBlanks.get(i).getIc()).append("</name>").append("\n");
+                sb.append("      ").append("<Snippet></Snippet>").append("\n");
+                //属性表内容
+                sb = makeCDATAHead(sb);
+                sb = makeCDATATail(sb);
+                sb.append("      ").append("<styleUrl>#LineStyle00</styleUrl>").append("\n");
+                sb.append("      ").append("<MultiGeometry>").append("\n");
+                sb.append("        ").append("<LineString>").append("\n");
+                sb.append("          ").append("<extrude>0</extrude>").append("\n");
+                sb.append("          ").append("<tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode>").append("\n");
+                String[] lines_str = whiteBlanks.get(i).getLines().split(" ");
+                float[] lats = new float[lines_str.length / 2];
+                float[] lngs = new float[lines_str.length / 2];
+                for (int k = 0; k < lines_str.length; ++k) {
+                    if (k == 0 || (k % 2 == 0)) {
+                        lats[k / 2] = Float.valueOf(lines_str[k]);
+                    } else {
+                        lngs[k / 2] = Float.valueOf(lines_str[k]);
+                    }
                 }
-                else {
-                    lngs[k / 2] = Float.valueOf(lines_str[k]);
+                StringBuffer str = new StringBuffer();
+                for (int k = 0; k < lngs.length; ++k) {
+                    str.append(" ").append(Float.toString(lngs[k])).append(",").append(Float.toString(lats[k])).append(",").append("0");
                 }
+                sb.append("          ").append("<coordinates>").append(str).append("</coordinates>").append("\n");
+                sb.append("        ").append("</LineString>").append("\n");
+                sb.append("      ").append("</MultiGeometry>").append("\n");
+                sb.append("    ").append("</Placemark>").append("\n");
+                //
             }
-            StringBuffer str = new StringBuffer();
-            for (int k = 0; k < lngs.length; ++k) {
-                str.append(" ").append(Float.toString(lngs[k])).append(",").append(Float.toString(lats[k])).append(",").append("0");
-            }
-            sb.append("          ").append("<coordinates>").append(str).append("</coordinates>").append("\n");
-            sb.append("        ").append("</LineString>").append("\n");
-            sb.append("      ").append("</MultiGeometry>").append("\n");
-            sb.append("    ").append("</Placemark>").append("\n");
-            //
         }
         sb = makeKMLTailForLine(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  "白板" + outputPath + ".kml");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  "白板" + outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1903,7 +1961,53 @@ public class DataUtil {
         return sb;
     }
 
-    public static void makeTxt(String type){
+    public static void makeTxt(String type, String ic, String save_folder_name){
+        try {
+            final List<POI> pois = LitePal.where("type = ? and ic = ?", type, ic).find(POI.class);
+            Log.w(TAG, "makeTxt: " + pois.size());
+            StringBuffer sb = new StringBuffer();
+            int size_POI = pois.size();
+            sb = makeTxtHead(sb);
+            for (int i = 0; i < size_POI; ++i) {
+                //属性表内容
+                sb.append(pois.get(i).getIc()).append(";").append(pois.get(i).getName()).append(";").append(pois.get(i).getPoic()).append(";");
+                List<MPHOTO> mphotos = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MPHOTO.class);
+                String photoStr = "";
+                for (int j = 0; j < mphotos.size(); ++j) {
+                    if (j == 0) {
+                        photoStr = mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/") + 1, mphotos.get(j).getPath().length());
+                    } else
+                        photoStr = photoStr + "|" + mphotos.get(j).getPath().substring(mphotos.get(j).getPath().lastIndexOf("/") + 1, mphotos.get(j).getPath().length());
+                }
+                photoStr = URLDecoder.decode(photoStr, "utf-8");
+                sb.append(photoStr).append(";");
+                List<MTAPE> mtapes = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MTAPE.class);
+                String tapeStr = "";
+                for (int j = 0; j < mtapes.size(); ++j) {
+                    if (j == 0) {
+                        tapeStr = mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
+                    } else
+                        tapeStr = tapeStr + "|" + mtapes.get(j).getPath().substring(mtapes.get(j).getPath().lastIndexOf("/") + 1, mtapes.get(j).getPath().length());
+                }
+                tapeStr = URLDecoder.decode(tapeStr, "utf-8");
+                List<MVEDIO> mvedios = LitePal.where("poic = ?", pois.get(i).getPoic()).find(MVEDIO.class);
+                String VideoStr = "";
+                for (int j = 0; j < mvedios.size(); ++j) {
+                    if (j == 0) {
+                        VideoStr = mvedios.get(j).getPath().substring(mvedios.get(j).getPath().lastIndexOf("/") + 1, mvedios.get(j).getPath().length());
+                    } else
+                        VideoStr = VideoStr + "|" + mvedios.get(j).getPath().substring(mvedios.get(j).getPath().lastIndexOf("/") + 1, mvedios.get(j).getPath().length());
+                }
+                VideoStr = URLDecoder.decode(VideoStr, "utf-8");
+                sb.append(tapeStr).append(";").append(VideoStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getType()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
+            }
+            makeFile(sb, type, save_folder_name);
+        }catch (UnsupportedEncodingException e){
+            Log.w(TAG, e.toString());
+        }
+    }
+
+    public static void makeTxt(String type, String save_folder_name){
         try {
             final List<POI> pois = LitePal.where("type = ?", type).find(POI.class);
             Log.w(TAG, "makeTxt: " + pois.size());
@@ -1943,13 +2047,13 @@ public class DataUtil {
                 VideoStr = URLDecoder.decode(VideoStr, "utf-8");
                 sb.append(tapeStr).append(";").append(VideoStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getType()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
             }
-            makeFile(sb, type);
+            makeFile(sb, type, save_folder_name);
         }catch (UnsupportedEncodingException e){
             Log.w(TAG, e.toString());
         }
     }
 
-    public static void makeTxt1(){
+    public static void makeTxt1(String save_folder_name){
         try {
             final List<DMBZ> pois = LitePal.findAll(DMBZ.class);
             Log.w(TAG, "makeTxt: " + pois.size());
@@ -1961,13 +2065,13 @@ public class DataUtil {
                 sb.append(pois.get(i).getXH()).append(";").append(pois.get(i).getDY()).append(";").append(pois.get(i).getMC()).append(";").append(pois.get(i).getBZMC()).append(";").append(pois.get(i).getXZQMC()).append(";").append(pois.get(i).getXZQDM()).append(";").append(pois.get(i).getSZDW()).append(";").append(pois.get(i).getSCCJ()).append(";").append(pois.get(i).getGG()).append(";").append(pois.get(i).getIMGPATH()).append(";").append(pois.get(i).getLng()).append(";");
                 sb.append(pois.get(i).getLat()).append("\n");
             }
-            makeFileDMP(sb);
+            makeFileDMP(sb, save_folder_name);
         }catch (Exception e){
             Log.w(TAG, e.toString());
         }
     }
 
-    public static void makeTxtDMP(){
+    public static void makeTxtDMP(String save_folder_name){
         try {
             final List<DMPoint> pois = LitePal.findAll(DMPoint.class);
             Log.w(TAG, "makeTxt: " + pois.size());
@@ -1979,19 +2083,19 @@ public class DataUtil {
                 sb.append(pois.get(i).getXh()).append(";").append(pois.get(i).getQydm()).append(";").append(pois.get(i).getLbdm()).append(";").append(pois.get(i).getBzmc()).append(";").append(pois.get(i).getCym()).append(";").append(pois.get(i).getJc()).append(";").append(pois.get(i).getBm()).append(";").append(pois.get(i).getDfyz()).append(";").append(pois.get(i).getZt()).append(";").append(pois.get(i).getDmll()).append(";").append(pois.get(i).getDmhy()).append(";").append(pois.get(i).getLsyg()).append(";").append(pois.get(i).getDlstms()).append(";").append(pois.get(i).getZlly()).append(";").append(pois.get(i).getLat()).append(";").append(pois.get(i).getLng()).append(";").append(pois.get(i).getTapepath());
                 sb.append(pois.get(i).getImgpath()).append("\n");
             }
-            makeFileDMP(sb);
+            makeFileDMP(sb, save_folder_name);
         }catch (Exception e){
             Log.w(TAG, e.toString());
         }
     }
 
-    public static void makeFile(StringBuffer sb, String type){
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+    public static void makeFile(StringBuffer sb, String type, String save_folder_name){
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()) {
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", "DMBZ" + type + outputPath + ".txt");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output", "DMBZ" + type + outputPath + ".txt");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -2001,13 +2105,13 @@ public class DataUtil {
         }
     }
 
-    public static void makeFile1(StringBuffer sb){
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+    public static void makeFile1(StringBuffer sb, String save_folder_name){
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()) {
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", "DMBZ" + outputPath + ".txt");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output", "DMBZ" + outputPath + ".txt");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -2017,13 +2121,13 @@ public class DataUtil {
         }
     }
 
-    public static void makeFileDMP(StringBuffer sb){
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+    public static void makeFileDMP(StringBuffer sb, String save_folder_name){
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
         if (!file.exists() && !file.isDirectory()) {
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output", "DMP" + outputPath + ".txt");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output", "DMP" + outputPath + ".txt");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());

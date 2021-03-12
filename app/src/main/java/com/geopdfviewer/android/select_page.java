@@ -71,6 +71,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -123,6 +125,72 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         public static final int SHJJTZ = 3;
         public static final int QYDLTZ = 4;
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!ParentNodeName.equals("")) {
+            FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
+            floatingActionButton.setElevation(100);
+            List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+            Collections.sort(mapList);
+            for (int i = 0; i < mapList.size(); i++) {
+                ElectronicAtlasMap map = mapList.get(i);
+                if (map.getName().equals(ParentNodeName)){
+                    ParentNodeName = map.getParentNode();
+                    setTitle(ParentNodeName);
+                    toolbar.setTitle(ParentNodeName);
+                    mapCollectionType = map.getMapType();
+                    InitElectronicAtlasData();
+                    refreshRecyclerForElectronicAtlas();
+                    if (mapCollectionType == 0){
+                        floatingActionButton.setVisibility(View.GONE);
+                        FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                        Output_fab.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                OutputBTFunction();
+                            }
+                        });
+                        Output_fab.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                        Output_fab.setVisibility(View.GONE);
+                        floatingActionButton.setVisibility(View.VISIBLE);
+                        floatingActionButton.setElevation(100);
+                    }
+                    break;
+                }
+                else if (ParentNodeName.equals("")){
+                    mapCollectionType = 0;
+                    setTitle("图志");
+                    toolbar.setTitle("图志");
+                    InitElectronicAtlasData();
+                    refreshRecyclerForElectronicAtlas();
+                    if (mapCollectionType == 0){
+                        floatingActionButton.setVisibility(View.GONE);
+                        FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                        Output_fab.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                OutputBTFunction();
+                            }
+                        });
+                        Output_fab.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
+                        Output_fab.setVisibility(View.GONE);
+                        floatingActionButton.setVisibility(View.VISIBLE);
+                        floatingActionButton.setElevation(100);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     //标识当前是否处于选择地图的状态
@@ -228,6 +296,24 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         return super.onPrepareOptionsMenu(menu);
     }
 
+    private static int GetPage(String FileName){
+        String PageNumPart = "";
+        char[] chars = FileName.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (Character.isDigit(chars[i])){
+                PageNumPart+=chars[i];
+            }
+            else
+                break;
+        }
+        if (PageNumPart.length() > 0) {
+            System.out.println("当前pdf文件页码为" + PageNumPart);
+            return Integer.valueOf(PageNumPart);
+        }
+        else
+            return 0;
+    }
+
     public void showListPopupWindowForMapQuery(View view, String query) {
         final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
         query = query.trim();
@@ -251,7 +337,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 int mapType = cursor.getInt(cursor.getColumnIndex("maptype"));
                 String path = cursor.getString(cursor.getColumnIndex("path"));
                 String MapGeoStr = cursor.getString(cursor.getColumnIndex("mapgeostr"));
-                ElectronicAtlasMap map = new ElectronicAtlasMap(parentNode, name, mapType, path, MapGeoStr);
+                int Page = GetPage(name);
+                ElectronicAtlasMap map = new ElectronicAtlasMap(parentNode, name, mapType, path, MapGeoStr, Page);
                 maps.add(map);
             } while (cursor.moveToNext());
         }
@@ -281,6 +368,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 else
                 {
                     List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                    Collections.sort(mapList);
                     Boolean HasNode = false;
                     for (int i = 0; i < mapList.size(); i++) {
                         ElectronicAtlasMap map1 = mapList.get(i);
@@ -314,6 +402,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 @Override
                                 public void onClick(View view) {
                                     List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                                    Collections.sort(mapList);
                                     for (int i = 0; i < mapList.size(); i++) {
                                         ElectronicAtlasMap map = mapList.get(i);
                                         if (map.getName().equals(ParentNodeName)){
@@ -454,6 +543,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     @Override
                                     public void onClick(View view) {
                                         List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                                        Collections.sort(mapList);
                                         for (int i = 0; i < mapList.size(); i++) {
                                             ElectronicAtlasMap map = mapList.get(i);
                                             if (map.getName().equals(ParentNodeName)){
@@ -833,10 +923,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         refreshRecycler();*/
                         FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
                         floatingActionButton.setVisibility(View.VISIBLE);
+                        floatingActionButton.setElevation(100);
                         floatingActionButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                                Collections.sort(mapList);
                                 for (int i = 0; i < mapList.size(); i++) {
                                     ElectronicAtlasMap map = mapList.get(i);
                                     if (map.getName().equals(ParentNodeName)){
@@ -1832,7 +1924,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     addMap(path);
                     break;
                 case 18:
-                    final File file33 = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input");
+                    final File file33 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input");
                     if (!file33.exists() && !file33.isDirectory()){
                         file33.mkdirs();
                     }
@@ -1867,7 +1959,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
                                         //System.out.println("解压缩" + entry.getName() + "文件。") ;
                                         locError(entry.toString());
-                                        outFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input", entry.getName()) ;   // 定义输出的文件路径
+                                        outFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input", entry.getName()) ;   // 定义输出的文件路径
                                         input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
                                         out = new FileOutputStream(outFile) ;   // 实例化文件输出流
                                         byte buffer[] = new byte[4096];
@@ -1889,7 +1981,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                 }
                                 //入库操作
-                                File ff = new File(Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input");
+                                File ff = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input");
                                 if (!ff.exists() && !ff.isDirectory()){
                                     ff.mkdirs();
                                 }
@@ -2228,7 +2320,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         locError("path : " + path);
                         continue;
                     }
@@ -2259,7 +2351,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/TuZhi" + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         continue;
                     }
                     if (line.contains("<time>")){
@@ -2568,15 +2660,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             }
                         }
                     }
-                    DataUtil.makeKML();
+                    DataUtil.makeKML(select_page.this.getResources().getText(R.string.save_folder_name).toString());
                     Log.w(TAG, "runlzy: " + types.size());
                     if (types.size() > 0) {
                         for (int i = 0; i < types.size(); ++i) {
-                            DataUtil.makeTxt(types.get(i));
+                            DataUtil.makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name).toString());
                         }
-                    }else DataUtil.makeTxt("");
-                    DataUtil.makeTxt1();
-                    DataUtil.makeWhiteBlankKML();
+                    }else DataUtil.makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name).toString());
+                    DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name).toString());
+                    DataUtil.makeWhiteBlankKML(select_page.this.getResources().getText(R.string.save_folder_name).toString());
                     List<File> files = new ArrayList<File>();
                     StringBuffer sb = new StringBuffer();
                     int size_POI = pois.size();
@@ -2668,17 +2760,21 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     int size_lines_whiteBlank = lines_whiteBlanks.size();
                     sb = sb.append("<Lines_WhiteBlank>").append("\n");
                     for (int i = 0; i < size_lines_whiteBlank; ++i){
-                        sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
-                        sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
-                        sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
+                        String ic = lines_whiteBlanks.get(i).getIc();
+                        List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.where("name = ?", ic).find(ElectronicAtlasMap.class);
+                        if (electronicAtlasMaps.size() == 1 && !electronicAtlasMaps.get(0).getParentNode().equals("社会经济图组") && !electronicAtlasMaps.get(0).getParentNode().equals("资源与环境图组")) {
+                            sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
+                            sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
+                            sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
+                        }
                     }
                     sb.append("</Lines_WhiteBlank>").append("\n");
-                    File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+                    File file = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output");
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
                     }
                     final String outputPath = Long.toString(System.currentTimeMillis());
-                    File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+                    File file1 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output",  outputPath + ".dtdb");
                     try {
                         FileOutputStream of = new FileOutputStream(file1);
                         of.write(sb.toString().getBytes());
@@ -2695,7 +2791,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 toolbar.setTitle("数据打包中");
                             }
                         });
-                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
+                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output",  outputPath + ".zip");
                         //InputStream inputStream = null;
                         ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                         zipOut.setComment("test");
@@ -2775,15 +2871,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             }
         }
-        DataUtil.makeKML();
+        DataUtil.makeKML(select_page.this.getResources().getText(R.string.save_folder_name).toString());
         Log.w(TAG, "runlzy: " + types.size());
         if (types.size() > 0) {
             for (int i = 0; i < types.size(); ++i) {
-                DataUtil.makeTxt(types.get(i));
+                DataUtil.makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name).toString());
             }
-        }else DataUtil.makeTxt("");
-        DataUtil.makeTxt1();
-        DataUtil.makeWhiteBlankKML();
+        }else DataUtil.makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name).toString());
+        DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name).toString());
+        DataUtil.makeWhiteBlankKML(select_page.this.getResources().getText(R.string.save_folder_name).toString());
         List<File> files = new ArrayList<File>();
         StringBuffer sb = new StringBuffer();
         int size_POI = pois.size();
@@ -2849,12 +2945,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
         }
         sb.append("</Lines_WhiteBlank>").append("\n");
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output");
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         final String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".dtdb");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output",  outputPath + ".dtdb");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -2871,7 +2967,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     toolbar.setTitle("数据打包中");
                 }
             });
-            File zipFile = new File(Environment.getExternalStorageDirectory() + "/TuZhi/" + "/Output",  outputPath + ".zip");
+            File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output",  outputPath + ".zip");
             //InputStream inputStream = null;
             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
             zipOut.setComment("test");
@@ -3006,22 +3102,24 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Log.w(TAG, "InitElectronicAtlasData: " + mapCollectionType);
         map_testList = new ArrayList<>();
         List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
+        Collections.sort(maps);
         for (int i = 0; i < maps.size(); i++) {
             ElectronicAtlasMap map = maps.get(i);
             if (map.getMapType() == mapCollectionType) {
                 ParentNodeName = map.getParentNode();
                 if (map.getMapGeoStr() == null) {
                     if (map.getPath() != "")
-                        map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType()));
+                        map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType(), map.getPageNum()));
                     else
-                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
+                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType(), map.getPageNum()));
                 } else {
                     String[] MapGeoStrs = map.getMapGeoStr().split(",");
                     //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
-                    map_testList.add(new Map_test(map.getName(), i, MapGeoStrs[0], MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType()));
+                    map_testList.add(new Map_test(map.getName(), i, MapGeoStrs[0], MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType(), map.getPageNum()));
                 }
             }
         }
+        Collections.sort(map_testList);
     }
 
     public void initPage(){
@@ -3048,35 +3146,40 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 String line = mData[i];
                 String[] strings = line.split(",");
                 if (strings.length <= 4) {
-                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), "", "", null, -1);
+                    int Page = GetPage(strings[1]);
+                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), "", "", null, -1, Page);
                     map.save();
                     if (map.getMapType() == 0)
-                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType()));
+                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType(), map.getPageNum()));
                 } else {
                     //PointF[] pts = GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7]);
-                    String bmPath = DataUtil.getDtThumbnail(strings[1], "/TuZhi" + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
+                    String bmPath = DataUtil.getDtThumbnail(strings[1], "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
                     Log.w(TAG, "BatchAddMapsForAndroid: " + bmPath);
                     if (strings.length == 5){
-                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, null, -1);
+                        int Page = GetPage(strings[1]);
+                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, null, -1, Page);
                         map.save();
                         //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
 
                         if (map.getMapType() == 0)
-                            map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType()));
+                            map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType(), map.getPageNum()));
                     }
                     else {
                         String[] MapGeoStrs = (strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]).split(",");
                         String GeoInfo = DataUtil.getGPTS(MapGeoStrs[0], MapGeoStrs[3]);
                         GeoInfo = DataUtil.rubberCoordinate(MapGeoStrs[1], MapGeoStrs[2], GeoInfo);
-                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7], FindXZQNumForMapName(strings[1]));
+                        int Page = GetPage(strings[1]);
+                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7], FindXZQNumForMapName(strings[1]), Page);
                         map.save();
                         //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
 
                         if (map.getMapType() == 0)
-                            map_testList.add(new Map_test(map.getName(), i, GeoInfo, MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType()));
+                            map_testList.add(new Map_test(map.getName(), i, GeoInfo, MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType(), map.getPageNum()));
                     }
                 }
             }
+
+            Collections.sort(map_testList);
         }
         catch (Exception e){
             Log.w(TAG, "BatchAddMapsForAndroid: " + e.toString());
@@ -3274,7 +3377,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             else {
                 in = new FileInputStream(file);
                 //TODO 内存泄漏检测
-                bmPath = DataUtil.getDtThumbnail(name, "/TuZhi" + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
+                bmPath = DataUtil.getDtThumbnail(name, "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
             }
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
