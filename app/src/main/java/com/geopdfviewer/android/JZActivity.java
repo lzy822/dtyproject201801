@@ -98,7 +98,6 @@ import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.listener.OnRenderListener;
 import com.github.barteksc.pdfviewer.listener.OnTapListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
-import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.github.clans.fab.FloatingActionButton;
 
 import org.litepal.LitePal;
@@ -3082,12 +3081,6 @@ public class JZActivity extends AppCompatActivity implements OnPageChangeListene
                 .enableAnnotationRendering(false)
                 .onLoad(this)
                 .onDraw(this)
-                .onRender(new OnRenderListener() {
-                    @Override
-                    public void onInitiallyRendered(int nbPages) {
-
-                    }
-                })
                 .onTap(this)
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // in dp

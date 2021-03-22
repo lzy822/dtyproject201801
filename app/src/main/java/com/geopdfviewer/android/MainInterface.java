@@ -95,7 +95,6 @@ import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.listener.OnRenderListener;
 import com.github.barteksc.pdfviewer.listener.OnTapListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
-import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.github.clans.fab.FloatingActionButton;
 
 import org.litepal.LitePal;
@@ -156,6 +155,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private String BBox = "";
     private String MediaBox = "";
     private String CropBox = "";
+    private String OriginalGPTS = "";
 
     //坐标信息
     double m_lat = 0, m_long = 0;
@@ -1994,6 +1994,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" + "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
                 int size0 = pois.size();
                 for (int i = 0; i < size0; ++i) {
+                    // TODO 2021/3/17 显示当前内图框范围内的poi点位
                     if (strings[0].equals(pois.get(i).getType()) && type1Checked) {
                         DrawType123POI(canvas, pois, i, showpts);
                     } else if (strings[1].equals(pois.get(i).getType()) && type2Checked) {
@@ -2142,7 +2143,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 locError("deltaK_trans: " + Double.toString(deltaK_trans));
                 if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
                     getInfoForElectronicAtlasWithGeoInfo(theName);
-                    manageInfo();
+                    manageInfoForElectronicAtlasWithGeoInfo();
                     geometry_whiteBlanks.clear();
                     num_whiteBlankPt = 0;
                     isWhiteBlank = false;
@@ -2316,7 +2317,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         isWhiteBlank = false;
                         whiteBlankPt = "";
                         getInfoForElectronicAtlasWithGeoInfo(theName);
-                        manageInfo();
+                        manageInfoForElectronicAtlasWithGeoInfo();
                         toolbar.setTitle(pdfFileName);
                         getNormalBitmap();
                         pdfView.recycle();
@@ -2660,6 +2661,38 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     }
 
+    private double[] OriginalGpts = new double[4];
+
+    //处理地理信息
+    private void manageInfoForElectronicAtlasWithGeoInfo() {
+        double[] gpts = DataUtil.getGPTS(GPTS);
+        min_lat = gpts[0];
+        max_lat = gpts[1];
+        min_long = gpts[2];
+        max_long = gpts[3];
+        locError("delta : " + Double.toString(max_lat - min_lat + (max_long - min_long)));
+        w = gpts[4];
+        h = gpts[5];
+        if (isGPSEnabled()) {
+            getLocation();
+        } else locError("请打开GPS功能");
+        float[] bboxs = DataUtil.getBox(BBox);
+        b_bottom_x = bboxs[0];
+        b_bottom_y = bboxs[1];
+        b_top_x = bboxs[2];
+        b_top_y = bboxs[3];
+        float[] mediaboxs = DataUtil.getBox(MediaBox);
+        m_bottom_x = mediaboxs[0];
+        m_bottom_y = mediaboxs[1];
+        m_top_x = mediaboxs[2];
+        m_top_y = mediaboxs[3];
+        float[] cropbox = DataUtil.getBox(CropBox);
+        c_bottom_x = cropbox[0];
+        c_bottom_y = cropbox[1];
+        c_top_x = cropbox[2];
+        c_top_y = cropbox[3];
+    }
+
     //处理地理信息
     private void manageInfo() {
         double[] gpts = DataUtil.getGPTS(GPTS);
@@ -2895,9 +2928,22 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 paint0.setStrokeWidth(5);//设置画笔宽度
                 paint0.setTextSize(55);
                 paint0.setStyle(Paint.Style.FILL);
-                String text0 = df1.format(area);
-                String text1 = "平方公里";
-                canvas.drawText(text0 + text1, centerPt.x - (text1.length() / 2 * 55 + text0.length() / 4 * 55), centerPt.y + 27, paint0);
+                if (area < 1)
+                {
+                    /*area = area/1000000;
+                    String text0 = df1.format(area);
+                    String text1 = "平方公里";
+                    canvas.drawText(text0 + text1, centerPt.x - (text1.length() / 2 * 55 + text0.length() / 4 * 55), centerPt.y + 27, paint0);*/
+                    int NumberLength = toolbar.getTitle().toString().indexOf("平方");
+                    canvas.drawText(toolbar.getTitle().toString(), centerPt.x - (NumberLength / 2 * 55 + (toolbar.getTitle().toString().length()-NumberLength) / 4 * 55), centerPt.y + 27, paint0);
+                }
+                else{
+                    /*String text0 = df1.format(area);
+                    String text1 = "平方米";
+                    canvas.drawText(text0 + text1, centerPt.x - (text1.length() / 2 * 55 + text0.length() / 4 * 55), centerPt.y + 27, paint0);*/
+                    int NumberLength = toolbar.getTitle().toString().indexOf("平方");
+                    canvas.drawText(toolbar.getTitle().toString(), centerPt.x - (NumberLength / 2 * 55 + (toolbar.getTitle().toString().length()-NumberLength) / 4 * 55), centerPt.y + 27, paint0);
+                }
             }
         }/*else if (size == 1){
             Log.w(TAG, "drawNormalPath11: ");
@@ -3540,7 +3586,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // in dp
                 .onPageError(this)
-                .pageFitPolicy(FitPolicy.BOTH)
                 .load();
         toolbar.setTitle(pdfFileName);
         TimerTask task = new TimerTask() {
@@ -3649,12 +3694,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 .enableAnnotationRendering(false)
                 .onLoad(this)
                 .onDraw(this)
-                .onRender(new OnRenderListener() {
-                    @Override
-                    public void onInitiallyRendered(int nbPages) {
-
-                    }
-                })
                 .onTap(this)
                 .scrollHandle(new DefaultScrollHandle(this))
                 .spacing(10) // in dp
@@ -5758,6 +5797,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    String SubFolder = Long.toString(System.currentTimeMillis());
+
                     List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
                     List<String> types = new ArrayList<>();
                     Log.w(TAG, "runlzy: " + pois.size());
@@ -5778,15 +5819,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             }
                         }
                     }
-                    DataUtil.makeKML(MainInterface.this.getResources().getText(R.string.save_folder_name).toString());
+                    DataUtil.makeKML(MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
                     Log.w(TAG, "runlzy: " + types.size());
                     if (types.size() > 0) {
                         for (int i = 0; i < types.size(); ++i) {
-                            DataUtil.makeTxt(types.get(i), ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString());
+                            DataUtil.makeTxt(types.get(i), ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
                         }
-                    }else DataUtil.makeTxt("", ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString());
-                    DataUtil.makeTxt1(MainInterface.this.getResources().getText(R.string.save_folder_name).toString());
-                    DataUtil.makeWhiteBlankKMLForSingleMap(ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString());
+                    }else DataUtil.makeTxt("", ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                    DataUtil.makeTxt1(MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                    DataUtil.makeWhiteBlankKMLForSingleMap(ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
                     List<File> files = new ArrayList<File>();
                     StringBuffer sb = new StringBuffer();
                     int size_POI = pois.size();
@@ -5883,12 +5924,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
                     }
                     sb.append("</Lines_WhiteBlank>").append("\n");
-                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output");
+                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder);
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
                     }
                     final String outputPath = Long.toString(System.currentTimeMillis());
-                    File file1 = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output",  outputPath + ".dtdb");
+                    File file1 = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".dtdb");
                     try {
                         FileOutputStream of = new FileOutputStream(file1);
                         of.write(sb.toString().getBytes());
@@ -5901,11 +5942,11 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingData), Toast.LENGTH_LONG).show();
                                 toolbar.setTitle("数据打包中");
                             }
                         });
-                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output",  outputPath + ".zip");
+                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".zip");
                         //InputStream inputStream = null;
                         ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                         zipOut.setComment("test");
@@ -5946,7 +5987,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             @Override
                             public void run() {
                                 Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
-                                toolbar.setTitle(MainInterface.this.getResources().getText(R.string.MapList));
+                                toolbar.setTitle(pdfFileName);
                             }
                         });
                     }catch (IOException e){
@@ -5968,8 +6009,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    DataUtil.makeWhiteBlankKMLForSingleMapWithoutGeoInfo(ic, pdfView.getWidth(), pdfView.getHeight(), MainInterface.this.getResources().getText(R.string.save_folder_name).toString());
-                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output");
+                    String SubFolder = Long.toString(System.currentTimeMillis());
+
+                    DataUtil.makeWhiteBlankKMLForSingleMapWithoutGeoInfo(ic, pdfView.getWidth(), pdfView.getHeight(), MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder);
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
                     }
@@ -5977,7 +6020,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingData).toString() + R.string.QSH, Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.PackingData), Toast.LENGTH_LONG).show();
                                 toolbar.setTitle("数据打包中");
                             }
                         });
@@ -6071,7 +6114,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     private void initMapVariableForElectronicAtlasWithGeoInfo(final String MapName) {
         //getInfo(m_num);
         getInfoForElectronicAtlasWithGeoInfo(MapName);
-        manageInfo();
+        manageInfoForElectronicAtlasWithGeoInfo();
         num_map1 = 0;
         File m_file = new File(uri);
         if (uri != null && !uri.isEmpty() && m_file.exists()) {
@@ -9030,6 +9073,21 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             getBitmap();
             registerSensor();
         }
+        InitPageButton();
+        getScreenParameter();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
+            sensorManager.unregisterListener(listener);
+            title = toolbar.getTitle().toString();
+        }
+        super.onPause();
+    }
+
+    private void InitPageButton(){
         FloatingActionButton leftButton = (FloatingActionButton)findViewById(R.id.LeftPDFButton);
         leftButton.setVisibility(View.VISIBLE);
         leftButton.setOnClickListener(new View.OnClickListener() {
@@ -9050,9 +9108,25 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     InitMapWithoutGeoInfo(maps.get(i).getName());
                                 }
                                 else {
+                                    ImageView imageView = (ImageView) findViewById(R.id.myscale);
+                                    if (imageView.getVisibility() == View.GONE)
+                                        showWidget();
+                                    FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
                                     initVariableForElectronicAtlas(maps.get(i).getName());
-                                    initWidget();
+                                    initWidgetForXZQTree();
+
+                                    whiteBlankLayerBt.setChecked(false);
+                                    geometry_whiteBlanks.clear();
+                                    num_whiteBlankPt = 0;
+                                    isWhiteBlank = false;
+                                    whiteBlankPt = "";
+                                    getWhiteBlankData();
+                                    isAutoTrans = false;
+                                    getNormalBitmap();
+                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+
                                     displayFromFile(uri);
+                                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                                 }
                                 break;
                             }
@@ -9084,9 +9158,25 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     InitMapWithoutGeoInfo(maps.get(i).getName());
                                 }
                                 else {
+                                    ImageView imageView = (ImageView) findViewById(R.id.myscale);
+                                    if (imageView.getVisibility() == View.GONE)
+                                        showWidget();
+                                    FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
                                     initVariableForElectronicAtlas(maps.get(i).getName());
-                                    initWidget();
+                                    initWidgetForXZQTree();
+
+                                    whiteBlankLayerBt.setChecked(false);
+                                    geometry_whiteBlanks.clear();
+                                    num_whiteBlankPt = 0;
+                                    isWhiteBlank = false;
+                                    whiteBlankPt = "";
+                                    getWhiteBlankData();
+                                    isAutoTrans = false;
+                                    getNormalBitmap();
+                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+
                                     displayFromFile(uri);
+                                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                                 }
                                 break;
                             }
@@ -9097,17 +9187,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
             }
         });
-        getScreenParameter();
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE) {
-            sensorManager.unregisterListener(listener);
-            title = toolbar.getTitle().toString();
-        }
-        super.onPause();
     }
 
     @Override

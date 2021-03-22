@@ -1348,12 +1348,12 @@ public class DataUtil {
         poi.save();
     }
 
-    public static void makeKML(String save_folder_name){
+    public static void makeKML(String save_folder_name, String SubFolder){
         List<File> files = new ArrayList<File>();
         //POI
         List<POI> pois = LitePal.findAll(POI.class);
         if (pois.size() > 0) {
-            files.add(makePOIKML(pois, save_folder_name));
+            files.add(makePOIKML(pois, save_folder_name, SubFolder));
         }
         //Trail
         //List<Trail> trails = LitePal.findAll(Trail.class);
@@ -1467,7 +1467,7 @@ public class DataUtil {
         return sb;
     }
 
-    public static File makePOIKML(final List<POI> pois, String save_folder_name){
+    public static File makePOIKML(final List<POI> pois, String save_folder_name, String SubFolder){
         StringBuffer sb = new StringBuffer();
         int size_POI = pois.size();
         makeKMLHead(sb, "POI");
@@ -1638,12 +1638,12 @@ public class DataUtil {
             //
         }
         sb = makeKMLTail(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder);
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  outputPath + ".kml");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder,  outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1654,7 +1654,7 @@ public class DataUtil {
         return file1;
     }
 
-    public static File makeTapeKML(final List<MTAPE> mtapes, List<File> files, String save_folder_name){
+    public static File makeTapeKML(final List<MTAPE> mtapes, List<File> files, String save_folder_name) {
         StringBuffer sb = new StringBuffer();
         int size_mtape = mtapes.size();
         makeKMLHead(sb, "MTAPE");
@@ -1742,7 +1742,7 @@ public class DataUtil {
         return file1;
     }
 
-    public static void makeWhiteBlankKMLForSingleMap(String ic, String save_folder_name){
+    public static void makeWhiteBlankKMLForSingleMap(String ic, String save_folder_name, String SubFolder){
         final List<Lines_WhiteBlank> whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
         StringBuffer sb = new StringBuffer();
         int size_whiteBlanks = whiteBlanks.size();
@@ -1781,12 +1781,12 @@ public class DataUtil {
             //
         }
         sb = makeKMLTailForLine(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder);
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  "白板" + outputPath + ".kml");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder,  "白板" + outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1796,7 +1796,7 @@ public class DataUtil {
         }
     }
 
-    public static void makeWhiteBlankKMLForSingleMapWithoutGeoInfo(String ic, int width, int height, String save_folder_name){
+    public static void makeWhiteBlankKMLForSingleMapWithoutGeoInfo(String ic, int width, int height, String save_folder_name, String SubFolder){
         final List<Lines_WhiteBlank> whiteBlanks = LitePal.where("ic = ?", ic).find(Lines_WhiteBlank.class);
         StringBuffer sb = new StringBuffer();
         int size_whiteBlanks = whiteBlanks.size();
@@ -1835,12 +1835,12 @@ public class DataUtil {
             //
         }
         sb = makeKMLTailForLine(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder);
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  "白板" + outputPath + ".kml");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder,  "白板" + outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1850,7 +1850,7 @@ public class DataUtil {
         }
     }
 
-    public static void makeWhiteBlankKML(String save_folder_name){
+    public static void makeWhiteBlankKML(String save_folder_name, String SubFolder){
         final List<Lines_WhiteBlank> whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
 
         StringBuffer sb = new StringBuffer();
@@ -1893,12 +1893,12 @@ public class DataUtil {
             }
         }
         sb = makeKMLTailForLine(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder);
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  "白板" + outputPath + ".kml");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder,  "白板" + outputPath + ".kml");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -1961,7 +1961,7 @@ public class DataUtil {
         return sb;
     }
 
-    public static void makeTxt(String type, String ic, String save_folder_name){
+    public static void makeTxt(String type, String ic, String save_folder_name, String SubFolder){
         try {
             final List<POI> pois = LitePal.where("type = ? and ic = ?", type, ic).find(POI.class);
             Log.w(TAG, "makeTxt: " + pois.size());
@@ -2001,13 +2001,13 @@ public class DataUtil {
                 VideoStr = URLDecoder.decode(VideoStr, "utf-8");
                 sb.append(tapeStr).append(";").append(VideoStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getType()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
             }
-            makeFile(sb, type, save_folder_name);
+            makeFile(sb, type, save_folder_name, SubFolder);
         }catch (UnsupportedEncodingException e){
             Log.w(TAG, e.toString());
         }
     }
 
-    public static void makeTxt(String type, String save_folder_name){
+    public static void makeTxt(String type, String save_folder_name, String SubFolder){
         try {
             final List<POI> pois = LitePal.where("type = ?", type).find(POI.class);
             Log.w(TAG, "makeTxt: " + pois.size());
@@ -2047,13 +2047,13 @@ public class DataUtil {
                 VideoStr = URLDecoder.decode(VideoStr, "utf-8");
                 sb.append(tapeStr).append(";").append(VideoStr).append(";").append(pois.get(i).getDescription()).append(";").append(pois.get(i).getTime()).append(";").append(pois.get(i).getType()).append(";").append(pois.get(i).getY()).append(";").append(pois.get(i).getX()).append("\n");
             }
-            makeFile(sb, type, save_folder_name);
+            makeFile(sb, type, save_folder_name, SubFolder);
         }catch (UnsupportedEncodingException e){
             Log.w(TAG, e.toString());
         }
     }
 
-    public static void makeTxt1(String save_folder_name){
+    public static void makeTxt1(String save_folder_name, String SubFolder){
         try {
             final List<DMBZ> pois = LitePal.findAll(DMBZ.class);
             Log.w(TAG, "makeTxt: " + pois.size());
@@ -2065,13 +2065,13 @@ public class DataUtil {
                 sb.append(pois.get(i).getXH()).append(";").append(pois.get(i).getDY()).append(";").append(pois.get(i).getMC()).append(";").append(pois.get(i).getBZMC()).append(";").append(pois.get(i).getXZQMC()).append(";").append(pois.get(i).getXZQDM()).append(";").append(pois.get(i).getSZDW()).append(";").append(pois.get(i).getSCCJ()).append(";").append(pois.get(i).getGG()).append(";").append(pois.get(i).getIMGPATH()).append(";").append(pois.get(i).getLng()).append(";");
                 sb.append(pois.get(i).getLat()).append("\n");
             }
-            makeFileDMP(sb, save_folder_name);
+            makeFileDMP(sb, save_folder_name, SubFolder);
         }catch (Exception e){
             Log.w(TAG, e.toString());
         }
     }
 
-    public static void makeTxtDMP(String save_folder_name){
+    public static void makeTxtDMP(String save_folder_name, String SubFolder){
         try {
             final List<DMPoint> pois = LitePal.findAll(DMPoint.class);
             Log.w(TAG, "makeTxt: " + pois.size());
@@ -2083,19 +2083,19 @@ public class DataUtil {
                 sb.append(pois.get(i).getXh()).append(";").append(pois.get(i).getQydm()).append(";").append(pois.get(i).getLbdm()).append(";").append(pois.get(i).getBzmc()).append(";").append(pois.get(i).getCym()).append(";").append(pois.get(i).getJc()).append(";").append(pois.get(i).getBm()).append(";").append(pois.get(i).getDfyz()).append(";").append(pois.get(i).getZt()).append(";").append(pois.get(i).getDmll()).append(";").append(pois.get(i).getDmhy()).append(";").append(pois.get(i).getLsyg()).append(";").append(pois.get(i).getDlstms()).append(";").append(pois.get(i).getZlly()).append(";").append(pois.get(i).getLat()).append(";").append(pois.get(i).getLng()).append(";").append(pois.get(i).getTapepath());
                 sb.append(pois.get(i).getImgpath()).append("\n");
             }
-            makeFileDMP(sb, save_folder_name);
+            makeFileDMP(sb, save_folder_name, SubFolder);
         }catch (Exception e){
             Log.w(TAG, e.toString());
         }
     }
 
-    public static void makeFile(StringBuffer sb, String type, String save_folder_name){
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
+    public static void makeFile(StringBuffer sb, String type, String save_folder_name, String SubFolder){
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder);
         if (!file.exists() && !file.isDirectory()) {
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output", "DMBZ" + type + outputPath + ".txt");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder, "DMBZ" + type + outputPath + ".txt");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -2121,13 +2121,13 @@ public class DataUtil {
         }
     }
 
-    public static void makeFileDMP(StringBuffer sb, String save_folder_name){
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
+    public static void makeFileDMP(StringBuffer sb, String save_folder_name, String SubFolder){
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder);
         if (!file.exists() && !file.isDirectory()) {
             file.mkdirs();
         }
         String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output", "DMP" + outputPath + ".txt");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder, "DMP" + outputPath + ".txt");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
