@@ -2092,7 +2092,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
                             lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
                             long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                            for (int i = 0; i < GPTSs.length; i = i + 2) {
+                            for (int i = 0; i < GPTSs.length; i = i + 2){
                                 if (GPTSs[i] < lat_axis) {
                                     if (GPTSs[i + 1] < long_axis) {
                                         pt_lb.x = GPTSs[i];
@@ -3683,6 +3683,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private void displayFromFile(String filePath) {
         pdfView = (PDFView) findViewById(R.id.pdfView);
+        pdfView.recycle();
         pdfView.setBackgroundColor(Color.WHITE);
         pdfView.setMidZoom(10);
         pdfView.setMaxZoom(20);
@@ -6867,11 +6868,16 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     List<com.esri.arcgisruntime.geometry.Point> mmpoints;
 
     private List<XZQTree> ExtendXZQForLevel012(List<XZQTree> xzqTrees, List<ElectronicAtlasMap> electronicAtlasMaps, String XZQName, int XZQNum){
+        // 存储新的行政区划树
         List<XZQTree> xzqTreeList = new ArrayList<>();
+
+        // 遍历老行政区划树
         for (int i = 0; i < xzqTrees.size(); i++) {
             XZQTree xzqTree = xzqTrees.get(i);
+            // 如果老地行政级别小于或等于当前行政区划的行政级别
             if (xzqTree.getXZQNum() <= XZQNum)
                 xzqTreeList.add(xzqTree);
+            // 如果当前行政区划的行政级别+1 且上级行政区划名称等于点击行政区划的名称
             else if (xzqTree.getXZQNum() == XZQNum+1 && xzqTree.getLastXZQName().equals(XZQName))
                 xzqTreeList.add(xzqTree);
             if (xzqTree.getXZQName().equals(XZQName))
@@ -6933,7 +6939,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         List<XZQTree> xzqTreeList = null;
 
-        if (XZQNum <= 2)
+        if (XZQNum <= 1)
             xzqTreeList = ExtendXZQForLevel012(xzqTrees, electronicAtlasMaps, XZQName, XZQNum);
         else
         {
@@ -9002,7 +9008,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         Collections.sort(atlasMaps);
         for (int i = 0; i < atlasMaps.size(); i++) {
             if (atlasMaps.get(i).getName().equals(MapName)){
-                if (atlasMaps.get(i).getParentNode().equals("社会经济图组") || atlasMaps.get(i).getParentNode().equals("资源与环境图组"))
+                //if (atlasMaps.get(i).getParentNode().equals("社会经济图组") || atlasMaps.get(i).getParentNode().equals("资源与环境图组") || atlasMaps.get(i).getParentNode().equals("州市介绍"))
+                if (atlasMaps.get(i).getMapGeoStr() == null)
                     return true;
             }
         }
@@ -9014,7 +9021,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         Collections.sort(atlasMaps);
         for (int i = 0; i < atlasMaps.size(); i++) {
             if (atlasMaps.get(i).getName().equals(MapName)){
-                if (atlasMaps.get(i).getParentNode().equals("社会经济图组") || atlasMaps.get(i).getParentNode().equals("资源与环境图组"))
+                if (atlasMaps.get(i).getMapGeoStr() == null)
                     return atlasMaps.get(i).getPath();
             }
         }
@@ -9037,7 +9044,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         //Toast.makeText(this, "locate here", Toast.LENGTH_SHORT).show();
 
 
-        String MapName = receiveMapName();
+        //String MapName = receiveMapName();
+        String MapName = "00-0封面";
 
         if (IsThematicMap(MapName)){
             InitMapWithoutGeoInfo(MapName);
@@ -9102,7 +9110,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     {
                         i--;
                         while(i >= 0){
-                            if (maps.get(i).getPageNum() != 0)
+                            if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
                             {
                                 if (IsThematicMap(maps.get(i).getName())){
                                     InitMapWithoutGeoInfo(maps.get(i).getName());
@@ -9152,7 +9160,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     {
                         i++;
                         while(i < maps.size()){
-                            if (maps.get(i).getPageNum() != 0)
+                            if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
                             {
                                 if (IsThematicMap(maps.get(i).getName())){
                                     InitMapWithoutGeoInfo(maps.get(i).getName());
@@ -9222,14 +9230,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     break;
                 case NONE_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    menu.findItem(R.id.back).setVisible(true);
+                    menu.findItem(R.id.back).setVisible(false);
                     menu.findItem(R.id.queryPOI).setVisible(true);
                     menu.findItem(R.id.action_search).setVisible(false);
                     menu.findItem(R.id.queryLatLng).setVisible(true);
                     break;
                 case SEARCH_DEMO:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    menu.findItem(R.id.back).setVisible(true);
+                    menu.findItem(R.id.back).setVisible(false);
                     menu.findItem(R.id.queryPOI).setVisible(false);
                     menu.findItem(R.id.queryLatLng).setVisible(false);
                     menu.findItem(R.id.action_search).setVisible(true);
@@ -9354,6 +9362,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     });
             }
         } else {
+            menu.findItem(R.id.back).setVisible(false);
             menu.findItem(R.id.queryPOI).setVisible(false);
             menu.findItem(R.id.queryLatLng).setVisible(false);
             menu.findItem(R.id.action_search).setVisible(true);

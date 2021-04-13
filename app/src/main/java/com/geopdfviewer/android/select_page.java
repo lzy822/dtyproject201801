@@ -297,6 +297,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private static int GetPage(String FileName){
+        Boolean isSpecialPage = false;
+        if (FileName.contains("00-") && FileName.substring(0, 3).equals("00-"))
+        {
+            FileName = FileName.replace("00-", "");
+            isSpecialPage = true;
+        }
         String PageNumPart = "";
         char[] chars = FileName.toCharArray();
         for (int i = 0; i < chars.length; i++) {
@@ -308,7 +314,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
         if (PageNumPart.length() > 0) {
             System.out.println("当前pdf文件页码为" + PageNumPart);
-            return Integer.valueOf(PageNumPart);
+            if (isSpecialPage)
+                return Integer.valueOf(PageNumPart);
+            else
+                return (-1 * Integer.valueOf(PageNumPart));
         }
         else
             return 0;
@@ -468,56 +477,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     if (HasNode == false){
                         for (int i = 0; i < mapList.size(); i++) {
                                 ParentNodeName = map.getName();
-                                switch (ParentNodeName) {
-                                case "序图组":
-                                    mapCollectionType = 1;
-                                    break;
-                                case "资源与环境图组":
-                                    mapCollectionType = 2;
-                                    break;
-                                case "社会经济图组":
-                                    mapCollectionType = 3;
-                                    break;
-                                case "区域地理图组":
-                                    mapCollectionType = 4;
-                                    break;
-                                case "县图":
-                                    mapCollectionType = 5;
-                                    break;
-                                case "各县城区图":
-                                    mapCollectionType = 6;
-                                    break;
-                                case "各县影像图":
-                                    mapCollectionType = 7;
-                                    break;
-                                case "乡镇图":
-                                    mapCollectionType = 8;
-                                    break;
-                                case "临翔区":
-                                    mapCollectionType = 9;
-                                    break;
-                                case "凤庆县":
-                                    mapCollectionType = 10;
-                                    break;
-                                case "云县":
-                                    mapCollectionType = 11;
-                                    break;
-                                case "永德县":
-                                    mapCollectionType = 12;
-                                    break;
-                                case "镇康县":
-                                    mapCollectionType = 13;
-                                    break;
-                                case "双江县":
-                                    mapCollectionType = 14;
-                                    break;
-                                case "耿马县":
-                                    mapCollectionType = 15;
-                                    break;
-                                case "沧源县":
-                                    mapCollectionType = 16;
-                                    break;
-                            }
+
+                            mapCollectionType = Integer.valueOf(GetMapType(ParentNodeName));
                                 InitElectronicAtlasData();
                                 refreshRecyclerForElectronicAtlas();
                                 FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
@@ -815,11 +776,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                 });
             }
-            if (mapCollectionType == 1 || mapCollectionType == 2 || mapCollectionType == 3
-                    || mapCollectionType == 5 || mapCollectionType == 6 || mapCollectionType == 7
-                    || mapCollectionType == 9 || mapCollectionType == 10 || mapCollectionType == 11
-                    || mapCollectionType == 12 || mapCollectionType == 13 || mapCollectionType == 14
-                    || mapCollectionType == 15 || mapCollectionType == 16 || mapCollectionType == -1) {
+            if (isRightMapType()) {
                 adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
                     @Override
                     public void onItemClick(View view, String map_name, int map_num, int position) {
@@ -869,56 +826,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
                         Output_fab.setVisibility(View.GONE);
                         // TODO Gross
-                        switch (map_name) {
-                            case "序图组":
-                                mapCollectionType = 1;
-                                break;
-                            case "资源与环境图组":
-                                mapCollectionType = 2;
-                                break;
-                            case "社会经济图组":
-                                mapCollectionType = 3;
-                                break;
-                            case "区域地理图组":
-                                mapCollectionType = 4;
-                                break;
-                            case "县图":
-                                mapCollectionType = 5;
-                                break;
-                            case "各县城区图":
-                                mapCollectionType = 6;
-                                break;
-                            case "各县影像图":
-                                mapCollectionType = 7;
-                                break;
-                            case "乡镇图":
-                                mapCollectionType = 8;
-                                break;
-                            case "临翔区":
-                                mapCollectionType = 9;
-                                break;
-                            case "凤庆县":
-                                mapCollectionType = 10;
-                                break;
-                            case "云县":
-                                mapCollectionType = 11;
-                                break;
-                            case "永德县":
-                                mapCollectionType = 12;
-                                break;
-                            case "镇康县":
-                                mapCollectionType = 13;
-                                break;
-                            case "双江县":
-                                mapCollectionType = 14;
-                                break;
-                            case "耿马县":
-                                mapCollectionType = 15;
-                                break;
-                            case "沧源县":
-                                mapCollectionType = 16;
-                                break;
-                        }
+                        mapCollectionType = Integer.valueOf(GetMapType(map_name));
                         /*initMap();
                         refreshRecycler();*/
                         FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
@@ -1009,6 +917,138 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         }
     }
 
+    private boolean isRightMapType(){
+        if (mapCollectionType == 1 || mapCollectionType == 2 || mapCollectionType == 3
+                || mapCollectionType == 8 || mapCollectionType == 6 || mapCollectionType == 7
+                || mapCollectionType == 9 || mapCollectionType == 10 || mapCollectionType == 11
+                || mapCollectionType == 12 || mapCollectionType == 13 || mapCollectionType == 14
+                || mapCollectionType == 15 || mapCollectionType == 16 || mapCollectionType == -1
+                || mapCollectionType == 17 || mapCollectionType == 18
+                || mapCollectionType == 19 || mapCollectionType == 20 || mapCollectionType == 21
+                || mapCollectionType == 22 || mapCollectionType == 23 || mapCollectionType == 24)
+            return true;
+        else
+            return false;
+    }
+
+    private boolean isRightMapType1(){
+        if (mapCollectionType == 1 || mapCollectionType == 2 || mapCollectionType == 3
+                || mapCollectionType == 5 || mapCollectionType == 6 || mapCollectionType == 7
+                || mapCollectionType == 9 || mapCollectionType == 10 || mapCollectionType == 11
+                || mapCollectionType == 12 || mapCollectionType == 13 || mapCollectionType == 14
+                || mapCollectionType == 15 || mapCollectionType == 16 || mapCollectionType == -1)
+            return true;
+        else
+            return false;
+    }
+
+    private static String GetMapType(String ParentNodeName){
+        switch (ParentNodeName){
+            case "序图组":
+                return "1";
+            case "资源与环境图组":
+                return "2";
+            case "社会经济图组":
+                return "3";
+            case "区域地理图组":
+                return "4";
+            case "县图":
+                return "5";
+            case "州图":
+                return "6";
+            case "州市介绍":
+                return "7";
+            case "各州市城区影像图":
+                return "8";
+            case "保山市":
+                return "9";
+            case "楚雄彝族自治州":
+                return "10";
+            case "大理白族自治州":
+                return "11";
+            case "德宏傣族景颇族自治州":
+                return "12";
+            case "迪庆藏族自治州":
+                return "13";
+            case "红河哈尼族彝族自治州":
+                return "14";
+            case "昆明市":
+                return "15";
+            case "丽江市":
+                return "16";
+            case "临沧市":
+                return "17";
+            case "怒江傈僳族自治州":
+                return "18";
+            case "普洱市":
+                return "19";
+            case "曲靖市":
+                return "20";
+            case "文山壮族苗族自治州":
+                return "21";
+            case "西双版纳傣族自治州":
+                return "22";
+            case "玉溪市":
+                return "23";
+            case "昭通市":
+                return "24";
+        }
+        return "0";
+    }
+
+    private void GetMapType1(String map_name){
+        switch (map_name) {
+            case "序图组":
+                mapCollectionType = 1;
+                break;
+            case "资源与环境图组":
+                mapCollectionType = 2;
+                break;
+            case "社会经济图组":
+                mapCollectionType = 3;
+                break;
+            case "区域地理图组":
+                mapCollectionType = 4;
+                break;
+            case "县图":
+                mapCollectionType = 5;
+                break;
+            case "各县城区图":
+                mapCollectionType = 6;
+                break;
+            case "各县影像图":
+                mapCollectionType = 7;
+                break;
+            case "乡镇图":
+                mapCollectionType = 8;
+                break;
+            case "临翔区":
+                mapCollectionType = 9;
+                break;
+            case "凤庆县":
+                mapCollectionType = 10;
+                break;
+            case "云县":
+                mapCollectionType = 11;
+                break;
+            case "永德县":
+                mapCollectionType = 12;
+                break;
+            case "镇康县":
+                mapCollectionType = 13;
+                break;
+            case "双江县":
+                mapCollectionType = 14;
+                break;
+            case "耿马县":
+                mapCollectionType = 15;
+                break;
+            case "沧源县":
+                mapCollectionType = 16;
+                break;
+        }
+    }
+
     //重新刷新Recycler
     public void refreshRecycler(){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -1036,11 +1076,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             });
         }
-        if (mapCollectionType == 1 || mapCollectionType == 2 || mapCollectionType == 3
-                || mapCollectionType == 5 || mapCollectionType == 6 || mapCollectionType == 7
-                || mapCollectionType == 9 || mapCollectionType == 10 || mapCollectionType == 11
-                || mapCollectionType == 12 || mapCollectionType == 13 || mapCollectionType == 14
-                || mapCollectionType == 15 || mapCollectionType == 16 || mapCollectionType == -1) {
+        if (isRightMapType()) {
             adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
                 @Override
                 public void onItemClick(View view, String map_name, int map_num, int position) {
@@ -1085,56 +1121,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 @Override
                 public void onItemClick(View view, String map_name, int map_num, int position) {
                     // TODO Gross
-                    switch (map_name){
-                        case "序图组":
-                            mapCollectionType = 1;
-                            break;
-                        case "资源与环境图组":
-                            mapCollectionType = 2;
-                            break;
-                        case "社会经济图组":
-                            mapCollectionType = 3;
-                            break;
-                        case "区域地理图组":
-                            mapCollectionType = 4;
-                            break;
-                        case "县图":
-                            mapCollectionType = 5;
-                            break;
-                        case "各县城区图":
-                            mapCollectionType = 6;
-                            break;
-                        case "各县影像图":
-                            mapCollectionType = 7;
-                            break;
-                        case "乡镇图":
-                            mapCollectionType = 8;
-                            break;
-                        case "临翔区":
-                            mapCollectionType = 9;
-                            break;
-                        case "凤庆县":
-                            mapCollectionType = 10;
-                            break;
-                        case "云县":
-                            mapCollectionType = 11;
-                            break;
-                        case "永德县":
-                            mapCollectionType = 12;
-                            break;
-                        case "镇康县":
-                            mapCollectionType = 13;
-                            break;
-                        case "双江县":
-                            mapCollectionType = 14;
-                            break;
-                        case "耿马县":
-                            mapCollectionType = 15;
-                            break;
-                        case "沧源县":
-                            mapCollectionType = 16;
-                            break;
-                    }
+                    mapCollectionType = Integer.valueOf(GetMapType(map_name));
                     initMap();
                     refreshRecycler();
                 }
@@ -3056,7 +3043,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private void GetDataForXZQTree(){
         try {
-            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "临沧市地图集安卓/行政区划树.txt";
+            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "云南省电子地图集安卓/行政区划树.txt";
             String Data = DataUtil.readtxt(DataFilePath);
             String[] mData = Data.split("\n");
             String LastXZQNameForLevel0 = "";
@@ -3109,6 +3096,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         Collections.sort(maps);
         for (int i = 0; i < maps.size(); i++) {
             ElectronicAtlasMap map = maps.get(i);
+            Log.w(TAG, "InitElectronicAtlasData: " + map.getName() + map.getPageNum());
             if (map.getMapType() == mapCollectionType) {
                 ParentNodeName = map.getParentNode();
                 if (map.getMapGeoStr() == null) {
@@ -3123,7 +3111,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             }
         }
-        Collections.sort(map_testList);
+        ResetPageNum();
+        //Collections.sort(map_testList);
     }
 
     public void initPage(){
@@ -3142,7 +3131,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         try {
             map_testList = new ArrayList<>();
             ParentNodeName = "";
-            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "临沧市地图集安卓/dataForAndroid.txt";
+            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "云南省电子地图集安卓/dataForAndroid.txt";
             String Data = DataUtil.readtxt(DataFilePath);
             String[] mData = Data.split("\n");
             for (int i = 0; i < mData.length; i++) {
@@ -3151,43 +3140,97 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 String[] strings = line.split(",");
                 if (strings.length <= 4) {
                     int Page = GetPage(strings[1]);
+                    Log.w(TAG, "BatchAddMapsForAndroid: " + strings[1] + ", " + Page);
                     ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), "", "", null, -1, Page);
                     map.save();
                     if (map.getMapType() == 0)
-                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType(), map.getPageNum()));
+                        map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType(), Page));
                 } else {
                     //PointF[] pts = GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7]);
                     String bmPath = DataUtil.getDtThumbnail(strings[1], "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
                     Log.w(TAG, "BatchAddMapsForAndroid: " + bmPath);
                     if (strings.length == 5){
                         int Page = GetPage(strings[1]);
+                        Log.w(TAG, "BatchAddMapsForAndroid: " + strings[1] + ", " + Page);
                         ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, null, -1, Page);
                         map.save();
                         //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
 
                         if (map.getMapType() == 0)
-                            map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType(), map.getPageNum()));
+                            map_testList.add(new Map_test(map.getName(), i, "", "", "", map.getPath(), map.getImgPath(), "", "", map.getName(), "", map.getMapType(), Page));
                     }
                     else {
                         String[] MapGeoStrs = (strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]).split(",");
                         String GeoInfo = DataUtil.getGPTS(MapGeoStrs[0], MapGeoStrs[3]);
                         GeoInfo = DataUtil.rubberCoordinate(MapGeoStrs[1], MapGeoStrs[2], GeoInfo);
                         int Page = GetPage(strings[1]);
+                        Log.w(TAG, "BatchAddMapsForAndroid: " + strings[1] + ", " + Page);
                         ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), bmPath, GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7] + "," + strings[4], FindXZQNumForMapName(strings[1]), Page);
                         map.save();
                         //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
 
                         if (map.getMapType() == 0)
-                            map_testList.add(new Map_test(map.getName(), i, GeoInfo, MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType(), map.getPageNum()));
+                            map_testList.add(new Map_test(map.getName(), i, GeoInfo, MapGeoStrs[2], "", map.getPath(), map.getImgPath(), MapGeoStrs[1], MapGeoStrs[1], map.getName(), "", map.getMapType(), Page));
                     }
                 }
             }
 
-            Collections.sort(map_testList);
+            ResetPageNumForInit();
         }
         catch (Exception e){
             Log.w(TAG, "BatchAddMapsForAndroid: " + e.toString());
         }
+    }
+
+    private void ResetPageNum(){
+        int maxPage = 0;
+        for (int i = 0; i < map_testList.size(); i++) {
+            int page = map_testList.get(i).getPage();
+            if (page > maxPage)
+                maxPage = page;
+        }
+
+        for (int i = 0; i < map_testList.size(); i++) {
+            int page = map_testList.get(i).getPage();
+            if (page < 0)
+                map_testList.get(i).setPage(Math.abs(page) + maxPage);
+        }
+
+        Collections.sort(map_testList);
+    }
+
+    private void ResetPageNumForInit(){
+        List<ElectronicAtlasMap> list = LitePal.findAll(ElectronicAtlasMap.class);
+        int maxPage = 0;
+        for (int i = 0; i < list.size(); i++) {
+            int page = list.get(i).getPageNum();
+            Log.w(TAG, "ResetPageNumForInit: page: " + page + ", MaxPage: " + maxPage);
+            if (page > maxPage)
+            {
+                maxPage = page;
+            }
+        }
+
+        for (int i = 0; i < map_testList.size(); i++) {
+            int page = map_testList.get(i).getPage();
+            if (page < 0)
+                map_testList.get(i).setPage(Math.abs(page) + maxPage);
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            ElectronicAtlasMap map = list.get(i);
+            int page = map.getPageNum();
+            if (page < 0)
+            {
+                ElectronicAtlasMap mm = new ElectronicAtlasMap();
+                mm.setPageNum(Math.abs(page) + maxPage);
+                Log.w(TAG, "ResetPageNum: " + "MaxPage: " + maxPage);
+                Log.w(TAG, "ResetPageNum: " + "MaxPage: " + (Math.abs(page) + maxPage));
+                mm.updateAll("name = ?", map.getName());
+            }
+        }
+
+        Collections.sort(map_testList);
     }
 
     private int FindXZQNumForMapName(String MapName){

@@ -118,7 +118,7 @@ public class Map_testAdapter extends RecyclerView.Adapter<Map_testAdapter.ViewHo
         Map_test map = mMapList.get(position);
         try {
             int MapType = map.getMapType();
-            if (MapType == 0 || MapType == 4 || MapType == 8) {
+            if (MapType == 0 || MapType == 4 || MapType == 5) {
                 holder.MapName.setText(map.getM_name());
                 holder.MapImage.setImageResource(R.drawable.ic_content_black_24dp);
             } else {

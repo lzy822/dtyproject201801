@@ -15,23 +15,26 @@ public class ElectronicAtlasMap extends LitePalSupport implements Comparable<Ele
     private int XZQNum;
     private int PageNum;
 
-    /*public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr, int XZQNum) {
-        this.parentNode = parentNode;
-        this.name = name;
-        this.mapType = mapType;
-        this.path = path;
-        this.imgPath = imgPath;
-        MapGeoStr = mapGeoStr;
-        this.XZQNum = XZQNum;
+    public ElectronicAtlasMap() {
     }
 
-    public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String mapGeoStr) {
-        this.parentNode = parentNode;
-        this.name = name;
-        this.mapType = mapType;
-        this.path = path;
-        MapGeoStr = mapGeoStr;
-    }*/
+    /*public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr, int XZQNum) {
+            this.parentNode = parentNode;
+            this.name = name;
+            this.mapType = mapType;
+            this.path = path;
+            this.imgPath = imgPath;
+            MapGeoStr = mapGeoStr;
+            this.XZQNum = XZQNum;
+        }
+
+        public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String mapGeoStr) {
+            this.parentNode = parentNode;
+            this.name = name;
+            this.mapType = mapType;
+            this.path = path;
+            MapGeoStr = mapGeoStr;
+        }*/
     public ElectronicAtlasMap(String parentNode, String name, int mapType, String path, String imgPath, String mapGeoStr, int XZQNum, int PageNum) {
         this.parentNode = parentNode;
         this.name = name;
