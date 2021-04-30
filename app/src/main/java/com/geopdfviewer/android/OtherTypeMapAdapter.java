@@ -90,7 +90,9 @@ public class OtherTypeMapAdapter extends RecyclerView.Adapter<OtherTypeMapAdapte
     public void onBindViewHolder(OtherTypeMapAdapter.ViewHolder holder, int position) {
         String MapName = list.get(position);
         try {
-            if (MapName.equals("社会经济图组") || MapName.equals("资源与环境图组")){
+            if (MapName.equals("社会经济图组") || MapName.equals("资源与环境图组"))
+            //if (MapName.equals("南亚东南亚图集") || MapName.equals("云南省地图集") || MapName.equals("十四五规划系列图"))
+            {
                 holder.cardView.setCardBackgroundColor(Color.WHITE);
             }
             else{

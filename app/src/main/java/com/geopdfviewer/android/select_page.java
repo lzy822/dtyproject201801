@@ -1911,7 +1911,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     addMap(path);
                     break;
                 case 18:
-                    final File file33 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input");
+                    final File file33 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input");
                     if (!file33.exists() && !file33.isDirectory()){
                         file33.mkdirs();
                     }
@@ -1946,7 +1946,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     while((entry = zipInput.getNextEntry())!=null){ // 得到一个压缩实体
                                         //System.out.println("解压缩" + entry.getName() + "文件。") ;
                                         locError(entry.toString());
-                                        outFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input", entry.getName()) ;   // 定义输出的文件路径
+                                        outFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input", entry.getName()) ;   // 定义输出的文件路径
                                         input = zipFile.getInputStream(entry) ; // 得到每一个实体的输入流
                                         out = new FileOutputStream(outFile) ;   // 实例化文件输出流
                                         byte buffer[] = new byte[4096];
@@ -1968,7 +1968,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                                 }
                                 //入库操作
-                                File ff = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input");
+                                File ff = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input");
                                 if (!ff.exists() && !ff.isDirectory()){
                                     ff.mkdirs();
                                 }
@@ -2307,7 +2307,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         locError("path : " + path);
                         continue;
                     }
@@ -2338,7 +2338,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                     if (line.contains("<path>")){
                         path = line.substring(6, line.indexOf("</path>"));
-                        path = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        path = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
                         continue;
                     }
                     if (line.contains("<time>")){
@@ -2412,6 +2412,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             });
             Output_fab.setVisibility(View.VISIBLE);
+
+            /*Intent intent = new Intent(select_page.this, MainInterface.class);
+            startActivity(intent);
+            select_page.this.finish();*/
         }
         else
         {
@@ -2425,6 +2429,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             });
             Output_fab.setVisibility(View.VISIBLE);
+
+            /*Intent intent = new Intent(select_page.this, MainInterface.class);
+            startActivity(intent);
+            select_page.this.finish();*/
             //InitElectronicAtlasData();
         }
 
@@ -2649,15 +2657,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             }
                         }
                     }
-                    DataUtil.makeKML(select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                    DataUtil.makeKML(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     Log.w(TAG, "runlzy: " + types.size());
                     if (types.size() > 0) {
                         for (int i = 0; i < types.size(); ++i) {
-                            DataUtil.makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                            DataUtil.makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                         }
-                    }else DataUtil.makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
-                    DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
-                    DataUtil.makeWhiteBlankKML(select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                    }else DataUtil.makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    DataUtil.makeWhiteBlankKML(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     List<File> files = new ArrayList<File>();
                     StringBuffer sb = new StringBuffer();
                     int size_POI = pois.size();
@@ -2758,12 +2766,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }
                     }
                     sb.append("</Lines_WhiteBlank>").append("\n");
-                    File file = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder);
+                    File file = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder);
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
                     }
                     final String outputPath = Long.toString(System.currentTimeMillis());
-                    File file1 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".dtdb");
+                    File file1 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder,  outputPath + ".dtdb");
                     try {
                         FileOutputStream of = new FileOutputStream(file1);
                         of.write(sb.toString().getBytes());
@@ -2780,7 +2788,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 toolbar.setTitle("数据打包中");
                             }
                         });
-                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".zip");
+                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder,  outputPath + ".zip");
                         //InputStream inputStream = null;
                         ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                         zipOut.setComment("test");
@@ -2862,15 +2870,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             }
         }
-        DataUtil.makeKML(select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+        DataUtil.makeKML(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
         Log.w(TAG, "runlzy: " + types.size());
         if (types.size() > 0) {
             for (int i = 0; i < types.size(); ++i) {
-                DataUtil.makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                DataUtil.makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
             }
-        }else DataUtil.makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
-        DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
-        DataUtil.makeWhiteBlankKML(select_page.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+        }else DataUtil.makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+        DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+        DataUtil.makeWhiteBlankKML(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
         List<File> files = new ArrayList<File>();
         StringBuffer sb = new StringBuffer();
         int size_POI = pois.size();
@@ -2936,12 +2944,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
         }
         sb.append("</Lines_WhiteBlank>").append("\n");
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder);
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder);
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
         final String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".dtdb");
+        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder,  outputPath + ".dtdb");
         try {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
@@ -2958,7 +2966,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     toolbar.setTitle("数据打包中");
                 }
             });
-            File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".zip");
+            File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder,  outputPath + ".zip");
             //InputStream inputStream = null;
             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
             zipOut.setComment("test");
@@ -3147,7 +3155,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         map_testList.add(new Map_test(map.getName(), i, "", "", "", "", "", "", "", map.getName(), "", map.getMapType(), Page));
                 } else {
                     //PointF[] pts = GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7]);
-                    String bmPath = DataUtil.getDtThumbnail(strings[1], "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
+                    String bmPath = DataUtil.getDtThumbnail(strings[1], "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
                     Log.w(TAG, "BatchAddMapsForAndroid: " + bmPath);
                     if (strings.length == 5){
                         int Page = GetPage(strings[1]);
@@ -3424,7 +3432,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             else {
                 in = new FileInputStream(file);
                 //TODO 内存泄漏检测
-                bmPath = DataUtil.getDtThumbnail(name, "/" + select_page.this.getResources().getText(R.string.save_folder_name) + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
+                bmPath = DataUtil.getDtThumbnail(name, "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Thumbnails",  filePath, 120, 180, 30,  select_page.this);
             }
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);

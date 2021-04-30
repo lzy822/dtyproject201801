@@ -50,6 +50,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -1880,6 +1881,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         if (isMessure && showMode == TuzhiEnum.NOCENTERMODE) {
             parseAndrawMessure(messure_pts, canvas);
         }*/
+            drawMLocPoint(canvas);
 
             if (isMessure) {
                 switch (showMode) {
@@ -1939,7 +1941,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             //locError(Float.toString(pageHeight) + "%%" + Float.toString(pdfView.getZoom() * 764));
             //canvas.drawLine(b_bottom_x * ratio_width, (m_top_y - b_bottom_y) * ratio_height, b_top_x * ratio_width, (m_top_y - b_top_y) * ratio_height, paint);
 
-            drawMLocPoint(canvas);
             if (isLocateEnd && !m_cTrail.isEmpty() || showTrail) {
                 for (int ii = 0; ii < trails.size(); ii++) {
                     String str1 = trails.get(ii).getPath();
@@ -2056,6 +2057,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     }
                 }
             }*/
+
+                if (hasQueriedPoi) {
+                    PointF ptf = LatLng.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                    Paint ptSpecial = new Paint();
+                    ptSpecial.setColor(Color.rgb(255, 0, 255));
+                    ptSpecial.setStyle(Paint.Style.FILL);
+                    canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
+                    canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
+                }
             }
             if (isDrawType == TuzhiEnum.LINE_DRAW_TYPE && (LineFeatures.size() > 0 || !drawLineFeature.isEmpty())) {
                 for (int i = 0; i < LineFeatures.size(); ++i) {
@@ -2417,14 +2427,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
              */
             }
-            if (hasQueriedPoi) {
-                PointF ptf = LatLng.getPixLocFromGeoL(new PointF(queriedPoi.getM_X(), queriedPoi.getM_Y()), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
-                Paint ptSpecial = new Paint();
-                ptSpecial.setColor(Color.rgb(255, 0, 255));
-                ptSpecial.setStyle(Paint.Style.FILL);
-                canvas.drawCircle(ptf.x, ptf.y - 70, 35, ptSpecial);
-                canvas.drawRect(new RectF(ptf.x - 5, ptf.y - 38, ptf.x + 5, ptf.y), paint2);
-            }
             if (isMessure && isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE)
                 drawMessureLine(canvas);
             drawMPOI(canvas);
@@ -2635,6 +2637,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         Log.w(TAG, "MediaBox : " + MediaBox);
         Log.w(TAG, "CropBox : " + CropBox);
         Log.w(TAG, "ic : " + ic);
+
+        geometry_whiteBlanks.clear();
+        num_whiteBlankPt = 0;
+        isWhiteBlank = false;
+        whiteBlankPt = "";
+        getWhiteBlankData();
+        isAutoTrans = false;
+        getNormalBitmap();
         //GPTSList = new double[8];
 
     }
@@ -5820,15 +5830,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             }
                         }
                     }
-                    DataUtil.makeKML(MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                    DataUtil.makeKML(MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     Log.w(TAG, "runlzy: " + types.size());
                     if (types.size() > 0) {
                         for (int i = 0; i < types.size(); ++i) {
-                            DataUtil.makeTxt(types.get(i), ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                            DataUtil.makeTxt(types.get(i), ic, MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                         }
-                    }else DataUtil.makeTxt("", ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
-                    DataUtil.makeTxt1(MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
-                    DataUtil.makeWhiteBlankKMLForSingleMap(ic, MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
+                    }else DataUtil.makeTxt("", ic, MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    DataUtil.makeTxt1(MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    DataUtil.makeWhiteBlankKMLForSingleMap(ic, MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     List<File> files = new ArrayList<File>();
                     StringBuffer sb = new StringBuffer();
                     int size_POI = pois.size();
@@ -5925,12 +5935,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
                     }
                     sb.append("</Lines_WhiteBlank>").append("\n");
-                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder);
+                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder);
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
                     }
                     final String outputPath = Long.toString(System.currentTimeMillis());
-                    File file1 = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".dtdb");
+                    File file1 = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder,  outputPath + ".dtdb");
                     try {
                         FileOutputStream of = new FileOutputStream(file1);
                         of.write(sb.toString().getBytes());
@@ -5947,7 +5957,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 toolbar.setTitle("数据打包中");
                             }
                         });
-                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder,  outputPath + ".zip");
+                        File zipFile = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder,  outputPath + ".zip");
                         //InputStream inputStream = null;
                         ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
                         zipOut.setComment("test");
@@ -6012,8 +6022,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 public void run() {
                     String SubFolder = Long.toString(System.currentTimeMillis());
 
-                    DataUtil.makeWhiteBlankKMLForSingleMapWithoutGeoInfo(ic, pdfView.getWidth(), pdfView.getHeight(), MainInterface.this.getResources().getText(R.string.save_folder_name).toString(), SubFolder);
-                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/Output" + "/" + SubFolder);
+                    DataUtil.makeWhiteBlankKMLForSingleMapWithoutGeoInfo(ic, pdfView.getWidth(), pdfView.getHeight(), MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    File file = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name1) + "/Output" + "/" + SubFolder);
                     if (!file.exists() && !file.isDirectory()){
                         file.mkdirs();
                     }
@@ -6058,6 +6068,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         OutputFab.setVisibility(View.VISIBLE);
         InitRightRecyclerView();
         InitLeftRecyclerView();
+        //InitLeftRecyclerViewForDisplay();
         InitWhiteBlankFunctionWithoutGeoInfo();
         toolbar = (Toolbar) findViewById(R.id.toolBar1);
         setSupportActionBar(toolbar);
@@ -7015,6 +7026,151 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         InitRightRecyclerView(XZQName, XZQNum);
                         break;
                 }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitLeftRecyclerViewForAsiaForDisplay(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+        Collections.sort(electronicAtlasMaps);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("南亚东南亚图集");
+        for (int i = 0; i < electronicAtlasMaps.size(); i++) {
+            if (electronicAtlasMaps.get(i).getParentNode().equals("南亚东南亚图集"))
+                list.add(electronicAtlasMaps.get(i).getName());
+        }
+        list.add("云南省地图集");
+        list.add("十四五规划系列图");
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("南亚东南亚图集"))
+                    InitLeftRecyclerViewForDisplay();
+                else if (MapName.equals("云南省地图集"))
+                    InitLeftRecyclerViewForProvinceForDisplay();
+                else if (MapName.equals("十四五规划系列图"))
+                    InitLeftRecyclerViewForTenFourFiveForDisplay();
+                else {
+                    InitMapWithoutGeoInfo(MapName);
+                    /*initVariableForElectronicAtlas(MapName);
+                    initWidgetForXZQTree();
+                    displayFromFile(uri);*/
+                    invalidateOptionsMenu();
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitLeftRecyclerViewForProvinceForDisplay(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+        Collections.sort(electronicAtlasMaps);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("南亚东南亚图集");
+        list.add("云南省地图集");
+        for (int i = 0; i < electronicAtlasMaps.size(); i++) {
+            if (electronicAtlasMaps.get(i).getParentNode().equals("云南省地图集"))
+                list.add(electronicAtlasMaps.get(i).getName());
+        }
+        list.add("十四五规划系列图");
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("云南省地图集"))
+                    InitLeftRecyclerViewForDisplay();
+                else if (MapName.equals("南亚东南亚图集"))
+                    InitLeftRecyclerViewForAsiaForDisplay();
+                else if (MapName.equals("十四五规划系列图"))
+                    InitLeftRecyclerViewForTenFourFiveForDisplay();
+                else {
+                    InitMapWithoutGeoInfo(MapName);
+                    /*initVariableForElectronicAtlas(MapName);
+                    initWidgetForXZQTree();
+                    displayFromFile(uri);*/
+                    invalidateOptionsMenu();
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitLeftRecyclerViewForTenFourFiveForDisplay(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+        Collections.sort(electronicAtlasMaps);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("南亚东南亚图集");
+        list.add("云南省地图集");
+        list.add("十四五规划系列图");
+        for (int i = 0; i < electronicAtlasMaps.size(); i++) {
+            if (electronicAtlasMaps.get(i).getParentNode().equals("十四五规划系列图"))
+                list.add(electronicAtlasMaps.get(i).getName());
+        }
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("十四五规划系列图"))
+                    InitLeftRecyclerViewForDisplay();
+                else if (MapName.equals("南亚东南亚图集"))
+                    InitLeftRecyclerViewForAsiaForDisplay();
+                else if (MapName.equals("云南省地图集"))
+                    InitLeftRecyclerViewForProvinceForDisplay();
+                else {
+                    InitMapWithoutGeoInfo(MapName);
+                    /*initVariableForElectronicAtlas(MapName);
+                    initWidgetForXZQTree();
+                    displayFromFile(uri);*/
+                    invalidateOptionsMenu();
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void InitLeftRecyclerViewForDisplay(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+        Collections.sort(electronicAtlasMaps);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("南亚东南亚图集");
+        list.add("云南省地图集");
+        list.add("十四五规划系列图");
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("南亚东南亚图集"))
+                    InitLeftRecyclerViewForAsiaForDisplay();
+                else if (MapName.equals("云南省地图集"))
+                    InitLeftRecyclerViewForProvinceForDisplay();
+                else if (MapName.equals("十四五规划系列图"))
+                    InitLeftRecyclerViewForTenFourFiveForDisplay();
             }
         });
         recyclerView.setAdapter(adapter);
@@ -8494,7 +8650,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         addPhoto_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addPhoto);
         //addPhoto_fab.setVisibility(View.VISIBLE);
         locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
-        //locHere_fab.setVisibility(View.VISIBLE);
+        locHere_fab.setVisibility(View.VISIBLE);
         restoreZoom_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.restoreZoom);
         //restoreZoom_fab.setVisibility(View.VISIBLE);
         addTape_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.addTape);
@@ -8913,12 +9069,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void takePhoto() {
-        File file2 = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/photo");
+        File file2 = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name1) + "/photo");
+        Log.w(TAG, "takePhoto: " + MainInterface.this.getResources().getText(R.string.save_folder_name1));
         if (!file2.exists() && !file2.isDirectory()) {
             file2.mkdirs();
         }
         long timenow = System.currentTimeMillis();
-        File outputImage = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name) + "/photo", Long.toString(timenow) + ".jpg");
+        File outputImage = new File(Environment.getExternalStorageDirectory() + "/" + MainInterface.this.getResources().getText(R.string.save_folder_name1) + "/photo", Long.toString(timenow) + ".jpg");
         try {
             if (outputImage.exists()) {
                 outputImage.delete();
@@ -9045,7 +9202,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
 
         //String MapName = receiveMapName();
-        String MapName = "00-0封面";
+        if (LitePal.findAll(ElectronicAtlasMap.class).size() == 0)
+        {
+            LitePal.deleteAll(ElectronicAtlasMap.class);
+            LitePal.deleteAll(XZQTree.class);
+            BatchAddMapsForAndroid();
+            GetDataForXZQTree();
+        }
+
+        String MapName = "00-0封面";//"1云南与周边国家通道示意图";//"00-0封面";
 
         if (IsThematicMap(MapName)){
             InitMapWithoutGeoInfo(MapName);
@@ -9055,7 +9220,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             initWidget();
             displayFromFile(uri);
         }
-
+        //InitMapWithoutGeoInfo(MapName);
+        //displayFromFile(Environment.getExternalStorageDirectory() + "/云南省电子地图集安卓/经济和自然资源图组" + "/" + "052-053生物资源（动物）.dt");
 
         Log.w(TAG, "onCreate: ");
         /*int num = receiveInfo();
@@ -9095,6 +9261,179 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         super.onPause();
     }
 
+    private void GetDataForXZQTree(){
+        try {
+            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "云南省电子地图集安卓/行政区划树.txt";//"省厅展示电子地图集安卓/行政区划树.txt";
+            String Data = DataUtil.readtxt(DataFilePath);
+            String[] mData = Data.split("\n");
+            String LastXZQNameForLevel0 = "";
+            String LastXZQNameForLevel1 = "";
+            String LastXZQNameForLevel2 = "";
+            for (int i = 0; i < mData.length; i++) {
+                String line = mData[i];
+                Log.w(TAG, "GetDataForXZQTree: " + line);
+                String[] strings = line.split(",");
+                String XZQName = strings[0];
+                int XZQNum = Integer.valueOf(strings[1].trim());
+                XZQTree xzqTree;
+                switch (XZQNum){
+                    case 0:
+                        xzqTree = new XZQTree(XZQName, XZQNum, "");
+                        LastXZQNameForLevel0 = XZQName;
+                        xzqTree.save();
+                        Log.w(TAG, "GetDataForXZQTree: " + "省级： " + XZQName);
+                        break;
+                    case 1:
+                        xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel0);
+                        LastXZQNameForLevel1 = XZQName;
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel0 + "地州级： " + XZQName);
+                        xzqTree.save();
+                        break;
+                    case 2:
+                        xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel1);
+                        LastXZQNameForLevel2 = XZQName;
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel1 + "县级： " + XZQName);
+                        xzqTree.save();
+                        break;
+                    case 3:
+                        xzqTree = new XZQTree(XZQName, XZQNum, LastXZQNameForLevel2);
+                        Log.w(TAG, "GetDataForXZQTree: " + LastXZQNameForLevel2 + "乡镇级： " + XZQName);
+                        xzqTree.save();
+                        break;
+                }
+            }
+        }
+        catch (Exception e){
+            Log.w(TAG, "GetDataForXZQTree: " + e.toString());
+            Toast.makeText(MainInterface.this, "获取行政区划树的过程中出错，请检查行政区划树文件", Toast.LENGTH_LONG);
+        }
+    }
+
+    private void BatchAddMapsForAndroid(){
+        try {
+            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "云南省电子地图集安卓/dataForAndroid.txt";//"省厅展示电子地图集安卓/dataForAndroid.txt";
+            String Data = DataUtil.readtxt(DataFilePath);
+            String[] mData = Data.split("\n");
+            for (int i = 0; i < mData.length; i++) {
+                Log.w(TAG, "BatchAddMapsForAndroid: " + i);
+                String line = mData[i];
+                String[] strings = line.split(",");
+                if (strings.length <= 4) {
+                    int Page = GetPage(strings[1]);
+                    Log.w(TAG, "BatchAddMapsForAndroid: " + strings[1] + ", " + Page);
+                    ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), "", "", null, -1, Page);
+                    map.save();
+                } else {
+                    //PointF[] pts = GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7]);
+                    //String bmPath = DataUtil.getDtThumbnail(strings[1], "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Thumbnails",  Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), 120, 180, 30,  select_page.this);
+
+                    if (strings.length == 5){
+                        int Page = GetPage(strings[1]);
+                        Log.w(TAG, "BatchAddMapsForAndroid: " + strings[1] + ", " + Page);
+                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), "", null, -1, Page);
+                        map.save();
+                        //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
+
+                    }
+                    else {
+                        String[] MapGeoStrs = (strings[4] + "," + strings[5] + "," + strings[6] + "," + strings[7]).split(",");
+                        String GeoInfo = DataUtil.getGPTS(MapGeoStrs[0], MapGeoStrs[3]);
+                        GeoInfo = DataUtil.rubberCoordinate(MapGeoStrs[1], MapGeoStrs[2], GeoInfo);
+                        int Page = GetPage(strings[1]);
+                        Log.w(TAG, "BatchAddMapsForAndroid: " + strings[1] + ", " + Page);
+                        ElectronicAtlasMap map = new ElectronicAtlasMap(strings[0], strings[1], Integer.parseInt(strings[2]), Environment.getExternalStorageDirectory().toString() + "/" + strings[3].replace("\\", "/"), "", GeoInfo + "," + strings[5] + "," + strings[6] + "," + strings[7] + "," + strings[4], FindXZQNumForMapName(strings[1]), Page);
+                        map.save();
+                        //map_testList.add(new Map_test(map.getName(), i, strings[4], strings[6], "", strings[3], bmPath, strings[5], strings[5], map.getName(), GetCenterLatAndLong(GetMapGeoInfo(strings[4], strings[5], strings[6], strings[7])), Integer.parseInt(strings[2])));
+
+                    }
+                }
+            }
+
+            //
+            ResetPageNumForInit();
+        }
+        catch (Exception e){
+            Log.w(TAG, "BatchAddMapsForAndroid: " + e.toString());
+        }
+    }
+
+    private void ResetPageNumForInit(){
+        List<ElectronicAtlasMap> list = LitePal.findAll(ElectronicAtlasMap.class);
+        int maxPage = 0;
+        for (int i = 0; i < list.size(); i++) {
+            int page = list.get(i).getPageNum();
+            Log.w(TAG, "ResetPageNumForInit: page: " + page + ", MaxPage: " + maxPage);
+            if (page > maxPage)
+            {
+                maxPage = page;
+            }
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            ElectronicAtlasMap map = list.get(i);
+            int page = map.getPageNum();
+            if (page < 0)
+            {
+                ElectronicAtlasMap mm = new ElectronicAtlasMap();
+                mm.setPageNum(Math.abs(page) + maxPage);
+                Log.w(TAG, "ResetPageNum: " + "MaxPage: " + maxPage);
+                Log.w(TAG, "ResetPageNum: " + "MaxPage: " + (Math.abs(page) + maxPage));
+                mm.updateAll("name = ?", map.getName());
+            }
+        }
+    }
+
+    private int FindXZQNumForMapName(String MapName){
+        List<XZQTree> xzqTrees = LitePal.findAll(XZQTree.class);
+        for (int i = 0; i < xzqTrees.size(); i++) {
+            XZQTree xzqTree = xzqTrees.get(i);
+            if (MapName.contains(xzqTree.getXZQName()))
+                return xzqTree.getXZQNum();
+        }
+        return -1;
+    }
+
+    private static int GetPage(String FileName){
+        Boolean isSpecialPage = false;
+        if (FileName.contains("00-") && FileName.substring(0, 3).equals("00-"))
+        {
+            FileName = FileName.replace("00-", "");
+            isSpecialPage = true;
+        }
+        String PageNumPart = "";
+        char[] chars = FileName.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (Character.isDigit(chars[i])){
+                PageNumPart+=chars[i];
+            }
+            else
+                break;
+        }
+        if (PageNumPart.length() > 0) {
+            System.out.println("当前pdf文件页码为" + PageNumPart);
+            if (isSpecialPage)
+                return Integer.valueOf(PageNumPart);
+            else
+                return (-1 * Integer.valueOf(PageNumPart));
+        }
+        else
+            return 0;
+        /*String PageNumPart = "";
+        char[] chars = FileName.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (Character.isDigit(chars[i])){
+                PageNumPart+=chars[i];
+            }
+            else
+                break;
+        }
+        if (PageNumPart.length() > 0) {
+            return Integer.valueOf(PageNumPart);
+        }
+        else
+            return 0;*/
+    }
+
     private void InitPageButton(){
         FloatingActionButton leftButton = (FloatingActionButton)findViewById(R.id.LeftPDFButton);
         leftButton.setVisibility(View.VISIBLE);
@@ -9112,6 +9451,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         while(i >= 0){
                             if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
                             {
+                                isOpenWhiteBlank = false;
+                                hasQueriedPoi = false;
                                 if (IsThematicMap(maps.get(i).getName())){
                                     InitMapWithoutGeoInfo(maps.get(i).getName());
                                 }
@@ -9162,6 +9503,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         while(i < maps.size()){
                             if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
                             {
+                                isOpenWhiteBlank = false;
+                                hasQueriedPoi = false;
                                 if (IsThematicMap(maps.get(i).getName())){
                                     InitMapWithoutGeoInfo(maps.get(i).getName());
                                 }
@@ -9223,7 +9566,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             switch (isDrawTrail) {
                 case TRAIL_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
-                    menu.findItem(R.id.back).setVisible(false);
+                    //menu.findItem(R.id.back).setVisible(false);
                     menu.findItem(R.id.queryPOI).setVisible(true);
                     menu.findItem(R.id.action_search).setVisible(false);
                     //menu.findItem(R.id.queryLatLng).setVisible(false);
@@ -9237,7 +9580,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     break;
                 case SEARCH_DEMO:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    menu.findItem(R.id.back).setVisible(false);
+                    //menu.findItem(R.id.back).setVisible(false);
                     menu.findItem(R.id.queryPOI).setVisible(false);
                     menu.findItem(R.id.queryLatLng).setVisible(false);
                     menu.findItem(R.id.action_search).setVisible(true);
@@ -9405,10 +9748,16 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.back:
-                if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
+                /*if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
                 else {
                     isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                     invalidateOptionsMenu();
+                }*/
+                if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE){
+                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                    invalidateOptionsMenu();
+                }
+                else if (FILE_TYPE == TuzhiEnum.ASSET_FILE_TYPE){
                 }
                 break;
             case R.id.info:
@@ -9534,9 +9883,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             } else {
                 imageuri = imageUri.toString().substring(7);
             }
+            locError("测试1 imageUri : " + imageUri.toString());
+            locError("测试2 imageUri : " + imageuri.toString());
             File file = new File(imageuri);
             if (file.exists()) {
-                locError("imageUri : " + imageuri.toString());
                 final float[] latandlong = new float[2];
                 try {
                     MediaStore.Images.Media.insertImage(getContentResolver(), imageuri, "title", "description");
@@ -9599,9 +9949,19 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
-        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+        /*if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
             popBackWindow("Back");
-        } else super.onBackPressed();
+        } else super.onBackPressed();*/
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK ) {
+            //do something.
+            return true;
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
     }
 }
 
