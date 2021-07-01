@@ -1220,7 +1220,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private boolean InspectTrail(float[] trails) {
         for (int i = 0; i < trails.length; i = i + 2) {
-            if (trails[i] < cs_right && trails[i] > cs_left && trails[i + 1] < cs_top && trails[i + 1] > cs_bottom) {
+            Log.w(TAG, "InspectTrail: " + trails[i]);
+            if (trails[i+1] < cs_right && trails[i+1] > cs_left && trails[i] < cs_top && trails[i] > cs_bottom) {
                 return true;
             }
         }
@@ -1949,13 +1950,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     for (int i = 0; i < TrailString.length; ++i) {
                         Trails[i] = Float.valueOf(TrailString[i]);
                     }
-                    if (InspectTrail(Trails)) {
+                    if (InspectTrail(Trails))
+                    {
                         Log.w(TAG, "onLayerDrawn: ");
                         for (int j = 0; j < Trails.length - 2; j = j + 2) {
                             PointF pt11, pt12;
                             pt11 = LatLng.getPixLocFromGeoL(new PointF(Trails[j], Trails[j + 1]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                             pt12 = LatLng.getPixLocFromGeoL(new PointF(Trails[j + 2], Trails[j + 3]), current_pagewidth, current_pageheight, w, h, min_long, min_lat);
                             canvas.drawLine(pt11.x, pt11.y, pt12.x, pt12.y, paint8);
+                            Log.w(TAG, "onLayerDrawn: " + "正在绘制轨迹");
                         }
                     }
                 }
@@ -2638,6 +2641,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         Log.w(TAG, "CropBox : " + CropBox);
         Log.w(TAG, "ic : " + ic);
 
+        geometry_whiteBlanks = new ArrayList<geometry_WhiteBlank>();
         geometry_whiteBlanks.clear();
         num_whiteBlankPt = 0;
         isWhiteBlank = false;
@@ -6581,6 +6585,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         strings = getResources().getStringArray(R.array.Type);
         trails = LitePal.findAll(Trail.class);
+        Log.w(TAG, "lzy");
+        Log.w(TAG, "initOtherVariable: 当前有： " + trails.size() + "条轨迹");
         simpleDateFormat1 = new SimpleDateFormat(MainInterface.this.getResources().getText(R.string.Date).toString());
         //初始化白板要素List
         geometry_whiteBlanks = new ArrayList<geometry_WhiteBlank>();
@@ -7838,9 +7844,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         initCheckbox();
 
-        InitRightRecyclerView();
+        //InitRightRecyclerView();
 
-        InitLeftRecyclerView();
+        //InitLeftRecyclerView();
 
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
@@ -9202,7 +9208,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
 
         //String MapName = receiveMapName();
-        if (LitePal.findAll(ElectronicAtlasMap.class).size() == 0)
+        /*if (LitePal.findAll(ElectronicAtlasMap.class).size() == 0)
         {
             LitePal.deleteAll(ElectronicAtlasMap.class);
             LitePal.deleteAll(XZQTree.class);
@@ -9210,7 +9216,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             GetDataForXZQTree();
         }
 
-        String MapName = "00-0封面";//"1云南与周边国家通道示意图";//"00-0封面";
+        String MapName = "8-9临沧市行政区划";//"1云南与周边国家通道示意图";//"00-0封面";
 
         if (IsThematicMap(MapName)){
             InitMapWithoutGeoInfo(MapName);
@@ -9219,12 +9225,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             initVariableForElectronicAtlas(MapName);
             initWidget();
             displayFromFile(uri);
-        }
+        }*/
         //InitMapWithoutGeoInfo(MapName);
         //displayFromFile(Environment.getExternalStorageDirectory() + "/云南省电子地图集安卓/经济和自然资源图组" + "/" + "052-053生物资源（动物）.dt");
 
         Log.w(TAG, "onCreate: ");
-        /*int num = receiveInfo();
+        int num = receiveInfo();
         if (num != -1) {
             doSpecificOperation();
             //initMapVariableForElectronicAtlas();
@@ -9234,7 +9240,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             Log.w(TAG, "resumeSurface: " + toolbar.getTitle().toString());
         } else {
             showLeaflets();
-        }*/
+        }
     }
 
     @Override
@@ -9247,7 +9253,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             getBitmap();
             registerSensor();
         }
-        InitPageButton();
+        //InitPageButton();
         getScreenParameter();
         super.onResume();
     }
@@ -9263,7 +9269,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private void GetDataForXZQTree(){
         try {
-            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "云南省电子地图集安卓/行政区划树.txt";//"省厅展示电子地图集安卓/行政区划树.txt";
+            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "临沧市地图集安卓/行政区划树.txt";//"云南省电子地图集安卓/行政区划树.txt";//"省厅展示电子地图集安卓/行政区划树.txt";
             String Data = DataUtil.readtxt(DataFilePath);
             String[] mData = Data.split("\n");
             String LastXZQNameForLevel0 = "";
@@ -9311,7 +9317,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     private void BatchAddMapsForAndroid(){
         try {
-            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "云南省电子地图集安卓/dataForAndroid.txt";//"省厅展示电子地图集安卓/dataForAndroid.txt";
+            String DataFilePath = Environment.getExternalStorageDirectory().toString() + "/" + "临沧市地图集安卓/dataForAndroid.txt";//"云南省电子地图集安卓/dataForAndroid.txt";//"省厅展示电子地图集安卓/dataForAndroid.txt";
             String Data = DataUtil.readtxt(DataFilePath);
             String[] mData = Data.split("\n");
             for (int i = 0; i < mData.length; i++) {
@@ -9566,21 +9572,30 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             switch (isDrawTrail) {
                 case TRAIL_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
+                    //电子地图集
                     //menu.findItem(R.id.back).setVisible(false);
+                    //图志
+                    menu.findItem(R.id.back).setVisible(true);
                     menu.findItem(R.id.queryPOI).setVisible(true);
                     menu.findItem(R.id.action_search).setVisible(false);
                     //menu.findItem(R.id.queryLatLng).setVisible(false);
                     break;
                 case NONE_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    menu.findItem(R.id.back).setVisible(false);
+                    //电子地图集
+                    //menu.findItem(R.id.back).setVisible(false);
+                    //图志
+                    menu.findItem(R.id.back).setVisible(true);
                     menu.findItem(R.id.queryPOI).setVisible(true);
                     menu.findItem(R.id.action_search).setVisible(false);
                     menu.findItem(R.id.queryLatLng).setVisible(true);
                     break;
                 case SEARCH_DEMO:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
+                    //电子地图集
                     //menu.findItem(R.id.back).setVisible(false);
+                    //图志
+                    menu.findItem(R.id.back).setVisible(true);
                     menu.findItem(R.id.queryPOI).setVisible(false);
                     menu.findItem(R.id.queryLatLng).setVisible(false);
                     menu.findItem(R.id.action_search).setVisible(true);
@@ -9610,7 +9625,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         });*/
                         dialog.show();
                     } else {
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                        /*AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
                         dialog.setTitle("提示");
                         dialog.setMessage("需要进行什么查询?");
                         dialog.setCancelable(false);
@@ -9626,11 +9641,11 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 queryMode = TuzhiEnum.MAP_QUERY;
                             }
                         });
-                        dialog.show();
+                        dialog.show();*/
 
 
-                        /*老版图志
-                        queryMode = TuzhiEnum.POI_QUERY;*/
+                        //老版图志
+                        queryMode = TuzhiEnum.POI_QUERY;
                     }
                     SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                     searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
@@ -9705,10 +9720,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     });
             }
         } else {
-            menu.findItem(R.id.back).setVisible(false);
+            //电子地图集
+            //menu.findItem(R.id.back).setVisible(false);
+            //menu.findItem(R.id.action_search).setVisible(true);
+            //图志
+            menu.findItem(R.id.back).setVisible(true);
+            menu.findItem(R.id.action_search).setVisible(false);
+
             menu.findItem(R.id.queryPOI).setVisible(false);
             menu.findItem(R.id.queryLatLng).setVisible(false);
-            menu.findItem(R.id.action_search).setVisible(true);
             queryMode = TuzhiEnum.MAP_QUERY;
             SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
@@ -9748,17 +9768,20 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.back:
-                /*if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
+                //图志
+                if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
                 else {
                     isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                     invalidateOptionsMenu();
-                }*/
-                if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE){
+                }
+                //电子地图集
+                /*if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE){
                     isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
                     invalidateOptionsMenu();
                 }
                 else if (FILE_TYPE == TuzhiEnum.ASSET_FILE_TYPE){
-                }
+
+                }*/
                 break;
             case R.id.info:
                 /*Intent intent = new Intent(MainInterface.this, info_page.class);
@@ -9948,16 +9971,17 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
-        /*if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
+        super.onBackPressed();
+        if (isDrawTrail == TuzhiEnum.TRAIL_DRAW_TYPE) {
             popBackWindow("Back");
-        } else super.onBackPressed();*/
+        } else super.onBackPressed();
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK ) {
             //do something.
+            this.finish();
             return true;
         } else {
             return super.dispatchKeyEvent(event);

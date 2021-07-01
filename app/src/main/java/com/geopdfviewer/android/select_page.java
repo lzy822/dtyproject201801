@@ -237,7 +237,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //toolbar = (Toolbar) findViewById(R.id.toolbar);
         // TODO 2021/2/1
 
-        menu.findItem(R.id.queryPOI).setVisible(false);
+        /*menu.findItem(R.id.queryPOI).setVisible(false);
         menu.findItem(R.id.queryLatLng).setVisible(false);
         menu.findItem(R.id.info).setVisible(false);
         menu.findItem(R.id.action_search).setVisible(true);
@@ -278,8 +278,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             public boolean onQueryTextChange(String newText) {
                 return true;
             }
-        });
-        /*老版图志switch (isLongClick){
+        });*/
+        //老版图志
+    switch (isLongClick){
             case 1:
                 toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
                 menu.findItem(R.id.delete).setVisible(false);
@@ -292,7 +293,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 menu.findItem(R.id.mmcancel).setVisible(true);
                 menu.findItem(R.id.showinfo).setVisible(false);
                 break;
-        }*/
+        }
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -591,14 +592,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //getMenuInflater().inflate(R.menu.options, menu);
-        /*老版图志
-        getMenuInflater().inflate(R.menu.deletetoolbar, menu);*/
-        getMenuInflater().inflate(R.menu.maintoolbar, menu);
+        //老版图志
+        getMenuInflater().inflate(R.menu.deletetoolbar, menu);
+        /*getMenuInflater().inflate(R.menu.maintoolbar, menu);
         menu.findItem(R.id.queryPOI).setVisible(false);
         menu.findItem(R.id.queryLatLng).setVisible(false);
         menu.findItem(R.id.info).setVisible(false);
         menu.findItem(R.id.action_search).setVisible(true);
-        menu.findItem(R.id.back).setVisible(false);
+        menu.findItem(R.id.back).setVisible(false);*/
         return true;
     }
 
@@ -733,11 +734,15 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             String ic = pref1.getString(str + "ic", "");
             // TODO 修改获取函数
             int MapType = pref1.getInt(str + "MapType", -1);
-            if (MapType == mapCollectionType) {
+            /*if (MapType == mapCollectionType)
+            {
                 Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong, MapType);
                 map_tests[j - 1] = mapTest;
                 map_testList.add(map_tests[j - 1]);
-            }
+            }*/
+            Map_test mapTest = new Map_test(name, num, GPTS, BBox, WKT, uri, imguri, MediaBox, CropBox, ic, center_latlong, MapType);
+            map_tests[j - 1] = mapTest;
+            map_testList.add(map_tests[j - 1]);
         }
         //refreshRecycler();
 
@@ -776,7 +781,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     }
                 });
             }
-            if (isRightMapType()) {
+            if (isRightMapType())
+            {
                 adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
                     @Override
                     public void onItemClick(View view, String map_name, int map_num, int position) {
@@ -816,7 +822,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         }
                     }
                 });
-            } else {
+            }
+            else {
                 adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
                     @Override
                     public void onItemClick(View view, String map_name, int map_num, int position) {
@@ -827,8 +834,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         Output_fab.setVisibility(View.GONE);
                         // TODO Gross
                         mapCollectionType = Integer.valueOf(GetMapType(map_name));
-                        /*initMap();
-                        refreshRecycler();*/
+                        //initMap();
+                        //refreshRecycler();
                         FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
                         floatingActionButton.setVisibility(View.VISIBLE);
                         floatingActionButton.setElevation(100);
@@ -1055,7 +1062,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         GridLayoutManager layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);
         Map_testAdapter adapter = new Map_testAdapter(map_testList);
-        if (mapCollectionType == MapCollectionType.NONE) {
+        //if (mapCollectionType == MapCollectionType.NONE)
+        {
             adapter.setOnItemLongClickListener(new Map_testAdapter.OnRecyclerItemLongListener() {
                 @Override
                 public void onItemLongClick(View view, int map_num, int position) {
@@ -1076,7 +1084,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             });
         }
-        if (isRightMapType()) {
+        //if (isRightMapType())
+        {
             adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
                 @Override
                 public void onItemClick(View view, String map_name, int map_num, int position) {
@@ -1116,7 +1125,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             });
         }
-        else {
+        /*else {
             adapter.setOnItemClickListener(new Map_testAdapter.OnRecyclerItemClickListener() {
                 @Override
                 public void onItemClick(View view, String map_name, int map_num, int position) {
@@ -1126,7 +1135,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     refreshRecycler();
                 }
             });
-        }
+        }*/
         //adapter.getItemSelected();
         recyclerView.setAdapter(adapter);
         /*addbt.hide(false);
@@ -1552,7 +1561,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private void addMapForGeoType1ForPicker(String path){
-        GetMapType();
+        //GetMapType();
+        MapTypeNum = 1;
         if (path.contains(".dt")) {
             new Thread(new Runnable() {
                 @Override
@@ -1580,7 +1590,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         message.what = UPDATE_TEXT;
                         handler.sendMessage(message);
                     } catch (Exception e) {
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             }).start();
@@ -1604,7 +1619,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         editor.apply();
                         manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true, MapTypeNum);
                     } catch (Exception e) {
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                     //locError(path);
                     //locError(findNameFromUri(uri));
@@ -1621,7 +1641,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private void addMapForGeoType2ForPicker(String path){
-        GetMapType();
+        //GetMapType();
+        MapTypeNum = 1;
         if (path.contains(".dt")) {
             new Thread(new Runnable() {
                 @Override
@@ -1649,7 +1670,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         message.what = UPDATE_TEXT;
                         handler.sendMessage(message);
                     } catch (Exception e) {
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             }).start();
@@ -1673,7 +1699,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         editor.apply();
                         manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), false, MapTypeNum);
                     } catch (Exception e) {
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                     //locError(path);
                     //locError(findNameFromUri(uri));
@@ -2398,10 +2429,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //获取定位信息
         getLocation();
         //初始化界面一
-        //doSpecificOperation();
-        //initPage();
+        doSpecificOperation();
+        //deleteAllData();
+        initPage();
 
-        if (LitePal.findAll(ElectronicAtlasMap.class).size() != 0){
+        /*if (LitePal.findAll(ElectronicAtlasMap.class).size() != 0){
             mapCollectionType = 0;
             InitElectronicAtlasData();
             FloatingActionButton Output_fab = (FloatingActionButton) findViewById(R.id.outputData_selectpage_ElectronicAtlas);
@@ -2412,10 +2444,6 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             });
             Output_fab.setVisibility(View.VISIBLE);
-
-            /*Intent intent = new Intent(select_page.this, MainInterface.class);
-            startActivity(intent);
-            select_page.this.finish();*/
         }
         else
         {
@@ -2429,18 +2457,13 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
             });
             Output_fab.setVisibility(View.VISIBLE);
-
-            /*Intent intent = new Intent(select_page.this, MainInterface.class);
-            startActivity(intent);
-            select_page.this.finish();*/
-            //InitElectronicAtlasData();
         }
 
 
         //fam菜单声明
         FloatingActionMenu floatingActionsMenu = (com.github.clans.fab.FloatingActionMenu) findViewById(R.id.fam_selectpage);
         floatingActionsMenu.setVisibility(View.GONE);
-        floatingActionsMenu.setClosedOnTouchOutside(true);
+        floatingActionsMenu.setClosedOnTouchOutside(true);*/
 
         /*FloatingActionButton floatingActionButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.BackFloatingActionButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -3021,9 +3044,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     protected void onResume() {
         super.onResume();
 
-        refreshRecyclerForElectronicAtlas();
+        //refreshRecyclerForElectronicAtlas();
 
-        /*refreshRecycler();
+        refreshRecycler();
 
         SharedPreferences prf1 = getSharedPreferences("simpledata", MODE_PRIVATE);
         String filepath = prf1.getString("path", "");
@@ -3032,7 +3055,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
             SharedPreferences.Editor editor = getSharedPreferences("simpledata", MODE_PRIVATE).edit();
             editor.putString("path", "");
             editor.apply();
-        }*/
+        }
         /*Intent intent = select_page.this.getIntent();
         String path = intent.getStringExtra("test22");
         Log.w(TAG, "onResume: " + path);

@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
+            android:visibility="gone"
             android:layout_gravity="bottom|right"
             android:src="@drawable/ic_arrow_back"
             fab:fab_size="normal" />
@@ -34,6 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
+            android:visibility="gone"
             android:layout_gravity="bottom|right"
             android:src="@drawable/ic_output_black_24dp"
             fab:fab_size="normal" />
