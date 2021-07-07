@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="POIStore" ></dbname>
-    <version value="42" ></version>
+    <version value="45" ></version>
     <list>
         <mapping class="com.geopdfviewer.android.Trail"></mapping>
         <mapping class="com.geopdfviewer.android.POI"></mapping>
@@ -23,5 +23,14 @@
         <mapping class="com.geopdfviewer.android.FWXXSheet"></mapping>
         <mapping class="com.geopdfviewer.android.ElectronicAtlasMap"></mapping>
         <mapping class="com.geopdfviewer.android.XZQTree"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_Ceremony"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_Festival"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_Object"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_OtherActivity"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_StandardInfo"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_Master"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_Participants"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_Story"></mapping>
+        <mapping class="com.geopdfviewer.android.Folkway_Taboo"></mapping>
     </list>
 </litepal>

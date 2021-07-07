@@ -28,8 +28,12 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".VideoShow"></activity>
-        <activity android:name=".Vedioshow"></activity>
+        <activity android:name=".FolkwaysShow">
+
+
+        </activity>
+        <activity android:name=".VideoShow" />
+        <activity android:name=".Vedioshow" />
         <activity
             android:name=".MainInterface"
             android:hardwareAccelerated="true"
@@ -39,8 +43,7 @@
             android:name=".select_page"
             android:hardwareAccelerated="true"
             android:label="图志"
-            android:launchMode="singleTask">
-        </activity>
+            android:launchMode="singleTask"></activity>
         <activity
             android:name=".info_page"
             android:label="地理信息显示页面" />
