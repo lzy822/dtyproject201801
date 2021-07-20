@@ -58,18 +58,17 @@ public class FestivalAdapter extends RecyclerView.Adapter<FestivalAdapter.ViewHo
                 mContext.startActivity(intent);*/
             }
         });
-        /*holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 if (mOnItemLong != null){
                     int position = holder.getAdapterPosition();
-                    FileManage fileManage = mFileManageList.get(position);
-                    mOnItemLong.onItemLongClick(v, fileManage.getFileSubset());
-                    holder.cardView.setCardBackgroundColor(Color.GRAY);
+                    String name = list.get(position);
+                    mOnItemLong.onItemLongClick(v, name);
                 }
                 return true;
             }
-        });*/
+        });
         return holder;
     }
 
@@ -89,7 +88,7 @@ public class FestivalAdapter extends RecyclerView.Adapter<FestivalAdapter.ViewHo
 
 
     public interface OnRecyclerItemLongListener{
-        void onItemLongClick(View view, String[] FileSubset);
+        void onItemLongClick(View view, String ObjectName);
     }
     public void setOnItemLongClickListener(FestivalAdapter.OnRecyclerItemLongListener listener){
         //Log.w(TAG, "setOnItemLongClickListener: " );

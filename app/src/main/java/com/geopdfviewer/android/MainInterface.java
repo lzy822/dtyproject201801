@@ -1,6 +1,7 @@
 package com.geopdfviewer.android;
 
 import android.app.SearchManager;
+import android.app.Service;
 import android.content.ActivityNotFoundException;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -15,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
@@ -49,12 +52,16 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -101,17 +108,22 @@ import com.github.clans.fab.FloatingActionButton;
 import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.IllegalFormatCodePointException;
 import java.util.Iterator;
 import java.util.List;
@@ -667,6 +679,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         if (pois.size() > 0) {
             mPOIobj poii = pois.get(0);
             PointF pointF1 = new PointF(poii.getM_X(), poii.getM_Y());
+            Log.w(TAG, "queryNormalPoi: " + poii.getM_X());
             pointF1 = LatLng.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
             pointF1 = new PointF(pointF1.x, pointF1.y - 70);
             //pointF = getGeoLocFromPixL(pointF);
@@ -748,6 +761,47 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         } else return -1;
     }
 
+    private String QueryFolkwayPOI(PointF pt1){
+        List<Folkway_StandardInfo> pois = LitePal.findAll(Folkway_StandardInfo.class);
+        // TODO 村级查询
+        int n = 0;
+        int num = 0;
+        if (pois.size() > 0) {
+            Folkway_StandardInfo poii = pois.get(0);
+            PointF pointF1 = new PointF(poii.getLat(), poii.getLongi());
+            Log.w(TAG, "QueryFolkwayPOI: " + poii.getLat());
+            pointF1 = LatLng.getPixLocFromGeoL(pointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            //pointF1 = new PointF(pointF1.x, pointF1.y - 70);
+            //pointF = getGeoLocFromPixL(pointF);
+            final PointF pt9 = LatLng.getPixLocFromGeoL(pt1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            locError("pt1 : " + pt9.toString());
+            float mdelta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
+            for (Folkway_StandardInfo poi : pois) {
+                PointF mpointF1 = new PointF(poi.getLat(), poi.getLongi());
+                Log.w(TAG, "mpointF1 queried: " + mpointF1.x + ";" + mpointF1.y);
+                mpointF1 = LatLng.getPixLocFromGeoL(mpointF1, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                //mpointF1 = new PointF(mpointF1.x, mpointF1.y - 70);
+                if (Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < mdelta && Math.abs(mpointF1.x - pt9.x) + Math.abs(mpointF1.y - pt9.y) < 35) {
+                    //locError("mpointF : " + mpointF1.toString());
+                    mdelta = Math.abs(pointF1.x - pt9.x) + Math.abs(pointF1.y - pt9.y);
+                    num = n;
+                }
+                locError("n : " + Integer.toString(n));
+                n++;
+            }
+            locError("num : " + Integer.toString(num));
+            locError("mdelta : " + Float.toString(mdelta));
+            if (mdelta < 35 || num != 0) {
+                locError("起飞 : " + Float.toString(mdelta));
+                return pois.get(num).getObjectID();
+                //locError(Integer.toString(pois.get(num).getPhotonum()));
+            } else {
+                locError("没有正常查询");
+                return "";
+            }
+        } else return "";
+    }
+
     @Override
     public boolean onTap(final MotionEvent e) {
         PointF pt = new PointF(e.getRawX(), e.getRawY());
@@ -755,6 +809,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         final PointF pt1 = getGeoLocFromPixL(pt);
         //在textview中显示地理位置信息
         showLocationText(pt1);
+
+        String XZQBM = QueryFolkwayPOI(pt1);
+
+        if (XZQBM.length() > 0) {
+            Intent intent = new Intent(MainInterface.this, FolkwaysShow.class);
+            intent.putExtra("DZQBM", XZQBM);
+            MainInterface.this.startActivity(intent);
+        }
 
         if (pt1.x != 0) {
 
@@ -1781,6 +1843,57 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             canvas.drawCircle(pt3.x, pt3.y - 70, 20, paint2);
     }
 
+    private List<String> DistricNum = new ArrayList<>();
+
+    private void HighLightFolkwayPOI(Canvas canvas){
+        for (int i = 0; i < DistricNum.size(); i++) {
+            String objectID = DistricNum.get(i);
+            List<Folkway_StandardInfo> folkway_standardInfos = LitePal.where("objectID = ?", objectID).find(Folkway_StandardInfo.class);
+            for (int j = 0; j < folkway_standardInfos.size(); j++) {
+                double longi = folkway_standardInfos.get(j).getLongi();
+                double lat = folkway_standardInfos.get(j).getLat();
+                PointF pt = new PointF((float) lat, (float) longi);
+                pt = LatLng.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+                canvas.drawCircle(pt.x, pt.y, 50, paint);
+                Paint paint1 = new Paint();
+                paint1.setStrokeWidth(2);
+                paint1.setStyle(Paint.Style.STROKE);
+                paint1.setColor(Color.rgb(255, 255, 255));
+                paint1.setTextSize(20);
+                int xx = (int)(folkway_standardInfos.get(j).getVillageName().length()*10);
+                canvas.drawText(folkway_standardInfos.get(j).getVillageName(), pt.x-xx, pt.y+10, paint1);
+            }
+        }
+
+    }
+
+    private void DrawFolkwayPOI(Canvas canvas){
+        // TODO drawFolkwayPOI
+        List<Folkway_StandardInfo> folkway_standardInfos = LitePal.findAll(Folkway_StandardInfo.class);
+        for (int i = 0; i < folkway_standardInfos.size(); i++) {
+            double longi = folkway_standardInfos.get(i).getLongi();
+            double lat = folkway_standardInfos.get(i).getLat();
+            PointF pt = new PointF((float) lat, (float) longi);
+            pt = LatLng.getPixLocFromGeoL(pt, current_pagewidth, current_pageheight, w, h, min_long, min_lat);
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.rgb(0, 0, 0));
+            canvas.drawCircle(pt.x, pt.y, 50, paint);
+
+            Paint paint1 = new Paint();
+            paint1.setStrokeWidth(2);
+            paint1.setStyle(Paint.Style.STROKE);
+            paint1.setColor(Color.rgb(255, 255, 255));
+            paint1.setTextSize(20);
+            int xx = (int)(folkway_standardInfos.get(i).getVillageName().length()*10);
+            canvas.drawText(folkway_standardInfos.get(i).getVillageName(), pt.x-xx, pt.y+10, paint1);
+            /*int version = Build.VERSION.SDK_INT;
+            if (version >= 21) {
+                canvas.drawArc(pt.x - 35, pt.y - 35, pt.x + 35, pt.y + 35, degree - 105, 30, true, paint3);
+            }*/
+        }
+    }
+
     @Override
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
         Log.w(TAG, "zoomCenteredTo: " + pdfView.getZoom());
@@ -1790,6 +1903,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         viewer_height = pdfView.getHeight();
         viewer_width = pdfView.getWidth();
 
+        DrawFolkwayPOI(canvas);
+        HighLightFolkwayPOI(canvas);
         Log.w(TAG, "getGeoLocFromPixL, current: " + current_pageheight + ", " + current_pagewidth);
         Log.w(TAG, "getGeoLocFromPixL, viewer: " + viewer_height + ", " + viewer_width);
 
@@ -4761,6 +4876,352 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 break;
         }
 
+    }
+
+    private List<String> GetFestivalsForStandardInfo(Folkway_StandardInfo folkway_standardInfo){
+        List<String> keyAndValues = new ArrayList<>();
+        String Festival = folkway_standardInfo.getFestival();
+        Festival = Festival.replace("|", "&");
+        String[] Festivals = Festival.split("&");
+        Log.w(TAG, "refreshRecyclerForFestival: " + Festivals.length);
+        for (int i = 0; i < Festivals.length; i++) {
+            Log.w(TAG, "refreshRecyclerForFestival: " + Festivals[i]);
+            List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", Festivals[i]).find(Folkway_Festival.class);
+            if (folkway_festivals.size() > 0)
+                keyAndValues.add(folkway_festivals.get(0).getName());
+        }
+        return keyAndValues;
+    }
+
+    private List<String> GetCeremoniesForStandardInfo(Folkway_StandardInfo folkway_standardInfo){
+        List<String> keyAndValues = new ArrayList<>();
+
+        String ceremony = folkway_standardInfo.getCeremony();
+
+        ceremony = ceremony.replace("|", "&");
+        String[] ceremonys = ceremony.split("&");
+        for (int i = 0; i < ceremonys.length; i++) {
+            Log.w(TAG, "refreshRecyclerForCeremony: " + ceremonys[i]);
+            List<Folkway_Ceremony> folkway_ceremonies = LitePal.where("objectID = ?", ceremonys[i]).find(Folkway_Ceremony.class);
+            if (folkway_ceremonies.size() > 0)
+                keyAndValues.add(folkway_ceremonies.get(0).getName());
+        }
+        return keyAndValues;
+    }
+
+    private List<String> GetMastersForStandardInfo(Folkway_StandardInfo folkway_standardInfo){
+        List<String> keyAndValues = new ArrayList<>();
+        HashMap<String, Folkway_Ceremony> ceremonyHashMap = new HashMap<>();
+        HashMap<String, Folkway_OtherActivity> OtheractivityHashMap = new HashMap<>();
+        String Festival = folkway_standardInfo.getFestival();
+        Festival = Festival.replace("|", "&");
+        String[] Festivals = Festival.split("&");
+        for (int i = 0; i < Festivals.length; i++) {
+            List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", Festivals[i]).find(Folkway_Festival.class);
+            if (folkway_festivals.size() > 0){
+                String process = folkway_festivals.get(0).getProcedure();
+                process = process.replace("|", "&");
+                String[] days = process.split("&");
+                for (int j = 0; j < days.length; j++) {
+                    String[] oneday = days[j].split(",");
+                    for (int k = 0; k < oneday.length; k++) {
+                        String activity = oneday[k];
+                        if (activity.contains("C")) {
+                            List<Folkway_Ceremony> list = LitePal.where("objectID = ?", activity).find(Folkway_Ceremony.class);
+                            if (list.size()>0) {
+                                Folkway_Ceremony folkway_ceremony = list.get(0);
+                                String Master = folkway_ceremony.getMaster();
+                                Master = Master.replace("|", "&");
+                                String[] masters = Master.split("&");
+                                for (int l = 0; l < masters.length; l++) {
+                                    List<Folkway_Master> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Master.class);
+                                    if (folkway_masters.size() > 0){
+                                        Folkway_Master folkway_master = folkway_masters.get(0);
+                                        ceremonyHashMap.put(folkway_master.getIdentity(), folkway_ceremony);
+                                        keyAndValues.add(folkway_master.getIdentity());
+                                    }
+                                }
+                            }
+                        } else if (activity.contains("A")) {
+                            List<Folkway_OtherActivity> list = LitePal.where("objectID = ?", activity).find(Folkway_OtherActivity.class);
+                            if (list.size() > 0) {
+                                Folkway_OtherActivity Folkway_OtherActivity = list.get(0);
+                                String Master = Folkway_OtherActivity.getMaster();
+                                Master = Master.replace("|", "&");
+                                String[] masters = Master.split("&");
+                                for (int l = 0; l < masters.length; l++) {
+                                    List<Folkway_Master> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Master.class);
+                                    if (folkway_masters.size() > 0){
+                                        Folkway_Master folkway_master = folkway_masters.get(0);
+                                        OtheractivityHashMap.put(folkway_master.getIdentity(), Folkway_OtherActivity);
+                                        keyAndValues.add(folkway_master.getIdentity());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        String ceremony = folkway_standardInfo.getCeremony();
+        ceremony = ceremony.replace("|", "&");
+        String[] ceremonys = ceremony.split("&");
+        for (int i = 0; i < ceremonys.length; i++) {
+            List<Folkway_Ceremony> folkway_ceremonies = LitePal.where("objectID = ?", ceremonys[i]).find(Folkway_Ceremony.class);
+            if (folkway_ceremonies.size() > 0) {
+                Folkway_Ceremony folkway_ceremony = folkway_ceremonies.get(0);
+                String Master = folkway_ceremony.getMaster();
+                Master = Master.replace("|", "&");
+                String[] masters = Master.split("&");
+                for (int l = 0; l < masters.length; l++) {
+                    List<Folkway_Master> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Master.class);
+                    if (folkway_masters.size() > 0){
+                        Folkway_Master folkway_master = folkway_masters.get(0);
+                        ceremonyHashMap.put(folkway_master.getIdentity(), folkway_ceremony);
+                        keyAndValues.add(folkway_master.getIdentity());
+                    }
+                }
+            }
+        }
+
+        HashMap<String, String> hashMap = new HashMap<>();
+        for (int i = 0; i < keyAndValues.size(); i++) {
+            if (hashMap.containsKey(keyAndValues.get(i)))
+                keyAndValues.remove(i--);
+            else
+                hashMap.put(keyAndValues.get(i), "");
+        }
+        return keyAndValues;
+    }
+
+    private List<String> GetObjectsForStandardInfo(Folkway_StandardInfo folkway_standardInfo){
+        List<String> keyAndValues = new ArrayList<>();
+
+        HashMap<String, Folkway_Ceremony> ceremonyHashMap = new HashMap<>();
+        HashMap<String, Folkway_OtherActivity> OtheractivityHashMap = new HashMap<>();
+        String Festival = folkway_standardInfo.getFestival();
+        Festival = Festival.replace("|", "&");
+        String[] Festivals = Festival.split("&");
+        for (int i = 0; i < Festivals.length; i++) {
+            List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", Festivals[i]).find(Folkway_Festival.class);
+            if (folkway_festivals.size()>0) {
+                String process = folkway_festivals.get(0).getProcedure();
+                process = process.replace("|", "&");
+                String[] days = process.split("&");
+                for (int j = 0; j < days.length; j++) {
+                    String[] oneday = days[j].split(",");
+                    for (int k = 0; k < oneday.length; k++) {
+                        String activity = oneday[k];
+                        if (activity.contains("C")) {
+                            List<Folkway_Ceremony> list = LitePal.where("objectID = ?", activity).find(Folkway_Ceremony.class);
+                            if (list.size() > 0) {
+                                Folkway_Ceremony folkway_ceremony = list.get(0);
+                                String Master = folkway_ceremony.getObject();
+                                Master = Master.replace("|", "&");
+                                String[] masters = Master.split("&");
+                                for (int l = 0; l < masters.length; l++) {
+                                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
+                                    if (folkway_masters.size() > 0){
+                                        Folkway_Object folkway_master = folkway_masters.get(0);
+                                        ceremonyHashMap.put(folkway_master.getName(), folkway_ceremony);
+                                        keyAndValues.add(folkway_master.getName());
+                                    }
+                                }
+                            }
+                        } else if (activity.contains("A")) {
+                            List<Folkway_OtherActivity> list = LitePal.where("objectID = ?", activity).find(Folkway_OtherActivity.class);
+                            if (list.size()>0) {
+                                Folkway_OtherActivity Folkway_OtherActivity = list.get(0);
+                                String Master = Folkway_OtherActivity.getObject();
+                                Master = Master.replace("|", "&");
+                                String[] masters = Master.split("&");
+                                for (int l = 0; l < masters.length; l++) {
+                                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
+                                    if (folkway_masters.size() > 0){
+                                        Folkway_Object folkway_master = folkway_masters.get(0);
+                                        OtheractivityHashMap.put(folkway_master.getName(), Folkway_OtherActivity);
+                                        keyAndValues.add(folkway_master.getName());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        String ceremony = folkway_standardInfo.getCeremony();
+        ceremony = ceremony.replace("|", "&");
+        String[] ceremonys = ceremony.split("&");
+        for (int i = 0; i < ceremonys.length; i++) {
+            List<Folkway_Ceremony> folkway_ceremonies = LitePal.where("objectID = ?", ceremonys[i]).find(Folkway_Ceremony.class);
+            if (folkway_ceremonies.size()>0) {
+                Folkway_Ceremony folkway_ceremony = folkway_ceremonies.get(0);
+                String Master = folkway_ceremony.getObject();
+                Master = Master.replace("|", "&");
+                String[] masters = Master.split("&");
+                for (int l = 0; l < masters.length; l++) {
+                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
+                    if (folkway_masters.size() > 0){
+                        Folkway_Object folkway_master = folkway_masters.get(0);
+                        ceremonyHashMap.put(folkway_master.getName(), folkway_ceremony);
+                        keyAndValues.add(folkway_master.getName());
+                    }
+                }
+            }
+        }
+        HashMap<String, String> hashMap = new HashMap<>();
+        for (int i = 0; i < keyAndValues.size(); i++) {
+            if (hashMap.containsKey(keyAndValues.get(i)))
+                keyAndValues.remove(i--);
+            else
+                hashMap.put(keyAndValues.get(i), "");
+        }
+        return keyAndValues;
+    }
+
+    public void showListPopupWindowForNationMaps(View view, String query) {
+        final ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        query = query.trim();
+        String sql = "select * from Folkway_StandardInfo where";
+        String[] strings = query.split(" ");
+        for (int i = 0; i < strings.length; ++i) {
+            if (strings.length == 1) sql = sql + " (VillageName LIKE '%" + strings[i] + "%')";
+            else {
+                if (i == 0) sql = sql + " (VillageName LIKE '%" + strings[i] + "%'";
+                else if (i != strings.length - 1)
+                    sql = sql + " AND VillageName LIKE '%" + strings[i] + "%'";
+                else sql = sql + " AND VillageName LIKE '%" + strings[i] + "%')";
+            }
+        }
+
+        final List<String> pois = new ArrayList<>();
+        final List<String> objectIDs = new ArrayList<>();
+        Cursor cursor = LitePal.findBySQL(sql);
+        if (cursor.moveToFirst()) {
+            do {
+                String name = cursor.getString(cursor.getColumnIndex("villagename"));
+                String objectID = cursor.getString(cursor.getColumnIndex("objectid"));
+                pois.add(name);
+                objectIDs.add(objectID);
+            } while (cursor.moveToNext());
+        }
+
+        List<String> masters = new ArrayList<>();
+        List<String> objects = new ArrayList<>();
+        List<Folkway_StandardInfo> folkway_standardInfos = LitePal.findAll(Folkway_StandardInfo.class);
+        for (int i = 0; i < folkway_standardInfos.size(); i++) {
+            Folkway_StandardInfo f = folkway_standardInfos.get(i);
+            List<String> mMasters = GetMastersForStandardInfo(f);
+            for (int j = 0; j < mMasters.size(); j++) {
+                if (mMasters.get(j).equals(query)){
+                    masters.add(f.getVillageName());
+                    objectIDs.add(f.getObjectID());
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < folkway_standardInfos.size(); i++) {
+            Folkway_StandardInfo f = folkway_standardInfos.get(i);
+            List<String> mObjects = GetObjectsForStandardInfo(folkway_standardInfos.get(i));
+            for (int j = 0; j < mObjects.size(); j++) {
+                if (mObjects.get(j).equals(query)){
+                    objects.add(f.getVillageName());
+                    objectIDs.add(f.getObjectID());
+                    break;
+                }
+            }
+        }
+
+        List<String> Festivals = new ArrayList<>();
+        for (int i = 0; i < folkway_standardInfos.size(); i++) {
+            Folkway_StandardInfo f = folkway_standardInfos.get(i);
+            List<String> FestivalList = GetFestivalsForStandardInfo(f);
+            for (int j = 0; j < FestivalList.size(); j++) {
+                if (FestivalList.get(j).equals(query)){
+                    Festivals.add(f.getVillageName());
+                    objectIDs.add(f.getObjectID());
+                    break;
+                }
+            }
+        }
+
+        List<String> Ceremonies = new ArrayList<>();
+        for (int i = 0; i < folkway_standardInfos.size(); i++) {
+            Folkway_StandardInfo f = folkway_standardInfos.get(i);
+            List<String> CeremonyList = GetCeremoniesForStandardInfo(f);
+            for (int j = 0; j < CeremonyList.size(); j++) {
+                if (CeremonyList.get(j).equals(query)){
+                    Ceremonies.add(f.getVillageName());
+                    objectIDs.add(f.getObjectID());
+                    break;
+                }
+            }
+        }
+
+        cursor.close();
+        String[] items = new String[objectIDs.size()];
+
+        for (int i = 0; i < pois.size(); ++i) {
+            items[i] = pois.get(i) + "(村)";
+        }
+        for (int i = 0; i < masters.size(); ++i) {
+            items[i] = masters.get(i) + "(该村有"  + query +  ")";
+        }
+        for (int i = 0; i < objects.size(); ++i) {
+            items[i] = objects.get(i) + "(该村祭祀" + query + ")";
+        }
+        for (int i = 0; i < Festivals.size(); ++i) {
+            items[i] = Festivals.get(i) + "(该村有该节日)";
+        }
+        for (int i = 0; i < Ceremonies.size(); ++i) {
+            items[i] = Ceremonies.get(i) + "(该村有该仪式)";
+        }
+
+        DistricNum = new ArrayList<>();
+        for (int i = 0; i < objectIDs.size(); i++) {
+            DistricNum.add(objectIDs.get(i));
+            //Log.w(TAG, "showListPopupWindowForNationMaps: " + items[i].substring(0, items[i].indexOf("(")));
+        }
+        pdfView.zoomWithAnimation(pdfView.getZoom());
+
+
+        // ListView适配器
+        listPopupWindow.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, items));
+
+        // 选择item的监听事件
+        listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String MapName = objectIDs.get(position);
+
+                Intent intent = new Intent(MainInterface.this, FolkwaysShow.class);
+                intent.putExtra("DZQBM", MapName);
+                MainInterface.this.startActivity(intent);
+
+                listPopupWindow.dismiss();
+                isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                invalidateOptionsMenu();
+            }
+        });
+
+        // 对话框的宽高
+        listPopupWindow.setWidth(600);
+        listPopupWindow.setHeight(600);
+
+        // ListPopupWindow的锚,弹出框的位置是相对当前View的位置
+        listPopupWindow.setAnchorView(view);
+
+        // ListPopupWindow 距锚view的距离
+        listPopupWindow.setHorizontalOffset(50);
+        listPopupWindow.setVerticalOffset(100);
+
+        listPopupWindow.setModal(false);
+
+        //listPopupWindow.show();
     }
 
     public void showListPopupWindowForMapQuery(View view, String query) {
@@ -9204,6 +9665,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
 
+
+        //AddData();
         //Toast.makeText(this, "locate here", Toast.LENGTH_SHORT).show();
 
 
@@ -9240,6 +9703,437 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             Log.w(TAG, "resumeSurface: " + toolbar.getTitle().toString());
         } else {
             showLeaflets();
+        }
+      //  ShowLittleWindow();
+    }
+
+    public static int getActionBarHeight(Context context){
+        TypedValue tv = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true)){
+            return  TypedValue.complexToDimensionPixelSize(tv.data,
+                    context.getResources().getDisplayMetrics());
+        }
+        return 0;
+    }
+
+    public static int getStatusBarHeight(final Context context) {
+        final Resources resources = context.getResources();
+        final int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0)
+            return resources.getDimensionPixelSize(resourceId);
+        else
+            return (int) Math.ceil((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? 24 : 25) * resources.getDisplayMetrics().density);
+    }
+
+    private static boolean canDrawOverlays(Context context, boolean isApplyAuthorization){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (Settings.canDrawOverlays(context)){
+                return true;
+            }
+            else{
+                if (isApplyAuthorization){
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
+                    if (context instanceof Service){
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
+                    context.startActivity(intent);
+                    return false;
+                }
+                else
+                    return false;
+            }
+        }
+        else
+            return true;
+    }
+
+    private void ShowLittleWindow(){
+        canDrawOverlays(this, false);
+        /*FrameLayout layout = new FrameLayout(this);
+        // 作为演示，随意设置一个有区别的颜色。
+        layout.setBackgroundColor(Color.LTGRAY);
+        layout.setAlpha(0.5f);
+
+        int screenWidth = getWindowManager().getDefaultDisplay().getWidth();
+
+        Log.w(TAG, "ShowLittleWindow: " + getStatusBarHeight(this) + "," + getActionBarHeight(this));
+
+        // 高度为200pix
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int)Math.ceil(screenWidth/3),
+                200);
+        // 在窗口的底部
+        layoutParams.topMargin = getStatusBarHeight(this) + getActionBarHeight(this);
+        //layoutParams.gravity = Gravity.TOP;
+
+        // 整个窗口
+        ViewGroup viewParent = (ViewGroup) getWindow().getDecorView();
+
+        // 将layout添加到窗口上层
+        viewParent.addView(layout, layoutParams);*/
+        WindowManager windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
+
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            layoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        }
+        else{
+            layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+        layoutParams.format = PixelFormat.RGBA_8888;
+        layoutParams.gravity = Gravity.START | Gravity.TOP;
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
+        layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+
+        View view = LayoutInflater.from(this).inflate(R.layout.popupwindow_messure, null, false);
+
+        windowManager.addView(view, layoutParams);
+    }
+
+    private void AddData(){
+        /*Folkway_StandardInfo folkway_standardInfo = new Folkway_StandardInfo("D1", "拱卡村", "芒海镇吕英村委会", "云南省德宏州芒市", "景颇族",
+                83, 334, 88, 334, , , "灵魂不死、万物有灵、神鬼不分", "F1", "C27|C28|C29|C30|C31|C32|C33|C34|C35|C36|C37", "A1|A2|A3|A4");
+        Folkway_StandardInfo folkway_standardInfo1 = new Folkway_StandardInfo("D2", "拱抗村", "芒海镇吕英村委会", "云南省德宏州芒市", "景颇族",
+                93, 374, 109, 446, , , "灵魂不死、万物有灵、神鬼不分", "F1", "C27|C28|C29|C30|C31|C32|C33|C34|C35|C36|C37", "A1|A2|A3|A4");
+        Folkway_StandardInfo folkway_standardInfo2 = new Folkway_StandardInfo("D3", "帕牙村", "芒海镇吕英村委会", "云南省德宏州芒市", "景颇族",
+                53, 0, 56, 218, , , "灵魂不死、万物有灵、神鬼不分", "F1", "C27|C28|C29|C30|C31|C32|C33|C34|C35|C36|C37", "A1|A2|A3|A4");
+        Folkway_StandardInfo folkway_standardInfo3 = new Folkway_StandardInfo("D4", "姐东崃", "勐卯镇姐东行政村", "云南省德宏州瑞丽市", "傣族",
+                0, 0, 53, 209, , , "灵魂不死、万物有灵、鬼魂忌讳、灵魂崇拜", "", "C1|C2|C3|C4|C5|C6|C7|C8|C9|C10|C11|C12|C13|C14|C15|C16|C17|C18|C19|C20|C21|C22|C23|C24|C25|C26", "");
+        Folkway_StandardInfo folkway_standardInfo4 = new Folkway_StandardInfo("D5", "广双村", "姐相乡顺哈村委会", "云南省德宏州瑞丽市", "傣族",
+                0, 0, 111, 447, , , "灵魂不死、万物有灵、鬼魂忌讳、灵魂崇拜", "", "C1|C2|C3|C4|C5|C6|C7|C8|C9|C10|C11|C12|C13|C14|C15|C16|C17|C18|C19|C20|C21|C22|C23|C24|C25|C26", "");
+        Folkway_StandardInfo folkway_standardInfo5 = new Folkway_StandardInfo("D6", "顿哄喊", "姐相乡暖波村委会", "云南省德宏州瑞丽市", "傣族",
+                0, 0, 120, 530, , , "灵魂不死、万物有灵、鬼魂忌讳、灵魂崇拜", "", "C1|C2|C3|C4|C5|C6|C7|C8|C9|C10|C11|C12|C13|C14|C15|C16|C17|C18|C19|C20|C21|C22|C23|C24|C25|C26", "");
+        Folkway_StandardInfo folkway_standardInfo6 = new Folkway_StandardInfo("D7", "雷允", "弄岛镇雷允行政村", "云南省德宏州瑞丽市", "傣族",
+                0, 741, 217, 922, , , "灵魂不死、万物有灵、鬼魂忌讳、灵魂崇拜", "", "C1|C2|C3|C4|C5|C6|C7|C8|C9|C10|C11|C12|C13|C14|C15|C16|C17|C18|C19|C20|C21|C22|C23|C24|C25|C26", "");*/
+
+        LitePal.deleteAll(Folkway_StandardInfo.class);
+        readStandardInfo();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_StandardInfo.class).size());
+        LitePal.deleteAll(Folkway_Festival.class);
+        readFestival();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_Festival.class).size());
+        LitePal.deleteAll(Folkway_Ceremony.class);
+        readCeremony();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_Ceremony.class).size());
+        LitePal.deleteAll(Folkway_Object.class);
+        readObject();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_Object.class).size());
+        LitePal.deleteAll(Folkway_OtherActivity.class);
+        readOtherActivity();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_OtherActivity.class).size());
+
+        LitePal.deleteAll(Folkway_Master.class);
+        readMaster();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_Master.class).size());
+        LitePal.deleteAll(Folkway_Participants.class);
+        readParticipants();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_Participants.class).size());
+
+        LitePal.deleteAll(Folkway_Taboo.class);
+        readTaboo();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_Taboo.class).size());
+        LitePal.deleteAll(Folkway_Story.class);
+        readStory();
+        Log.w(TAG, "AddData: " + LitePal.findAll(Folkway_Story.class).size());
+    }
+
+    public static void readStory() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/故事.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                    }
+                    Folkway_Story Folkway_Story = new Folkway_Story(strings[0], strings[1]);
+                    Folkway_Story.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readTaboo() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/禁忌.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                    }
+                    Folkway_Taboo Folkway_Taboo = new Folkway_Taboo(strings[0], strings[1]);
+                    Folkway_Taboo.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readParticipants() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/参与人员.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                    }
+                    Folkway_Participants Folkway_Participants = new Folkway_Participants(strings[0], strings[1]);
+                    Folkway_Participants.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readMaster() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/主持人员.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                    }
+                    Folkway_Master Folkway_Master = new Folkway_Master(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+                    Folkway_Master.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readOtherActivity() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/其他活动.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                    }
+                    Folkway_OtherActivity Folkway_OtherActivity = new Folkway_OtherActivity(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8], strings[9], strings[10]);
+                    Folkway_OtherActivity.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readObject() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/祭祀对象.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                    }
+                    Folkway_Object Folkway_Object = new Folkway_Object(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5]);
+                    Folkway_Object.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readCeremony() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/仪式.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                    }
+                    Folkway_Ceremony folkway_ceremony = new Folkway_Ceremony(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8], strings[9], strings[10], strings[11]);
+                    folkway_ceremony.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readFestival() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/祭祀节日.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1) {
+                    String[] strings = s.split("&&");
+                    /*for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                        if (i == 7 || i == 8 || i == 9 || i == 10 || i == 4 || i == 5)
+                        {
+                            if (strings[i].equals(""))
+                                strings[i] = "0";
+                        }
+                    }*/
+                    Folkway_Festival folkway_festival = new Folkway_Festival(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
+                    folkway_festival.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readStandardInfo() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/基本情况.txt";
+        //按行读取，不能保留换行等格式，所以需要手动添加每行换行符。
+        //String result = "";
+        StringBuffer txtContent = new StringBuffer();
+        File file = new File(path);
+        try {
+            int len = 0;
+            FileInputStream in = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(in, "utf-8");
+            BufferedReader br = new BufferedReader(reader);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+                len++;
+                if (len>1)
+                {
+                    String[] strings = s.split("&&");
+                    for (int i = 0; i < strings.length; i++) {
+                        Log.w(TAG, "readtxt1: " + strings[i]);
+                        if (i == 7 || i == 8 || i == 9 || i == 10 || i == 4 || i == 5)
+                        {
+                            if (strings[i].equals(""))
+                                strings[i] = "0";
+                        }
+                    }
+                    Folkway_StandardInfo folkway_standardInfo = new Folkway_StandardInfo(strings[3], strings[2], strings[1], strings[0], strings[6], Integer.valueOf(strings[7]), Integer.valueOf(strings[8]), Integer.valueOf(strings[9]), Integer.valueOf(strings[10]), Float.valueOf(strings[4]), Float.valueOf(strings[5]), strings[11], strings[12], strings[13], strings[14]);
+                    folkway_standardInfo.save();
+                }
+            }
+            reader.close();
+            in.close();
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -9703,11 +10597,16 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     return true;
                                 }
                             } else if (queryMode == TuzhiEnum.POI_QUERY){
-                                showListPopupWindow(searchView, query);
+                                if (query.equals("CXZRMZXYSJ"))
+                                    AddData();
+                                else
+                                    showListPopupWindowForNationMaps(searchView, query);
+                                //showListPopupWindow(searchView, query);
                                 //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
                                 return true;
                             }
                             else {
+                                //showListPopupWindowForNationMaps(searchView, query);
                                 showListPopupWindowForMapQuery(searchView, query);
                                 return true;
                             }
@@ -9740,6 +10639,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 @Override
                 public boolean onQueryTextSubmit(String query) {
                     showListPopupWindowForMapQuery(searchView, query);
+                    //showListPopupWindowForNationMaps(searchView, query);
                     return true;
                 }
 
@@ -9768,6 +10668,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.back:
+                DistricNum = new ArrayList<>();
+                pdfView.zoomWithAnimation(pdfView.getZoom());
                 //图志
                 if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
                 else {
