@@ -16,6 +16,7 @@ public class FestivalAdapter extends RecyclerView.Adapter<FestivalAdapter.ViewHo
     private Context mContext;
 
     private List<String> list;
+    private List<KeyAndValue> keyAndValues = null;
 
     private FestivalAdapter.OnRecyclerItemLongListener mOnItemLong;
 
@@ -37,6 +38,10 @@ public class FestivalAdapter extends RecyclerView.Adapter<FestivalAdapter.ViewHo
     }
     public FestivalAdapter(List<String> mFileList) {
         this.list = mFileList;
+    }
+    public FestivalAdapter(List<String> mFileList, List<KeyAndValue> keyAndValues) {
+        this.list = mFileList;
+        this.keyAndValues = keyAndValues;
     }
 
     @Override
@@ -74,9 +79,44 @@ public class FestivalAdapter extends RecyclerView.Adapter<FestivalAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(FestivalAdapter.ViewHolder holder, int position) {
-        String keyAndValue = list.get(position);
-        holder.FileName.setText(keyAndValue);
-        holder.FileName.setTextColor(Color.BLACK);
+        if (keyAndValues == null) {
+            String keyAndValue = list.get(position);
+            holder.FileName.setText(keyAndValue);
+            holder.FileName.setTextColor(Color.BLACK);
+        }
+        else{
+            String keyAndValue = list.get(position);
+            holder.FileName.setText(keyAndValue);
+            holder.FileName.setTextColor(Color.BLACK);
+            int color = 0;
+            switch (keyAndValues.get(position).getValue()){
+                case "0":
+                    color = Color.RED;
+                    break;
+                case "1":
+                    color = Color.YELLOW;
+                    break;
+                case "2":
+                    color = Color.GREEN;
+                    break;
+                case "3":
+                    color = Color.LTGRAY;
+                    break;
+                case "4":
+                    color = Color.BLUE;
+                    break;
+                case "5":
+                    color = Color.WHITE;
+                    break;
+                case "6":
+                    color = Color.rgb(255,255,0);
+                    break;
+                case "7":
+                    color = Color.rgb(255,0,255);
+                    break;
+            }
+            holder.cardView.setCardBackgroundColor(color);
+        }
     }
 
 

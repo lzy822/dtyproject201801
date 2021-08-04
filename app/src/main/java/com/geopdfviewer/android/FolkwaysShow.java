@@ -143,6 +143,7 @@ public class FolkwaysShow extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(FolkwaysShow.this,3);
         recyclerView.setLayoutManager(layoutManager);
         List<String> keyAndValues = new ArrayList<>();
+        HashMap<String, String> FestivalAndOid = new HashMap<>();
         String Festival = folkway_standardInfo.getFestival();
         Festival = Festival.replace("|", "&");
         String[] Festivals = Festival.split("&");
@@ -151,14 +152,19 @@ public class FolkwaysShow extends AppCompatActivity {
             Log.w(TAG, "refreshRecyclerForFestival: " + Festivals[i]);
             List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", Festivals[i]).find(Folkway_Festival.class);
             if (folkway_festivals.size() > 0)
+            {
                 keyAndValues.add(folkway_festivals.get(0).getName());
+                FestivalAndOid.put(folkway_festivals.get(0).getName(), Festivals[i]);
+            }
         }
         FestivalAdapter festivalAdapter = new FestivalAdapter(keyAndValues);
         recyclerView.setAdapter(festivalAdapter);
         festivalAdapter.setOnItemClickListener(new FestivalAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, String Name, int position) {
-
+                Intent intent = new Intent(FolkwaysShow.this, FolkwayFestivalShow.class);
+                intent.putExtra("objectid", FestivalAndOid.get(Name));
+                startActivity(intent);
             }
         });
         festivalAdapter.setOnItemLongClickListener(new FestivalAdapter.OnRecyclerItemLongListener() {
@@ -177,6 +183,7 @@ public class FolkwaysShow extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(FolkwaysShow.this,3);
         recyclerView.setLayoutManager(layoutManager);
         List<String> keyAndValues = new ArrayList<>();
+        HashMap<String, String> CeremonyAndOid = new HashMap<>();
 
         String ceremony = folkway_standardInfo.getCeremony();
 
@@ -186,7 +193,10 @@ public class FolkwaysShow extends AppCompatActivity {
             Log.w(TAG, "refreshRecyclerForCeremony: " + ceremonys[i]);
             List<Folkway_Ceremony> folkway_ceremonies = LitePal.where("objectID = ?", ceremonys[i]).find(Folkway_Ceremony.class);
             if (folkway_ceremonies.size() > 0)
+            {
                 keyAndValues.add(folkway_ceremonies.get(0).getName());
+                CeremonyAndOid.put(folkway_ceremonies.get(0).getName(), ceremonys[i]);
+            }
         }
 
         FestivalAdapter festivalAdapter = new FestivalAdapter(keyAndValues);
@@ -194,7 +204,9 @@ public class FolkwaysShow extends AppCompatActivity {
         festivalAdapter.setOnItemClickListener(new FestivalAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, String Name, int position) {
-
+                Intent intent = new Intent(FolkwaysShow.this, FolkwayCeremonyShow.class);
+                intent.putExtra("objectid", CeremonyAndOid.get(Name));
+                startActivity(intent);
             }
         });
         festivalAdapter.setOnItemLongClickListener(new FestivalAdapter.OnRecyclerItemLongListener() {
@@ -205,6 +217,128 @@ public class FolkwaysShow extends AppCompatActivity {
                 Toast.makeText(FolkwaysShow.this, R.string.FinishCopy, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void refreshRecyclerForMaster(Folkway_StandardInfo folkway_standardInfo){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.master_recycler_view);
+        recyclerView.setVisibility(View.VISIBLE);
+        GridLayoutManager layoutManager = new GridLayoutManager(FolkwaysShow.this,3);
+        recyclerView.setLayoutManager(layoutManager);
+        List<String> mastersOID = GetMastersForStandardInfo(folkway_standardInfo);
+        List<String> masters = GetMasterNameForOID(mastersOID);
+        FestivalAdapter festivalAdapter = new FestivalAdapter(masters);
+        recyclerView.setAdapter(festivalAdapter);
+        festivalAdapter.setOnItemClickListener(new FestivalAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String Name, int position) {
+                Intent intent = new Intent(FolkwaysShow.this, FolkwayMasterShow.class);
+                intent.putExtra("objectid", mastersOID.get(position));
+                startActivity(intent);
+            }
+        });
+        festivalAdapter.setOnItemLongClickListener(new FestivalAdapter.OnRecyclerItemLongListener() {
+            @Override
+            public void onItemLongClick(View view, String ObjectName) {
+                ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                manager.setText(ObjectName);
+                Toast.makeText(FolkwaysShow.this, R.string.FinishCopy, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private List<String> GetObjectsForStandardInfo(Folkway_StandardInfo folkway_standardInfo){
+        List<String> keyAndValues = new ArrayList<>();
+
+        HashMap<String, Folkway_Ceremony> ceremonyHashMap = new HashMap<>();
+        HashMap<String, Folkway_OtherActivity> OtheractivityHashMap = new HashMap<>();
+        String Festival = folkway_standardInfo.getFestival();
+        Festival = Festival.replace("|", "&");
+        String[] Festivals = Festival.split("&");
+        for (int i = 0; i < Festivals.length; i++) {
+            List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", Festivals[i]).find(Folkway_Festival.class);
+            if (folkway_festivals.size()>0) {
+                String process = folkway_festivals.get(0).getProcedure();
+                process = process.replace("|", "&");
+                String[] days = process.split("&");
+                for (int j = 0; j < days.length; j++) {
+                    String[] oneday = days[j].split(",");
+                    for (int k = 0; k < oneday.length; k++) {
+                        String activity = oneday[k];
+                        if (activity.contains("C")) {
+                            List<Folkway_Ceremony> list = LitePal.where("objectID = ?", activity).find(Folkway_Ceremony.class);
+                            if (list.size() > 0) {
+                                Folkway_Ceremony folkway_ceremony = list.get(0);
+                                String Master = folkway_ceremony.getObject();
+                                Master = Master.replace("|", "&");
+                                String[] masters = Master.split("&");
+                                for (int l = 0; l < masters.length; l++) {
+                                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
+                                    if (folkway_masters.size() > 0){
+                                        Folkway_Object folkway_master = folkway_masters.get(0);
+                                        ceremonyHashMap.put(folkway_master.getObjectID(), folkway_ceremony);
+                                        keyAndValues.add(folkway_master.getObjectID());
+                                    }
+                                }
+                            }
+                        } else if (activity.contains("A")) {
+                            List<Folkway_OtherActivity> list = LitePal.where("objectID = ?", activity).find(Folkway_OtherActivity.class);
+                            if (list.size()>0) {
+                                Folkway_OtherActivity Folkway_OtherActivity = list.get(0);
+                                String Master = Folkway_OtherActivity.getObject();
+                                Master = Master.replace("|", "&");
+                                String[] masters = Master.split("&");
+                                for (int l = 0; l < masters.length; l++) {
+                                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
+                                    if (folkway_masters.size() > 0){
+                                        Folkway_Object folkway_master = folkway_masters.get(0);
+                                        OtheractivityHashMap.put(folkway_master.getObjectID(), Folkway_OtherActivity);
+                                        keyAndValues.add(folkway_master.getObjectID());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        String ceremony = folkway_standardInfo.getCeremony();
+        ceremony = ceremony.replace("|", "&");
+        String[] ceremonys = ceremony.split("&");
+        for (int i = 0; i < ceremonys.length; i++) {
+            List<Folkway_Ceremony> folkway_ceremonies = LitePal.where("objectID = ?", ceremonys[i]).find(Folkway_Ceremony.class);
+            if (folkway_ceremonies.size()>0) {
+                Folkway_Ceremony folkway_ceremony = folkway_ceremonies.get(0);
+                String Master = folkway_ceremony.getObject();
+                Master = Master.replace("|", "&");
+                String[] masters = Master.split("&");
+                for (int l = 0; l < masters.length; l++) {
+                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
+                    if (folkway_masters.size() > 0){
+                        Folkway_Object folkway_master = folkway_masters.get(0);
+                        ceremonyHashMap.put(folkway_master.getObjectID(), folkway_ceremony);
+                        keyAndValues.add(folkway_master.getObjectID());
+                    }
+                }
+            }
+        }
+        HashMap<String, String> hashMap = new HashMap<>();
+        for (int i = 0; i < keyAndValues.size(); i++) {
+            if (hashMap.containsKey(keyAndValues.get(i)))
+                keyAndValues.remove(i--);
+            else
+                hashMap.put(keyAndValues.get(i), "");
+        }
+        return keyAndValues;
+    }
+
+    private List<String> GetObjectNameForOID(List<String> list){
+        List<String> Objects = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            List<Folkway_Object> Folkway_Objects = LitePal.where("objectID = ?", list.get(i)).find(Folkway_Object.class);
+            Objects.add(Folkway_Objects.get(0).getName());
+        }
+        return Objects;
     }
 
     private List<String> GetMastersForStandardInfo(Folkway_StandardInfo folkway_standardInfo){
@@ -240,8 +374,8 @@ public class FolkwaysShow extends AppCompatActivity {
                                     List<Folkway_Master> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Master.class);
                                     if (folkway_masters.size() > 0){
                                         Folkway_Master folkway_master = folkway_masters.get(0);
-                                        ceremonyHashMap.put(folkway_master.getIdentity(), folkway_ceremony);
-                                        keyAndValues.add(folkway_master.getIdentity());
+                                        ceremonyHashMap.put(folkway_master.getObjectID(), folkway_ceremony);
+                                        keyAndValues.add(folkway_master.getObjectID());
                                     }
                                 }
                             }
@@ -257,8 +391,8 @@ public class FolkwaysShow extends AppCompatActivity {
                                     List<Folkway_Master> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Master.class);
                                     if (folkway_masters.size() > 0){
                                         Folkway_Master folkway_master = folkway_masters.get(0);
-                                        OtheractivityHashMap.put(folkway_master.getIdentity(), Folkway_OtherActivity);
-                                        keyAndValues.add(folkway_master.getIdentity());
+                                        OtheractivityHashMap.put(folkway_master.getObjectID(), Folkway_OtherActivity);
+                                        keyAndValues.add(folkway_master.getObjectID());
                                     }
                                 }
                             }
@@ -283,8 +417,8 @@ public class FolkwaysShow extends AppCompatActivity {
                     List<Folkway_Master> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Master.class);
                     if (folkway_masters.size() > 0){
                         Folkway_Master folkway_master = folkway_masters.get(0);
-                        ceremonyHashMap.put(folkway_master.getIdentity(), folkway_ceremony);
-                        keyAndValues.add(folkway_master.getIdentity());
+                        ceremonyHashMap.put(folkway_master.getObjectID(), folkway_ceremony);
+                        keyAndValues.add(folkway_master.getObjectID());
                     }
                 }
             }
@@ -300,114 +434,13 @@ public class FolkwaysShow extends AppCompatActivity {
         return keyAndValues;
     }
 
-    private List<String> GetObjectsForStandardInfo(Folkway_StandardInfo folkway_standardInfo){
-        List<String> keyAndValues = new ArrayList<>();
-
-        HashMap<String, Folkway_Ceremony> ceremonyHashMap = new HashMap<>();
-        HashMap<String, Folkway_OtherActivity> OtheractivityHashMap = new HashMap<>();
-        String Festival = folkway_standardInfo.getFestival();
-        Festival = Festival.replace("|", "&");
-        String[] Festivals = Festival.split("&");
-        for (int i = 0; i < Festivals.length; i++) {
-            List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", Festivals[i]).find(Folkway_Festival.class);
-            if (folkway_festivals.size()>0) {
-                String process = folkway_festivals.get(0).getProcedure();
-                process = process.replace("|", "&");
-                String[] days = process.split("&");
-                for (int j = 0; j < days.length; j++) {
-                    String[] oneday = days[j].split(",");
-                    for (int k = 0; k < oneday.length; k++) {
-                        String activity = oneday[k];
-                        if (activity.contains("C")) {
-                            List<Folkway_Ceremony> list = LitePal.where("objectID = ?", activity).find(Folkway_Ceremony.class);
-                            if (list.size() > 0) {
-                                Folkway_Ceremony folkway_ceremony = list.get(0);
-                                String Master = folkway_ceremony.getObject();
-                                Master = Master.replace("|", "&");
-                                String[] masters = Master.split("&");
-                                for (int l = 0; l < masters.length; l++) {
-                                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
-                                    if (folkway_masters.size() > 0){
-                                        Folkway_Object folkway_master = folkway_masters.get(0);
-                                        ceremonyHashMap.put(folkway_master.getName(), folkway_ceremony);
-                                        keyAndValues.add(folkway_master.getName());
-                                    }
-                                }
-                            }
-                        } else if (activity.contains("A")) {
-                            List<Folkway_OtherActivity> list = LitePal.where("objectID = ?", activity).find(Folkway_OtherActivity.class);
-                            if (list.size()>0) {
-                                Folkway_OtherActivity Folkway_OtherActivity = list.get(0);
-                                String Master = Folkway_OtherActivity.getObject();
-                                Master = Master.replace("|", "&");
-                                String[] masters = Master.split("&");
-                                for (int l = 0; l < masters.length; l++) {
-                                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
-                                    if (folkway_masters.size() > 0){
-                                        Folkway_Object folkway_master = folkway_masters.get(0);
-                                        OtheractivityHashMap.put(folkway_master.getName(), Folkway_OtherActivity);
-                                        keyAndValues.add(folkway_master.getName());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    private List<String> GetMasterNameForOID(List<String> list){
+        List<String> Masters = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            List<Folkway_Master> folkway_masters = LitePal.where("objectID = ?", list.get(i)).find(Folkway_Master.class);
+            Masters.add(folkway_masters.get(0).getIdentity());
         }
-
-        String ceremony = folkway_standardInfo.getCeremony();
-        ceremony = ceremony.replace("|", "&");
-        String[] ceremonys = ceremony.split("&");
-        for (int i = 0; i < ceremonys.length; i++) {
-            List<Folkway_Ceremony> folkway_ceremonies = LitePal.where("objectID = ?", ceremonys[i]).find(Folkway_Ceremony.class);
-            if (folkway_ceremonies.size()>0) {
-                Folkway_Ceremony folkway_ceremony = folkway_ceremonies.get(0);
-                String Master = folkway_ceremony.getObject();
-                Master = Master.replace("|", "&");
-                String[] masters = Master.split("&");
-                for (int l = 0; l < masters.length; l++) {
-                    List<Folkway_Object> folkway_masters = LitePal.where("objectID = ?", masters[l]).find(Folkway_Object.class);
-                    if (folkway_masters.size() > 0){
-                        Folkway_Object folkway_master = folkway_masters.get(0);
-                        ceremonyHashMap.put(folkway_master.getName(), folkway_ceremony);
-                        keyAndValues.add(folkway_master.getName());
-                    }
-                }
-            }
-        }
-        HashMap<String, String> hashMap = new HashMap<>();
-        for (int i = 0; i < keyAndValues.size(); i++) {
-            if (hashMap.containsKey(keyAndValues.get(i)))
-                keyAndValues.remove(i--);
-            else
-                hashMap.put(keyAndValues.get(i), "");
-        }
-        return keyAndValues;
-    }
-
-    private void refreshRecyclerForMaster(Folkway_StandardInfo folkway_standardInfo){
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.master_recycler_view);
-        recyclerView.setVisibility(View.VISIBLE);
-        GridLayoutManager layoutManager = new GridLayoutManager(FolkwaysShow.this,3);
-        recyclerView.setLayoutManager(layoutManager);
-        List<String> masters = GetMastersForStandardInfo(folkway_standardInfo);
-        FestivalAdapter festivalAdapter = new FestivalAdapter(masters);
-        recyclerView.setAdapter(festivalAdapter);
-        festivalAdapter.setOnItemClickListener(new FestivalAdapter.OnRecyclerItemClickListener() {
-            @Override
-            public void onItemClick(View view, String Name, int position) {
-
-            }
-        });
-        festivalAdapter.setOnItemLongClickListener(new FestivalAdapter.OnRecyclerItemLongListener() {
-            @Override
-            public void onItemLongClick(View view, String ObjectName) {
-                ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                manager.setText(ObjectName);
-                Toast.makeText(FolkwaysShow.this, R.string.FinishCopy, Toast.LENGTH_SHORT).show();
-            }
-        });
+        return Masters;
     }
 
     private void refreshRecyclerForObject(Folkway_StandardInfo folkway_standardInfo){
@@ -415,13 +448,16 @@ public class FolkwaysShow extends AppCompatActivity {
         recyclerView.setVisibility(View.VISIBLE);
         GridLayoutManager layoutManager = new GridLayoutManager(FolkwaysShow.this,3);
         recyclerView.setLayoutManager(layoutManager);
-        List<String> Objects = GetObjectsForStandardInfo(folkway_standardInfo);
+        List<String> ObjectsOID = GetObjectsForStandardInfo(folkway_standardInfo);
+        List<String> Objects = GetObjectNameForOID(ObjectsOID);
         FestivalAdapter festivalAdapter = new FestivalAdapter(Objects);
         recyclerView.setAdapter(festivalAdapter);
         festivalAdapter.setOnItemClickListener(new FestivalAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, String Name, int position) {
-
+                Intent intent = new Intent(FolkwaysShow.this, FolkwayObjectShow.class);
+                intent.putExtra("objectid", ObjectsOID.get(position));
+                startActivity(intent);
             }
         });
         festivalAdapter.setOnItemLongClickListener(new FestivalAdapter.OnRecyclerItemLongListener() {

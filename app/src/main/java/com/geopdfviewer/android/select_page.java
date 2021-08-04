@@ -2781,8 +2781,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     sb = sb.append("<Lines_WhiteBlank>").append("\n");
                     for (int i = 0; i < size_lines_whiteBlank; ++i){
                         String ic = lines_whiteBlanks.get(i).getIc();
-                        List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.where("name = ?", ic).find(ElectronicAtlasMap.class);
-                        if (electronicAtlasMaps.size() == 1 && !electronicAtlasMaps.get(0).getParentNode().equals("社会经济图组") && !electronicAtlasMaps.get(0).getParentNode().equals("资源与环境图组")) {
+                        /*List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.where("name = ?", ic).find(ElectronicAtlasMap.class);
+                        if (electronicAtlasMaps.size() == 1 && !electronicAtlasMaps.get(0).getParentNode().equals("社会经济图组") && !electronicAtlasMaps.get(0).getParentNode().equals("资源与环境图组")) */
+                        {
                             sb.append("<m_ic>").append(lines_whiteBlanks.get(i).getIc()).append("</m_ic>").append("\n");
                             sb.append("<m_lines>").append(lines_whiteBlanks.get(i).getLines()).append("</m_lines>").append("\n");
                             sb.append("<m_color>").append(lines_whiteBlanks.get(i).getColor()).append("</m_color>").append("\n");
