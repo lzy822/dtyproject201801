@@ -40,7 +40,7 @@
                 android:layout_gravity="center"
                 android:textSize="20dp"
                 android:textColor="#000000"
-                android:text="节日名称: "
+                android:text="无"
                 android:visibility="visible"/>
         </LinearLayout>
         <LinearLayout
@@ -66,7 +66,7 @@
             android:layout_gravity="center"
             android:textSize="20dp"
             android:textColor="#000000"
-            android:text="简介: "
+            android:text="无"
             android:visibility="visible"/>
     </LinearLayout>
         <LinearLayout
@@ -92,7 +92,7 @@
                 android:layout_gravity="center"
                 android:textSize="20dp"
                 android:textColor="#000000"
-                android:text="时间: "
+                android:text="无"
                 android:visibility="visible"/>
         </LinearLayout>
         <LinearLayout
@@ -118,7 +118,7 @@
                 android:layout_gravity="center"
                 android:textSize="20dp"
                 android:textColor="#000000"
-                android:text="地点: "
+                android:text="无"
                 android:visibility="visible"/>
         </LinearLayout>
         <LinearLayout
@@ -186,7 +186,7 @@
                 android:layout_gravity="center"
                 android:textSize="20dp"
                 android:textColor="#000000"
-                android:text="备注: "
+                android:text="无"
                 android:visibility="visible"/>
         </LinearLayout>
 
@@ -313,7 +313,7 @@
                 android:layout_gravity="center"
                 android:textSize="20dp"
                 android:textColor="#000000"
-                android:text="故事: "
+                android:text="无"
                 android:visibility="visible"/>
         </LinearLayout>
     </LinearLayout>

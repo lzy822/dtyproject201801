@@ -459,52 +459,57 @@ public class tapeshow extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_TAPE){
             Uri uri = data.getData();
-            long time = System.currentTimeMillis();
-            if (POIType == 0) {
-                List<POI> POIs = LitePal.where("POIC = ?", POIC).find(POI.class);
-                POI poi = new POI();
-                poi.setTapenum(POIs.get(0).getTapenum() + 1);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(tapeshow.this.getResources().getText(R.string.DateAndTime).toString());
-                Date date = new Date(time);
-                poi.updateAll("POIC = ?", POIC);
-                MTAPE mtape = new MTAPE();
-                mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
-                mtape.setPdfic(POIs.get(0).getIc());
-                mtape.setPoic(POIC);
-                mtape.setTime(simpleDateFormat.format(date));
-                mtape.save();
-            }else if (POIType == 1){
-                List<DMBZ> dmbzs = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
-                DMBZ dmbz = new DMBZ();
-                if (dmbzs.get(0).getTAPEPATH() != null) {
-                    String imgpath = dmbzs.get(0).getTAPEPATH();
-                    if (DataUtil.appearNumber(imgpath, ".MP3") > 0) dmbz.setTAPEPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
-                    else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                }else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                dmbz.updateAll("xh = ?", DMXH);
-                refreshCardFromDMBZ();
-            }else if (POIType == 2){
-                List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
-                DMLine dmLine = new DMLine();
-                if (dmLines.get(0).getTapepath() != null) {
-                    String tapepath = dmLines.get(0).getTapepath();
-                    if (DataUtil.appearNumber(tapepath, ".MP3") > 0) dmLine.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
-                    else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                }else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                dmLine.updateAll("mapid = ?", DML);
-                refreshCardFromDML();
-            }else if (POIType == 3){
-                List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
-                DMPoint dmPoint = new DMPoint();
-                if (dmPoints.get(0).getTapepath() != null) {
-                    String tapepath = dmPoints.get(0).getTapepath();
-                    if (DataUtil.appearNumber(tapepath, ".MP3") > 0) dmPoint.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
-                    else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                }else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
-                dmPoint.updateAll("mapid = ?", DMP);
-                refreshCardFromDMP();
+            if (DataUtil.getRealPathFromUriForAudio(this, uri).contains("Android/data")){
+                Toast.makeText(tapeshow.this, "权限问题，该手机无法正常保存录音文件！", Toast.LENGTH_LONG).show();
             }
+            else{
+                long time = System.currentTimeMillis();
+                if (POIType == 0) {
+                    List<POI> POIs = LitePal.where("POIC = ?", POIC).find(POI.class);
+                    POI poi = new POI();
+                    poi.setTapenum(POIs.get(0).getTapenum() + 1);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(tapeshow.this.getResources().getText(R.string.DateAndTime).toString());
+                    Date date = new Date(time);
+                    poi.updateAll("POIC = ?", POIC);
+                    MTAPE mtape = new MTAPE();
+                    mtape.setPath(DataUtil.getRealPathFromUriForAudio(this, uri));
+                    mtape.setPdfic(POIs.get(0).getIc());
+                    mtape.setPoic(POIC);
+                    mtape.setTime(simpleDateFormat.format(date));
+                    mtape.save();
+                }else if (POIType == 1){
+                    List<DMBZ> dmbzs = LitePal.where("xh = ?", DMXH).find(DMBZ.class);
+                    DMBZ dmbz = new DMBZ();
+                    if (dmbzs.get(0).getTAPEPATH() != null) {
+                        String imgpath = dmbzs.get(0).getTAPEPATH();
+                        if (DataUtil.appearNumber(imgpath, ".MP3") > 0) dmbz.setTAPEPATH(imgpath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                        else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    }else dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    dmbz.updateAll("xh = ?", DMXH);
+                    refreshCardFromDMBZ();
+                }else if (POIType == 2){
+                    List<DMLine> dmLines = LitePal.where("mapid = ?", DML).find(DMLine.class);
+                    DMLine dmLine = new DMLine();
+                    if (dmLines.get(0).getTapepath() != null) {
+                        String tapepath = dmLines.get(0).getTapepath();
+                        if (DataUtil.appearNumber(tapepath, ".MP3") > 0) dmLine.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                        else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    }else dmLine.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    dmLine.updateAll("mapid = ?", DML);
+                    refreshCardFromDML();
+                }else if (POIType == 3){
+                    List<DMPoint> dmPoints = LitePal.where("mapid = ?", DMP).find(DMPoint.class);
+                    DMPoint dmPoint = new DMPoint();
+                    if (dmPoints.get(0).getTapepath() != null) {
+                        String tapepath = dmPoints.get(0).getTapepath();
+                        if (DataUtil.appearNumber(tapepath, ".MP3") > 0) dmPoint.setTapepath(tapepath + "|" + DataUtil.getRealPathFromUriForPhoto(this, uri));
+                        else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    }else dmPoint.setTapepath(DataUtil.getRealPathFromUriForPhoto(this, uri));
+                    dmPoint.updateAll("mapid = ?", DMP);
+                    refreshCardFromDMP();
+                }
 
+            }
         }
     }
 

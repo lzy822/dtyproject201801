@@ -69,6 +69,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -165,8 +166,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
                 else if (ParentNodeName.equals("")){
                     mapCollectionType = 0;
-                    setTitle("图志");
-                    toolbar.setTitle("图志");
+                    setTitle(select_page.this.getResources().getText(R.string.app_showname));
+                    toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                     InitElectronicAtlasData();
                     refreshRecyclerForElectronicAtlas();
                     if (mapCollectionType == 0){
@@ -444,8 +445,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                         }
                                         else if (ParentNodeName.equals("")){
                                             mapCollectionType = 0;
-                                            setTitle("图志");
-                                            toolbar.setTitle("图志");
+                                            setTitle(select_page.this.getResources().getText(R.string.app_showname));
+                                            toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                                             InitElectronicAtlasData();
                                             refreshRecyclerForElectronicAtlas();
                                             if (mapCollectionType == 0){
@@ -537,8 +538,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                             }
                                             else if (ParentNodeName.equals("")){
                                                 mapCollectionType = 0;
-                                                setTitle("图志");
-                                                toolbar.setTitle("图志");
+                                                setTitle(select_page.this.getResources().getText(R.string.app_showname));
+                                                toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                                                 InitElectronicAtlasData();
                                                 refreshRecyclerForElectronicAtlas();
                                                 if (mapCollectionType == 0){
@@ -604,7 +605,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
     }
 
     private void resetView(){
-        setTitle(select_page.this.getResources().getText(R.string.MapList));
+        setTitle(select_page.this.getResources().getText(R.string.app_showname));
         selectedNum = 0;
         isLongClick = 1;
         invalidateOptionsMenu();
@@ -875,8 +876,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     }
                                     else if (ParentNodeName.equals("")){
                                         mapCollectionType = 0;
-                                        setTitle("图志");
-                                        toolbar.setTitle("图志");
+                                        setTitle(select_page.this.getResources().getText(R.string.app_showname));
+                                        toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                                         InitElectronicAtlasData();
                                         refreshRecyclerForElectronicAtlas();
                                         if (mapCollectionType == 0){
@@ -1474,7 +1475,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     // 在这里进行UI操作
                     refreshRecycler();
                     if (add_current == add_max){
-                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                    toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                     }
                     Log.w(TAG, "handleMessage: " );
             }
@@ -1965,10 +1966,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     SharedPreferences.Editor editor = getSharedPreferences("filepath", MODE_PRIVATE).edit();
                                     editor.putString("inputpath", configPath.substring(0, configPath.lastIndexOf("/")));
                                     editor.apply();
-                                    locError("filepath" + configPath.substring(0, configPath.lastIndexOf("/")));
+                                    locError("filepath: " + configPath.substring(0, configPath.lastIndexOf("/")));
+                                    Log.w(TAG, "filepath: " + configPath);
                                     File file1 = new File(configPath);
+                                    /*String fileEncode = EncodeUtil.getEncode(configPath,true);
+                                    ZipFile zipFile = new ZipFile(file1, Charset.forName(fileEncode));*/
+                                    ZipFile zipFile = new ZipFile(file1);
                                     File outFile = null ;   // 输出文件的时候要有文件夹的操作
-                                    ZipFile zipFile = new ZipFile(file1) ;   // 实例化ZipFile对象
+                                    //ZipFile zipFile = new ZipFile(file1) ;   // 实例化ZipFile对象
                                     ZipInputStream zipInput = null ;    // 定义压缩输入流
                                     OutputStream out = null ;   // 定义输出流，用于输出每一个实体内容
                                     InputStream input = null ;  // 定义输入流，读取每一个ZipEntry
@@ -1994,9 +1999,19 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                     //locError(findNameFromUri(uri));
                                     //LitePal.getDatabase();
                                 } catch (UnsupportedEncodingException e) {
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                                }catch (IOException e){
-                                    Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }catch (Exception e){
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                                 }
                                 //入库操作
                                 File ff = new File(Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input");
@@ -2016,7 +2031,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                                        toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                                         Log.w(TAG, "run: " );
                                         Toast.makeText(MyApplication.getContext(), select_page.this.getResources().getText(R.string.DataInputOk), Toast.LENGTH_LONG).show();
                                     }
@@ -2141,7 +2156,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         message.what = UPDATE_TEXT;
                         handler.sendMessage(message);
                     } catch (Exception e) {
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             }).start();
@@ -2165,7 +2185,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         editor.apply();
                         manageGeoInfo(configPath, URI_TYPE, configPath, DataUtil.findNameFromUri(Uri.parse(configPath)), true, MapTypeNum);
                     } catch (Exception e) {
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                     //locError(uri.toString());
                     //locError(findNameFromUri(uri));
@@ -2199,13 +2224,14 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         final int MTAPE_TYPE = 3;
         final int LINES_WHITEBLANK_TYPE = 4;
         final int NONE_TYPE = -1;
+        final int MVIDEO_TYPE = 5;
         try {
             String line;
             in = new FileInputStream(file);
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             READ_TYPE = NONE_TYPE;
-            String ic = "", name = "", poic = "", description = "", time = "", starttime = "", endtime = "", m_ic = "", m_lines = "", path = "", type = "";
+            String ic = "", name = "", poic = "", description = "", time = "", starttime = "", endtime = "", m_ic = "", m_lines = "", path = "", type = "", Thumbnailpath = "";
             int color = 0, photonum = 0, tapenum = 0, id = 0;
             float x = 0, y = 0;
             while((line = bufferedReader.readLine()) != null) {
@@ -2224,6 +2250,10 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 }
                 if (line.contains("<MTAPE>")) {
                     READ_TYPE = MTAPE_TYPE;
+                    continue;
+                }
+                if (line.contains("<MVIDEO>")) {
+                    READ_TYPE = MVIDEO_TYPE;
                     continue;
                 }
                 if (line.contains("<Lines_WhiteBlank>")) {
@@ -2384,6 +2414,42 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         continue;
                     }
                 }
+                if (READ_TYPE == MVIDEO_TYPE){
+                    if (line.contains("<id>")){
+                        id = Integer.valueOf(line.substring(4, line.indexOf("</id>")));
+                        continue;
+                    }
+                    if (line.contains("<pdfic>")){
+                        ic = line.substring(7, line.indexOf("</pdfic>"));
+                        continue;
+                    }
+                    if (line.contains("<POIC>")){
+                        poic = line.substring(6, line.indexOf("</POIC>"));
+                        continue;
+                    }
+                    if (line.contains("<Thumbnailpath>")){
+                        path = line.substring(15, line.indexOf("</Thumbnailpath>"));
+                        Thumbnailpath = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        continue;
+                    }
+                    if (line.contains("<path>")){
+                        path = line.substring(6, line.indexOf("</path>"));
+                        path = Environment.getExternalStorageDirectory() + "/" + select_page.this.getResources().getText(R.string.save_folder_name1) + "/Input/" + path.substring(path.lastIndexOf("/") + 1);
+                        continue;
+                    }
+                    if (line.contains("<time>")){
+                        time = line.substring(6, line.indexOf("</time>"));
+                        MVEDIO mvedio = new MVEDIO();
+                        mvedio.setThumbnailImg(Thumbnailpath);
+                        mvedio.setId(id);
+                        mvedio.setPdfic(ic);
+                        mvedio.setPoic(poic);
+                        mvedio.setPath(path);
+                        mvedio.setTime(time);
+                        mvedio.save();
+                        continue;
+                    }
+                }
                 if (READ_TYPE == LINES_WHITEBLANK_TYPE){
                     if (line.contains("<m_ic>")){
                         m_ic = line.substring(6, line.indexOf("</m_ic>"));
@@ -2408,7 +2474,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 @Override
                 public void run() {
                     Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.DataInputOk), Toast.LENGTH_LONG).show();
-                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                    toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                 }
             });
         }catch (IOException e){
@@ -2426,6 +2492,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        instance = this;
+
         //获取定位信息
         getLocation();
         //初始化界面一
@@ -2433,6 +2501,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         //deleteAllData();
         initPage();
 
+        toolbar.setTitle(R.string.app_showname);
         /*if (LitePal.findAll(ElectronicAtlasMap.class).size() != 0){
             mapCollectionType = 0;
             InitElectronicAtlasData();
@@ -2489,6 +2558,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
 
     private void doSpecificOperation(){
         Log.w(TAG, "doSpecificOperation: " + 2.0e-6 * 100000000.1);
+        /*LitePal.deleteAll(POI.class);
+        LitePal.deleteAll(MTAPE.class);
+        LitePal.deleteAll(MVEDIO.class);
+        LitePal.deleteAll(MPHOTO.class);
+        LitePal.deleteAll(Lines_WhiteBlank.class);*/
+
         //DataUtil.getSpatialIndex();
         //LitePal.deleteAll(Trail.class);
         //Log.w(TAG, "getExternalPolygon: " + lineUtil.getExternalPolygon("25,102 25.5,102.5 26.5,101.5", 1));
@@ -2653,6 +2728,9 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         });
     }
 
+
+    public static select_page instance = null;
+
     private void OutputBTFunction(){
         try {
             new Thread(new Runnable() {
@@ -2684,10 +2762,11 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                     Log.w(TAG, "runlzy: " + types.size());
                     if (types.size() > 0) {
                         for (int i = 0; i < types.size(); ++i) {
-                            DataUtil.makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                            makeTxt(types.get(i), select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                         }
-                    }else DataUtil.makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
-                    DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    }else makeTxt("", select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    //DataUtil.makeTxt1(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    DataUtil.makeTrailKML(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     DataUtil.makeWhiteBlankKML(select_page.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     List<File> files = new ArrayList<File>();
                     StringBuffer sb = new StringBuffer();
@@ -2802,7 +2881,8 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                         of.close();
                         files.add(file1);
                     }catch (IOException e){
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "run: " + e.toString());
+                        ToastOutputErrorInfo();
                     }
                     try {
                         runOnUiThread(new Runnable() {
@@ -2853,13 +2933,12 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                             @Override
                             public void run() {
                                 Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
-                                toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                                toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                             }
                         });
                     }catch (IOException e){
-                        Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
                         Log.w(TAG, "run: " + e.toString());
-                        Log.w(TAG, "run: " + e.getMessage());
+                        ToastOutputErrorInfo();
                     }
                 }
 
@@ -2868,7 +2947,17 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
         {
             Log.w(TAG, "error: " + e.toString());
         }
-        setFAMVisible(false);
+        //setFAMVisible(false);
+    }
+
+    private void ToastOutputErrorInfo(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
+            }
+        });
     }
 
     private void OutputData(){
@@ -3031,7 +3120,7 @@ public class select_page extends AppCompatActivity implements OnPageChangeListen
                 @Override
                 public void run() {
                     Toast.makeText(select_page.this, select_page.this.getResources().getText(R.string.PackingOk), Toast.LENGTH_LONG).show();
-                    toolbar.setTitle(select_page.this.getResources().getText(R.string.MapList));
+                    toolbar.setTitle(select_page.this.getResources().getText(R.string.app_showname));
                 }
             });
         }catch (IOException e){

@@ -2198,6 +2198,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
             if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
 
+                /*
                 List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
                 Collections.sort(mapList);
                 int size = mapList.size();
@@ -2268,7 +2269,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 Log.w(TAG, "theName: " + theName);
                 double deltaK_trans;
                 deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
-                locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
                 if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
                     getInfoForElectronicAtlasWithGeoInfo(theName);
                     manageInfoForElectronicAtlasWithGeoInfo();
@@ -2279,14 +2280,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     getWhiteBlankData();
                     isAutoTrans = false;
                     getNormalBitmap();
-                    /*num_map1 = num_map;
-                    getInfo(thenum);*/
                     toolbar.setTitle(pdfFileName);
                     pdfView.recycle();
                     autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                     displayFromFile(uri);
-                }
-            /*老版图志
+                }*/
+            //老版图志
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
             if (size != 0) {
@@ -2298,7 +2297,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     String Muri = pref2.getString(str + "uri", "");
                     String MGPTS = pref2.getString(str + "GPTS", "");
                     int MMapType = pref2.getInt(str + "MapType", -1);
-                    if ((MMapType == 1 || MMapType >= 4) && MGPTS != null && !MGPTS.isEmpty())
+                    if (MGPTS != null && !MGPTS.isEmpty())
                     {
                         String[] GPTString = MGPTS.split(" ");
                         float[] GPTSs = new float[GPTString.length];
@@ -2356,7 +2355,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
                 double deltaK_trans;
                 deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
-                locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
                 if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
                     geometry_whiteBlanks.clear();
                     num_whiteBlankPt = 0;
@@ -2364,6 +2363,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     whiteBlankPt = "";
                     num_map1 = num_map;
                     getInfo(thenum);
+                    CurrentNum = thenum;
                     manageInfo();
                     toolbar.setTitle(pdfFileName);
                     getNormalBitmap();
@@ -2374,9 +2374,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     getWhiteBlankData();
                 }
             } else
-                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();*/
+                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
             } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
-                List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                //电子地图集
+                /*List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
                 Collections.sort(mapList);
                 int size = mapList.size();
                 float thedelta = 0;
@@ -2454,8 +2455,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                         getWhiteBlankData();
                     }
-                }
-            /*老版图志
+                }*/
+            //老版图志
             SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
             int size = pref1.getInt("num", 0);
             if (size != 0)
@@ -2468,7 +2469,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     String Muri = pref2.getString(str + "uri", "");
                     String MGPTS = pref2.getString(str + "GPTS", "");
                     int MMapType = pref2.getInt(str + "MapType", -1);
-                    if ((MMapType == 1 || MMapType >= 5) && MGPTS != null && !MGPTS.isEmpty())
+                    if (MGPTS != null && !MGPTS.isEmpty())
                     {
                         Log.w(TAG, "GPTS: " + MGPTS);
                         String[] GPTString = MGPTS.split(" ");
@@ -2524,7 +2525,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
                 double deltaK_trans;
                 deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
-                locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
                 if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
                     geometry_whiteBlanks.clear();
                     num_whiteBlankPt = 0;
@@ -2532,6 +2533,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     whiteBlankPt = "";
                     num_map1 = num_map;
                     getInfo(thenum);
+                    CurrentNum = thenum;
                     manageInfo();
                     toolbar.setTitle(pdfFileName);
                     getNormalBitmap();
@@ -2543,7 +2545,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }
             } else
             Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-             */
+
             }
             if (isMessure && isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE)
                 drawMessureLine(canvas);
@@ -6302,7 +6304,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             DataUtil.makeTxt(types.get(i), ic, MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                         }
                     }else DataUtil.makeTxt("", ic, MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
-                    DataUtil.makeTxt1(MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    //DataUtil.makeTxt1(MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
+                    DataUtil.makeTrailKML(MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     DataUtil.makeWhiteBlankKMLForSingleMap(ic, MainInterface.this.getResources().getText(R.string.save_folder_name1).toString(), SubFolder);
                     List<File> files = new ArrayList<File>();
                     StringBuffer sb = new StringBuffer();
@@ -6412,7 +6415,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         of.close();
                         files.add(file1);
                     }catch (IOException e){
-                        Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                                toolbar.setTitle(pdfFileName);
+                            }
+                        });
                     }
                     try {
                         runOnUiThread(new Runnable() {
@@ -6467,9 +6476,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             }
                         });
                     }catch (IOException e){
-                        Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                        Log.w(TAG, "run: " + e.toString());
-                        Log.w(TAG, "run: " + e.getMessage());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                                toolbar.setTitle(pdfFileName);
+                            }
+                        });
                     }
                 }
 
@@ -6508,9 +6521,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             }
                         });
                     }catch (Exception e){
-                        Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
-                        Log.w(TAG, "run: " + e.toString());
-                        Log.w(TAG, "run: " + e.getMessage());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.OpenFileError) + "_2", Toast.LENGTH_SHORT).show();
+                                toolbar.setTitle(pdfFileName);
+                            }
+                        });
                     }
                 }
 
@@ -9156,60 +9173,67 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         new Thread(new Runnable() {
             @Override
             public void run() {
-                bts.clear();
-                List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" + "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
-                if (pois.size() > 0) {
-                    for (POI poi : pois) {
-                        List<MPHOTO> mphotos = LitePal.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
-                        //PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
-                        //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
-                        //locError(Boolean.toString(poi.getPath().isEmpty()));
-                        //locError(Integer.toString(poi.getPath().length()));
-                        //locError(poi.getPath());
-                        if (poi.getPhotonum() != 0 && mphotos.size() != 0) {
-                            locError("poic = " + poi.getPoic());
-                            locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
-                            String path = mphotos.get(0).getPath();
-                            locError("需要显示的缩略图数量1 : " + path);
-                            File file = new File(path);
-                            if (file.exists()) {
-                                Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
-                                if (mphotos.size() != 0) {
-                                    int degree = DataUtil.getPicRotate(path);
-                                    if (degree != 0) {
-                                        Matrix m = new Matrix();
-                                        m.setRotate(degree); // 旋转angle度
-                                        Log.w(TAG, "showPopueWindowForPhoto: " + degree);
-                                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                try {
+                    bts.clear();
+                    List<POI> pois = LitePal.where("x <= " + String.valueOf(max_lat) + ";" + "x >= " + String.valueOf(min_lat) + ";" + "y <= " + String.valueOf(max_long) + ";" + "y >= " + String.valueOf(min_long)).find(POI.class);
+                    if (pois.size() > 0) {
+                        for (POI poi : pois) {
+                            if (bts.size() < 30) {
+                                List<MPHOTO> mphotos = LitePal.where("poic = ?", poi.getPoic()).find(MPHOTO.class);
+                                //PointF pt2 = LatLng.getPixLocFromGeoL(new PointF(poi.getX(), poi.getY()));
+                                //canvas.drawRect(new RectF(pt2.x - 5, pt2.y - 38, pt2.x + 5, pt2.y), paint2);
+                                //locError(Boolean.toString(poi.getPath().isEmpty()));
+                                //locError(Integer.toString(poi.getPath().length()));
+                                //locError(poi.getPath());
+                                if (poi.getPhotonum() != 0 && mphotos.size() != 0) {
+                                    locError("poic = " + poi.getPoic());
+                                    locError("需要显示的缩略图数量1 : " + Integer.toString(mphotos.size()));
+                                    String path = mphotos.get(0).getPath();
+                                    locError("需要显示的缩略图数量1 : " + path);
+                                    File file = new File(path);
+                                    if (file.exists()) {
+                                        Bitmap bitmap = DataUtil.getImageThumbnail(path, 100, 80);
+                                        if (mphotos.size() != 0) {
+                                            int degree = DataUtil.getPicRotate(path);
+                                            if (degree != 0) {
+                                                Matrix m = new Matrix();
+                                                m.setRotate(degree); // 旋转angle度
+                                                Log.w(TAG, "showPopueWindowForPhoto: " + degree);
+                                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                                            }
+                                            Log.w(TAG, "imageUri: " + path);
+                                            bt btt = new bt(bitmap, path);
+                                            btt.setPoic(poi.getPoic());
+                                            bts.add(btt);
+                                        }
+                                    } else {
+                                        Log.w(TAG, "imageUriWithWrongPath: " + path);
+                                        //Resources res = MyApplication.getContext().getResources();
+                                        //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
+                                        Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
+                                        BitmapDrawable bd = (BitmapDrawable) drawable;
+                                        Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
+                                        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
+                                                ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                                        bt btt = new bt(bitmap, path);
+                                        btt.setPoic("11");
+                                        bts.add(btt);
                                     }
-                                    Log.w(TAG, "imageUri: " + path);
-                                    bt btt = new bt(bitmap, path);
-                                    btt.setPoic(poi.getPoic());
-                                    bts.add(btt);
+                                } else {
+                                    POI poi1 = new POI();
+                                    if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
+                                    else poi1.setToDefault("photonum");
+                                    poi1.updateAll("poic = ?", poi.getPoic());
                                 }
-                            } else {
-                                Log.w(TAG, "imageUriWithWrongPath: " + path);
-                                //Resources res = MyApplication.getContext().getResources();
-                                //Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.ic_info_black);
-                                Drawable drawable = MyApplication.getContext().getResources().getDrawable(R.drawable.imgerror);
-                                BitmapDrawable bd = (BitmapDrawable) drawable;
-                                Bitmap bitmap = Bitmap.createBitmap(bd.getBitmap(), 0, 0, bd.getBitmap().getWidth(), bd.getBitmap().getHeight());
-                                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 80, 120,
-                                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                                bt btt = new bt(bitmap, path);
-                                btt.setPoic("11");
-                                bts.add(btt);
                             }
-                        } else {
-                            POI poi1 = new POI();
-                            if (mphotos.size() != 0) poi1.setPhotonum(mphotos.size());
-                            else poi1.setToDefault("photonum");
-                            poi1.updateAll("poic = ?", poi.getPoic());
                         }
                     }
+                    locError("需要显示的缩略图数量2 : " + Integer.toString(bts.size()));
+                    isCreateBitmap = true;
                 }
-                locError("需要显示的缩略图数量2 : " + Integer.toString(bts.size()));
-                isCreateBitmap = true;
+                catch (Exception e){
+                    Log.w(TAG, "run: " + e.toString());
+                }
                 /*runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -9695,6 +9719,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         Log.w(TAG, "onCreate: ");
         int num = receiveInfo();
         if (num != -1) {
+            CurrentNum = num;
             doSpecificOperation();
             //initMapVariableForElectronicAtlas();
             initVariable(num);
@@ -9706,6 +9731,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         }
       //  ShowLittleWindow();
     }
+
+    private int CurrentNum = 0;
 
     public static int getActionBarHeight(Context context){
         TypedValue tv = new TypedValue();
@@ -10340,7 +10367,23 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         leftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
+                if (CurrentNum != 1){
+                    geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
+                    num_map1 = num_map;
+                    getInfo(--CurrentNum);
+                    manageInfo();
+                    toolbar.setTitle(pdfFileName);
+                    getNormalBitmap();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();
+                }
+                /*List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
                 Collections.sort(maps);
                 for (int i = 0; i < maps.size(); i++) {
                     ElectronicAtlasMap m = maps.get(i);
@@ -10383,7 +10426,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         }
                         break;
                     }
-                }
+                }*/
             }
         });
 
@@ -10392,7 +10435,23 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         rightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
+                if (CurrentNum != 4){
+                    geometry_whiteBlanks.clear();
+                    num_whiteBlankPt = 0;
+                    isWhiteBlank = false;
+                    whiteBlankPt = "";
+                    num_map1 = num_map;
+                    getInfo(++CurrentNum);
+                    manageInfo();
+                    toolbar.setTitle(pdfFileName);
+                    getNormalBitmap();
+                    pdfView.recycle();
+                    displayFromFile(uri);
+                    isAutoTrans = false;
+                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                    getWhiteBlankData();
+                }
+                /*List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
                 Collections.sort(maps);
                 for (int i = 0; i < maps.size(); i++) {
                     ElectronicAtlasMap m = maps.get(i);
@@ -10435,7 +10494,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         }
                         break;
                     }
-                }
+                }*/
             }
         });
     }
@@ -10597,8 +10656,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     return true;
                                 }
                             } else if (queryMode == TuzhiEnum.POI_QUERY){
-                                if (query.equals("CXZRMZXYSJ"))
+                                if (query.equals("DQSYSJ"))
                                     AddData();
+                                else if (query.equals("DELETEALL")){
+                                    LitePal.deleteAll(POI.class);
+                                    LitePal.deleteAll(MTAPE.class);
+                                    LitePal.deleteAll(MVEDIO.class);
+                                    LitePal.deleteAll(MPHOTO.class);
+                                    LitePal.deleteAll(Lines_WhiteBlank.class);
+                                }
                                 else
                                     showListPopupWindowForNationMaps(searchView, query);
                                 //showListPopupWindow(searchView, query);
@@ -10764,41 +10830,46 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         }
         if (resultCode == RESULT_OK && requestCode == EnumClass.REQUEST_CODE_TAPE) {
             final Uri uri = data.getData();
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
-            builder.setTitle("提示");
-            builder.setMessage("请选择你要添加的图层");
-            builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (!esterEgg_lm) AddTape(uri, 0);
-                }
-            });
-            builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (!esterEgg_lm) AddTape(uri, 1);
-                    else {
-                        dmbzList = LitePal.findAll(DMBZ.class);
-                        int size = dmbzList.size();
-                        DMBZ dmbz = new DMBZ();
-                        dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
-                        dmbz.setLat((float) m_lat);
-                        dmbz.setLng((float) m_long);
-                        dmbz.setXH(String.valueOf(size + 1));
-                        dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
-                        dmbz.save();
-                        getDMBZBitmap();
-                        pdfView.zoomWithAnimation(c_zoom);
+            if (DataUtil.getRealPathFromUriForAudio(this, uri).contains("Android/data")){
+                Toast.makeText(MainInterface.this, "权限问题，该手机无法正常保存录音文件！", Toast.LENGTH_LONG).show();
+            }
+            else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainInterface.this);
+                builder.setTitle("提示");
+                builder.setMessage("请选择你要添加的图层");
+                builder.setNeutralButton(strings[0], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!esterEgg_lm) AddTape(uri, 0);
                     }
-                }
-            });
-            builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (!esterEgg_lm) AddTape(uri, 2);
-                }
-            });
-            builder.show();
+                });
+                builder.setNegativeButton(strings[1], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!esterEgg_lm) AddTape(uri, 1);
+                        else {
+                            dmbzList = LitePal.findAll(DMBZ.class);
+                            int size = dmbzList.size();
+                            DMBZ dmbz = new DMBZ();
+                            dmbz.setTAPEPATH(DataUtil.getRealPathFromUriForPhoto(MainInterface.this, uri));
+                            dmbz.setLat((float) m_lat);
+                            dmbz.setLng((float) m_long);
+                            dmbz.setXH(String.valueOf(size + 1));
+                            dmbz.setTime(simpleDateFormat1.format(new Date(System.currentTimeMillis())));
+                            dmbz.save();
+                            getDMBZBitmap();
+                            pdfView.zoomWithAnimation(c_zoom);
+                        }
+                    }
+                });
+                builder.setPositiveButton(strings[2], new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!esterEgg_lm) AddTape(uri, 2);
+                    }
+                });
+                builder.show();
+            }
         }
         if (resultCode == RESULT_OK && requestCode == EnumClass.TAKE_PHOTO) {
             theNum = 0;

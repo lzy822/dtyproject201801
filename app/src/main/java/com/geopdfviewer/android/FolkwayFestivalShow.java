@@ -74,21 +74,27 @@ public class FolkwayFestivalShow extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         List<String> mprocess = new ArrayList<>();
         List<KeyAndValue> keyAndValues = new ArrayList<>();
-        String[] days = festival.getProcedure().replace("|", "&").split("&");
+        String[] days = festival.getProcedure().split(";");
         for (int i = 0; i < days.length; i++) {
             String process = days[i];
-            String[] processs = process.split(",");
+            String[] processs = process.replace("|", "&").split("&");
             for (int j = 0; j < processs.length; j++) {
                 String CeremonyOrActivity = processs[j];
                 if (CeremonyOrActivity.contains("C")){
-                    Folkway_Ceremony folkway_ceremony = LitePal.where("objectid = ?", CeremonyOrActivity).find(Folkway_Ceremony.class).get(0);
-                    mprocess.add(folkway_ceremony.getName());
-                    keyAndValues.add(new KeyAndValue(CeremonyOrActivity, String.valueOf(i)));
+                    List<Folkway_Ceremony> list = LitePal.where("objectid = ?", CeremonyOrActivity).find(Folkway_Ceremony.class);
+                    if (list.size() > 0) {
+                        Folkway_Ceremony folkway_ceremony = list.get(0);
+                        mprocess.add(folkway_ceremony.getName());
+                        keyAndValues.add(new KeyAndValue(CeremonyOrActivity, String.valueOf(i)));
+                    }
                 }
                 else if (CeremonyOrActivity.contains("A")){
-                    Folkway_OtherActivity folkwayOtherActivity = LitePal.where("objectid = ?", CeremonyOrActivity).find(Folkway_OtherActivity.class).get(0);
-                    mprocess.add(folkwayOtherActivity.getActivityName());
-                    keyAndValues.add(new KeyAndValue(CeremonyOrActivity, String.valueOf(i)));
+                    List<Folkway_OtherActivity> list = LitePal.where("objectid = ?", CeremonyOrActivity).find(Folkway_OtherActivity.class);
+                    if (list.size() > 0) {
+                        Folkway_OtherActivity folkwayOtherActivity = list.get(0);
+                        mprocess.add(folkwayOtherActivity.getActivityName());
+                        keyAndValues.add(new KeyAndValue(CeremonyOrActivity, String.valueOf(i)));
+                    }
                 }
             }
         }
@@ -128,12 +134,16 @@ public class FolkwayFestivalShow extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         List<String> taboolist = new ArrayList<>();
         List<String> objectids = new ArrayList<>();
-        String[] taboos = festival.getTaboo().split(",");
+        String[] taboos = festival.getTaboo().replace("|", "&").split("&");
         for (int i = 0; i < taboos.length; i++) {
             String taboo = taboos[i];
-            Folkway_Taboo folkway_taboo = LitePal.where("objectid = ?", taboo).find(Folkway_Taboo.class).get(0);
-            taboolist.add((i+1) + ": " + folkway_taboo.getName());
-            objectids.add(taboo);
+            Log.w(TAG, "MakeTabooPart: " + taboo);
+            List<Folkway_Taboo> list = LitePal.where("objectid = ?", taboo).find(Folkway_Taboo.class);
+            if (list.size() > 0) {
+                Folkway_Taboo folkway_taboo = list.get(0);
+                taboolist.add((i + 1) + ": " + folkway_taboo.getName());
+                objectids.add(taboo);
+            }
         }
 
         FestivalAdapter festivalAdapter = new FestivalAdapter(taboolist);
@@ -166,16 +176,22 @@ public class FolkwayFestivalShow extends AppCompatActivity {
     private void MakeStoryPart(Folkway_Festival festival){
         TextView festivalstory = findViewById(R.id.txt_festival_story);
         String storys = "";
-        //String[] stories = festival.getStory().replace("|", "&").split("&");
-        String[] stories = "S4|S6|S7|S8".replace("|", "&").split("&");
+        String[] stories = festival.getStory().replace("|", "&").split("&");
+        //String[] stories = "S4|S6|S7|S8".replace("|", "&").split("&");
         for (int i = 0; i < stories.length; i++) {
-            Folkway_Story folkway_story = LitePal.where("objectid = ?", stories[i]).find(Folkway_Story.class).get(0);
-            if (i<stories.length-1)
-                storys+=(i+1) + ": " + folkway_story.getName() + "\n";
-            else
-                storys+=(i+1) + ": " + folkway_story.getName();
+            List<Folkway_Story> list = LitePal.where("objectid = ?", stories[i]).find(Folkway_Story.class);
+            if (list.size() > 0) {
+                Folkway_Story folkway_story = list.get(0);
+                if (i < stories.length - 1)
+                    storys += (i + 1) + ": " + folkway_story.getName() + "\n";
+                else
+                    storys += (i + 1) + ": " + folkway_story.getName();
+            }
         }
-        festivalstory.setText(storys);
+        if (storys.length() > 0)
+            festivalstory.setText(storys);
+        else
+            festivalstory.setText("无");
     }
 
     private void MakeViligePart(Folkway_Festival festival){
@@ -254,10 +270,11 @@ public class FolkwayFestivalShow extends AppCompatActivity {
 
         List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", festival.getObjectID()).find(Folkway_Festival.class);
         String process = folkway_festivals.get(0).getProcedure();
-        process = process.replace("|", "&");
-        String[] days = process.split("&");
+        /*process = process.replace("|", "&");
+        String[] days = process.split("&");*/
+        String[] days = process.split(";");
         for (int j = 0; j < days.length; j++) {
-            String[] oneday = days[j].split(",");
+            String[] oneday = days[j].replace("|", "&").split("&");
             for (int k = 0; k < oneday.length; k++) {
                 String activity = oneday[k];
                 if (activity.contains("C")) {
@@ -358,10 +375,11 @@ public class FolkwayFestivalShow extends AppCompatActivity {
         List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", festival.getObjectID()).find(Folkway_Festival.class);
 
         String process = folkway_festivals.get(0).getProcedure();
-        process = process.replace("|", "&");
-        String[] days = process.split("&");
+        /*process = process.replace("|", "&");
+        String[] days = process.split("&");*/
+        String[] days = process.split(";");
         for (int j = 0; j < days.length; j++) {
-            String[] oneday = days[j].split(",");
+            String[] oneday = days[j].replace("|", "&").split("&");
             for (int k = 0; k < oneday.length; k++) {
                 String activity = oneday[k];
                 if (activity.contains("C")) {
@@ -461,10 +479,11 @@ public class FolkwayFestivalShow extends AppCompatActivity {
         List<Folkway_Festival> folkway_festivals = LitePal.where("objectID = ?", festival.getObjectID()).find(Folkway_Festival.class);
 
         String process = folkway_festivals.get(0).getProcedure();
-        process = process.replace("|", "&");
-        String[] days = process.split("&");
+        /*process = process.replace("|", "&");
+        String[] days = process.split("&");*/
+        String[] days = process.split(";");
         for (int j = 0; j < days.length; j++) {
-            String[] oneday = days[j].split(",");
+            String[] oneday = days[j].replace("|", "&").split("&");
             for (int k = 0; k < oneday.length; k++) {
                 String activity = oneday[k];
                 if (activity.contains("C")) {
@@ -524,6 +543,9 @@ public class FolkwayFestivalShow extends AppCompatActivity {
     private void MakeJoinmenPart(Folkway_Festival festival){
         List<String> objectids = GetJoinmenForFestival(festival);
         List<String> standardInfos = GetJoinmenNameForOID(objectids);
+        for (int i = 0; i < standardInfos.size(); i++) {
+            standardInfos.set(i, (i+1) + ", " + standardInfos.get(i));
+        }
         TextView festivalviliges = findViewById(R.id.txt_festival_joinmen);
         festivalviliges.setText("该节日有以下" + standardInfos.size() + "个参与群体：");
 

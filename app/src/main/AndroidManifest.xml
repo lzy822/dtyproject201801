@@ -29,12 +29,15 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FolkwayObjectShow"></activity>
+        <activity android:name=".FolkwayTabooShow"></activity>
+        <activity android:name=".FolkwayParticipantShow" />
+        <activity android:name=".FolkwayObjectShow" />
         <activity android:name=".FolkwayMasterShow" />
         <activity android:name=".FolkwayCeremonyShow" />
         <activity android:name=".FolkwayFestivalShow" />
         <activity android:name=".FolkwaysShow" />
-        <activity android:name=".VideoShow" />
+        <activity android:name=".VideoShow"
+            android:screenOrientation="portrait" ></activity>
         <activity android:name=".Vedioshow" />
         <activity
             android:name=".MainInterface"
@@ -60,10 +63,12 @@
             android:label="所有POI信息" />
         <activity
             android:name=".photoshow"
-            android:hardwareAccelerated="true" />
+            android:hardwareAccelerated="true"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".tapeshow"
-            android:hardwareAccelerated="true" />
+            android:hardwareAccelerated="true"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
