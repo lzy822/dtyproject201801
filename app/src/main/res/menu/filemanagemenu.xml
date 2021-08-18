@@ -6,4 +6,10 @@
         android:icon="@drawable/ic_arrow_back"
         android:title="@string/BackBt"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/closeall_filemanage"
+        android:icon="@drawable/ic_close_white_24dp"
+        android:title="@string/CloseAll"
+        android:visible="false"
+        app:showAsAction="always"/>
 </menu>

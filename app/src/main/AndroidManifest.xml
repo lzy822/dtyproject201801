@@ -43,7 +43,8 @@
             android:name=".MainInterface"
             android:hardwareAccelerated="true"
             android:label="@string/app_showname"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask" />
         <activity
             android:name=".select_page"
             android:hardwareAccelerated="true"

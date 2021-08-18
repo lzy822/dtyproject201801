@@ -829,7 +829,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 0;
-                        // TODO LM
                         if (!esterEgg_lm) {
                             GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                         }
@@ -844,7 +843,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         CreatePOI = true;
                         POIType = 1;
 
-                        // TODO LM
                         if (!esterEgg_lm) {
                             GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
                         } else {
@@ -860,7 +858,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     public void onClick(DialogInterface dialog, int which) {
                         CreatePOI = true;
                         POIType = 2;
-                        // TODO LM
+
                         if (!esterEgg_lm) {
                             GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
                         }
@@ -893,7 +891,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             public void onClick(DialogInterface dialog, int which) {
                                 CreatePOI = true;
                                 POIType = 0;
-                                // TODO LM
+
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 0));
                                 }
@@ -908,7 +906,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 CreatePOI = true;
                                 POIType = 1;
 
-                                // TODO LM
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 1));
                                 } else {
@@ -924,7 +921,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             public void onClick(DialogInterface dialog, int which) {
                                 CreatePOI = true;
                                 POIType = 2;
-                                // TODO LM
+
                                 if (!esterEgg_lm) {
                                     GoNormalSinglePOIPage(AddNormalPOI(pt1, 2));
                                 }
@@ -1156,7 +1153,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             //locError(Integer.toString(kmltests.get(num).getPhotonum()));
                         } else locError("没有正常查询");
                     }
-                    // TODO LM
+
                 } else if (esterEgg_lm) {
                     int n = 0;
                     int num = 0;
@@ -1903,8 +1900,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         viewer_height = pdfView.getHeight();
         viewer_width = pdfView.getWidth();
 
-        DrawFolkwayPOI(canvas);
-        HighLightFolkwayPOI(canvas);
+        if (showMZXYPoint) {
+            DrawFolkwayPOI(canvas);
+            HighLightFolkwayPOI(canvas);
+        }
         Log.w(TAG, "getGeoLocFromPixL, current: " + current_pageheight + ", " + current_pagewidth);
         Log.w(TAG, "getGeoLocFromPixL, viewer: " + viewer_height + ", " + viewer_width);
 
@@ -2103,7 +2102,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 if (esterEgg_plq) drawPLQData(canvas);
                 //List<POI> pois = LitePal.where("ic = ?", ic).find(POI.class);
 
-                // TODO LM
+
                 if (type2Checked && esterEgg_lm) {
                     drawDMBZ(canvas);
                 }
@@ -4199,7 +4198,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         intent.putExtra("POIC", poic);
         startActivity(intent);*/
         Log.w(TAG, "updateMapPage: ");
-        // TODO LM
+
         if (!esterEgg_lm) GoNormalSinglePOIPage(poic);
     }
 
@@ -6058,6 +6057,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         }
     }
 
+    Boolean showMZXYPoint = true;
     private void initCheckbox() {
         trailLayerBt = (CheckBox) findViewById(R.id.trailLayer);
         whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer);
@@ -6066,6 +6066,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
         type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
         type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
+        CheckBox mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
+        mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                showMZXYPoint = b;
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
         trailLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -8250,6 +8258,21 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
         });
         locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
+        locHere_fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (showCheckboxes)
+                {
+                    showCheckboxes = false;
+                    RemoveAllCheckbox();
+                }
+                else{
+                    showCheckboxes = true;
+                    ShowAllCheckbox();
+                }
+                return false;
+            }
+        });
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         //params.addRule(RelativeLayout., whiteBlank_fab.getId());
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
@@ -8314,6 +8337,59 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         restoreZoom_fab.setVisibility(View.VISIBLE);
         locHere_fab.setVisibility(View.VISIBLE);
         addPhoto_fab.setVisibility(View.VISIBLE);*/
+    }
+
+    private Boolean showCheckboxes = true;
+    private void ShowAllCheckbox(){
+        trailLayerBt = (CheckBox) findViewById(R.id.trailLayer);
+        whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer);
+        centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
+        poiLayerBt = (CheckBox) findViewById(R.id.poiLayer);
+        type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
+        type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
+        type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
+        CheckBox mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
+        mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                showMZXYPoint = b;
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        trailLayerBt.setVisibility(View.VISIBLE);
+        whiteBlankLayerBt.setVisibility(View.VISIBLE);
+        centerPointModeBt.setVisibility(View.VISIBLE);
+        poiLayerBt.setVisibility(View.VISIBLE);
+        type1_checkbox.setVisibility(View.VISIBLE);
+        type2_checkbox.setVisibility(View.VISIBLE);
+        type3_checkbox.setVisibility(View.VISIBLE);
+        mzxyCheckbox.setVisibility(View.VISIBLE);
+    }
+
+    private void RemoveAllCheckbox(){
+        trailLayerBt = (CheckBox) findViewById(R.id.trailLayer);
+        whiteBlankLayerBt = (CheckBox) findViewById(R.id.whiteBlankLayer);
+        centerPointModeBt = (CheckBox) findViewById(R.id.centerPointMode);
+        poiLayerBt = (CheckBox) findViewById(R.id.poiLayer);
+        type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
+        type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
+        type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
+        CheckBox mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
+        mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                showMZXYPoint = b;
+                pdfView.zoomWithAnimation(c_zoom);
+            }
+        });
+        trailLayerBt.setVisibility(View.GONE);
+        whiteBlankLayerBt.setVisibility(View.GONE);
+        centerPointModeBt.setVisibility(View.GONE);
+        poiLayerBt.setVisibility(View.GONE);
+        type1_checkbox.setVisibility(View.GONE);
+        type2_checkbox.setVisibility(View.GONE);
+        type3_checkbox.setVisibility(View.GONE);
+        mzxyCheckbox.setVisibility(View.GONE);
     }
 
     private void initWidget() {
@@ -8814,6 +8890,21 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             }
         });
         locHere_fab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.locHere);
+        locHere_fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (showCheckboxes)
+                {
+                    showCheckboxes = false;
+                    RemoveAllCheckbox();
+                }
+                else{
+                    showCheckboxes = true;
+                    ShowAllCheckbox();
+                }
+                return false;
+            }
+        });
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         //params.addRule(RelativeLayout., whiteBlank_fab.getId());
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
@@ -8946,11 +9037,11 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     }
 
     private void showPositionModuleError(){
-        Toast.makeText(MyApplication.getContext(), R.string.LocError, Toast.LENGTH_LONG).show();
+        Toast.makeText(MyApplication.getContext(), R.string.LocError, Toast.LENGTH_SHORT).show();
     }
 
     private void showDeviceNotInThisMapError(){
-        Toast.makeText(MyApplication.getContext(), R.string.LocError, Toast.LENGTH_LONG).show();
+        Toast.makeText(MyApplication.getContext(), R.string.LocError, Toast.LENGTH_SHORT).show();
     }
 
     private void clickLocHereBT(){
@@ -10666,7 +10757,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     LitePal.deleteAll(Lines_WhiteBlank.class);
                                 }
                                 else
+                                {
                                     showListPopupWindowForNationMaps(searchView, query);
+                                    showListPopupWindow(searchView, query);
+                                }
                                 //showListPopupWindow(searchView, query);
                                 //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
                                 return true;

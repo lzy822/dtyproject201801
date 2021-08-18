@@ -34,12 +34,13 @@ public class FolkwayCeremonyShow extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_folkway_ceremony_show);
+        ActivityCollector.addActivity(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.folkway_ceremony_toolbar);
         toolbar.setTitle("仪式");
         setSupportActionBar(toolbar);
         final Intent intent = getIntent();
         String oid = intent.getStringExtra("objectid");
-        Toast.makeText(FolkwayCeremonyShow.this, oid, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(FolkwayCeremonyShow.this, oid, Toast.LENGTH_SHORT).show();
 
         Folkway_Ceremony ceremony = LitePal.where("objectid = ?", oid).find(Folkway_Ceremony.class).get(0);
         TextView ceremonyname = findViewById(R.id.txt_ceremony_name);
@@ -89,6 +90,11 @@ public class FolkwayCeremonyShow extends AppCompatActivity {
             @Override
             public void onItemClick(View view, String Name, int position) {
                 String CeremonyOrActivity = objectids.get(position);
+
+
+                Intent intent = new Intent(FolkwayCeremonyShow.this, FolkwayTabooShow.class);
+                intent.putExtra("objectid", CeremonyOrActivity);
+                startActivity(intent);
 
                 /*Intent intent = new Intent(FolkwayFestivalShow.this, Fo.class);
                 intent.putExtra("objectid", keyAndValues.get(position).getKey());
@@ -402,6 +408,7 @@ public class FolkwayCeremonyShow extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.filemanagemenu, menu);
         menu.findItem(R.id.back_filemanage).setVisible(true);
+        menu.findItem(R.id.closeall_filemanage).setVisible(true);
         return true;
     }
     @Override
@@ -410,8 +417,17 @@ public class FolkwayCeremonyShow extends AppCompatActivity {
             case R.id.back_filemanage:
                 this.finish();
                 break;
+            case R.id.closeall_filemanage:
+                ActivityCollector.finishAll();
+                break;
             default:
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollector.removeActivity(this);
     }
 }

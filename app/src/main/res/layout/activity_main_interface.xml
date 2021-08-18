@@ -191,10 +191,19 @@
             android:textSize="12sp"
             android:textStyle="bold"/>
         <CheckBox
+            android:id="@+id/mzxy_poiLayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="180dp"
+            android:layout_alignParentRight="true"
+            android:text="自然村显示"
+            android:checked="true"
+            android:textStyle="bold"/>
+        <CheckBox
             android:id="@+id/trailLayer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="190dp"
+            android:layout_marginTop="210dp"
             android:layout_alignParentRight="true"
             android:text="@string/ShowTrail"
             android:textStyle="bold"/>
@@ -202,7 +211,7 @@
             android:id="@+id/whiteBlankLayer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="220dp"
+            android:layout_marginTop="240dp"
             android:layout_alignParentRight="true"
             android:text="@string/ShowWhiteBlank"
             android:textStyle="bold"/>
@@ -210,7 +219,7 @@
             android:id="@+id/centerPointMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="260dp"
+            android:layout_marginTop="280dp"
             android:layout_alignParentRight="true"
             android:text="@string/CenterMode"
             android:textColor="#ff0000"

@@ -36,12 +36,13 @@ public class FolkwayFestivalShow extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_folkway_festival_show);
+        ActivityCollector.addActivity(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.folkway_festival_toolbar);
         toolbar.setTitle("节日");
         setSupportActionBar(toolbar);
         final Intent intent = getIntent();
         String oid = intent.getStringExtra("objectid");
-        Toast.makeText(FolkwayFestivalShow.this, oid, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(FolkwayFestivalShow.this, oid, Toast.LENGTH_SHORT).show();
         Folkway_Festival festival = LitePal.where("objectid = ?", oid).find(Folkway_Festival.class).get(0);
         TextView festivalname = findViewById(R.id.txt_festival_name);
         festivalname.setText(festival.getName());
@@ -153,9 +154,11 @@ public class FolkwayFestivalShow extends AppCompatActivity {
             public void onItemClick(View view, String Name, int position) {
                 String CeremonyOrActivity = objectids.get(position);
 
-                /*Intent intent = new Intent(FolkwayFestivalShow.this, Fo.class);
-                intent.putExtra("objectid", keyAndValues.get(position).getKey());
-                startActivity(intent);*/
+
+                Intent intent = new Intent(FolkwayFestivalShow.this, FolkwayTabooShow.class);
+                intent.putExtra("objectid", CeremonyOrActivity);
+                startActivity(intent);
+
                 /*else if (CeremonyOrActivity.contains("A")){
                     Intent intent = new Intent(FolkwayFestivalShow.this, F.class);
                     intent.putExtra("objectid", keyAndValues.get(position).getKey());
@@ -576,10 +579,12 @@ public class FolkwayFestivalShow extends AppCompatActivity {
         });
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.filemanagemenu, menu);
         menu.findItem(R.id.back_filemanage).setVisible(true);
+        menu.findItem(R.id.closeall_filemanage).setVisible(true);
         return true;
     }
     @Override
@@ -588,8 +593,17 @@ public class FolkwayFestivalShow extends AppCompatActivity {
             case R.id.back_filemanage:
                 this.finish();
                 break;
+            case R.id.closeall_filemanage:
+                ActivityCollector.finishAll();
+                break;
             default:
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollector.removeActivity(this);
     }
 }

@@ -33,12 +33,13 @@ public class FolkwayMasterShow extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_folkway_master_show);
+        ActivityCollector.addActivity(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.folkway_master_toolbar);
         toolbar.setTitle("主持人");
         setSupportActionBar(toolbar);
         final Intent intent = getIntent();
         String oid = intent.getStringExtra("objectid");
-        Toast.makeText(FolkwayMasterShow.this, oid, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(FolkwayMasterShow.this, oid, Toast.LENGTH_SHORT).show();
 
         Folkway_Master folkway_master = LitePal.where("objectid = ?", oid).find(Folkway_Master.class).get(0);
         TextView masterIdentity = findViewById(R.id.txt_master_identity);
@@ -396,11 +397,11 @@ public class FolkwayMasterShow extends AppCompatActivity {
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.filemanagemenu, menu);
         menu.findItem(R.id.back_filemanage).setVisible(true);
+        menu.findItem(R.id.closeall_filemanage).setVisible(true);
         return true;
     }
     @Override
@@ -409,8 +410,17 @@ public class FolkwayMasterShow extends AppCompatActivity {
             case R.id.back_filemanage:
                 this.finish();
                 break;
+            case R.id.closeall_filemanage:
+                ActivityCollector.finishAll();
+                break;
             default:
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollector.removeActivity(this);
     }
 }

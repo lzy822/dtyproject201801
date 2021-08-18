@@ -34,6 +34,7 @@
     <string name="CancelBt">取消</string>
     <string name="ShowInfoBt">版本信息</string>
     <string name="BackBt">返回</string>
+    <string name="CloseAll">关闭所有窗口</string>
     <string name="SimpleQueryBt">简单查询</string>
     <string name="InfoBt">信息</string>
     <string name="QueryAllPOIBt">查询所有兴趣点</string>

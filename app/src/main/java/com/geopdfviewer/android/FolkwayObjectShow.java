@@ -26,12 +26,13 @@ public class FolkwayObjectShow extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_folkway_object_show);
+        ActivityCollector.addActivity(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.folkway_object_toolbar);
         toolbar.setTitle("祭祀对象");
         setSupportActionBar(toolbar);
         final Intent intent = getIntent();
         String oid = intent.getStringExtra("objectid");
-        Toast.makeText(FolkwayObjectShow.this, oid, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(FolkwayObjectShow.this, oid, Toast.LENGTH_SHORT).show();
 
         Folkway_Object folkway_object = LitePal.where("objectid = ?", oid).find(Folkway_Object.class).get(0);
 
@@ -383,10 +384,12 @@ public class FolkwayObjectShow extends AppCompatActivity {
         });
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.filemanagemenu, menu);
         menu.findItem(R.id.back_filemanage).setVisible(true);
+        menu.findItem(R.id.closeall_filemanage).setVisible(true);
         return true;
     }
     @Override
@@ -395,8 +398,17 @@ public class FolkwayObjectShow extends AppCompatActivity {
             case R.id.back_filemanage:
                 this.finish();
                 break;
+            case R.id.closeall_filemanage:
+                ActivityCollector.finishAll();
+                break;
             default:
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollector.removeActivity(this);
     }
 }
