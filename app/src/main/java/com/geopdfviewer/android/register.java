@@ -362,8 +362,8 @@ public class register extends AppCompatActivity {
                 if (isOKforGo) {
                     editor.apply();
                     //Intent intent = new Intent(register.this, JZActivity.class);
-                    Intent intent = new Intent(register.this, select_page.class);
-                    //Intent intent = new Intent(register.this, MainInterface.class);
+                    //Intent intent = new Intent(register.this, select_page.class);
+                    Intent intent = new Intent(register.this, MainInterface.class);
                     startActivity(intent);
                     register.this.finish();
                 } else

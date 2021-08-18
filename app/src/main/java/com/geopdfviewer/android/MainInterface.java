@@ -422,6 +422,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     mPOIobj queriedPoi;
     private boolean hasQueriedLine = false;
     DMLine queriedLine;
+    //其中VersionType为1时，该系统在使用图志系统
+    //其中VersionType为2时，该系统在使用临沧市电子地图集
+    private int VersionType;
 
     private SensorEventListener listener = new SensorEventListener() {
         @Override
@@ -2196,355 +2199,366 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     drawLineFromLineString("", mdrawLineFeature, false, false, canvas, paint9, paint2);
             }
             if (isAutoTrans && (isZoom == TuzhiEnum.ZOOM_IN || c_zoom == 10)) {
-
-                /*
-                List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
-                Collections.sort(mapList);
-                int size = mapList.size();
-                float thedelta = 0;
-                String theName = "";
-                for (int j = 0; j < size; ++j) {
-                    ElectronicAtlasMap map = mapList.get(j);
-                    String MapGeoStr = map.getMapGeoStr();
-                    if (MapGeoStr != null) {
-                        String[] MapGeoStrs = MapGeoStr.split(",");
-                        String MGPTS = MapGeoStrs[0];
-                        int MMapType = map.getMapType();
-                        if ((MMapType == 1 || MMapType >= 5) && MGPTS != null && !MGPTS.isEmpty()) {
-                            String[] GPTString = MGPTS.split(" ");
-                            float[] GPTSs = new float[GPTString.length];
-                            for (int i = 0; i < GPTString.length; ++i) {
-                                GPTSs[i] = Float.valueOf(GPTString[i]);
-                            }
-                            float lat_axis, long_axis;
-                            PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                            lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                            long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                            for (int i = 0; i < GPTSs.length; i = i + 2){
-                                if (GPTSs[i] < lat_axis) {
-                                    if (GPTSs[i + 1] < long_axis) {
-                                        pt_lb.x = GPTSs[i];
-                                        pt_lb.y = GPTSs[i + 1];
-                                    } else {
-                                        pt_rb.x = GPTSs[i];
-                                        pt_rb.y = GPTSs[i + 1];
-                                    }
-                                } else {
-                                    if (GPTSs[i + 1] < long_axis) {
-                                        pt_lt.x = GPTSs[i];
-                                        pt_lt.y = GPTSs[i + 1];
-                                    } else {
-                                        pt_rt.x = GPTSs[i];
-                                        pt_rt.y = GPTSs[i + 1];
-                                    }
-                                }
-                            }
-                            locError("see here");
-                            locError("see here");
-                            float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                            float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                            float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                            float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                            if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
-                                float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                                locError("find delta1: " + Float.toString(thedelta1));
-                                locError("find delta: " + Float.toString(thedelta));
-                                locError("find num: " + Integer.toString(j));
-                                if (j != num_map) {
-                                    if (thedelta == 0) {
-                                        thedelta = thedelta1;
-                                        theName = map.getName();
-                                    }
-                                    if (thedelta1 < thedelta) {
-                                        locError("change!!!");
-                                        thedelta = thedelta1;
-                                        theName = map.getName();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                Log.w(TAG, "theName: " + theName);
-                double deltaK_trans;
-                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
-                locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
-                if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
-                    getInfoForElectronicAtlasWithGeoInfo(theName);
-                    manageInfoForElectronicAtlasWithGeoInfo();
-                    geometry_whiteBlanks.clear();
-                    num_whiteBlankPt = 0;
-                    isWhiteBlank = false;
-                    whiteBlankPt = "";
-                    getWhiteBlankData();
-                    isAutoTrans = false;
-                    getNormalBitmap();
-                    toolbar.setTitle(pdfFileName);
-                    pdfView.recycle();
-                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                    displayFromFile(uri);
-                }*/
-            //老版图志
-            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
-            int size = pref1.getInt("num", 0);
-            if (size != 0) {
-                float thedelta = 0;
-                int thenum = 0;
-                for (int j = 1; j <= size; ++j) {
-                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
-                    String str = "n_" + j + "_";
-                    String Muri = pref2.getString(str + "uri", "");
-                    String MGPTS = pref2.getString(str + "GPTS", "");
-                    int MMapType = pref2.getInt(str + "MapType", -1);
-                    if (MGPTS != null && !MGPTS.isEmpty())
-                    {
-                        String[] GPTString = MGPTS.split(" ");
-                        float[] GPTSs = new float[GPTString.length];
-                        for (int i = 0; i < GPTString.length; ++i) {
-                            GPTSs[i] = Float.valueOf(GPTString[i]);
-                        }
-                        float lat_axis, long_axis;
-                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                        for (int i = 0; i < GPTSs.length; i = i + 2) {
-                            if (GPTSs[i] < lat_axis) {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lb.x = GPTSs[i];
-                                    pt_lb.y = GPTSs[i + 1];
-                                } else {
-                                    pt_rb.x = GPTSs[i];
-                                    pt_rb.y = GPTSs[i + 1];
-                                }
-                            } else {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lt.x = GPTSs[i];
-                                    pt_lt.y = GPTSs[i + 1];
-                                } else {
-                                    pt_rt.x = GPTSs[i];
-                                    pt_rt.y = GPTSs[i + 1];
-                                }
-                            }
-                        }
-                        locError("see here");
-                        locError("see here");
-                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                        if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
-                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                            locError("find delta1: " + Float.toString(thedelta1));
-                            locError("find delta: " + Float.toString(thedelta));
-                            locError("find num: " + Integer.toString(j));
-                            if (j != num_map) {
-                                if (thedelta == 0) {
-                                    thedelta = thedelta1;
-                                    thenum = j;
-                                }
-                                if (thedelta1 < thedelta) {
-                                    locError("change!!!");
-                                    thedelta = thedelta1;
-                                    thenum = j;
-                                }
-                            }
-                            locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
-                        }
-                    }
-                }
-                double deltaK_trans;
-                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
-                locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
-                if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
-                    geometry_whiteBlanks.clear();
-                    num_whiteBlankPt = 0;
-                    isWhiteBlank = false;
-                    whiteBlankPt = "";
-                    num_map1 = num_map;
-                    getInfo(thenum);
-                    CurrentNum = thenum;
-                    manageInfo();
-                    toolbar.setTitle(pdfFileName);
-                    getNormalBitmap();
-                    pdfView.recycle();
-                    displayFromFile(uri);
-                    isAutoTrans = false;
-                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                    getWhiteBlankData();
-                }
-            } else
-                Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
-            } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
-                //电子地图集
-                /*List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
-                Collections.sort(mapList);
-                int size = mapList.size();
-                float thedelta = 0;
-                String theName = "";
-                for (int j = 0; j < size; j++) {
-                    ElectronicAtlasMap map = mapList.get(j);
-                    String MapGeoStr = map.getMapGeoStr();
-                    if (MapGeoStr != null) {
-                        String[] MapGeoStrs = MapGeoStr.split(",");
-                        String MGPTS = MapGeoStrs[0];
-                        int MMapType = map.getMapType();
-                        if ((MMapType == 1 || MMapType >= 5)) {
-                            Log.w(TAG, "GPTS: " + MGPTS);
-                            String[] GPTString = MGPTS.split(" ");
-                            float[] GPTSs = new float[GPTString.length];
-                            for (int i = 0; i < GPTString.length; ++i) {
+                switch (VersionType){
+                    case 1:
+                        //老版图志
+                        SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+                        int size = pref1.getInt("num", 0);
+                        if (size != 0) {
+                            float thedelta = 0;
+                            int thenum = 0;
+                            for (int j = 1; j <= size; ++j) {
+                                SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                                String str = "n_" + j + "_";
+                                String Muri = pref2.getString(str + "uri", "");
+                                String MGPTS = pref2.getString(str + "GPTS", "");
+                                int MMapType = pref2.getInt(str + "MapType", -1);
                                 if (MGPTS != null && !MGPTS.isEmpty())
-                                    GPTSs[i] = Float.valueOf(GPTString[i]);
-                            }
-                            float lat_axis, long_axis;
-                            PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                            lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                            long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                            for (int i = 0; i < GPTSs.length; i = i + 2) {
-                                if (GPTSs[i] < lat_axis) {
-                                    if (GPTSs[i + 1] < long_axis) {
-                                        pt_lb.x = GPTSs[i];
-                                        pt_lb.y = GPTSs[i + 1];
-                                    } else {
-                                        pt_rb.x = GPTSs[i];
-                                        pt_rb.y = GPTSs[i + 1];
+                                {
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; ++i) {
+                                        GPTSs[i] = Float.valueOf(GPTString[i]);
                                     }
-                                } else {
-                                    if (GPTSs[i + 1] < long_axis) {
-                                        pt_lt.x = GPTSs[i];
-                                        pt_lt.y = GPTSs[i + 1];
-                                    } else {
-                                        pt_rt.x = GPTSs[i];
-                                        pt_rt.y = GPTSs[i + 1];
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2) {
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    locError("see here");
+                                    locError("see here");
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        locError("find delta1: " + Float.toString(thedelta1));
+                                        locError("find delta: " + Float.toString(thedelta));
+                                        locError("find num: " + Integer.toString(j));
+                                        if (j != num_map) {
+                                            if (thedelta == 0) {
+                                                thedelta = thedelta1;
+                                                thenum = j;
+                                            }
+                                            if (thedelta1 < thedelta) {
+                                                locError("change!!!");
+                                                thedelta = thedelta1;
+                                                thenum = j;
+                                            }
+                                        }
+                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
                                     }
                                 }
                             }
-                            float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                            float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                            float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                            float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                            if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
-                                float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                                if (thedelta == 0) {
-                                    thedelta = thedelta1;
-                                    theName = map.getName();
-                                } else if (thedelta1 < thedelta) {
-                                    thedelta = thedelta1;
-                                    theName = map.getName();
+                            double deltaK_trans;
+                            deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
+                            locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
+                            if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
+                                geometry_whiteBlanks.clear();
+                                num_whiteBlankPt = 0;
+                                isWhiteBlank = false;
+                                whiteBlankPt = "";
+                                num_map1 = num_map;
+                                getInfo(thenum);
+                                CurrentNum = thenum;
+                                manageInfo();
+                                toolbar.setTitle(pdfFileName);
+                                getNormalBitmap();
+                                pdfView.recycle();
+                                displayFromFile(uri);
+                                isAutoTrans = false;
+                                autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                getWhiteBlankData();
+                            }
+                        } else
+                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+                        break;
+                    case 2:
+                        List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                        Collections.sort(mapList);
+                        int size1 = mapList.size();
+                        float thedelta = 0;
+                        String theName = "";
+                        for (int j = 0; j < size1; ++j) {
+                            ElectronicAtlasMap map = mapList.get(j);
+                            String MapGeoStr = map.getMapGeoStr();
+                            if (MapGeoStr != null) {
+                                String[] MapGeoStrs = MapGeoStr.split(",");
+                                String MGPTS = MapGeoStrs[0];
+                                int MMapType = map.getMapType();
+                                if ((MMapType == 1 || MMapType >= 5) && MGPTS != null && !MGPTS.isEmpty()) {
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; ++i) {
+                                        GPTSs[i] = Float.valueOf(GPTString[i]);
+                                    }
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2){
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    locError("see here");
+                                    locError("see here");
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (verifyAreaForAutoTrans(mmax_lat, mmin_lat, mmax_long, mmin_long)) {
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        locError("find delta1: " + Float.toString(thedelta1));
+                                        locError("find delta: " + Float.toString(thedelta));
+                                        locError("find num: " + Integer.toString(j));
+                                        if (j != num_map) {
+                                            if (thedelta == 0) {
+                                                thedelta = thedelta1;
+                                                theName = map.getName();
+                                            }
+                                            if (thedelta1 < thedelta) {
+                                                locError("change!!!");
+                                                thedelta = thedelta1;
+                                                theName = map.getName();
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                    Log.w(TAG, "theName: " + theName);
-                    double deltaK_trans;
-                    deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
-                    locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                    if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
-                        geometry_whiteBlanks.clear();
-                        num_whiteBlankPt = 0;
-                        isWhiteBlank = false;
-                        whiteBlankPt = "";
-                        getInfoForElectronicAtlasWithGeoInfo(theName);
-                        manageInfoForElectronicAtlasWithGeoInfo();
-                        toolbar.setTitle(pdfFileName);
-                        getNormalBitmap();
-                        pdfView.recycle();
-                        displayFromFile(uri);
-                        isAutoTrans = false;
-                        autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                        getWhiteBlankData();
-                    }
-                }*/
-            //老版图志
-            SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
-            int size = pref1.getInt("num", 0);
-            if (size != 0)
-            {
-                float thedelta = 0;
-                int thenum = 0;
-                for (int j = 0; j <= size; ++j) {
-                    SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
-                    String str = "n_" + j + "_";
-                    String Muri = pref2.getString(str + "uri", "");
-                    String MGPTS = pref2.getString(str + "GPTS", "");
-                    int MMapType = pref2.getInt(str + "MapType", -1);
-                    if (MGPTS != null && !MGPTS.isEmpty())
-                    {
-                        Log.w(TAG, "GPTS: " + MGPTS);
-                        String[] GPTString = MGPTS.split(" ");
-                        float[] GPTSs = new float[GPTString.length];
-                        for (int i = 0; i < GPTString.length; ++i) {
-                            if (MGPTS != null && !MGPTS.isEmpty())
-                                GPTSs[i] = Float.valueOf(GPTString[i]);
+                        Log.w(TAG, "theName: " + theName);
+                        double deltaK_trans;
+                        deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_IN);
+                        locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
+                        if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
+                            getInfoForElectronicAtlasWithGeoInfo(theName);
+                            manageInfoForElectronicAtlasWithGeoInfo();
+                            geometry_whiteBlanks.clear();
+                            num_whiteBlankPt = 0;
+                            isWhiteBlank = false;
+                            whiteBlankPt = "";
+                            getWhiteBlankData();
+                            isAutoTrans = false;
+                            getNormalBitmap();
+                            toolbar.setTitle(pdfFileName);
+                            pdfView.recycle();
+                            autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                            displayFromFile(uri);
                         }
-                        float lat_axis, long_axis;
-                        PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
-                        lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
-                        long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
-                        for (int i = 0; i < GPTSs.length; i = i + 2) {
-                            if (GPTSs[i] < lat_axis) {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lb.x = GPTSs[i];
-                                    pt_lb.y = GPTSs[i + 1];
-                                } else {
-                                    pt_rb.x = GPTSs[i];
-                                    pt_rb.y = GPTSs[i + 1];
-                                }
-                            } else {
-                                if (GPTSs[i + 1] < long_axis) {
-                                    pt_lt.x = GPTSs[i];
-                                    pt_lt.y = GPTSs[i + 1];
-                                } else {
-                                    pt_rt.x = GPTSs[i];
-                                    pt_rt.y = GPTSs[i + 1];
-                                }
-                            }
-                        }
-                        locError("see here");
-                        //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
-                        //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
-                        locError("see here");
-                        float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
-                        float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
-                        float mmin_long = (pt_lt.y + pt_lb.y) / 2;
-                        float mmax_long = (pt_rt.y + pt_rb.y) / 2;
-                        if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
-                            float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
-                            if (thedelta == 0) {
-                                thedelta = thedelta1;
-                                thenum = j;
-                            } else if (thedelta1 < thedelta) {
-                                thedelta = thedelta1;
-                                thenum = j;
-                            }
-                            locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
-
-                        }
-                    }
+                        break;
                 }
-                double deltaK_trans;
-                deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
-                locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
-                if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
-                    geometry_whiteBlanks.clear();
-                    num_whiteBlankPt = 0;
-                    isWhiteBlank = false;
-                    whiteBlankPt = "";
-                    num_map1 = num_map;
-                    getInfo(thenum);
-                    CurrentNum = thenum;
-                    manageInfo();
-                    toolbar.setTitle(pdfFileName);
-                    getNormalBitmap();
-                    pdfView.recycle();
-                    displayFromFile(uri);
-                    isAutoTrans = false;
-                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                    getWhiteBlankData();
-                }
-            } else
-            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
 
+
+            } else if (c_zoom <= 1.5 && isAutoTrans && isZoom == TuzhiEnum.ZOOM_OUT) {
+                switch (VersionType){
+                    case 1:
+                        //老版图志
+                        SharedPreferences pref1 = getSharedPreferences("data_num", MODE_PRIVATE);
+                        int size = pref1.getInt("num", 0);
+                        if (size != 0)
+                        {
+                            float thedelta = 0;
+                            int thenum = 0;
+                            for (int j = 0; j <= size; ++j) {
+                                SharedPreferences pref2 = getSharedPreferences("data", MODE_PRIVATE);
+                                String str = "n_" + j + "_";
+                                String Muri = pref2.getString(str + "uri", "");
+                                String MGPTS = pref2.getString(str + "GPTS", "");
+                                int MMapType = pref2.getInt(str + "MapType", -1);
+                                if (MGPTS != null && !MGPTS.isEmpty())
+                                {
+                                    Log.w(TAG, "GPTS: " + MGPTS);
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; ++i) {
+                                        if (MGPTS != null && !MGPTS.isEmpty())
+                                            GPTSs[i] = Float.valueOf(GPTString[i]);
+                                    }
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2) {
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    locError("see here");
+                                    //w = ((pt_rt.y - pt_lt.y) + (pt_rb.y - pt_lb.y)) / 2;
+                                    //h = ((pt_lt.x - pt_lb.x) + (pt_rt.x - pt_rb.x)) / 2;
+                                    locError("see here");
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        if (thedelta == 0) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        } else if (thedelta1 < thedelta) {
+                                            thedelta = thedelta1;
+                                            thenum = j;
+                                        }
+                                        locError("delta : " + Float.toString(thedelta) + "thenum : " + Integer.toString(thenum));
+
+                                    }
+                                }
+                            }
+                            double deltaK_trans;
+                            deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
+                            locError("deltaK_trans: " + Double.toString(deltaK_trans) + ", " + thedelta);
+                            if (thenum != num_map && thenum != 0 && thedelta < deltaK_trans) {
+                                geometry_whiteBlanks.clear();
+                                num_whiteBlankPt = 0;
+                                isWhiteBlank = false;
+                                whiteBlankPt = "";
+                                num_map1 = num_map;
+                                getInfo(thenum);
+                                CurrentNum = thenum;
+                                manageInfo();
+                                toolbar.setTitle(pdfFileName);
+                                getNormalBitmap();
+                                pdfView.recycle();
+                                displayFromFile(uri);
+                                isAutoTrans = false;
+                                autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                getWhiteBlankData();
+                            }
+                        } else
+                            Toast.makeText(MainInterface.this, MainInterface.this.getResources().getText(R.string.AutoTransError), Toast.LENGTH_SHORT).show();
+                        break;
+                    case 2:
+                        //电子地图集
+                        List<ElectronicAtlasMap> mapList = LitePal.findAll(ElectronicAtlasMap.class);
+                        Collections.sort(mapList);
+                        int size1 = mapList.size();
+                        float thedelta = 0;
+                        String theName = "";
+                        for (int j = 0; j < size1; j++) {
+                            ElectronicAtlasMap map = mapList.get(j);
+                            String MapGeoStr = map.getMapGeoStr();
+                            if (MapGeoStr != null) {
+                                String[] MapGeoStrs = MapGeoStr.split(",");
+                                String MGPTS = MapGeoStrs[0];
+                                int MMapType = map.getMapType();
+                                if ((MMapType == 1 || MMapType >= 5)) {
+                                    Log.w(TAG, "GPTS: " + MGPTS);
+                                    String[] GPTString = MGPTS.split(" ");
+                                    float[] GPTSs = new float[GPTString.length];
+                                    for (int i = 0; i < GPTString.length; ++i) {
+                                        if (MGPTS != null && !MGPTS.isEmpty())
+                                            GPTSs[i] = Float.valueOf(GPTString[i]);
+                                    }
+                                    float lat_axis, long_axis;
+                                    PointF pt_lb = new PointF(), pt_rb = new PointF(), pt_lt = new PointF(), pt_rt = new PointF();
+                                    lat_axis = (GPTSs[0] + GPTSs[2] + GPTSs[4] + GPTSs[6]) / 4;
+                                    long_axis = (GPTSs[1] + GPTSs[3] + GPTSs[5] + GPTSs[7]) / 4;
+                                    for (int i = 0; i < GPTSs.length; i = i + 2) {
+                                        if (GPTSs[i] < lat_axis) {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lb.x = GPTSs[i];
+                                                pt_lb.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rb.x = GPTSs[i];
+                                                pt_rb.y = GPTSs[i + 1];
+                                            }
+                                        } else {
+                                            if (GPTSs[i + 1] < long_axis) {
+                                                pt_lt.x = GPTSs[i];
+                                                pt_lt.y = GPTSs[i + 1];
+                                            } else {
+                                                pt_rt.x = GPTSs[i];
+                                                pt_rt.y = GPTSs[i + 1];
+                                            }
+                                        }
+                                    }
+                                    float mmin_lat = (pt_lb.x + pt_rb.x) / 2;
+                                    float mmax_lat = (pt_lt.x + pt_rt.x) / 2;
+                                    float mmin_long = (pt_lt.y + pt_lb.y) / 2;
+                                    float mmax_long = (pt_rt.y + pt_rb.y) / 2;
+                                    if (mmax_lat > max_lat && mmin_lat < min_lat && mmax_long > max_long && mmin_long < min_long) {
+                                        float thedelta1 = Math.abs(cs_top - mmax_lat) + Math.abs(cs_bottom - mmin_lat) + Math.abs(cs_right - mmax_long) + Math.abs(cs_left - mmin_long);
+                                        if (thedelta == 0) {
+                                            thedelta = thedelta1;
+                                            theName = map.getName();
+                                        } else if (thedelta1 < thedelta) {
+                                            thedelta = thedelta1;
+                                            theName = map.getName();
+                                        }
+                                    }
+                                }
+                            }
+                            Log.w(TAG, "theName: " + theName);
+                            double deltaK_trans;
+                            deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
+                            locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                            if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
+                                geometry_whiteBlanks.clear();
+                                num_whiteBlankPt = 0;
+                                isWhiteBlank = false;
+                                whiteBlankPt = "";
+                                getInfoForElectronicAtlasWithGeoInfo(theName);
+                                manageInfoForElectronicAtlasWithGeoInfo();
+                                toolbar.setTitle(pdfFileName);
+                                getNormalBitmap();
+                                pdfView.recycle();
+                                displayFromFile(uri);
+                                isAutoTrans = false;
+                                autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                getWhiteBlankData();
+                            }
+                        }
+                        break;
+                }
             }
             if (isMessure && isMessureType == TuzhiEnum.MESSURE_DISTANCE_TYPE)
                 drawMessureLine(canvas);
@@ -6066,14 +6080,30 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
         type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
         type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
-        CheckBox mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
-        mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                showMZXYPoint = b;
-                pdfView.zoomWithAnimation(c_zoom);
-            }
-        });
+        switch (VersionType){
+            case 1:
+                CheckBox mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
+                mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        showMZXYPoint = b;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }
+                });
+                mzxyCheckbox.setVisibility(View.VISIBLE);
+                break;
+            case 2:
+                mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
+                mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        showMZXYPoint = b;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }
+                });
+                mzxyCheckbox.setVisibility(View.GONE);
+                break;
+        }
         trailLayerBt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -8348,14 +8378,23 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         type1_checkbox = (CheckBox) findViewById(R.id.type1_poiLayer);
         type2_checkbox = (CheckBox) findViewById(R.id.type2_poiLayer);
         type3_checkbox = (CheckBox) findViewById(R.id.type3_poiLayer);
-        CheckBox mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
-        mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                showMZXYPoint = b;
-                pdfView.zoomWithAnimation(c_zoom);
-            }
-        });
+        switch (VersionType){
+            case 1:
+                CheckBox mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
+                mzxyCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        showMZXYPoint = b;
+                        pdfView.zoomWithAnimation(c_zoom);
+                    }
+                });
+                mzxyCheckbox.setVisibility(View.VISIBLE);
+                break;
+            case 2:
+                mzxyCheckbox = findViewById(R.id.mzxy_poiLayer);
+                mzxyCheckbox.setVisibility(View.GONE);
+                break;
+        }
         trailLayerBt.setVisibility(View.VISIBLE);
         whiteBlankLayerBt.setVisibility(View.VISIBLE);
         centerPointModeBt.setVisibility(View.VISIBLE);
@@ -8363,7 +8402,6 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         type1_checkbox.setVisibility(View.VISIBLE);
         type2_checkbox.setVisibility(View.VISIBLE);
         type3_checkbox.setVisibility(View.VISIBLE);
-        mzxyCheckbox.setVisibility(View.VISIBLE);
     }
 
     private void RemoveAllCheckbox(){
@@ -9786,28 +9824,52 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
 
         //String MapName = receiveMapName();
-        /*if (LitePal.findAll(ElectronicAtlasMap.class).size() == 0)
-        {
-            LitePal.deleteAll(ElectronicAtlasMap.class);
-            LitePal.deleteAll(XZQTree.class);
-            BatchAddMapsForAndroid();
-            GetDataForXZQTree();
-        }
 
-        String MapName = "8-9临沧市行政区划";//"1云南与周边国家通道示意图";//"00-0封面";
-
-        if (IsThematicMap(MapName)){
-            InitMapWithoutGeoInfo(MapName);
-        }
-        else {
-            initVariableForElectronicAtlas(MapName);
-            initWidget();
-            displayFromFile(uri);
-        }*/
         //InitMapWithoutGeoInfo(MapName);
         //displayFromFile(Environment.getExternalStorageDirectory() + "/云南省电子地图集安卓/经济和自然资源图组" + "/" + "052-053生物资源（动物）.dt");
 
-        Log.w(TAG, "onCreate: ");
+        //其中VersionType为 1 时，该系统在使用 图志
+        //其中VersionType为 2 时，该系统在使用 临沧市电子地图集
+        VersionType = 2;
+
+        switch (VersionType){
+            case 1:
+                Log.w(TAG, "onCreate: ");
+                int num = receiveInfo();
+                if (num != -1) {
+                    CurrentNum = num;
+                    doSpecificOperation();
+                    //initMapVariableForElectronicAtlas();
+                    initVariable(num);
+                    initWidget();
+                    displayFromFile(uri);
+                    Log.w(TAG, "resumeSurface: " + toolbar.getTitle().toString());
+                } else {
+                    showLeaflets();
+                }
+                break;
+            case 2:
+                if (LitePal.findAll(ElectronicAtlasMap.class).size() == 0)
+                {
+                    LitePal.deleteAll(ElectronicAtlasMap.class);
+                    LitePal.deleteAll(XZQTree.class);
+                    BatchAddMapsForAndroid();
+                    GetDataForXZQTree();
+                }
+
+                String MapName = "8-9临沧市行政区划";//"1云南与周边国家通道示意图";//"00-0封面";
+
+                if (IsThematicMap(MapName)){
+                    InitMapWithoutGeoInfo(MapName);
+                }
+                else {
+                    initVariableForElectronicAtlas(MapName);
+                    initWidget();
+                    displayFromFile(uri);
+                }
+                break;
+        }
+        /*Log.w(TAG, "onCreate: ");
         int num = receiveInfo();
         if (num != -1) {
             CurrentNum = num;
@@ -9819,7 +9881,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             Log.w(TAG, "resumeSurface: " + toolbar.getTitle().toString());
         } else {
             showLeaflets();
-        }
+        }*/
       //  ShowLittleWindow();
     }
 
@@ -10616,33 +10678,49 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             switch (isDrawTrail) {
                 case TRAIL_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(233, 150, 122));
-                    //电子地图集
-                    //menu.findItem(R.id.back).setVisible(false);
-                    //图志
-                    menu.findItem(R.id.back).setVisible(true);
-                    menu.findItem(R.id.queryPOI).setVisible(true);
-                    menu.findItem(R.id.action_search).setVisible(false);
+                    switch (VersionType){
+                        case 1:
+                            menu.findItem(R.id.back).setVisible(true);
+                            menu.findItem(R.id.queryPOI).setVisible(true);
+                            menu.findItem(R.id.action_search).setVisible(false);
+                            break;
+                        case 2:
+                            menu.findItem(R.id.back).setVisible(false);
+                            break;
+                    }
                     //menu.findItem(R.id.queryLatLng).setVisible(false);
                     break;
                 case NONE_DRAW_TYPE:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    //电子地图集
-                    //menu.findItem(R.id.back).setVisible(false);
-                    //图志
-                    menu.findItem(R.id.back).setVisible(true);
-                    menu.findItem(R.id.queryPOI).setVisible(true);
-                    menu.findItem(R.id.action_search).setVisible(false);
-                    menu.findItem(R.id.queryLatLng).setVisible(true);
+                    switch (VersionType){
+                        case 1:
+                            //图志
+                            menu.findItem(R.id.back).setVisible(true);
+                            menu.findItem(R.id.queryPOI).setVisible(true);
+                            menu.findItem(R.id.action_search).setVisible(false);
+                            menu.findItem(R.id.queryLatLng).setVisible(true);
+                            break;
+                        case 2:
+                            //电子地图集
+                            menu.findItem(R.id.back).setVisible(false);
+                            break;
+                    }
                     break;
                 case SEARCH_DEMO:
                     toolbar.setBackgroundColor(Color.rgb(63, 81, 181));
-                    //电子地图集
-                    //menu.findItem(R.id.back).setVisible(false);
-                    //图志
-                    menu.findItem(R.id.back).setVisible(true);
-                    menu.findItem(R.id.queryPOI).setVisible(false);
-                    menu.findItem(R.id.queryLatLng).setVisible(false);
-                    menu.findItem(R.id.action_search).setVisible(true);
+                    switch (VersionType){
+                    case 1:
+                        //图志
+                        menu.findItem(R.id.back).setVisible(true);
+                        menu.findItem(R.id.queryPOI).setVisible(false);
+                        menu.findItem(R.id.queryLatLng).setVisible(false);
+                        menu.findItem(R.id.action_search).setVisible(true);
+                        break;
+                    case 2:
+                        //电子地图集
+                        menu.findItem(R.id.back).setVisible(false);
+                        break;
+                    }
                     if (esterEgg_redline) {
                         AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
                         dialog.setTitle("提示");
@@ -10669,27 +10747,33 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         });*/
                         dialog.show();
                     } else {
-                        /*AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
-                        dialog.setTitle("提示");
-                        dialog.setMessage("需要进行什么查询?");
-                        dialog.setCancelable(false);
-                        dialog.setNegativeButton("简单查询", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                        switch (VersionType){
+                            case 1:
+                                //老版图志
                                 queryMode = TuzhiEnum.POI_QUERY;
-                            }
-                        });
-                        dialog.setNeutralButton("图幅查询", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                queryMode = TuzhiEnum.MAP_QUERY;
-                            }
-                        });
-                        dialog.show();*/
+                                break;
+                            case 2:
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(MainInterface.this);
+                                dialog.setTitle("提示");
+                                dialog.setMessage("需要进行什么查询?");
+                                dialog.setCancelable(false);
+                                dialog.setNegativeButton("简单查询", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        queryMode = TuzhiEnum.POI_QUERY;
+                                    }
+                                });
+                                dialog.setNeutralButton("图幅查询", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        queryMode = TuzhiEnum.MAP_QUERY;
+                                    }
+                                });
+                                dialog.show();
+                                break;
+                        }
 
 
-                        //老版图志
-                        queryMode = TuzhiEnum.POI_QUERY;
                     }
                     SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                     searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
@@ -10758,8 +10842,15 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 }
                                 else
                                 {
-                                    showListPopupWindowForNationMaps(searchView, query);
-                                    showListPopupWindow(searchView, query);
+                                    switch (VersionType){
+                                    case 1:
+                                        showListPopupWindowForNationMaps(searchView, query);
+                                        showListPopupWindow(searchView, query);
+                                        break;
+                                    case 2:
+                                        showListPopupWindow(searchView, query);
+                                        break;
+                                }
                                 }
                                 //showListPopupWindow(searchView, query);
                                 //Toast.makeText(MainInterface.this, "该功能正在开发当中!", Toast.LENGTH_LONG).show();
@@ -10779,12 +10870,18 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     });
             }
         } else {
-            //电子地图集
-            //menu.findItem(R.id.back).setVisible(false);
-            //menu.findItem(R.id.action_search).setVisible(true);
-            //图志
-            menu.findItem(R.id.back).setVisible(true);
-            menu.findItem(R.id.action_search).setVisible(false);
+            switch (VersionType){
+                case 1:
+                    //图志
+                    menu.findItem(R.id.back).setVisible(true);
+                    menu.findItem(R.id.action_search).setVisible(false);
+                    break;
+                case 2:
+                    //电子地图集
+                    menu.findItem(R.id.back).setVisible(false);
+                    menu.findItem(R.id.action_search).setVisible(true);
+                    break;
+            }
 
             menu.findItem(R.id.queryPOI).setVisible(false);
             menu.findItem(R.id.queryLatLng).setVisible(false);
@@ -10830,20 +10927,26 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             case R.id.back:
                 DistricNum = new ArrayList<>();
                 pdfView.zoomWithAnimation(pdfView.getZoom());
-                //图志
-                if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
-                else {
-                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
-                    invalidateOptionsMenu();
-                }
-                //电子地图集
-                /*if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE){
-                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
-                    invalidateOptionsMenu();
-                }
-                else if (FILE_TYPE == TuzhiEnum.ASSET_FILE_TYPE){
+                switch (VersionType){
+                    case 1:
+                        //图志
+                        if (isDrawTrail != TuzhiEnum.SEARCH_DEMO) this.finish();
+                        else {
+                            isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                            invalidateOptionsMenu();
+                        }
+                        break;
+                    case 2:
+                        //电子地图集
+                        if (FILE_TYPE == TuzhiEnum.FILE_FILE_TYPE){
+                            isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                            invalidateOptionsMenu();
+                        }
+                        else if (FILE_TYPE == TuzhiEnum.ASSET_FILE_TYPE){
 
-                }*/
+                        }
+                        break;
+                }
                 break;
             case R.id.info:
                 /*Intent intent = new Intent(MainInterface.this, info_page.class);
