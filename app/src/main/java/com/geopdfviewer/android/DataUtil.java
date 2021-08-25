@@ -1656,66 +1656,7 @@ public class DataUtil {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
             of.close();
-        }catch (IOException e){
-            Log.w(TAG, e.toString());
-        }
-        return file1;
-    }
-
-    public static File makeTapeKML(final List<MTAPE> mtapes, List<File> files, String save_folder_name) {
-        StringBuffer sb = new StringBuffer();
-        int size_mtape = mtapes.size();
-        makeKMLHead(sb, "MTAPE");
-        for (int i = 0; i < size_mtape; ++i){
-            sb.append("<id>").append(mtapes.get(i).getId()).append("</id>").append("\n");
-            sb.append("<pdfic>").append(mtapes.get(i).getPdfic()).append("</pdfic>").append("\n");
-            sb.append("<POIC>").append(mtapes.get(i).getPoic()).append("</POIC>").append("\n");
-            String path = mtapes.get(i).getPath();
-            sb.append("<path>").append(path).append("</path>").append("\n");
-            files.add(new File(path));
-            sb.append("<time>").append(mtapes.get(i).getTime()).append("</time>").append("\n");
-        }
-        sb.append("</MTAPE>").append("\n");
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
-        if (!file.exists() && !file.isDirectory()){
-            file.mkdirs();
-        }
-        String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  outputPath + ".dtdb");
-        try {
-            FileOutputStream of = new FileOutputStream(file1);
-            of.write(sb.toString().getBytes());
-            of.close();
-        }catch (IOException e){
-            Log.w(TAG, e.toString());
-        }
-        return file1;
-    }
-
-    public static File makePhotoKML(final List<MPHOTO> mphotos, List<File> files, String save_folder_name){
-        StringBuffer sb = new StringBuffer();
-        int size_mphoto = mphotos.size();
-        makeKMLHead(sb, "MPHOTO");
-        for (int i = 0; i < size_mphoto; ++i){
-            sb.append("<id>").append(mphotos.get(i).getId()).append("</id>").append("\n");
-            sb.append("<pdfic>").append(mphotos.get(i).getPdfic()).append("</pdfic>").append("\n");
-            sb.append("<POIC>").append(mphotos.get(i).getPoic()).append("</POIC>").append("\n");
-            String path = mphotos.get(i).getPath();
-            sb.append("<path>").append(path).append("</path>").append("\n");
-            files.add(new File(path));
-            sb.append("<time>").append(mphotos.get(i).getTime()).append("</time>").append("\n");
-        }
-        sb.append("</MPHOTO>").append("\n");
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output");
-        if (!file.exists() && !file.isDirectory()){
-            file.mkdirs();
-        }
-        String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output",  outputPath + ".dtdb");
-        try {
-            FileOutputStream of = new FileOutputStream(file1);
-            of.write(sb.toString().getBytes());
-            of.close();
+            MediaScannerConnection.scanFile(MainInterface.instance, new String[]{(file1).getAbsolutePath()},null,null);
         }catch (IOException e){
             Log.w(TAG, e.toString());
         }
@@ -1786,7 +1727,7 @@ public class DataUtil {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
             of.close();
-            MediaScannerConnection.scanFile(select_page.instance, new String[]{(file1).getAbsolutePath()},null,null);
+            MediaScannerConnection.scanFile(MainInterface.instance, new String[]{(file1).getAbsolutePath()},null,null);
         }catch (IOException e){
 
         }
@@ -1814,6 +1755,7 @@ public class DataUtil {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
             of.close();
+            MediaScannerConnection.scanFile(MainInterface.instance, new String[]{(file1).getAbsolutePath()},null,null);
         }catch (IOException e){
             Log.w(TAG, e.toString());
         }
@@ -1869,6 +1811,7 @@ public class DataUtil {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
             of.close();
+            MediaScannerConnection.scanFile(MainInterface.instance, new String[]{(file1).getAbsolutePath()},null,null);
         }catch (IOException e){
             Log.w(TAG, e.toString());
         }
@@ -1923,6 +1866,7 @@ public class DataUtil {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
             of.close();
+            MediaScannerConnection.scanFile(MainInterface.instance, new String[]{(file1).getAbsolutePath()},null,null);
         }catch (IOException e){
             Log.w(TAG, e.toString());
         }
@@ -1977,64 +1921,7 @@ public class DataUtil {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
             of.close();
-        }catch (IOException e){
-            Log.w(TAG, e.toString());
-        }
-    }
-
-    public static void makeWhiteBlankKML11(String save_folder_name, String SubFolder){
-        final List<Lines_WhiteBlank> whiteBlanks = LitePal.findAll(Lines_WhiteBlank.class);
-
-        StringBuffer sb = new StringBuffer();
-        int size_whiteBlanks = whiteBlanks.size();
-        makeKMLHead(sb, "WhiteBlank");
-        for (int i = 0; i < size_whiteBlanks; ++i){
-            String ic = whiteBlanks.get(i).getIc();
-            List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.where("name = ?", ic).find(ElectronicAtlasMap.class);
-            if (electronicAtlasMaps.size() == 1 && !electronicAtlasMaps.get(0).getParentNode().equals("社会经济图组") && !electronicAtlasMaps.get(0).getParentNode().equals("资源与环境图组")) {
-                sb.append("    ").append("<Placemark id=\"ID_").append(plusID(i)).append("\">").append("\n");
-                sb.append("      ").append("<name>").append(whiteBlanks.get(i).getIc()).append("</name>").append("\n");
-                sb.append("      ").append("<Snippet></Snippet>").append("\n");
-                //属性表内容
-                sb = makeCDATAHead(sb);
-                sb = makeCDATATail(sb);
-                sb.append("      ").append("<styleUrl>#LineStyle00</styleUrl>").append("\n");
-                sb.append("      ").append("<MultiGeometry>").append("\n");
-                sb.append("        ").append("<LineString>").append("\n");
-                sb.append("          ").append("<extrude>0</extrude>").append("\n");
-                sb.append("          ").append("<tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode>").append("\n");
-                String[] lines_str = whiteBlanks.get(i).getLines().split(" ");
-                float[] lats = new float[lines_str.length / 2];
-                float[] lngs = new float[lines_str.length / 2];
-                for (int k = 0; k < lines_str.length; ++k) {
-                    if (k == 0 || (k % 2 == 0)) {
-                        lats[k / 2] = Float.valueOf(lines_str[k]);
-                    } else {
-                        lngs[k / 2] = Float.valueOf(lines_str[k]);
-                    }
-                }
-                StringBuffer str = new StringBuffer();
-                for (int k = 0; k < lngs.length; ++k) {
-                    str.append(" ").append(Float.toString(lngs[k])).append(",").append(Float.toString(lats[k])).append(",").append("0");
-                }
-                sb.append("          ").append("<coordinates>").append(str).append("</coordinates>").append("\n");
-                sb.append("        ").append("</LineString>").append("\n");
-                sb.append("      ").append("</MultiGeometry>").append("\n");
-                sb.append("    ").append("</Placemark>").append("\n");
-                //
-            }
-        }
-        sb = makeKMLTailForLine(sb);
-        File file = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder);
-        if (!file.exists() && !file.isDirectory()){
-            file.mkdirs();
-        }
-        String outputPath = Long.toString(System.currentTimeMillis());
-        File file1 = new File(Environment.getExternalStorageDirectory() + "/" + save_folder_name + "/Output" + "/" + SubFolder,  "白板" + outputPath + ".kml");
-        try {
-            FileOutputStream of = new FileOutputStream(file1);
-            of.write(sb.toString().getBytes());
-            of.close();
+            MediaScannerConnection.scanFile(MainInterface.instance, new String[]{(file1).getAbsolutePath()},null,null);
         }catch (IOException e){
             Log.w(TAG, e.toString());
         }
@@ -2050,22 +1937,6 @@ public class DataUtil {
         sb = sb.append("description").append(";");
         sb = sb.append("time").append(";");
         sb = sb.append("type").append(";");
-        sb = sb.append("x").append(";");
-        sb = sb.append("y").append("\n");
-        return sb;
-    }
-
-    public static StringBuffer makeTxtHead1(StringBuffer sb){
-        sb = sb.append("XH").append(";");
-        sb = sb.append("DY").append(";");
-        sb = sb.append("MC").append(";");
-        sb = sb.append("BZMC").append(";");
-        sb = sb.append("XZQMC").append(";");
-        sb = sb.append("XZQDM").append(";");
-        sb = sb.append("SZDW").append(";");
-        sb = sb.append("SCCJ").append(";");
-        sb = sb.append("GG").append(";");
-        sb = sb.append("IMGPATH").append(";");
         sb = sb.append("x").append(";");
         sb = sb.append("y").append("\n");
         return sb;
@@ -2232,6 +2103,7 @@ public class DataUtil {
             FileOutputStream of = new FileOutputStream(file1);
             of.write(sb.toString().getBytes());
             of.close();
+            MediaScannerConnection.scanFile(MainInterface.instance, new String[]{(file1).getAbsolutePath()},null,null);
         } catch (IOException e) {
             Log.w(TAG, e.toString());
         }

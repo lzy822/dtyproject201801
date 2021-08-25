@@ -426,6 +426,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
     //其中VersionType为2时，该系统在使用临沧市电子地图集
     private int VersionType;
 
+    public static MainInterface instance;
+
     private SensorEventListener listener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -2283,7 +2285,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                 manageInfo();
                                 toolbar.setTitle(pdfFileName);
                                 getNormalBitmap();
-                                pdfView.recycle();
+                                //pdfView.recycle();
                                 displayFromFile(uri);
                                 isAutoTrans = false;
                                 autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
@@ -2375,9 +2377,20 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                             isAutoTrans = false;
                             getNormalBitmap();
                             toolbar.setTitle(pdfFileName);
-                            pdfView.recycle();
+                            //pdfView.recycle();
                             autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
                             displayFromFile(uri);
+                            /*if (IsThematicMap(theName)){
+                                InitMapWithoutGeoInfo(theName);
+                            }
+                            else {
+                                showWidget();
+                                initVariableForElectronicAtlas(theName);
+                                initWidget();
+                                displayFromFile(uri);
+                            }
+                            isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                            invalidateOptionsMenu();*/
                         }
                         break;
                 }
@@ -2537,26 +2550,40 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     }
                                 }
                             }
-                            Log.w(TAG, "theName: " + theName);
-                            double deltaK_trans;
-                            deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
-                            locError("deltaK_trans: " + Double.toString(deltaK_trans));
-                            if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
-                                geometry_whiteBlanks.clear();
-                                num_whiteBlankPt = 0;
-                                isWhiteBlank = false;
-                                whiteBlankPt = "";
-                                getInfoForElectronicAtlasWithGeoInfo(theName);
-                                manageInfoForElectronicAtlasWithGeoInfo();
-                                toolbar.setTitle(pdfFileName);
-                                getNormalBitmap();
-                                pdfView.recycle();
-                                displayFromFile(uri);
-                                isAutoTrans = false;
-                                autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                                getWhiteBlankData();
-                            }
                         }
+                        Log.w(TAG, "theName: " + theName);
+                        double deltaK_trans;
+                        deltaK_trans = RenderUtil.getDeltaKforTrans(pageWidth, max_long, min_long, MainInterface.this, TuzhiEnum.ZOOM_OUT);
+                        locError("deltaK_trans: " + Double.toString(deltaK_trans));
+                        if (!theName.equals(this.pdfFileName) && theName != "" && thedelta < deltaK_trans) {
+
+                            geometry_whiteBlanks.clear();
+                            num_whiteBlankPt = 0;
+                            isWhiteBlank = false;
+                            whiteBlankPt = "";
+                            getInfoForElectronicAtlasWithGeoInfo(theName);
+                            manageInfoForElectronicAtlasWithGeoInfo();
+                            toolbar.setTitle(pdfFileName);
+                            Log.w(TAG, "2021/8/23: " + pdfFileName);
+                            getNormalBitmap();
+                            //pdfView.recycle();
+                            isAutoTrans = false;
+                            autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                            getWhiteBlankData();
+                            displayFromFile(uri);
+                            /*if (IsThematicMap(theName)){
+                                InitMapWithoutGeoInfo(theName);
+                            }
+                            else {
+                                showWidget();
+                                initVariableForElectronicAtlas(theName);
+                                initWidget();
+                                displayFromFile(uri);
+                            }
+                            isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                            invalidateOptionsMenu();*/
+                        }
+
                         break;
                 }
             }
@@ -4548,9 +4575,9 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         mLastPTForWhiteBlank = null;
                         break;
                 }
-
                 PointF pt = new PointF(event.getRawX(), event.getRawY());
                 pt = getGeoLocFromPixL(pt);
+                if (pt.x != 0 && pt.y != 0){
                 locError("RawX : " + pt.x + "; RawY : " + pt.y);
                 //pt_last = pt_current;
                 //pt_current = pt;
@@ -4561,14 +4588,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                 }*/
                 double mDis = -1;
                 try {
-                    if(mLastPTForWhiteBlank != null) {
+                    if (mLastPTForWhiteBlank != null) {
                         mDis = LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlank.y, mLastPTForWhiteBlank.x);
 
                         locError("RawX" + mDis);
                     }
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     locError("RawX" + e.toString());
                 }
                 //if (isWhiteBlank && ( mDis >= 0.2 || mDis == -1)) {//设置点位基础抽稀
@@ -4590,9 +4615,8 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         pdfView.zoomWithAnimation(c_zoom);
                         //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
                     }
-
                 }
-
+            }
                 return true;
             }
         });
@@ -4751,51 +4775,50 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         break;
                 }
 
-                PointF pt = new PointF(event.getRawX(), event.getRawY());
-                locError("RawX : " + pt.x + "; RawY : " + pt.y);
-                pt = getGeoLocFromPixLWithoutGeoInfo(pt);
-                locError("NewX : " + pt.x + "; NewY : " + pt.y);
-                //pt_last = pt_current;
-                //pt_current = pt;
-                //pdfView.zoomWithAnimation(c_zoom);
+                    PointF pt = new PointF(event.getRawX(), event.getRawY());
+                    locError("RawX : " + pt.x + "; RawY : " + pt.y);
+                    pt = getGeoLocFromPixLWithoutGeoInfo(pt);
+                    if (pt.x != 0 && pt.y != 0){
+                    locError("NewX : " + pt.x + "; NewY : " + pt.y);
+                    //pt_last = pt_current;
+                    //pt_current = pt;
+                    //pdfView.zoomWithAnimation(c_zoom);
                 /*if (event.getRawY() >= height - 100 && event.getRawY() <= height && event.getRawX() >= 50 && event.getRawX() <= 150){
                     popupWindow.dismiss();
                     whiteblank.setImageResource(R.drawable.ic_brush_black_24dp);
                 }*/
-                //double mDis = -1;
-                try {
-                    if(mLastPTForWhiteBlankWithoutGeoInfo != null) {
-                        //mDis = LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlankWithoutGeoInfo.y, mLastPTForWhiteBlankWithoutGeoInfo.x);
+                    //double mDis = -1;
+                    try {
+                        if (mLastPTForWhiteBlankWithoutGeoInfo != null) {
+                            //mDis = LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlankWithoutGeoInfo.y, mLastPTForWhiteBlankWithoutGeoInfo.x);
 
-                        //locError("RawX" + mDis);
+                            //locError("RawX" + mDis);
+                        }
+                    } catch (Exception e) {
+                        locError("RawX" + e.toString());
+                    }
+                    //if (isWhiteBlank && ( mDis >= 0.2 || mDis == -1)) {//设置点位基础抽稀
+                    if (isWhiteBlank) {//不设置点位基础抽稀
+                        //locError("RawX" + LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlank.y, mLastPTForWhiteBlank.x));
+                        mLastPTForWhiteBlankWithoutGeoInfo = pt;
+                        num_whiteBlankPt++;
+                        if (num_whiteBlankPt == 1) {
+                            whiteBlankPt = Float.toString(pt.x) + " " + Float.toString(pt.y);
+                        } else if (num_whiteBlankPt == 2) {
+                            whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                            //setTitle("正在测量");
+                            pdfView.zoomWithAnimation(c_zoom);
+                            //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
+                            //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                        } else {
+                            whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
+                            //setTitle("正在测量");
+                            pdfView.zoomWithAnimation(c_zoom);
+                            //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
+                        }
+
                     }
                 }
-                catch (Exception e)
-                {
-                    locError("RawX" + e.toString());
-                }
-                //if (isWhiteBlank && ( mDis >= 0.2 || mDis == -1)) {//设置点位基础抽稀
-                if (isWhiteBlank) {//不设置点位基础抽稀
-                    //locError("RawX" + LatLng.algorithm(pt.y, pt.x, mLastPTForWhiteBlank.y, mLastPTForWhiteBlank.x));
-                    mLastPTForWhiteBlankWithoutGeoInfo = pt;
-                    num_whiteBlankPt++;
-                    if (num_whiteBlankPt == 1) {
-                        whiteBlankPt = Float.toString(pt.x) + " " + Float.toString(pt.y);
-                    } else if (num_whiteBlankPt == 2) {
-                        whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
-                        //setTitle("正在测量");
-                        pdfView.zoomWithAnimation(c_zoom);
-                        //locError(Double.toString(algorithm(poi111.y, poi111.x, poi222.y, poi222.x)));
-                        //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                    } else {
-                        whiteBlankPt = whiteBlankPt + " " + Float.toString(pt.x) + " " + Float.toString(pt.y);
-                        //setTitle("正在测量");
-                        pdfView.zoomWithAnimation(c_zoom);
-                        //Toast.makeText(MainInterface.this, "距离为" + Double.toString(distanceSum) + "米", Toast.LENGTH_LONG).show();
-                    }
-
-                }
-
                 return true;
             }
         });
@@ -6135,7 +6158,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     showMode = TuzhiEnum.CENTERMODE;
                     centerPoint.setVisibility(View.VISIBLE);
                     isQuery = true;
-                    isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    if (isDrawType != TuzhiEnum.POI_DRAW_TYPE)
+                    {
+                        isDrawType = TuzhiEnum.NONE_DRAW_TYPE;
+                    }
+                    else
+                        isQuery = false;
                     locError("中心点模式");
                     isMessureType = TuzhiEnum.MESSURE_NONE_TYPE;
                     query_poi_imgbt.setVisibility(View.INVISIBLE);
@@ -7698,6 +7726,49 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         recyclerView.setAdapter(adapter);
     }
 
+    private void InitLeftRecyclerViewForLC(){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
+        recyclerView.setLayoutManager(layoutManager);
+        final List<ElectronicAtlasMap> electronicAtlasMaps = LitePal.findAll(ElectronicAtlasMap.class);
+        Collections.sort(electronicAtlasMaps);
+
+        List<String> list = new ArrayList<>();
+
+        list.add("临沧概览");
+        for (int i = 0; i < electronicAtlasMaps.size(); i++) {
+            if (electronicAtlasMaps.get(i).getParentNode().equals("临沧概览"))
+                list.add(electronicAtlasMaps.get(i).getName());
+        }
+        list.add("社会与经济");
+        list.add("资源与环境");
+
+        OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
+        adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
+            @Override
+            public void onItemClick(View view, String MapName, int position) {
+                if (MapName.equals("社会与经济"))
+                    InitLeftRecyclerViewForSociety();
+                else if (MapName.equals("资源与环境"))
+                    InitLeftRecyclerViewForEarth();
+                else if (MapName.equals("临沧概览"))
+                    InitLeftRecyclerView();
+                else {
+                    if (IsThematicMap(MapName))
+                        InitMapWithoutGeoInfo(MapName);
+                    else{
+                        showWidget();
+                        initVariableForElectronicAtlas(MapName);
+                        initWidget();
+                        displayFromFile(uri);
+                    }
+                    invalidateOptionsMenu();
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
     private void InitLeftRecyclerViewForSociety(){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.LeftRecyclerView);
         GridLayoutManager layoutManager = new GridLayoutManager(this,1);
@@ -7707,21 +7778,24 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         List<String> list = new ArrayList<>();
 
-        list.add("社会经济图组");
+        list.add("临沧概览");
+        list.add("社会与经济");
         for (int i = 0; i < electronicAtlasMaps.size(); i++) {
-            if (electronicAtlasMaps.get(i).getParentNode().equals("社会经济图组"))
+            if (electronicAtlasMaps.get(i).getParentNode().equals("社会与经济"))
                 list.add(electronicAtlasMaps.get(i).getName());
         }
-        list.add("资源与环境图组");
+        list.add("资源与环境");
 
         OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
         adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, String MapName, int position) {
-                if (MapName.equals("社会经济图组"))
+                if (MapName.equals("社会与经济"))
                     InitLeftRecyclerView();
-                else if (MapName.equals("资源与环境图组"))
+                else if (MapName.equals("资源与环境"))
                     InitLeftRecyclerViewForEarth();
+                else if (MapName.equals("临沧概览"))
+                    InitLeftRecyclerViewForLC();
                 else {
                     InitMapWithoutGeoInfo(MapName);
                     /*initVariableForElectronicAtlas(MapName);
@@ -7743,10 +7817,11 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         List<String> list = new ArrayList<>();
 
-        list.add("社会经济图组");
-        list.add("资源与环境图组");
+        list.add("临沧概览");
+        list.add("社会与经济");
+        list.add("资源与环境");
         for (int i = 0; i < electronicAtlasMaps.size(); i++) {
-            if (electronicAtlasMaps.get(i).getParentNode().equals("资源与环境图组"))
+            if (electronicAtlasMaps.get(i).getParentNode().equals("资源与环境"))
                 list.add(electronicAtlasMaps.get(i).getName());
         }
 
@@ -7754,10 +7829,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, String MapName, int position) {
-                if (MapName.equals("社会经济图组"))
+                if (MapName.equals("社会与经济"))
                     InitLeftRecyclerViewForSociety();
-                else if (MapName.equals("资源与环境图组"))
+                else if (MapName.equals("资源与环境"))
                     InitLeftRecyclerView();
+                else if (MapName.equals("临沧概览"))
+                    InitLeftRecyclerViewForLC();
                 else
                 {
                     /*initVariableForElectronicAtlas(MapName);
@@ -7780,17 +7857,20 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         List<String> list = new ArrayList<>();
 
-        list.add("社会经济图组");
-        list.add("资源与环境图组");
+        list.add("临沧概览");
+        list.add("社会与经济");
+        list.add("资源与环境");
 
         OtherTypeMapAdapter adapter = new OtherTypeMapAdapter(list);
         adapter.setOnItemClickListener(new OtherTypeMapAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, String MapName, int position) {
-                if (MapName.equals("社会经济图组"))
+                if (MapName.equals("社会与经济"))
                     InitLeftRecyclerViewForSociety();
-                else if (MapName.equals("资源与环境图组"))
+                else if (MapName.equals("资源与环境"))
                     InitLeftRecyclerViewForEarth();
+                else if (MapName.equals("临沧概览"))
+                    InitLeftRecyclerViewForLC();
             }
         });
         recyclerView.setAdapter(adapter);
@@ -8436,9 +8516,14 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
 
         initCheckbox();
 
-        //InitRightRecyclerView();
-
-        //InitLeftRecyclerView();
+        switch (VersionType){
+            case 1:
+                break;
+            case 2:
+                InitRightRecyclerView();
+                InitLeftRecyclerView();
+                break;
+        }
 
         //中心点图标初始化
         centerPoint = (ImageView) findViewById(R.id.centerPoint);
@@ -9242,8 +9327,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         //声明ToolBar
         toolbar = (Toolbar) findViewById(R.id.toolBar1);
         setSupportActionBar(toolbar);
+        /*autoTrans_imgbt = (ImageButton) findViewById(R.id.trans);
+        autoTrans_imgbt.setVisibility(View.VISIBLE);*/
         autoTrans_imgbt = (ImageButton) findViewById(R.id.trans);
-        autoTrans_imgbt.setVisibility(View.VISIBLE);
+        autoTrans_imgbt.setVisibility(View.GONE);
         textView = (TextView) findViewById(R.id.txt);
         textView.setVisibility(View.VISIBLE);
         trail_imgbt = (ImageButton) findViewById(R.id.trail);
@@ -9785,7 +9872,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         Collections.sort(atlasMaps);
         for (int i = 0; i < atlasMaps.size(); i++) {
             if (atlasMaps.get(i).getName().equals(MapName)){
-                //if (atlasMaps.get(i).getParentNode().equals("社会经济图组") || atlasMaps.get(i).getParentNode().equals("资源与环境图组") || atlasMaps.get(i).getParentNode().equals("州市介绍"))
+                //if (atlasMaps.get(i).getParentNode().equals("社会与经济") || atlasMaps.get(i).getParentNode().equals("资源与环境") || atlasMaps.get(i).getParentNode().equals("州市介绍"))
                 if (atlasMaps.get(i).getMapGeoStr() == null)
                     return true;
             }
@@ -9818,6 +9905,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_interface);
 
+        instance = MainInterface.this;
 
         //AddData();
         //Toast.makeText(this, "locate here", Toast.LENGTH_SHORT).show();
@@ -9857,7 +9945,7 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                     GetDataForXZQTree();
                 }
 
-                String MapName = "8-9临沧市行政区划";//"1云南与周边国家通道示意图";//"00-0封面";
+                String MapName = "2-3世界地图";//"1云南与周边国家通道示意图";//"00-0封面";
 
                 if (IsThematicMap(MapName)){
                     InitMapWithoutGeoInfo(MapName);
@@ -10327,7 +10415,13 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
             getBitmap();
             registerSensor();
         }
-        //InitPageButton();
+        switch (VersionType){
+            case 1:
+                break;
+            case 2:
+                InitPageButton();
+                break;
+        }
         getScreenParameter();
         super.onResume();
     }
@@ -10520,66 +10614,75 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         leftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (CurrentNum != 1){
-                    geometry_whiteBlanks.clear();
-                    num_whiteBlankPt = 0;
-                    isWhiteBlank = false;
-                    whiteBlankPt = "";
-                    num_map1 = num_map;
-                    getInfo(--CurrentNum);
-                    manageInfo();
-                    toolbar.setTitle(pdfFileName);
-                    getNormalBitmap();
-                    pdfView.recycle();
-                    displayFromFile(uri);
-                    isAutoTrans = false;
-                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                    getWhiteBlankData();
-                }
-                /*List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
-                Collections.sort(maps);
-                for (int i = 0; i < maps.size(); i++) {
-                    ElectronicAtlasMap m = maps.get(i);
-                    Log.w(TAG, "pdfName: " + pdfFileName + ", " + m.getName() + ", " + ic);
-                    if (pdfFileName.equals(m.getName()))
-                    {
-                        i--;
-                        while(i >= 0){
-                            if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
+                switch (VersionType){
+                    case 1:
+                        break;
+                    case 2:
+                        List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
+                        Collections.sort(maps);
+                        for (int i = 0; i < maps.size(); i++) {
+                            ElectronicAtlasMap m = maps.get(i);
+                            Log.w(TAG, "pdfName: " + pdfFileName + ", " + m.getName() + ", " + ic);
+                            if (pdfFileName.equals(m.getName()))
                             {
-                                isOpenWhiteBlank = false;
-                                hasQueriedPoi = false;
-                                if (IsThematicMap(maps.get(i).getName())){
-                                    InitMapWithoutGeoInfo(maps.get(i).getName());
-                                }
-                                else {
-                                    ImageView imageView = (ImageView) findViewById(R.id.myscale);
-                                    if (imageView.getVisibility() == View.GONE)
-                                        showWidget();
-                                    FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
-                                    initVariableForElectronicAtlas(maps.get(i).getName());
-                                    initWidgetForXZQTree();
+                                i--;
+                                while(i >= 0){
+                                    if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
+                                    {
+                                        isOpenWhiteBlank = false;
+                                        hasQueriedPoi = false;
+                                        if (IsThematicMap(maps.get(i).getName())){
+                                            InitMapWithoutGeoInfo(maps.get(i).getName());
+                                        }
+                                        else {
+                                            ImageView imageView = (ImageView) findViewById(R.id.myscale);
+                                            if (imageView.getVisibility() == View.GONE)
+                                                showWidget();
+                                            FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
+                                            initVariableForElectronicAtlas(maps.get(i).getName());
+                                            initWidgetForXZQTree();
 
-                                    whiteBlankLayerBt.setChecked(false);
-                                    geometry_whiteBlanks.clear();
-                                    num_whiteBlankPt = 0;
-                                    isWhiteBlank = false;
-                                    whiteBlankPt = "";
-                                    getWhiteBlankData();
-                                    isAutoTrans = false;
-                                    getNormalBitmap();
-                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                            whiteBlankLayerBt.setChecked(false);
+                                            geometry_whiteBlanks.clear();
+                                            num_whiteBlankPt = 0;
+                                            isWhiteBlank = false;
+                                            whiteBlankPt = "";
+                                            getWhiteBlankData();
+                                            isAutoTrans = false;
+                                            getNormalBitmap();
+                                            autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
 
-                                    displayFromFile(uri);
-                                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                                            displayFromFile(uri);
+                                            isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                                        }
+                                        break;
+                                    }
+                                    i--;
                                 }
                                 break;
                             }
-                            i--;
                         }
                         break;
-                    }
-                }*/
+                    case 3:
+                        if (CurrentNum != 1){
+                            geometry_whiteBlanks.clear();
+                            num_whiteBlankPt = 0;
+                            isWhiteBlank = false;
+                            whiteBlankPt = "";
+                            num_map1 = num_map;
+                            getInfo(--CurrentNum);
+                            manageInfo();
+                            toolbar.setTitle(pdfFileName);
+                            getNormalBitmap();
+                            pdfView.recycle();
+                            displayFromFile(uri);
+                            isAutoTrans = false;
+                            autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                            getWhiteBlankData();
+                        }
+                        break;
+                }
+
             }
         });
 
@@ -10588,66 +10691,74 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
         rightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (CurrentNum != 4){
-                    geometry_whiteBlanks.clear();
-                    num_whiteBlankPt = 0;
-                    isWhiteBlank = false;
-                    whiteBlankPt = "";
-                    num_map1 = num_map;
-                    getInfo(++CurrentNum);
-                    manageInfo();
-                    toolbar.setTitle(pdfFileName);
-                    getNormalBitmap();
-                    pdfView.recycle();
-                    displayFromFile(uri);
-                    isAutoTrans = false;
-                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
-                    getWhiteBlankData();
-                }
-                /*List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
-                Collections.sort(maps);
-                for (int i = 0; i < maps.size(); i++) {
-                    ElectronicAtlasMap m = maps.get(i);
-                    Log.w(TAG, "pdfName: " + pdfFileName + ", " + m.getName() + ", " + ic);
-                    if (pdfFileName.equals(m.getName()))
-                    {
-                        i++;
-                        while(i < maps.size()){
-                            if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
+                switch (VersionType){
+                    case 1:
+                        break;
+                    case 2:
+                        List<ElectronicAtlasMap> maps = LitePal.findAll(ElectronicAtlasMap.class);
+                        Collections.sort(maps);
+                        for (int i = 0; i < maps.size(); i++) {
+                            ElectronicAtlasMap m = maps.get(i);
+                            Log.w(TAG, "pdfName: " + pdfFileName + ", " + m.getName() + ", " + ic);
+                            if (pdfFileName.equals(m.getName()))
                             {
-                                isOpenWhiteBlank = false;
-                                hasQueriedPoi = false;
-                                if (IsThematicMap(maps.get(i).getName())){
-                                    InitMapWithoutGeoInfo(maps.get(i).getName());
-                                }
-                                else {
-                                    ImageView imageView = (ImageView) findViewById(R.id.myscale);
-                                    if (imageView.getVisibility() == View.GONE)
-                                        showWidget();
-                                    FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
-                                    initVariableForElectronicAtlas(maps.get(i).getName());
-                                    initWidgetForXZQTree();
+                                i++;
+                                while(i < maps.size()){
+                                    if (maps.get(i).getPageNum() >= 0 && !maps.get(i).getPath().equals(""))
+                                    {
+                                        isOpenWhiteBlank = false;
+                                        hasQueriedPoi = false;
+                                        if (IsThematicMap(maps.get(i).getName())){
+                                            InitMapWithoutGeoInfo(maps.get(i).getName());
+                                        }
+                                        else {
+                                            ImageView imageView = (ImageView) findViewById(R.id.myscale);
+                                            if (imageView.getVisibility() == View.GONE)
+                                                showWidget();
+                                            FILE_TYPE = TuzhiEnum.FILE_FILE_TYPE;
+                                            initVariableForElectronicAtlas(maps.get(i).getName());
+                                            initWidgetForXZQTree();
 
-                                    whiteBlankLayerBt.setChecked(false);
-                                    geometry_whiteBlanks.clear();
-                                    num_whiteBlankPt = 0;
-                                    isWhiteBlank = false;
-                                    whiteBlankPt = "";
-                                    getWhiteBlankData();
-                                    isAutoTrans = false;
-                                    getNormalBitmap();
-                                    autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                                            whiteBlankLayerBt.setChecked(false);
+                                            geometry_whiteBlanks.clear();
+                                            num_whiteBlankPt = 0;
+                                            isWhiteBlank = false;
+                                            whiteBlankPt = "";
+                                            getWhiteBlankData();
+                                            isAutoTrans = false;
+                                            getNormalBitmap();
+                                            autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
 
-                                    displayFromFile(uri);
-                                    isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                                            displayFromFile(uri);
+                                            isDrawTrail = TuzhiEnum.NONE_DRAW_TYPE;
+                                        }
+                                        break;
+                                    }
+                                    i++;
                                 }
                                 break;
                             }
-                            i++;
                         }
                         break;
-                    }
-                }*/
+                    case 3:
+                        if (CurrentNum != 4){
+                            geometry_whiteBlanks.clear();
+                            num_whiteBlankPt = 0;
+                            isWhiteBlank = false;
+                            whiteBlankPt = "";
+                            num_map1 = num_map;
+                            getInfo(++CurrentNum);
+                            manageInfo();
+                            toolbar.setTitle(pdfFileName);
+                            getNormalBitmap();
+                            pdfView.recycle();
+                            displayFromFile(uri);
+                            isAutoTrans = false;
+                            autoTrans_imgbt.setBackgroundResource(R.drawable.ic_close_black_24dp);
+                            getWhiteBlankData();
+                        }
+                        break;
+                }
             }
         });
     }
@@ -10718,7 +10829,10 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                         break;
                     case 2:
                         //电子地图集
-                        menu.findItem(R.id.back).setVisible(false);
+                        menu.findItem(R.id.back).setVisible(true);
+                        menu.findItem(R.id.queryPOI).setVisible(false);
+                        menu.findItem(R.id.queryLatLng).setVisible(false);
+                        menu.findItem(R.id.action_search).setVisible(true);
                         break;
                     }
                     if (esterEgg_redline) {
@@ -10839,6 +10953,12 @@ public class MainInterface extends AppCompatActivity implements OnPageChangeList
                                     LitePal.deleteAll(MVEDIO.class);
                                     LitePal.deleteAll(MPHOTO.class);
                                     LitePal.deleteAll(Lines_WhiteBlank.class);
+                                }
+                                else if (query.equals("LCSDTJ")){
+                                    LitePal.deleteAll(ElectronicAtlasMap.class);
+                                    LitePal.deleteAll(XZQTree.class);
+                                    BatchAddMapsForAndroid();
+                                    GetDataForXZQTree();
                                 }
                                 else
                                 {

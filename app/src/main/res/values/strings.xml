@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">图志</string>
-    <string name="app_showname">图志</string>
-    <string name="save_folder_name1">TuZhi</string>
+    <string name="app_name">临沧市电子地图集</string>
+    <string name="app_showname">临沧市电子地图集</string>
+    <string name="save_folder_name1">ElectronicAtlasMap</string>
     <string name="pick_file">找到</string>
     <string name="start">开始</string>
     <string name="go">正式开始</string>
