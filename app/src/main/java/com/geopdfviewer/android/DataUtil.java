@@ -84,6 +84,42 @@ public class DataUtil {
     //编码
     public static String encryption(String password){
         password = password.replace("0", "q");
+        password = password.replace("1", "w");
+        password = password.replace("2", "e");
+        password = password.replace("3", "r");
+        password = password.replace("4", "t");
+        password = password.replace("5", "y");
+        password = password.replace("6", "u");
+        password = password.replace("7", "i");
+        password = password.replace("8", "o");
+        password = password.replace("9", "p");
+        password = password.replace("a", "a");
+        password = password.replace("b", "s");
+        password = password.replace("c", "d");
+        password = password.replace("d", "f");
+        password = password.replace("e", "g");
+        password = password.replace("f", "h");
+        return password;
+    }
+
+    //编码
+    public static String encryption1(String password){
+        password = password.replace("0", "q");
+        password = password.replace("1", "w");
+        password = password.replace("2", "e");
+        password = password.replace("3", "r");
+        password = password.replace("4", "t");
+        password = password.replace("5", "y");
+        password = password.replace("6", "u");
+        password = password.replace("7", "i");
+        password = password.replace("8", "o");
+        password = password.replace("9", "p");
+        return password;
+    }
+
+    //编码
+    public static String encryptionx(String password){
+        password = password.replace("0", "q");
         password = password.replace("1", "R");
         password = password.replace("2", "V");
         password = password.replace("3", "z");
@@ -103,7 +139,7 @@ public class DataUtil {
     }
 
     //编码
-    public static String encryption1(String password){
+    public static String encryption1x(String password){
         password = password.replace("0", "a");
         password = password.replace("1", "Z");
         password = password.replace("2", "o");
@@ -129,6 +165,22 @@ public class DataUtil {
 
     //日期提取算法
     public static String getDateFromStr(String password){
+        password = password.replace("q", "0");
+        password = password.replace("w", "1");
+        password = password.replace("e", "2");
+        password = password.replace("r", "3");
+        password = password.replace("t", "4");
+        password = password.replace("y", "5");
+        password = password.replace("u", "6");
+        password = password.replace("i", "7");
+        password = password.replace("o", "8");
+        password = password.replace("p", "9");
+        password = password.substring(0, 4) + "年" + password.substring(4, 6) + "月" + password.substring(6, 8) + "日";
+        return password;
+    }
+
+    //日期提取算法
+    public static String getDateFromStrx(String password){
         password = password.replace("a", "0");
         password = password.replace("Z", "1");
         password = password.replace("o", "2");

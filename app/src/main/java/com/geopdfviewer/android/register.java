@@ -264,7 +264,7 @@ public class register extends AppCompatActivity {
     }
 
     private void initRootDirectory(){
-        File file = new File(Environment.getExternalStorageDirectory() + "/TuZhi");
+        File file = new File(Environment.getExternalStorageDirectory() + "/" + register.this.getString(R.string.save_folder_name1));
         if (!file.exists() && !file.isDirectory()){
             file.mkdirs();
         }
@@ -310,7 +310,7 @@ public class register extends AppCompatActivity {
             if (verifyInputLisence(edittxt)) {
                 boolean isOKforGo = false;
                 SharedPreferences.Editor editor = getSharedPreferences("imei", MODE_PRIVATE).edit();
-                if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("x")) {
+                if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("z")) {
                     String endTime = DataUtil.datePlus(startTime, 7);
                     if (DataUtil.verifyDate(endTime)) {
                         editor.putBoolean("type", true);
@@ -318,7 +318,7 @@ public class register extends AppCompatActivity {
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
                     }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
-                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("X")) {
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("x")) {
                     String endTime = DataUtil.datePlus(startTime, 180);
                     if (DataUtil.verifyDate(endTime)) {
                         editor.putBoolean("type", true);
@@ -326,7 +326,7 @@ public class register extends AppCompatActivity {
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
                     }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
-                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("y")) {
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("c")) {
                     String endTime = DataUtil.datePlus(startTime, 366);
                     if (DataUtil.verifyDate(endTime)) {
                         editor.putBoolean("type", true);
@@ -334,7 +334,7 @@ public class register extends AppCompatActivity {
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
                     }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
-                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("g")) {
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("v")) {
                     String endTime = DataUtil.datePlus(startTime, 30);
                     if (DataUtil.verifyDate(endTime)) {
                         editor.putBoolean("type", true);
@@ -342,7 +342,7 @@ public class register extends AppCompatActivity {
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
                     }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
-                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("G")) {
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("b")) {
                     String endTime = DataUtil.datePlus(startTime, 90);
                     if (DataUtil.verifyDate(endTime)) {
                         editor.putBoolean("type", true);
@@ -350,7 +350,7 @@ public class register extends AppCompatActivity {
                         editor.putString("endDate", endTime);
                         isOKforGo = true;
                     }else Toast.makeText(MyApplication.getContext(), register.this.getResources().getText(R.string.InputLicenseError) + "_1", Toast.LENGTH_LONG).show();
-                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("j")) {
+                } else if (edittxt.substring(edittxt.length() - 1, edittxt.length()).contentEquals("n")) {
                     String endTime = DataUtil.datePlus(startTime, 3660);
                     if (DataUtil.verifyDate(endTime)) {
                         editor.putBoolean("type", true);
